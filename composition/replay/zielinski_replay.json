@@ -1,0 +1,31 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "zielinski-replay",
+  "title": "Zielinski et al. (2019) recombinant human insulin process — evidence replay",
+  "description": "A single standalone instance of the Zielinski process model in evidence_replay mode. There are no connections: COMPOSITION_AUDIT.md section 6.3 explains why none is offered. This graph exists so the 3D replay scene can obtain the model's genuine outputs through the verified composition interface.",
+  "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+  "notes": "Evidence replay is not a simulation. The model restates the paper's reported numbers, applies the accounting identities the paper supports, and publishes the Fig. 3 digitized growth trajectory with its declared uncertainty. It reports no kinetic parameter, no oxygen transfer and no spatial field, so nothing downstream of this graph may present a simulated concentration, velocity or temperature field.",
+  "instances": [
+    {
+      "instance_id": "zielinski_replay",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Recombinant human insulin process",
+      "role": "standalone paper model (evidence replay)",
+      "notes": "Runs on its own terms, exactly as it does in brass_batch_chain.json.",
+      "position": {
+        "x": 60,
+        "y": 60
+      },
+      "parameters": {
+        "execution": {
+          "mode": "evidence_replay",
+          "notes": "Evidence replay restates the paper's reported numbers and applies the accounting identities the paper supports. It is not a simulation."
+        }
+      }
+    }
+  ],
+  "connections": [],
+  "literal_inputs": {},
+  "defaults": {}
+}

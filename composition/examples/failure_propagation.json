@@ -1,0 +1,100 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "failure-propagation",
+  "title": "Failure propagation: an inconsistent balance stops its dependent (CG-11)",
+  "description": "The upstream control volume declares readings that contradict each other. Its feed is 1000 kg/h at w = 0.60 / 0.40, its two products are declared at 454 and 472 kg/h: 454 + 472 = 926, not 1000, and the component amounts those compositions imply do not reconcile with the feed either.\n\nMorris et al. sec. 4.7 is explicit that reconciling this needs a judgement about which reading is least accurate, and the engine has no basis for making it. So it solves nothing, reports the residuals that locate the disagreement, and alters no measurement.\n\nThe downstream instance needs the upstream total. It is therefore skipped, not run on missing data, and the diagnostic names the upstream instance as the cause.",
+  "source_ref": "Morris et al. (2011), sec. 4.7 and sec. 4.6.2",
+  "notes": "Expected: the runner exits 2. stage_b is not executed; execution.dependent_skipped names stage_a.",
+  "instances": [
+    {
+      "instance_id": "stage_a",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Feed split with contradictory readings",
+      "role": "upstream control volume",
+      "position": { "x": 90, "y": 180 },
+      "parameters": {
+        "system": {
+          "system_id": "inconsistent-split",
+          "label": "Feed split with contradictory readings",
+          "process_mode": "steady_state",
+          "basis": "mass",
+          "source_ref": "Composition example: deliberately contradictory declared data",
+          "components": [
+            { "component_id": "X", "label": "component X" },
+            { "component_id": "Y", "label": "component Y" }
+          ],
+          "streams": [
+            {
+              "stream_id": "F", "label": "feed", "direction": "input",
+              "amount": { "quantity_id": "F:total", "value": 1000.0, "unit": "kg/h", "kind": "mass_flow", "provenance": "reported", "source_ref": "declared reading 1" },
+              "mass_fractions": {
+                "X": { "quantity_id": "F:w_X", "value": 0.6, "unit": "1", "kind": "mass_fraction", "provenance": "reported", "source_ref": "declared reading 1" },
+                "Y": { "quantity_id": "F:w_Y", "value": 0.4, "unit": "1", "kind": "mass_fraction", "provenance": "reported", "source_ref": "declared reading 1" }
+              }
+            },
+            {
+              "stream_id": "P1", "label": "product 1", "direction": "output",
+              "amount": { "quantity_id": "P1:total", "value": 454.0, "unit": "kg/h", "kind": "mass_flow", "provenance": "reported", "source_ref": "declared reading 2, contradicts reading 1" },
+              "mass_fractions": {
+                "X": { "variable_id": "stream:P1:w:X", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "determined by the split" },
+                "Y": { "variable_id": "stream:P1:w:Y", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "determined by the split" }
+              }
+            },
+            {
+              "stream_id": "P2", "label": "product 2", "direction": "output",
+              "amount": { "quantity_id": "P2:total", "value": 472.0, "unit": "kg/h", "kind": "mass_flow", "provenance": "reported", "source_ref": "declared reading 3, contradicts reading 1" },
+              "mass_fractions": {
+                "X": { "variable_id": "stream:P2:w:X", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "determined by the split" },
+                "Y": { "variable_id": "stream:P2:w:Y", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "determined by the split" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "instance_id": "stage_b",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Downstream assay",
+      "role": "downstream control volume (depends on stage_a)",
+      "position": { "x": 620, "y": 180 },
+      "parameters": {
+        "system": {
+          "system_id": "downstream-assay",
+          "label": "Assay of the combined product",
+          "process_mode": "steady_state",
+          "basis": "mass",
+          "source_ref": "Composition example",
+          "components": [
+            { "component_id": "X", "label": "component X" },
+            { "component_id": "Y", "label": "component Y" }
+          ],
+          "streams": [
+            {
+              "stream_id": "A", "label": "material from stage_a", "direction": "input",
+              "amount": { "variable_id": "stream:A:total", "kind": "mass_flow", "provenance": "unknown", "reason": "supplied by connection ab-total" },
+              "mass_fractions": {
+                "X": { "variable_id": "stream:A:w:X", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "supplied by connection ab-wx" },
+                "Y": { "variable_id": "stream:A:w:Y", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "supplied by connection ab-wy" }
+              }
+            },
+            {
+              "stream_id": "E", "label": "assayed material", "direction": "output",
+              "component_amounts": {
+                "X": { "variable_id": "stream:E:X", "kind": "mass_flow", "provenance": "unknown", "reason": "determined by the balance" },
+                "Y": { "variable_id": "stream:E:Y", "kind": "mass_flow", "provenance": "unknown", "reason": "determined by the balance" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": [
+    { "connection_id": "ab-total", "source": { "instance_id": "stage_a", "port_id": "out:P1:total" }, "target": { "instance_id": "stage_b", "port_id": "in:A:total" }, "label": "product 1 total" },
+    { "connection_id": "ab-wx", "source": { "instance_id": "stage_a", "port_id": "out:P1:w:X" }, "target": { "instance_id": "stage_b", "port_id": "in:A:w:X" }, "label": "product 1 X fraction" },
+    { "connection_id": "ab-wy", "source": { "instance_id": "stage_a", "port_id": "out:P1:w:Y" }, "target": { "instance_id": "stage_b", "port_id": "in:A:w:Y" }, "label": "product 1 Y fraction" }
+  ]
+}

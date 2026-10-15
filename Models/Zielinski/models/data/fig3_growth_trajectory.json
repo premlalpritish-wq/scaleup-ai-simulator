@@ -1,0 +1,58 @@
+{
+  "source": {
+    "source_id": "zielinski2019",
+    "figure": "Fig. 3",
+    "figure_caption": "Escherichia coli 20 growth curve. X-axis values are hours of culture, y-axis values are optical density (OD) 600 nm.",
+    "pdf_page": 5,
+    "printed_page": 67
+  },
+  "digitization_method": {
+    "summary": "Marker centres recovered from the embedded raster image by gridline calibration plus a vertical thickness profile of the curve colour.",
+    "steps": [
+      "Located the five vertical and seven horizontal light-grey plot gridlines and selected the arithmetic-progression subset that excludes the figure frame.",
+      "Calibrated pixel->data with x in [0, 20] h over the vertical gridlines and y in [0, 60] OD600 over the horizontal gridlines.",
+      "Isolated the blue curve by colour (B > 90, B - R > 45, B - G > 35) and removed connected components smaller than 200 px.",
+      "Measured the vertical thickness of the curve per image column; data markers are ~14 px filled circles and therefore peak far above the ~5-8 px of a plain line segment.",
+      "Grouped columns whose smoothed thickness exceeded base + 0.45*(max - base) and took the thickness-weighted centroid of each group as the marker centre."
+    ],
+    "verification": "All 19 detected markers fell within 0.07 h of integer hours, and the recovered gridlines align with the printed axis labels 0/5/10/15/20 and 0/10/20/30/40/50/60.",
+    "calibration": {
+      "vertical_gridline_px": [115, 422, 728, 1034, 1340],
+      "horizontal_gridline_px": [146, 225, 304, 386, 464, 543, 622],
+      "px_per_hour": 61.25,
+      "px_per_OD": 7.933333333333334
+    },
+    "declared_uncertainty": {
+      "time_h": 0.1,
+      "od600": 0.5,
+      "basis": "Dominated by marker-centroid bias on steep segments and by JPEG compression of the embedded figure. The plateau markers, where the curve is flat and the centroid is unambiguous, reproduce to within 0.01 OD, so 0.5 OD is a conservative envelope that also covers the steep-region bias."
+    },
+    "not_modelled": "This is a replay of one published batch. It is not a fitted mechanistic growth model: no kinetic parameter is derived from it, and it is never used to predict a new batch."
+  },
+  "trajectory": [
+    {"hour": 1.0, "od600": 0.37},
+    {"hour": 2.0, "od600": 0.37},
+    {"hour": 3.0, "od600": 0.36},
+    {"hour": 4.0, "od600": 0.36},
+    {"hour": 5.0, "od600": 0.37},
+    {"hour": 6.0, "od600": 0.37},
+    {"hour": 7.0, "od600": 0.73},
+    {"hour": 8.0, "od600": 1.47},
+    {"hour": 9.0, "od600": 2.57},
+    {"hour": 10.0, "od600": 4.79},
+    {"hour": 11.0, "od600": 7.41},
+    {"hour": 12.0, "od600": 13.88},
+    {"hour": 13.0, "od600": 24.39},
+    {"hour": 14.0, "od600": 33.82},
+    {"hour": 15.0, "od600": 43.16},
+    {"hour": 16.0, "od600": 52.20},
+    {"hour": 17.0, "od600": 53.66},
+    {"hour": 18.0, "od600": 53.67},
+    {"hour": 19.0, "od600": 53.67}
+  ],
+  "notes": [
+    "Points at 1-6 h sit on the OD=0 baseline; the digitized 0.36-0.37 is within the declared +/-0.5 OD uncertainty of zero.",
+    "The digitized plateau (53.66-53.67) is slightly below the OD600 of 54.4 reported in the text at sec. 4.2. Both are retained; the discrepancy is surfaced as a cross-check rather than resolved.",
+    "The paper never states the induction time point; it is not recoverable from this figure either."
+  ]
+}

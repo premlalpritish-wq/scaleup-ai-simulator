@@ -1,0 +1,113 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "cycle-rejected",
+  "title": "Refused: a cyclic graph (CG-10)",
+  "description": "stage_a sends its product to stage_b and stage_b sends its product back to stage_a. v0.1 executes every instance exactly once in dependency order and has no iterative solve, so this graph is rejected with the participating instances named and the connections listed.",
+  "source_ref": "Morris et al. (2011), Chapter 4",
+  "notes": "Expected: order.cycle_detected, naming both instances and the connection ids that close the loop.",
+  "instances": [
+    {
+      "instance_id": "stage_a",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Mixing",
+      "role": "upstream control volume",
+      "position": { "x": 100, "y": 200 },
+      "parameters": {
+        "system": {
+          "system_id": "cycle-stage-a",
+          "label": "Batch charge",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Composition example built on Morris et al. 2011, Example 4.2",
+          "components": [
+            { "component_id": "Cu", "label": "copper", "formula": "Cu", "molar_mass_kg_per_mol": 0.063546 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A", "label": "zinc charge", "direction": "initial",
+              "absent_components": ["Cu"],
+              "component_amounts": {
+                "Zn": { "quantity_id": "A:Zn", "value": 3600.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" }
+              }
+            },
+            {
+              "stream_id": "B", "label": "copper charge", "direction": "initial",
+              "absent_components": ["Zn"],
+              "component_amounts": {
+                "Cu": { "quantity_id": "B:Cu", "value": 14500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Figure 4.11 and the 26600 kg total" }
+              }
+            },
+            {
+              "stream_id": "C", "label": "scrap brass", "direction": "initial",
+              "amount": { "quantity_id": "stream:C:total", "value": 8500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" },
+              "mass_fractions": {
+                "Cu": { "quantity_id": "C:w_Cu", "value": 0.79, "unit": "1", "kind": "mass_fraction", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" },
+                "Zn": { "variable_id": "stream:C:w:Zn", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "follows by difference from wCu" }
+              }
+            },
+            {
+              "stream_id": "D", "label": "mixed charge", "direction": "final",
+              "component_amounts": {
+                "Cu": { "variable_id": "stream:D:Cu", "kind": "mass", "provenance": "unknown", "reason": "determined by the copper balance" },
+                "Zn": { "variable_id": "stream:D:Zn", "kind": "mass", "provenance": "unknown", "reason": "determined by the zinc balance" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "instance_id": "stage_b",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Remelt",
+      "role": "downstream control volume (feeds back into stage_a)",
+      "position": { "x": 560, "y": 200 },
+      "parameters": {
+        "system": {
+          "system_id": "cycle-stage-b",
+          "label": "Remelt to specification",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Composition example built on Morris et al. 2011, Chapter 4",
+          "components": [
+            { "component_id": "Cu", "label": "copper", "formula": "Cu", "molar_mass_kg_per_mol": 0.063546 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A", "label": "charge from stage_a", "direction": "initial",
+              "amount": { "variable_id": "stream:A:total", "kind": "mass", "provenance": "unknown", "reason": "supplied by connection a-to-b" },
+              "mass_fractions": {
+                "Cu": { "variable_id": "stream:A:w:Cu", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "supplied by connection a-to-b-wcu" },
+                "Zn": { "variable_id": "stream:A:w:Zn", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "determined by the composition sum" }
+              }
+            },
+            {
+              "stream_id": "B", "label": "zinc make-up", "direction": "initial",
+              "absent_components": ["Cu"],
+              "component_amounts": {
+                "Zn": { "quantity_id": "B:Zn", "value": 500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "declared make-up charge" }
+              }
+            },
+            {
+              "stream_id": "E", "label": "remelted alloy", "direction": "final",
+              "component_amounts": {
+                "Cu": { "variable_id": "stream:E:Cu", "kind": "mass", "provenance": "unknown", "reason": "determined by the copper balance" },
+                "Zn": { "variable_id": "stream:E:Zn", "kind": "mass", "provenance": "unknown", "reason": "determined by the zinc balance" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": [
+    { "connection_id": "a-to-b", "source": { "instance_id": "stage_a", "port_id": "out:D:total" }, "target": { "instance_id": "stage_b", "port_id": "in:A:total" }, "label": "mixed charge" },
+    { "connection_id": "a-to-b-wcu", "source": { "instance_id": "stage_a", "port_id": "out:D:w:Cu" }, "target": { "instance_id": "stage_b", "port_id": "in:A:w:Cu" }, "label": "copper fraction" },
+    { "connection_id": "b-to-a", "source": { "instance_id": "stage_b", "port_id": "out:E:total" }, "target": { "instance_id": "stage_a", "port_id": "in:C:total" }, "label": "remelted charge, back into the mixer" },
+    { "connection_id": "b-to-a-wcu", "source": { "instance_id": "stage_b", "port_id": "out:E:w:Cu" }, "target": { "instance_id": "stage_a", "port_id": "in:C:w:Cu" }, "label": "copper fraction, back into the mixer" }
+  ]
+}

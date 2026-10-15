@@ -1,0 +1,80 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "rejected-au-to-mass",
+  "title": "Refused: absorbance units are not mass (CG-02, CG-09)",
+  "description": "The Zielinski model reports 5460 AU of dissolved protein after the inclusion bodies are dissolved. Morris et al. Chapter 4 has no absorbance dimension at all, so there is no unit to convert into.\n\nThe reason is scientific and is stated by the source itself. Section 2.18 records that the spectrophotometer was calibrated with water: no extinction coefficient and no path length are given, so the AU scale is instrument-relative. The model registers 'calibration.au_to_mass' as a declared, deliberately unimplemented missing model precisely so this answer can be given instead of a guess.\n\nThe same edge is refused a second time by the capability check, because a Morris control volume would have to be drawn across a boundary the Zielinski model does not represent at all.",
+  "source_ref": "Zielinski et al. (2019) sec. 2.18 and sec. 4.4; Morris et al. (2011), Chapter 4",
+  "notes": "Expected: connection.quantity_mismatch plus capability.reactive_balance_refused on the same edge.",
+  "instances": [
+    {
+      "instance_id": "zielinski_rhi",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Recombinant human insulin process",
+      "role": "upstream process model",
+      "position": { "x": 120, "y": 220 },
+      "parameters": { "execution": { "mode": "evidence_replay" } }
+    },
+    {
+      "instance_id": "brass_charge",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Brass charge preparation (Example 4.2)",
+      "role": "downstream control volume",
+      "position": { "x": 620, "y": 220 },
+      "parameters": {
+        "system": {
+          "system_id": "example-4.2-brass-charge",
+          "label": "Batch charge preparation for a brass melting furnace",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Morris et al. 2011, sec. 4.5, Example 4.2, pp. 152-153",
+          "components": [
+            { "component_id": "Cu", "label": "copper", "formula": "Cu", "molar_mass_kg_per_mol": 0.063546 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A", "label": "zinc charge", "direction": "initial",
+              "absent_components": ["Cu"],
+              "component_amounts": {
+                "Zn": { "quantity_id": "A:Zn", "value": 3600.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" }
+              }
+            },
+            {
+              "stream_id": "B", "label": "copper charge", "direction": "initial",
+              "absent_components": ["Zn"],
+              "component_amounts": {
+                "Cu": { "quantity_id": "B:Cu", "value": 14500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Figure 4.11 and the 26600 kg total" }
+              }
+            },
+            {
+              "stream_id": "C", "label": "scrap brass", "direction": "initial",
+              "amount": { "quantity_id": "stream:C:total", "value": 8500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" },
+              "mass_fractions": {
+                "Cu": { "quantity_id": "C:w_Cu", "value": 0.79, "unit": "1", "kind": "mass_fraction", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" },
+                "Zn": { "variable_id": "stream:C:w:Zn", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "follows by difference from wCu" }
+              }
+            },
+            {
+              "stream_id": "D", "label": "mixed scrap to furnace", "direction": "final",
+              "component_amounts": {
+                "Cu": { "variable_id": "stream:D:Cu", "kind": "mass", "provenance": "unknown", "reason": "determined by the copper balance" },
+                "Zn": { "variable_id": "stream:D:Zn", "kind": "mass", "provenance": "unknown", "reason": "determined by the zinc balance" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "bad-au-into-mass",
+      "source": { "instance_id": "zielinski_rhi", "port_id": "stream:S05_denatured_solution#dissolved_protein" },
+      "target": { "instance_id": "brass_charge", "port_id": "in:A:Zn" },
+      "label": "5460 AU into a zinc charge",
+      "notes": "Refused twice over: absorbance is not a mass, and there is no calibration to bridge them."
+    }
+  ]
+}

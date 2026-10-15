@@ -1,0 +1,79 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "rejected-mass-as-flow",
+  "title": "Refused: a batch inventory cannot feed a steady-state rate (CG-03)",
+  "description": "Zielinski et al. report 224 g of wet biomass from a single 4 L batch: that is an INVENTORY. Morris et al. Example 4.1 is a STEADY-STATE control volume whose streams are RATES (kg/h). The units differ by a single character and the quantities are different things.\n\nTurning one into the other needs an operating interval. The paper states batch durations only as ranges (15-16 h, 4-5 h), which the Zielinski model deliberately refuses to collapse to a point value. Even if it were collapsed, a batch-average rate is not a steady-state one, and Morris's own schema refuses a MASS stream in a flow mode before any arithmetic happens.\n\nLoad this graph and the validation panel will show the refusal.",
+  "source_ref": "Zielinski et al. (2019) sec. 4.2; Morris et al. (2011) sec. 4.5, Example 4.1",
+  "notes": "Expected: one error, connection.quantity_mismatch. Do not 'fix' it by editing the unit.",
+  "instances": [
+    {
+      "instance_id": "zielinski_rhi",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Recombinant human insulin process",
+      "role": "upstream process model",
+      "position": { "x": 120, "y": 220 },
+      "parameters": { "execution": { "mode": "evidence_replay" } }
+    },
+    {
+      "instance_id": "cdzn_distillation",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Cd-Zn distillation (Example 4.1)",
+      "role": "downstream steady-state control volume",
+      "position": { "x": 640, "y": 220 },
+      "parameters": {
+        "system": {
+          "system_id": "example-4.1-cd-zn",
+          "label": "Distillation of a Cd-Zn alloy",
+          "process_mode": "steady_state",
+          "basis": "mass",
+          "source_ref": "Morris et al. 2011, sec. 4.5, Example 4.1, pp. 151-152",
+          "components": [
+            { "component_id": "Cd", "label": "cadmium", "formula": "Cd", "molar_mass_kg_per_mol": 0.112414 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A",
+              "label": "original alloy",
+              "direction": "input",
+              "amount": { "quantity_id": "A:total", "value": 1000.0, "unit": "kg/h", "kind": "mass_flow", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.1" },
+              "mass_fractions": {
+                "Cd": { "quantity_id": "A:w_Cd", "value": 0.50, "unit": "1", "kind": "mass_fraction", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.1" },
+                "Zn": { "variable_id": "stream:A:w:Zn", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "the book determines it from the Cd fraction" }
+              }
+            },
+            {
+              "stream_id": "B",
+              "label": "vapour",
+              "direction": "output",
+              "component_amounts": {
+                "Cd": { "quantity_id": "B:Cd", "value": 454.0, "unit": "kg/h", "kind": "mass_flow", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.1" },
+                "Zn": { "variable_id": "stream:B:Zn", "unit": "kg/h", "kind": "mass_flow", "provenance": "unknown", "reason": "determined by the zinc balance" }
+              }
+            },
+            {
+              "stream_id": "C",
+              "label": "Zn-rich alloy",
+              "direction": "output",
+              "component_amounts": {
+                "Zn": { "quantity_id": "C:Zn", "value": 472.0, "unit": "kg/h", "kind": "mass_flow", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.1" },
+                "Cd": { "variable_id": "stream:C:Cd", "unit": "kg/h", "kind": "mass_flow", "provenance": "unknown", "reason": "determined by the cadmium balance" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "bad-mass-into-flow",
+      "source": { "instance_id": "zielinski_rhi", "port_id": "stream:S03_wet_biomass#wet_biomass_total" },
+      "target": { "instance_id": "cdzn_distillation", "port_id": "in:A:total" },
+      "label": "224 g into a kg/h stream",
+      "notes": "Expected to be refused. mass != mass_flow, and no conversion model bridges them."
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "rejected-component-mapping",
+  "title": "Refused: a process role is not a conserved component (CG-08)",
+  "description": "This graph contains the two most tempting component edges in the whole repository, and the two the audit says must not be drawn.\n\nZielinski's StreamKind vocabulary (wet_biomass, inclusion_bodies, chromatographic_fraction, ...) names process ROLES, not chemical species: an inclusion body is not a substance. No Zielinski stream carries a component amount or a mass fraction at all, and none of the twenty registered equations produces one.\n\nEdge 1 and edge 2 supply a Morris control volume from such a port. Both are refused: the source names no component, so it cannot be assigned to zinc or to copper, and the boundary would in any case be one Chapter 4 cannot represent.\n\nEdge 3 supplies copper where zinc is expected. Both sides declare their components perfectly well; they simply disagree. That is refused too, because connecting them would relabel the substance -- the failure mode that turns a copper charge into an inclusion-body charge without anything looking wrong.",
+  "source_ref": "Zielinski et al. (2019) sec. 4.2 and 4.3; Morris et al. (2011), Chapter 4",
+  "notes": "Expected: connection.component_unattributed on edges 1 and 2, connection.component_mismatch on edge 3, plus capability.reactive_balance_refused on the two edges that cross the Zielinski boundary.",
+  "instances": [
+    {
+      "instance_id": "zielinski_rhi",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Recombinant human insulin process",
+      "role": "upstream process model",
+      "position": { "x": 90, "y": 300 },
+      "parameters": { "execution": { "mode": "evidence_replay" } }
+    },
+    {
+      "instance_id": "brass_charge",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Brass charge preparation (Example 4.2)",
+      "role": "component-declared control volume",
+      "position": { "x": 620, "y": 180 },
+      "parameters": {
+        "system": {
+          "system_id": "example-4.2-brass-charge",
+          "label": "Batch charge preparation for a brass melting furnace",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Morris et al. 2011, sec. 4.5, Example 4.2, pp. 152-153",
+          "components": [
+            { "component_id": "Cu", "label": "copper", "formula": "Cu", "molar_mass_kg_per_mol": 0.063546 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A", "label": "zinc charge", "direction": "initial",
+              "absent_components": ["Cu"],
+              "component_amounts": {
+                "Zn": { "quantity_id": "A:Zn", "value": 3600.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" }
+              }
+            },
+            {
+              "stream_id": "B", "label": "copper charge", "direction": "initial",
+              "absent_components": ["Zn"],
+              "component_amounts": {
+                "Cu": { "quantity_id": "B:Cu", "value": 14500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Figure 4.11 and the 26600 kg total" }
+              }
+            },
+            {
+              "stream_id": "C", "label": "scrap brass", "direction": "initial",
+              "amount": { "quantity_id": "stream:C:total", "value": 8500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" },
+              "mass_fractions": {
+                "Cu": { "quantity_id": "C:w_Cu", "value": 0.79, "unit": "1", "kind": "mass_fraction", "provenance": "reported", "source_ref": "Morris et al. 2011, Example 4.2" },
+                "Zn": { "variable_id": "stream:C:w:Zn", "unit": "1", "kind": "mass_fraction", "provenance": "unknown", "reason": "follows by difference from wCu" }
+              }
+            },
+            {
+              "stream_id": "D", "label": "mixed scrap to furnace", "direction": "final",
+              "component_amounts": {
+                "Cu": { "variable_id": "stream:D:Cu", "kind": "mass", "provenance": "unknown", "reason": "determined by the copper balance" },
+                "Zn": { "variable_id": "stream:D:Zn", "kind": "mass", "provenance": "unknown", "reason": "determined by the zinc balance" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "instance_id": "zinc_makeup",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Zinc make-up (Example 4.2 again)",
+      "role": "second component-declared control volume",
+      "position": { "x": 620, "y": 460 },
+      "parameters": {
+        "system": {
+          "system_id": "zinc-makeup",
+          "label": "Zinc make-up to specification",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Composition example built on Morris et al. 2011, Chapter 4",
+          "components": [
+            { "component_id": "Cu", "label": "copper", "formula": "Cu", "molar_mass_kg_per_mol": 0.063546 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A", "label": "carry-over from the mixing step", "direction": "initial",
+              "component_amounts": {
+                "Cu": { "variable_id": "stream:A:Cu", "kind": "mass", "provenance": "unknown", "reason": "supplied by connection" },
+                "Zn": { "variable_id": "stream:A:Zn", "kind": "mass", "provenance": "unknown", "reason": "supplied by connection" }
+              }
+            },
+            {
+              "stream_id": "B", "label": "zinc make-up", "direction": "initial",
+              "absent_components": ["Cu"],
+              "amount": { "quantity_id": "B:total", "value": 500.0, "unit": "kg", "kind": "mass", "provenance": "reported", "source_ref": "declared make-up charge" },
+              "mass_fractions": {
+                "Zn": { "quantity_id": "B:w_Zn", "value": 1.0, "unit": "1", "kind": "mass_fraction", "provenance": "reported", "source_ref": "pure zinc make-up" }
+              }
+            },
+            {
+              "stream_id": "E", "label": "alloy", "direction": "final",
+              "component_amounts": {
+                "Cu": { "variable_id": "stream:E:Cu", "kind": "mass", "provenance": "unknown", "reason": "determined by the copper balance" },
+                "Zn": { "variable_id": "stream:E:Zn", "kind": "mass", "provenance": "unknown", "reason": "determined by the zinc balance" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "bad-unmapped-to-component",
+      "source": { "instance_id": "zielinski_rhi", "port_id": "stream:S03_wet_biomass#wet_biomass_total" },
+      "target": { "instance_id": "brass_charge", "port_id": "in:A:Zn" },
+      "label": "224 g of wet biomass as the zinc charge",
+      "notes": "The source names no component at all, so it cannot be assigned to zinc."
+    },
+    {
+      "connection_id": "bad-unmapped-to-total",
+      "source": { "instance_id": "zielinski_rhi", "port_id": "stream:S04_inclusion_bodies#inclusion_bodies_total" },
+      "target": { "instance_id": "zinc_makeup", "port_id": "in:B:total" },
+      "label": "58 g of inclusion bodies into a control-volume total",
+      "notes": "The target total must be attributable to {Cu, Zn}; the source says nothing about either."
+    },
+    {
+      "connection_id": "bad-wrong-component",
+      "source": { "instance_id": "brass_charge", "port_id": "out:C:Cu" },
+      "target": { "instance_id": "zinc_makeup", "port_id": "in:A:Zn" },
+      "label": "scrap copper as the zinc carry-over",
+      "notes": "Both sides declare their components perfectly well. They simply disagree, and connecting them would relabel the substance."
+    }
+  ]
+}

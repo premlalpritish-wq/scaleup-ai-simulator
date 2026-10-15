@@ -1,0 +1,271 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "brass-batch-chain",
+  "title": "Brass batch chain: Morris et al. (2011) Chapter 4",
+  "description": "Two Morris control volumes in series. The first reproduces Example 4.2 (batch charge preparation for a brass melting furnace); the second takes its product as an initial charge, adds a declared zinc make-up, and balances to a final alloy. Everything here is non-reacting mixing, which is the only kind of boundary Chapter 4 can represent.\n\nThe Zielinski et al. (2019) process model is present as a third, standalone instance. It is deliberately NOT connected: COMPOSITION_AUDIT.md section 6.3 shows that none of its twenty equation outputs can legally enter a Morris control volume, because the model publishes no component identity and every one of its boundaries is reactive. It runs on its own terms, in evidence-replay mode, and its results are shown as what they are: a restatement of reported paper numbers, not a simulation.",
+  "source_ref": "Morris, Geiger & Fine (2011), Introduction to Chemical Engineering, 4th ed., Chapter 4, Examples 4.2 and 4.5; Zielinski et al. (2019), Protein Expression and Purification 157, 63-69",
+  "defaults": {
+    "notes": "All masses are batch inventories in kg on a per-charge basis. No rate basis is used anywhere, because Chapter 4's steady-state mode requires one and no charge rate is known."
+  },
+  "instances": [
+    {
+      "instance_id": "brass_charge",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Brass charge preparation",
+      "role": "upstream control volume (Example 4.2)",
+      "notes": "Three charges are mixed without reaction. D is determined by the copper balance, the zinc balance and sum(w) = 1 on C.",
+      "position": { "x": 60, "y": 220 },
+      "parameters": {
+        "system": {
+          "system_id": "example-4.2-brass-charge",
+          "label": "Batch charge preparation for a brass melting furnace",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Morris et al. 2011, sec. 4.5, Example 4.2, pp. 152-153",
+          "components": [
+            { "component_id": "Cu", "label": "copper", "formula": "Cu", "molar_mass_kg_per_mol": 0.063546 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A",
+              "label": "zinc charge",
+              "direction": "initial",
+              "absent_components": ["Cu"],
+              "component_amounts": {
+                "Zn": {
+                  "quantity_id": "A:Zn",
+                  "value": 3600.0,
+                  "unit": "kg",
+                  "kind": "mass",
+                  "provenance": "reported",
+                  "source_ref": "Morris et al. 2011, Example 4.2"
+                }
+              }
+            },
+            {
+              "stream_id": "B",
+              "label": "copper charge",
+              "direction": "initial",
+              "absent_components": ["Zn"],
+              "note": "The prose says 14000 kg but the flowsheet and the book's own 26600 kg total both require 14500 kg.",
+              "component_amounts": {
+                "Cu": {
+                  "quantity_id": "B:Cu",
+                  "value": 14500.0,
+                  "unit": "kg",
+                  "kind": "mass",
+                  "provenance": "reported",
+                  "source_ref": "Morris et al. 2011, Figure 4.11 and the 26600 kg total",
+                  "note": "The prose says 14000 kg but the flowsheet and the book's own 26600 kg total both require 14500 kg."
+                }
+              }
+            },
+            {
+              "stream_id": "C",
+              "label": "scrap brass",
+              "direction": "initial",
+              "amount": {
+                "quantity_id": "stream:C:total",
+                "value": 8500.0,
+                "unit": "kg",
+                "kind": "mass",
+                "provenance": "reported",
+                "source_ref": "Morris et al. 2011, Example 4.2"
+              },
+              "mass_fractions": {
+                "Cu": {
+                  "quantity_id": "C:w_Cu",
+                  "value": 0.79,
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "reported",
+                  "source_ref": "Morris et al. 2011, Example 4.2"
+                },
+                "Zn": {
+                  "variable_id": "stream:C:w:Zn",
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "unknown",
+                  "reason": "follows by difference from wCu"
+                }
+              }
+            },
+            {
+              "stream_id": "D",
+              "label": "mixed scrap to furnace",
+              "direction": "final",
+              "component_amounts": {
+                "Cu": {
+                  "variable_id": "stream:D:Cu",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the copper balance"
+                },
+                "Zn": {
+                  "variable_id": "stream:D:Zn",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the zinc balance"
+                }
+              }
+            }
+          ],
+          "assumptions": [
+            {
+              "assumption_id": "COMP-COMPOSITION-COMPLETE",
+              "statement": "Each charge carries only the components it declares; anything omitted is listed in absent_components.",
+              "rationale": "Chapter 4 generates sum(w) = 1 over exactly the declared components, so an omission would silently read as a zero fraction.",
+              "affects": ["A", "B"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "instance_id": "brass_alloying",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Alloying to specification",
+      "role": "downstream control volume",
+      "notes": "Takes D from brass_charge as its initial charge, adds a declared zinc make-up, and balances to the final alloy. Non-reacting: nothing here converts one substance into another.",
+      "position": { "x": 520, "y": 220 },
+      "parameters": {
+        "system": {
+          "system_id": "brass-alloying",
+          "label": "Alloying of the mixed charge to specification",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Composition example built on Morris et al. 2011, Chapter 4",
+          "components": [
+            { "component_id": "Cu", "label": "copper", "formula": "Cu", "molar_mass_kg_per_mol": 0.063546 },
+            { "component_id": "Zn", "label": "zinc", "formula": "Zn", "molar_mass_kg_per_mol": 0.065388 }
+          ],
+          "streams": [
+            {
+              "stream_id": "A",
+              "label": "alloy from the mixing step",
+              "direction": "initial",
+              "note": "Supplied entirely by connection from brass_charge/out:D.",
+              "amount": {
+                "variable_id": "stream:A:total",
+                "kind": "mass",
+                "provenance": "unknown",
+                "reason": "supplied by connection c1 (brass_charge/out:D:total)"
+              },
+              "mass_fractions": {
+                "Cu": {
+                  "variable_id": "stream:A:w:Cu",
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "unknown",
+                  "reason": "supplied by connection c2 (brass_charge/out:D:w:Cu)"
+                },
+                "Zn": {
+                  "variable_id": "stream:A:w:Zn",
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "unknown",
+                  "reason": "supplied by connection c3 (brass_charge/out:D:w:Zn)"
+                }
+              }
+            },
+            {
+              "stream_id": "B",
+              "label": "zinc make-up charge",
+              "direction": "initial",
+              "absent_components": ["Cu"],
+              "note": "A declared literal input, not a connection: 500 kg of zinc added to reach specification.",
+              "component_amounts": {
+                "Zn": {
+                  "quantity_id": "B:Zn",
+                  "value": 500.0,
+                  "unit": "kg",
+                  "kind": "mass",
+                  "provenance": "reported",
+                  "source_ref": "declared on the composition graph (literal input brass_alloying/in:B:Zn)"
+                }
+              }
+            },
+            {
+              "stream_id": "E",
+              "label": "final alloy",
+              "direction": "final",
+              "component_amounts": {
+                "Cu": {
+                  "variable_id": "stream:E:Cu",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the copper balance"
+                },
+                "Zn": {
+                  "variable_id": "stream:E:Zn",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the zinc balance"
+                }
+              }
+            }
+          ],
+          "assumptions": [
+            {
+              "assumption_id": "COMP-MAKEUP-500KG",
+              "statement": "500 kg of pure zinc is added to the mixed charge.",
+              "rationale": "Declared on the composition graph, not derived. It is the only invented number in this control volume and is reported as assumed provenance so a reader can see exactly which result depends on it.",
+              "affects": ["B:Zn", "stream:E:Zn", "stream:E:total"]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "instance_id": "zielinski_rhi",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Recombinant human insulin process",
+      "role": "standalone paper model (evidence replay)",
+      "notes": "Runs on its own terms. It is not connected to either balance, and COMPOSITION_AUDIT.md section 6.3 explains why no connection is offered.",
+      "position": { "x": 290, "y": 560 },
+      "parameters": {
+        "execution": {
+          "mode": "evidence_replay",
+          "notes": "Evidence replay restates the paper's reported numbers and applies the accounting identities the paper supports. It is not a simulation, and the results panel labels it as such."
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "c1",
+      "source": { "instance_id": "brass_charge", "port_id": "out:D:total" },
+      "target": { "instance_id": "brass_alloying", "port_id": "in:A:total" },
+      "label": "mixed charge, kg",
+      "notes": "Both sides are MASS on a batch inventory basis; the units are identical so no conversion is performed."
+    },
+    {
+      "connection_id": "c2",
+      "source": { "instance_id": "brass_charge", "port_id": "out:D:w:Cu" },
+      "target": { "instance_id": "brass_alloying", "port_id": "in:A:w:Cu" },
+      "label": "copper mass fraction"
+    },
+    {
+      "connection_id": "c3",
+      "source": { "instance_id": "brass_charge", "port_id": "out:D:w:Zn" },
+      "target": { "instance_id": "brass_alloying", "port_id": "in:A:w:Zn" },
+      "label": "zinc mass fraction"
+    }
+  ],
+  "literal_inputs": {
+    "brass_alloying/in:B:Zn": {
+      "state": "number",
+      "quantity": "mass",
+      "value": 500.0,
+      "unit": "kg",
+      "source_ref": "composition graph literal input",
+      "method": "declared zinc make-up charge",
+      "reason": "The only invented number in this graph; declared, not derived."
+    }
+  },
+  "notes": "Load this file in Godot and press Run. Three instances execute in the order brass_charge -> brass_alloying -> zielinski_rhi."
+}

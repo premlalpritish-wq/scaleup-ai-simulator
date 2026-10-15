@@ -1,0 +1,20 @@
+[project]
+name = "scaleup-ai-composition"
+version = "0.1.0"
+description = "Typed, auditable composition layer connecting the ScaleUp AI scientific models"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["composition", "composition.adapters", "composition._workers"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

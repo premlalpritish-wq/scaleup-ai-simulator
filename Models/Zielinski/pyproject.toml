@@ -1,0 +1,23 @@
+[project]
+name = "zielinski2019-rhi-process"
+version = "1.0.0"
+description = "Executable, evidence-traceable model of the Zielinski et al. (2019) recombinant human insulin process"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["scaleup_ai", "models"]
+
+[tool.setuptools.package-data]
+models = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

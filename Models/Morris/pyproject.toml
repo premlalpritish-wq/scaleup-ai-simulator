@@ -1,0 +1,20 @@
+[project]
+name = "morris2011-material-balance"
+version = "0.1.0"
+description = "Deterministic, provenance-tracked material balance engine based on Morris, Geiger & Fine (2011), Chapter 4"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["schemas", "models"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

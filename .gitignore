@@ -1,0 +1,69 @@
+# ---------------------------------------------------------------------------
+# ScaleUp AI Simulator -- ignore rules
+#
+# Verified against what the project actually needs at runtime:
+#   * Models/*/models/data/*.json  are REQUIRED model fixtures (extracted paper
+#     text and the digitized growth curve) and are deliberately NOT ignored.
+#   * scenes/, scripts/, project.godot, icon.svg and the three pyproject.toml
+#     files are required and tracked.
+# ---------------------------------------------------------------------------
+
+# --- Godot 4 ----------------------------------------------------------------
+.godot/
+/android/
+export_presets.cfg
+*.translation
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+build/
+dist/
+
+# --- Secrets ----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Test and tooling scratch ------------------------------------------------
+# conftest pins pytest's basetemp inside the repo so tests never depend on the
+# host temp directory being writable.
+composition/.artifacts/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Editors and OS ----------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Generated model output --------------------------------------------------
+# Regenerate with:  cd Models/Zielinski && python run_model.py
+# Verified NOT to be a test fixture: the Zielinski suite writes its own
+# artifacts to a temp directory, and all 223 + 128 tests pass without this
+# directory existing.
+Models/Zielinski/out/
+
+# --- Ad-hoc runner output ----------------------------------------------------
+# A stray result document from a manual run, not part of the project.
+composition/out.json
+
+# --- Copyrighted reference papers and figures -------------------------------
+# These are publications by other authors. They are NOT distributed with this
+# repository. Nothing in the application or the test suites reads them: the
+# citation tests verify against models/data/paper_pages.json, which holds the
+# extracted page text. All 537 tests pass with every PDF absent.
+# `python -m models.source rebuild_paper_pages` is the only thing that needs
+# the original PDF, and it is a manual developer utility.
+papers/
+*.pdf
