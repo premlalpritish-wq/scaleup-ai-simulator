@@ -791,6 +791,94 @@ constructed bad registries rather than left untested.
 
 ---
 
+## 13. Section 5 empty-panel fix
+
+### 13.1 Root cause
+
+`_collapsible(title, open_by_default)` connected its header button to `pressed`
+and the handler rewrote only the caption:
+
+```gdscript
+head.pressed.connect(func() -> void:
+    head.text = ("▸  " if head.button_pressed else "▸  ") + title)
+```
+
+`body.visible` was set once at construction and never again. The caption
+changed; the panel did not. Expanding a collapsed section therefore appeared to
+work while revealing nothing — the exact report.
+
+Measured, not inferred: after pressing, `body.is_visible_in_tree()` was `false`
+before **and** after, while `_tree` held 196 rows and `_diagnostics` held 9263
+characters. The data was present and bound; only the visibility gate was
+missing.
+
+The fix connects to `toggled`, which carries the new state, and declares `body`
+before the connection so the lambda cannot capture it unset. `replay_evidence.gd`
+already did this correctly, which is why only these two panels were affected.
+
+### 13.2 Two further defects the tests caught
+
+Both were real and both were found by the acceptance harness rather than by
+reading:
+
+1. **A stale detail pane.** The "select a row" waiting state was written only
+   `if _detail.text == ""`. Selecting a row, then loading a dataset with no rows,
+   left the *previous* dataset's row on screen. The waiting state is now written
+   unconditionally on dataset change — "empty" and "still showing the last row"
+   are different things and only the first looks like a broken pane.
+2. **A type error on malformed entries.** The second diagnostic loop redeclared
+   `var rec: Dictionary = d` without the guard the first loop had, so a
+   `diagnostics` list containing a non-Dictionary entry raised
+   `Trying to assign value of type 'int' to a variable of type 'Dictionary'`
+   and aborted the render partway. Both loops now guard identically, and a
+   malformed entry is named as a schema mismatch.
+
+### 13.3 What the panels show now
+
+**All data and evidence** — every published value with its exact field name, its
+value with unit, and its provenance; selecting a row shows method, source and
+the full provenance chain. Unknown values read `not available` and the reason is
+shown. A dataset with no records shows `no evidence records available`.
+
+**Run status and technical details** — exit code, then every field the result
+document actually carries: status, run id, graph id, contract version, runner
+version, graph digest, and model versions. Then the diagnostics with code,
+origin and where.
+
+Three distinctions the previous version could not make:
+
+| Situation | Shown |
+|---|---|
+| a field the document does not carry | *not recorded in this document* |
+| a run that succeeded and raised nothing | *This run raised no diagnostics.* |
+| a document missing the `diagnostics` field | schema mismatch, with the fields that are present |
+
+The first two are deliberately different statements, because one is missing data
+and the other is a run that had nothing to say.
+
+### 13.4 Verification
+
+47 acceptance checks, 0 failures, against the real scene in a real window.
+Highlights: both panel bodies visible after expanding; the diagnostics pane
+non-blank and on screen; a fixture rendering status, run id, graph id, contract
+version, runner version, graph digest, model versions, code, error and warning;
+an empty result reproducing the command to run by hand; `no evidence records
+available` when a dataset has no records; `not available` for an unknown value
+against `50 mL` for a reported one; and every schema mismatch visible rather
+than blank.
+
+Two harness notes, recorded because they cost time and will recur:
+`RenderingServer.frame_post_draw` never fires under `--headless`, so a harness
+that awaits it hangs until `--quit-after` and reports nothing; these must run
+windowed. And a typed `var x: T = _scene.get("_diagnostics")` resolved to null
+while the bare `get()` call returned the same object — the lookup is done
+untyped and asserted non-null.
+
+Nothing under `Models/` was modified; the 196-output result is unchanged; the
+provenance census is intact (131 reported, 23 derived, 20 digitized, 22 unknown).
+
+---
+
 ## 7. Environment
 
 | | |

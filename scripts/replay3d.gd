@@ -443,19 +443,27 @@ func _collapsible(title: String, open_by_default: bool) -> Dictionary:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 3)
 
+	var body := VBoxContainer.new()
+	body.visible = open_by_default
+	body.add_theme_constant_override("separation", 4)
+
 	var head := Button.new()
 	head.toggle_mode = true
 	head.button_pressed = open_by_default
 	head.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	head.text = ("▾  " if open_by_default else "▸  ") + title
 	head.add_theme_font_size_override("font_size", 12)
-	head.pressed.connect(func() -> void:
-		head.text = ("▾  " if head.button_pressed else "▸  ") + title)
+	# `toggled` carries the new state, so the body follows the button.
+	#
+	# The previous handler was wired to `pressed` and only rewrote the caption;
+	# it never touched `body.visible`, which was set once at construction and
+	# never again. The caption changed, the panel did not -- so expanding a
+	# collapsed section appeared to work while revealing nothing. The body is
+	# declared before the connection so the lambda cannot capture it unset.
+	head.toggled.connect(func(on: bool) -> void:
+		body.visible = on
+		head.text = ("▾  " if on else "▸  ") + title)
 	box.add_child(head)
-
-	var body := VBoxContainer.new()
-	body.visible = open_by_default
-	body.add_theme_constant_override("separation", 4)
 	box.add_child(body)
 	return {"box": box, "body": body, "head": head}
 
@@ -1007,6 +1015,7 @@ func _rebuild_tree() -> void:
 	_tree.clear()
 	var root := _tree.create_item()
 	var wanted := _selected_provenance()
+	var shown := 0
 	for o in _data.raw_outputs:
 		var ref: Dictionary = o.get("ref", {})
 		var v: Dictionary = o.get("value", {})
@@ -1021,6 +1030,24 @@ func _rebuild_tree() -> void:
 		item.set_custom_color(2, PROVENANCE_COLOUR.get(prov, Color(0.80, 0.82, 0.86)))
 		if prov == "unknown":
 			item.set_custom_color(1, Color(0.95, 0.70, 0.58))
+		shown += 1
+
+	# An empty table with no explanation reads as a rendering failure, so the
+	# absence of evidence is stated in the pane itself.
+	if shown == 0:
+		var item := _tree.create_item(root)
+		item.set_text(0, "no evidence records available")
+		item.set_text(1, "-")
+		item.set_text(2, "-")
+		item.set_custom_color(2, Color(0.62, 0.66, 0.72))
+		item.set_selectable(0, false)
+
+	# A dataset change must never leave the previous dataset's row in the pane.
+	# The waiting state is written unconditionally rather than only when the pane
+	# is empty, because "empty" and "still showing the last row" are different
+	# things and only the first looks like a broken pane.
+	_detail.text = ("[color=#8892a0]Select a row above to see its method, its "
+		+ "source and its full provenance chain.[/color]")
 
 
 ## Compact value for the one-line tree cell. The full reason sentence is shown
@@ -1062,6 +1089,12 @@ func _on_output_selected() -> void:
 			lines.append("   where: %s" % _bb(str((link as Dictionary).get("where", ""))))
 			lines.append("   detail: %s" % _bb(str((link as Dictionary).get("detail", ""))))
 			lines.append("   source_ref: %s" % _bb(str((link as Dictionary).get("source_ref", ""))))
+			# The pane is a contract between the tree and the reader. Leaving it blank
+		# until a row is chosen is indistinguishable from a broken pane, so the
+		# waiting state is written out too.
+		if _detail.text == "":
+			_detail.text = ("[color=#8892a0]Select a row above to see its method, its "
+				+ "source and its full provenance chain.[/color]")
 		_detail.text = "\n".join(lines)
 		return
 
@@ -1084,33 +1117,124 @@ static func _bb(text: String) -> String:
 
 func _render_diagnostics(payload: Dictionary, code: int) -> void:
 	var lines := PackedStringArray()
+
+	# --- did we get a result document at all? -------------------------------
+	if payload.is_empty():
+		_diagnostics.text = "\n".join(PackedStringArray([
+			"[b]No result document.[/b]",
+			"[color=#f08a7a]The runner wrote nothing to %s, so there is no status, no "
+			% _result_path,
+			"diagnostics and no evidence to show. Run this by hand to see the traceback:[/color]",
+			"[code]%s -m composition.runner --graph %s --result %s[/code]" % [
+				_runner.python_executable(), GRAPH_PATH, _result_path],
+		]))
+		return
+
+	lines.append("[b]exit code %d[/b]" % code)
+
+	# --- run metadata -------------------------------------------------------
+	# Every field below is read from the document. A field the document does not
+	# carry is reported as unavailable, which is a different statement from a
+	# run that succeeded with nothing to report.
+	lines.append("")
+	lines.append("[b]run[/b]")
+	var status := str(payload.get("status", ""))
+	lines.append("  status            %s" % (
+		_bb(status) if status != "" else _UNRECORDED))
+	lines.append("  run id            %s" % _present(payload, "run_id"))
+	lines.append("  graph id          %s" % _present(payload, "graph_id"))
+	lines.append("  contract version  %s" % _present(payload, "contract_version"))
+	lines.append("  runner version    %s" % _present(payload, "runner_version"))
+	var repro := str(payload.get("reproducibility", ""))
+	lines.append("  graph digest      %s" % (
+		_bb(repro.substr(0, 24) + "...") if repro != "" else _UNRECORDED))
+	var versions: Dictionary = payload.get("model_versions", {})
+	if versions.is_empty():
+		lines.append("  model versions    %s" % _UNRECORDED)
+	else:
+		var parts := PackedStringArray()
+		for k in versions.keys():
+			parts.append("%s %s" % [_bb(str(k)), _bb(str(versions[k]))])
+		lines.append("  model versions    %s" % ", ".join(parts))
+
+	# --- diagnostics --------------------------------------------------------
+# An absent "diagnostics" key and an empty list are different facts. The
+	# first means the document does not have the shape this panel expects, and
+	# is reported as such rather than rendered as a clean run.
+	if not payload.has("diagnostics"):
+		var present := PackedStringArray()
+		for k in payload.keys():
+			present.append(str(k))
+		lines.append("")
+		lines.append("[b]diagnostics[/b]")
+		lines.append("  [color=#f08a7a]This result document has no 'diagnostics' field. "
+			+ "The runner and this panel both expect it, so the diagnostic content "
+			+ "cannot be shown. This is a schema mismatch, not a clean run.[/color]")
+		lines.append("  top-level fields present: %s" % _bb(", ".join(present)))
+		_diagnostics.text = "\n".join(lines)
+		return
+
 	var diags: Array = payload.get("diagnostics", [])
 	var errors := 0
 	var warnings := 0
+	var malformed := 0
 	for d in diags:
-		if str(d.get("severity", "")) == "error":
+		var rec: Dictionary = d if d is Dictionary else {}
+		if rec.is_empty():
+			# A diagnostic entry that is not a Dictionary is a schema mismatch in
+			# its own right. Naming it is more useful than skipping it, which
+			# would render the run as clean.
+			malformed += 1
+			continue
+		var sev := str(rec.get("severity", ""))
+		if sev == "error":
 			errors += 1
-		elif str(d.get("severity", "")) == "warning":
+		elif sev == "warning":
 			warnings += 1
 
-	lines.append("[b]exit code %d[/b]   %d error diagnostic(s), %d warning(s)" % [code, errors, warnings])
+	lines.append("")
+	lines.append("[b]diagnostics[/b]   %d error, %d warning, %d total" % [
+		errors, warnings, diags.size()])
+	if malformed > 0:
+		var noun := "y" if malformed == 1 else "ies"
+		lines.append("  [color=#f08a7a]%d entr%s in 'diagnostics' is not a diagnostic "
+			% [malformed, noun]
+			+ "record and could not be read. Every entry must be an object with a "
+			+ "'severity' and a 'message'. This is a schema mismatch, not a clean run.[/color]")
 	if diags.is_empty():
-		lines.append("[color=#8fd18f]no diagnostics were raised.[/color]")
+		lines.append("  [color=#8fd18f]This run raised no diagnostics.[/color]")
 	for d in diags:
-		var sev := str(d.get("severity", ""))
+		var rec: Dictionary = d if d is Dictionary else {}
+		if rec.is_empty():
+			malformed += 1
+			continue
+		var sev := str(rec.get("severity", ""))
 		# The letters must not collide with BBCode tags: `[i]` is italic and
 		# `[b]` is bold, so using them as severity letters leaves an unmatched
 		# close tag that renders literally. E / W / N are not tags.
 		var tag := "E" if sev == "error" else ("W" if sev == "warning" else "N")
 		var colour := "#f08a7a" if sev == "error" else ("#e8c07a" if sev == "warning" else "#9fb0c8")
-		lines.append("[color=%s][b]%s[/b][/color] %s" % [colour, tag, _bb(str(d.get("message", "")))])
-		var rem := str(d.get("remediation", ""))
+		lines.append("[color=%s][b]%s[/b][/color] %s" % [
+			colour, tag, _bb(str(rec.get("message", "")))])
+		var origin := ("%s %s" % [str(rec.get("origin", "")), str(rec.get("model_id", ""))]).strip_edges()
+		lines.append("      [color=#8892a0]code %s  origin %s  where %s[/color]" % [
+			_bb(str(rec.get("code", ""))), _bb(origin), _bb(str(rec.get("where", "")))])
+		var rem := str(rec.get("remediation", ""))
 		if rem != "":
 			lines.append("      [color=#8892a0]%s[/color]" % _bb(rem))
 
-	if code != 0 and payload.get("status", "") == null:
-		lines.append("")
-		lines.append("[color=#f08a7a]No result document was written, so the failure happened before the runner could report. Run this by hand to see the traceback:[/color]")
-		lines.append("[code]%s -m composition.runner --graph %s --result %s[/code]" % [
-			_runner.python_executable(), GRAPH_PATH, _result_path])
 	_diagnostics.text = "\n".join(lines)
+
+
+## Shown wherever the result document does not carry a field. Deliberately
+## different wording from "no diagnostics", because the two mean different
+## things: one is missing data, the other is a run that had nothing to say.
+const _UNRECORDED := "[color=#e8c07a]not recorded in this document[/color]"
+
+
+## A value the document actually carries, or an explicit statement that it does not.
+func _present(payload: Dictionary, key: String) -> String:
+	var v: Variant = payload.get(key, null)
+	if v == null or str(v) == "":
+		return _UNRECORDED
+	return _bb(str(v))

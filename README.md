@@ -165,6 +165,14 @@ or *not established by the available evidence*.
 An unknown quantity used to be a dead end: the screen said what was missing and
 stopped. Under each one there is now an **Investigate** button.
 
+**Section 5, "Detailed evidence and technical diagnostics", has two panels that
+open to show real content.** "All data and evidence" lists every published value
+with its field name, value, unit and provenance; selecting a row shows its
+method, source and provenance chain. "Run status and technical details" shows
+exit code, status, run id, graph id, versions, the graph digest and every
+diagnostic with its code, origin and location. Both were permanently hidden by a
+single missing `body.visible` assignment; see §13.
+
 Pressing it opens a panel that shows:
 
 - which model, version and run this was checked against, with the run's graph
