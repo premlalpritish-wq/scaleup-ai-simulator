@@ -46,6 +46,13 @@ class RecordExamined:
     graph_reproducibility_digest: str
     #: Version string the model package reported for this run.
     model_version: str = ""
+    #: The unambiguous ``model_id@version`` of the *registered* model this was
+    #: assessed against. Empty when no registered model was resolved.
+    model_reference: str = ""
+    #: Whether the reference resolved in the registry. A compatibility report
+    #: whose model is unregistered cannot carry a definitive verdict.
+    registry_resolution: str = ""
+    registry_detail: str = ""
     #: Output ports inspected for this finding.
     ports_examined: tuple[str, ...] = ()
     missing_parameters_examined: tuple[str, ...] = ()
@@ -53,15 +60,27 @@ class RecordExamined:
     def to_dict(self) -> dict[str, Any]:
         return {
             "model_id": self.model_id,
+            "model_reference": self.model_reference,
             "model_source": self.model_source,
             "model_doi": self.model_doi,
+            "model_version": self.model_version,
             "run_id": self.run_id,
             "graph_reproducibility_digest": self.graph_reproducibility_digest,
             "digest_covers": "the graph document, not the numeric results",
-            "model_version": self.model_version,
+            "registry_resolution": self.registry_resolution,
+            "registry_detail": self.registry_detail,
             "ports_examined": list(self.ports_examined),
             "missing_parameters_examined": list(self.missing_parameters_examined),
         }
+
+    def is_definitive(self) -> bool:
+        """False unless an exact registered model version was resolved.
+
+        The scope contract forbids presenting an unverified relationship as
+        established fact. A verdict resting on an unregistered or ambiguous
+        model is provisional, and this is where that shows.
+        """
+        return self.registry_resolution == "resolved" and bool(self.model_reference)
 
 
 # --------------------------------------------------------------------------- #

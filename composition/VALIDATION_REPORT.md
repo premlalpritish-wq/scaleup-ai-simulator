@@ -48,7 +48,8 @@ two model roots to `sys.path` and never writes to them.
 | `tests/test_contracts.py` | 16 |
 | **pre-existing total** | **128 passed** |
 | `tests/test_evidence_catalogue.py` | 62 (new — §11) |
-| **composition total** | **190 passed** |
+| `tests/test_registry.py` | 52 (new — §12) |
+| **composition total** | **242 passed** |
 
 The acceptance suite is organised as one class per criterion with a
 `CG_COVERAGE` table that the suite checks for completeness, so a criterion
@@ -61,11 +62,12 @@ interface rather than an internal detail.
 | | |
 |---|---|
 | existing model suites | 409 |
-| composition suite | 190 |
-| **total** | **599 passed** |
+| composition suite | 242 |
+| **total** | **651 passed** |
 
-The pre-existing figure was 537 (409 + 128). The 62 additional tests cover the
-literature-evidence workflow added in §11; no pre-existing test was modified.
+The pre-existing figure was 537 (409 + 128). The 114 additional tests cover the
+literature-evidence workflow (§11) and the model registry (§12); no
+pre-existing test was modified.
 
 ### 2.4 Godot project
 
@@ -638,6 +640,157 @@ to nothing else.
 
 ---
 
+## 12. Model registry
+
+### 12.1 What registration means
+
+Registration records that a specification artefact **exists**, is identified by a
+stable id and version, and can be located and hashed. That is all. Every
+registration carries the disclaimer verbatim:
+
+> Registration records that a specification artefact exists, is identified, and
+> can be located and hashed. It does **NOT** establish that the model is correct,
+> independently supported by evidence, or executable. None of those claims is
+> made or implied by appearing here.
+
+A model can be registered and still be wrong. The state is published as
+`scientific_status.state = "registered_only"`, with `means` and `does_not_mean`
+alongside it, so "it is in the registry" can never be read as "it is correct".
+
+### 12.2 Schema
+
+Every field on a registered model is a `TrackedField` carrying a value, an
+`Origin`, and a `basis`. Origins are:
+
+| Origin | Meaning |
+|---|---|
+| `declared` | read verbatim from the artefact or its manifest |
+| `derived` | computed from declared data by a rule recorded on the field |
+| `unknown` | the artefact does not state it |
+
+`unknown` is not a blank and not a deferred inference. It is the honest answer,
+and it carries the reason it is absent. This is what stops the registry from
+looking more complete than the repository is.
+
+Existing schemas are reused rather than duplicated: identity, version, citation
+and port structure come from the established `ModelManifest` and the adapter
+registrations in `composition/adapters/__init__.py`. No parallel model
+representation was created.
+
+### 12.3 What is registered
+
+Discovery is not a scan of the file tree for things that look like models. It
+follows the artefacts the repository already establishes — the adapter
+registrations — and reads each model's own manifest. No model is described here
+that the composition layer cannot already reach.
+
+| Reference | Ports | DOI | Conditions declared |
+|---|---|---|---|
+| `morris2011.material_balance@0.1.0` | instance-parameterised | **unknown** | unknown |
+| `zielinski2019.rhi_process@1.0.0` | 139 in / 57 out | `10.1016/j.pep.2019.02.002` | 8 |
+
+Required experimental conditions are taken from the model's own declaration of
+what it cannot do (`parameter_sections["declared missing models"]`), not from
+our reading of it. Operating conditions are identified by the model marking its
+own ports with `role = operating_condition`.
+
+### 12.4 Digests, and exactly what they cover
+
+```
+SHA-256 over the exact bytes of every .py file under the model package root,
+excluding test modules, caches and generated output. The package digest is
+SHA-256 over the sorted '<relative-path>:<file-digest>' lines of that same set.
+
+Neither digest covers data fixtures, example graphs, the adapter that wraps
+the model, or any execution result.
+```
+
+17 artefacts across the two packages: 5 for Morris, 12 for Zieliński. Every
+digest carries its own `covers` string, and every `package_digest.basis`
+restates the rule, so scope is never inferred from a bare hash.
+
+Tests verify that each file digest equals `sha256` of the bytes currently on
+disk, that each package digest equals the documented function of its file
+digests, that changing a file's content changes its digest, and that the whole
+registry is byte-identical across runs.
+
+### 12.5 Integrity checks
+
+| Check | Behaviour |
+|---|---|
+| duplicate model id | reported; the first is kept, never merged or chosen |
+| missing artefact | registration **fails**; no substitute model is reached for |
+| ambiguous version | reported; a bare `model_id` is declared not to resolve |
+| unregistered reference | reported with the reference and why it does not resolve |
+
+`audit_references()` is the gate compatibility reports pass through. It returns
+a `TrackedField`: `declared` with the exact `model_id@version` when the
+reference resolves, `unknown` with the reason when it does not.
+
+`RecordExamined.is_definitive()` is `False` unless an exact registered version
+resolved, and `inventory()` publishes `verdict_authority` accordingly — so an
+unregistered or ambiguous model **cannot** carry a definitive compatibility
+verdict. It currently reads `definitive`, because the catalogue does resolve.
+
+### 12.6 Two errors this corrected
+
+The evidence catalogue was referencing a model that does not exist:
+
+| | before | after |
+|---|---|---|
+| `model_id` | `zielinski2019.recombinant-insulin` | `zielinski2019.rhi_process` |
+| DOI | `10.1016/j.jbiotec.2019.03.011` | `10.1016/j.pep.2019.02.002` |
+
+The first was never registered. The second was written from memory and is
+declared by no artefact — the model itself states `10.1016/j.pep.2019.02.002`
+in `models/source.py`. Identity, citation and DOI are now **read from the
+registry** rather than typed into the catalogue, so they cannot drift again.
+
+### 12.7 Models that could not be fully registered
+
+**`morris2011.material_balance@0.1.0` — registered, with eight explicit
+unknowns.** Its manifest requires an instance `system` declaration, so nothing
+about it is fixed at model level:
+
+| Field | State | Why |
+|---|---|---|
+| `ports` | unknown | instance-parameterised; a declared system produces 7 in / 19 out, another produces a different set |
+| `title` | unknown | declared per instance ("Batch charge preparation for a brass melting furnace") |
+| `source_paper` | unknown | the citation is per instance ("Morris et al. 2011, sec. 4.5, Example 4.2") |
+| `doi` | unknown | no DOI is declared anywhere in the package, and none is inferred from author or title |
+| `variables`, `units` | unknown | follow from the port set being undefined |
+| `assumptions`, `capabilities` | unknown | declared per instance |
+
+This is the difference between a model that declares no ports and a model whose
+ports are not fixed. Resolving these requires a human decision about whether
+the Morris model should declare a model-level interface, which is a scientific
+design question and was not taken here.
+
+**`Models/Morris/models/degrees_of_freedom.py` — deliberately not registered.**
+It is imported by `material_balance.py` and is internal bookkeeping for the
+chapter's DOF rule, not a separately composable model: it has no id, no version
+and no adapter. Registering it would invent a model that does not exist. It is
+covered by the Morris package digest.
+
+**Nothing else was found.** No other model specification exists in the
+repository.
+
+### 12.8 Read-only, and verification
+
+Registration reads and hashes. It never writes to a model package and never
+imports one — the two packages collide on a top-level `models` name, so
+hashing bytes is the only safe route. The sole write in the package is the
+CLI's `--result` output, guarded by the flag, asserted by an AST test that
+also pins the guard's position.
+
+`composition/tests/test_registry.py` — **52 tests**. Beyond the acceptance
+criteria: `build_registry()` is asserted not to change any file size or mtime
+under `Models/`; CLI output is asserted byte-identical across two runs; and the
+duplicate-id and ambiguous-version detectors are exercised against deliberately
+constructed bad registries rather than left untested.
+
+---
+
 ## 7. Environment
 
 | | |
@@ -654,7 +807,7 @@ to nothing else.
 
 ```bash
 # composition suite
-cd composition && python -m pytest tests        # 190 (128 pre-existing + 62 evidence)
+cd composition && python -m pytest tests        # 242 (128 pre-existing + 62 evidence + 52 registry)
 
 # existing model suites, reported separately
 cd Models/Morris    && python -m pytest tests   # 186
@@ -663,6 +816,9 @@ cd Models/Zielinski && python -m pytest tests   # 223
 # the evidence catalogue, the same invocation the Godot scene makes
 cd composition
 python -m composition.evidence --result evidence_catalogue.json
+
+# the model registry
+python -m composition.registry --result model_registry.json   # exit 2 if issues
 
 # the runner directly
 cd composition

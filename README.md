@@ -214,6 +214,38 @@ agreement is a claim about two independently checkable passages. See
 Nothing here merges a value into the model. The model still reports every one of
 these quantities as unknown, and `Models/Zielinski` is unmodified.
 
+### Model registry
+
+`python -m composition.registry` reports every model the composition layer can
+reach, as machine-readable JSON:
+
+```bash
+cd composition && python -m composition.registry        # exit 2 if any issue found
+```
+
+Each model is recorded with a stable id and version, its citation and DOI
+*where the artefact declares them*, the path to its specification, SHA-256
+digests of the files actually read (with an explicit statement of what the
+digest covers), its ports, variables and units, and the experimental conditions
+the model itself says it needs.
+
+Registration is bookkeeping. It records that an artefact exists, is identified
+and can be hashed — **not** that the model is correct, independently supported,
+or executable. Every entry carries that disclaimer.
+
+Fields the artefact does not state stay explicitly `unknown`, with the reason
+attached. Nothing is inferred: Morris declares no DOI, so the registry records
+no DOI rather than deriving one from the author name.
+
+`zielinski2019.rhi_process@1.0.0` registers fully (196 ports, 8 declared
+missing models). `morris2011.material_balance@0.1.0` registers with eight
+explicit unknowns, because its interface is parameterised per instance rather
+than fixed. See §12.7 of `composition/VALIDATION_REPORT.md` for the full list.
+
+The evidence catalogue resolves its model through the registry, so a
+compatibility verdict that does not resolve to an exact registered version is
+reported as **provisional** rather than definitive.
+
 ---
 
 ## Running the tests
@@ -224,7 +256,7 @@ is required.
 
 ```bash
 # composition layer
-cd composition && python -m pytest tests          # 190 (128 pre-existing + 62 evidence)
+cd composition && python -m pytest tests          # 242 (128 pre-existing + 62 evidence + 52 registry)
 
 # Morris 2011 material balance
 cd Models/Morris    && python -m pytest tests     # 186
@@ -233,7 +265,7 @@ cd Models/Morris    && python -m pytest tests     # 186
 cd Models/Zielinski && python -m pytest tests     # 223
 ```
 
-**Total: 599 tests** (409 existing model tests, unchanged, plus 190 in the
+**Total: 651 tests** (409 existing model tests, unchanged, plus 242 in the
 composition layer).
 
 To regenerate the Zieliński reference artifacts (optional; they are not tracked):
@@ -258,8 +290,9 @@ composition/
       sourcing.py        conditions bound to a passage in their own source
       conflicts.py       conflict detection and the records examined
       target_source.json Zielinski 2019 passages, with printed-page references
+    registry/            deterministic model registry (id, version, digests)
   examples/              six example graphs with pinned exit codes
-  tests/                 190 tests
+  tests/                 242 tests
   replay/                the standalone graph the 3D scene executes
 Models/
   Morris/                material-balance model + 186 tests
@@ -309,4 +342,4 @@ The reference PDFs under `papers/` and inside each model package are
 publications by other authors and are deliberately excluded, along with all
 generated output. Nothing in the application or the test suites reads them: the
 citation tests verify against `Models/Zielinski/models/data/paper_pages.json`,
-which holds the extracted page text. All 599 tests pass with every PDF absent.
+which holds the extracted page text. All 651 tests pass with every PDF absent.

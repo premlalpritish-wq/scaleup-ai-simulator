@@ -30,6 +30,7 @@ from .candidate import (  # noqa: F401
 )
 from .catalogue import (  # noqa: F401
     FINDINGS,
+    REGISTERED_MODEL_ID,
     SEARCH_SCOPE,
     TARGETS,
     ZIELINSKI_RECORD,
@@ -75,6 +76,7 @@ __all__ = [
     "Match",
     "NUMERIC_DIMENSIONS",
     "Provenance",
+    "REGISTERED_MODEL_ID",
     "RecordExamined",
     "SEARCH_SCOPE",
     "SourceLocation",

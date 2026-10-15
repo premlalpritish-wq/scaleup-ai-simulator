@@ -62,11 +62,15 @@ composition/out.json
 # The curated catalogue is code, not data; this is only the rendered copy.
 composition/evidence_catalogue.json
 
+# Regenerate with:  cd composition && python -m composition.registry --result <path>
+# Registry output is generated; the registry itself is built from the models on disk.
+composition/model_registry.json
+
 # --- Copyrighted reference papers and figures -------------------------------
 # These are publications by other authors. They are NOT distributed with this
 # repository. Nothing in the application or the test suites reads them: the
 # citation tests verify against models/data/paper_pages.json, which holds the
-# extracted page text. All 599 tests pass with every PDF absent.
+# extracted page text. All 651 tests pass with every PDF absent.
 # `python -m models.source rebuild_paper_pages` is the only thing that needs
 # the original PDF, and it is a manual developer utility.
 papers/

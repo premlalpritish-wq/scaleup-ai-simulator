@@ -53,27 +53,48 @@ from .candidate import (
 from .conflicts import Conflict, RecordExamined, detect
 from .sourcing import Condition
 
-#: The exact artefact every verdict below was made against. Reproducibility
-#: digest included, so a later reader can tell which model state produced them.
-#: Taken from the Zielinski evidence-replay run; see VALIDATION_REPORT.md.
-ZIELINSKI_RECORD = RecordExamined(
-    model_id="zielinski2019.recombinant-insulin",
-    model_source="Zielinski M, Kwiatkowski SC, Groszkowski M, Nedelec JM, "
-                 "Soshiyama T (2019). Development of a continuous bioprocess for "
-                 "recombinant human insulin production in an Escherichia coli 20 "
-                 "strain. Journal of Biotechnology 243:63-69.",
-    model_doi="10.1016/j.jbiotec.2019.03.011",
-    model_version="1.0.0",
-    run_id="zielinski-replay",
-    graph_reproducibility_digest=(
-        "2f5a2820c622b74d2ad46fcf9b6f90a5632d249dec9ec27b7523a3a588ce5fad"
-    ),
-    missing_parameters_examined=(
-        "MP-GROWTH-KINETICS",
-        "MP-OXYGEN-TRANSFER",
-        "MP-INDUCTION-TIME",
-    ),
-)
+#: The registered model this catalogue assesses evidence against.
+REGISTERED_MODEL_ID = "zielinski2019.rhi_process"
+
+#: The exact artefact every verdict below was made against.
+#:
+#: Identity, citation and DOI are read from the *registry*, not written here, so
+#: they cannot drift from the model that actually exists. Two corrections
+#: follow from that, both recorded because they were real errors: an earlier
+#: version of this file named a model_id ("zielinski2019.recombinant-insulin")
+#: that was never registered, and carried a DOI of 10.1016/j.jbiotec.2019.03.011
+#: that no artefact declares. The registry reads the DOI the model itself
+#: states, 10.1016/j.pep.2019.02.002.
+#:
+#: The graph digest is the one the run actually reported, read from the result
+#: document rather than remembered; a test asserts they match.
+def _build_record() -> RecordExamined:
+    from ..registry import audit_references, build_registry
+
+    models, _ = build_registry()
+    resolved = audit_references(REGISTERED_MODEL_ID, models)
+    model = models.get(REGISTERED_MODEL_ID)
+    return RecordExamined(
+        model_id=REGISTERED_MODEL_ID,
+        model_reference=resolved.value or "",
+        registry_resolution=("resolved" if resolved.is_known else "unresolved"),
+        registry_detail=resolved.basis,
+        model_version=model.model_version if model else "",
+        model_source=(model.source_paper.value if model else "") or "",
+        model_doi=(model.doi.value if model else "") or "",
+        run_id="zielinski-replay",
+        graph_reproducibility_digest=(
+            "2f5a2820c622b74d2ad46fcf9b6f90a5632d249dec9ec27b7523a3a588ce5fad"
+        ),
+        missing_parameters_examined=(
+            "MP-GROWTH-KINETICS",
+            "MP-OXYGEN-TRANSFER",
+            "MP-INDUCTION-TIME",
+        ),
+    )
+
+
+ZIELINSKI_RECORD: RecordExamined = _build_record()
 
 # --------------------------------------------------------------------------- #
 # What is missing, in the model's own words
@@ -547,6 +568,14 @@ def inventory() -> dict[str, Any]:
             1 for f in FINDINGS if f.assess().verdict is not Verdict.VALIDATED
         ),
     }
+    # Whether this report may state a definitive verdict at all. An unregistered
+    # or ambiguous model makes every verdict in it provisional.
+    out["verdict_authority"] = (
+        "definitive" if ZIELINSKI_RECORD.is_definitive()
+        else "provisional - " + (ZIELINSKI_RECORD.registry_detail
+                                 or "the assessed model did not resolve to a "
+                                    "registered model version")
+    )
     # The governing statement, in the artefact itself rather than only in prose.
     out["authority"] = {
         "may_do": [
