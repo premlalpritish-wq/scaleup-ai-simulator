@@ -167,18 +167,22 @@ stopped. Under each one there is now an **Investigate** button.
 
 Pressing it opens a panel that shows:
 
+- which model, version and run this was checked against, with the run's graph
+  digest and a statement of what that digest does and does not cover;
 - what is missing and what it blocks, in the model's own words;
 - what was searched, and what the search returned;
 - each candidate finding — the extracted value with its unit, the publisher's
   citation, a DOI, a section locator, and the **verbatim quoted passage** it came
   from;
-- how the candidate's conditions differ from the target process, dimension by
-  dimension (strain, construct, medium, mode, temperature, pH, scale,
-  measurement basis), with critical dimensions marked;
+- the conditions it was measured under, and how they differ from the target
+  process dimension by dimension (strain, construct, medium, mode, temperature,
+  pH, scale, measurement basis), with critical dimensions marked;
+- whether the source is **independent** of the target publication;
 - a verdict: **incompatible conditions**, **needs checking**, or **compatible but
   not yet validated**;
 - what the candidate would *not* settle even if it were adopted;
-- a checkable list of the nine validation criteria, showing which passed;
+- any conflicting evidence, left explicitly unresolved;
+- a checkable list of the ten validation criteria, showing which passed;
 - an action to **propose a separate model or parameter set**.
 
 The catalogue is static curated data, not a search engine. It is produced by
@@ -188,11 +192,24 @@ GDScript → Python boundary the model run uses.
 **For the growth-rate gap the answer is no.** A literature search found two
 published kinetic constants, and both are incompatible — one measured on a
 different strain in a continuous chemostat, one a single-cell rate measured at
-microlitre scale. The closest-matched publication in existence — same institute,
-same strain, same vector, same medium, same fermenter — reports no kinetic
-parameter at all. So the panel says the gap is unresolved and points at the only
+microlitre scale. The panel says the gap is unresolved and points at the only
 route that would actually close it: build a separate, explicitly parameterised
 model fitted to batch data from this strain.
+
+A third source — same institute, same strain, same vector, same medium — looked
+like a perfect match until each condition was bound to the passage it was read
+from. Its supporting text turns out to appear **verbatim in the Zieliński paper
+itself**. It is the target paper's own content reached through a second paper,
+so it cannot corroborate the target paper, and it is flagged as **not
+independent**.
+
+That check exists because an earlier version of this workflow recorded the
+target process once and then wrote the candidate's conditions as strings
+identical to it. Every dimension then "matched", which looked like verification
+but was a tautology — both sides were written by the same person. Each condition
+now carries the verbatim passage it was transcribed from, in its own source, so
+agreement is a claim about two independently checkable passages. See
+`composition/composition/evidence/sourcing.py`.
 
 Nothing here merges a value into the model. The model still reports every one of
 these quantities as unknown, and `Models/Zielinski` is unmodified.
@@ -207,7 +224,7 @@ is required.
 
 ```bash
 # composition layer
-cd composition && python -m pytest tests          # 164 (128 pre-existing + 36 evidence)
+cd composition && python -m pytest tests          # 190 (128 pre-existing + 62 evidence)
 
 # Morris 2011 material balance
 cd Models/Morris    && python -m pytest tests     # 186
@@ -216,7 +233,7 @@ cd Models/Morris    && python -m pytest tests     # 186
 cd Models/Zielinski && python -m pytest tests     # 223
 ```
 
-**Total: 573 tests** (409 existing model tests, unchanged, plus 164 in the
+**Total: 599 tests** (409 existing model tests, unchanged, plus 190 in the
 composition layer).
 
 To regenerate the Zieliński reference artifacts (optional; they are not tracked):
@@ -238,8 +255,11 @@ scripts/                 all GDScript (UI and the GDScript -> Python boundary)
 composition/
   composition/           the composition layer
     evidence/            candidate literature evidence for unresolved quantities
+      sourcing.py        conditions bound to a passage in their own source
+      conflicts.py       conflict detection and the records examined
+      target_source.json Zielinski 2019 passages, with printed-page references
   examples/              six example graphs with pinned exit codes
-  tests/                 164 tests
+  tests/                 190 tests
   replay/                the standalone graph the 3D scene executes
 Models/
   Morris/                material-balance model + 186 tests
@@ -280,7 +300,7 @@ and the quantities differ.
   reproducibility digest without changing any scientific content.
 * The Godot-side UI acceptance checks (77 assertions) and replay behaviour
   regression (18 assertions) were written as temporary harnesses during
-  development and are **not currently committed**. Only the 537 Python tests
+  development and are **not currently committed**. Only the Python tests
   ship with this repository.
 
 ## Not distributed
@@ -289,4 +309,4 @@ The reference PDFs under `papers/` and inside each model package are
 publications by other authors and are deliberately excluded, along with all
 generated output. Nothing in the application or the test suites reads them: the
 citation tests verify against `Models/Zielinski/models/data/paper_pages.json`,
-which holds the extracted page text. All 537 tests pass with every PDF absent.
+which holds the extracted page text. All 599 tests pass with every PDF absent.

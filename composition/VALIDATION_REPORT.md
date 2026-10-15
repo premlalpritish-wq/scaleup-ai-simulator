@@ -47,8 +47,8 @@ two model roots to `sys.path` and never writes to them.
 | `tests/test_quantities.py` | 26 |
 | `tests/test_contracts.py` | 16 |
 | **pre-existing total** | **128 passed** |
-| `tests/test_evidence_catalogue.py` | 36 (new — §11) |
-| **composition total** | **164 passed** |
+| `tests/test_evidence_catalogue.py` | 62 (new — §11) |
+| **composition total** | **190 passed** |
 
 The acceptance suite is organised as one class per criterion with a
 `CG_COVERAGE` table that the suite checks for completeness, so a criterion
@@ -61,10 +61,10 @@ interface rather than an internal detail.
 | | |
 |---|---|
 | existing model suites | 409 |
-| composition suite | 164 |
-| **total** | **573 passed** |
+| composition suite | 190 |
+| **total** | **599 passed** |
 
-The pre-existing figure was 537 (409 + 128). The 36 additional tests cover the
+The pre-existing figure was 537 (409 + 128). The 62 additional tests cover the
 literature-evidence workflow added in §11; no pre-existing test was modified.
 
 ### 2.4 Godot project
@@ -442,40 +442,122 @@ one publication was needed.
 The new package takes **no run-time dependency on a model** — it neither imports
 `scaleup_ai` nor writes to `Models/`. A test asserts this by walking the AST.
 
-### 11.3 What the search actually found
+### 11.3 A circular verdict, found and corrected
 
-Three findings are registered. All three were retrieved and are quoted verbatim.
+The first version of this workflow recorded the target process once, then
+recorded each candidate's conditions as strings **identical** to it. The
+comparator then reported dimensions matching — which looked like verification
+but was a tautology, because both sides of every comparison had been written by
+the same person from the same reading. Agreement had been constructed, not
+observed.
 
-| ID | Quantity | Source | Verdict |
-|---|---|---|---|
-| CF-001 | Monod Ks, 40–88 µg/L | Senn *et al.* 1994, BBA 1201(3):424–436, `10.1016/0304-4165(94)90072-8` | **incompatible** |
-| CF-002 | Single-cell μ, 0.19–0.61 h⁻¹ | Smaluch *et al.* 2023, Eng Life Sci 23(1):e2100157, `10.1002/elsc.202100157` | **incompatible** |
-| CF-003 | Growth-phase OD600 ranges | Mikiewicz *et al.* 2017, PLoS ONE 12(3):e0172600, `10.1371/journal.pone.0172600` | **found** |
+CF-003 made this visible. It was recorded as a `found` external source — a 2017
+paper from the same institute, on the same strain, vector and medium — on the
+strength of seven dimensions scoring `match`. But every one of those condition
+strings had been typed identical to the target's.
 
-**Zero findings are validated.** The four verdicts are produced by
-`assess()`, which never returns `VALIDATED`; only `validate()` may grant it, and
-only if all nine registered criteria pass.
+Binding each condition to a passage from its own source exposed what was
+actually true:
 
-The reasoning behind each:
+> **CF-003's supporting passage occurs verbatim in the Zieliński 2019 text.**
 
-- **CF-001** — a steady-state glucose-limited chemostat on strain ML30. The
-  target is a pH-stat fed batch on a different strain. Critically, the source's
-  own conclusion is that a single set of kinetic "constants" probably cannot
-  describe the bacterium, because published Ks values differ by orders of
-  magnitude depending on how far the cells were adapted. It reports a *range*,
-  so the upper bound is carried and the full range kept in the uncertainty
-  record. **No midpoint was invented.**
-- **CF-002** — single-cell rates from quantitative phase imaging at 606 pL.
-  Temperature (37 °C) matches; strain, construct, medium, mode and measurement
-  basis do not. A single-cell rate is not the population rate the process
-  observed.
-- **CF-003** — the closest-matched publication that exists: same institute, same
-  strain, same vector, same medium, same supplements, same fermenter, same
-  pH-stat strategy. Every compared dimension matches. **It reports no kinetic
-  parameter of any kind.** It is registered precisely because it matches and
-  still does not supply the missing number.
+The 2019 methods section and the 2017 methods section describe the same run in
+near-identical wording — *"…the glucose feeding was limited until its
+concentration in the medium was reduced to 0 g/dL"* appears in both. CF-003 is
+therefore the target publication's own content reached through a second paper.
+It is **not independent evidence**, and it can never corroborate the target
+paper.
 
-### 11.4 The honest result
+The defect sat precisely on the one finding carrying positive weight. The two
+`incompatible` verdicts were unaffected: their conditions genuinely differ,
+because they were transcribed from what those papers actually said.
+
+### 11.4 The fix
+
+Each condition is now a record carrying its value **in that source's own
+wording**, the **verbatim passage** it was transcribed from, and that source's
+id. The target process is transcribed the same way, from the Zieliński
+publication, with printed-page references (§11.2).
+
+Comparison then compares two independently checkable passages. A reader can
+verify each side against its own paper. Agreement is a finding again.
+
+Two consequences worth stating plainly:
+
+- **Similar is no longer sufficient.** "GMS medium" against "GMS medium plus 2×
+  yeast extract" scores `partial`, never `match`. The test suite pins this.
+- **Different is still different.** Removing string-equality scoring entirely
+  would have been over-correction — it collapsed genuinely distinct strains
+  (ML30, MG1655) into "cannot tell". The declared rules distinguish them by
+  extracting the identifiers each side names (`ML30` ∩ `20, IBA, 1` = ∅ →
+  `mismatch`), and use closed vocabularies where the terms are genuinely
+  mutually exclusive (a culture is batch *or* chemostat *or* microfluidic).
+
+A new determination, **`independence`**, is reported for every finding and is
+required for validation (VC-10). A non-independent finding can never be
+recorded as `FOUND`, whatever its conditions say.
+
+### 11.5 What the search actually found
+
+| ID | Quantity | Source | Independent | Verdict |
+|---|---|---|---|---|
+| CF-001 | Monod Ks, 40–88 µg/L | Senn *et al.* 1994, BBA 1201(3):424–436, `10.1016/0304-4165(94)90072-8` | external | **incompatible** |
+| CF-002 | Single-cell μ, 0.19–0.61 h⁻¹ | Smaluch *et al.* 2023, Eng Life Sci 23(1):e2100157, `10.1002/elsc.202100157` | external | **incompatible** |
+| CF-003 | Growth-phase OD600 ranges | Mikiewicz *et al.* 2017, PLoS ONE 12(3):e0172600, `10.1371/journal.pone.0172600` | **target source** | **incompatible** |
+
+**Zero found. Zero validated.** All three are now `incompatible`, and CF-003 for
+a reason that is about provenance rather than conditions.
+
+- **CF-001** — steady-state glucose-limited chemostat on strain ML30, against a
+  pH-stat fed batch on a different strain with a recombinant plasmid. Its own
+  conclusion is that a single set of kinetic "constants" probably cannot describe
+  the bacterium, because published Ks values differ by orders of magnitude
+  depending on adaptation history. It reports a *range*; the upper bound is
+  carried and 40–88 µg/L kept in the uncertainty record. **No midpoint was
+  invented.**
+- **CF-002** — single-cell rates by quantitative phase imaging at 606 pL.
+  Temperature (37 °C) genuinely matches — both papers state it. Strain, medium,
+  mode and measurement basis do not.
+- **CF-003** — matches the process on temperature, medium, mode and scale, and
+  supplies **no kinetic parameter of any kind**. It is now recorded as
+  non-independent, which is the stronger and more accurate statement.
+
+### 11.6 Records examined
+
+Every verdict is published next to the artefact it was made against, so a later
+reader can tell which model state produced it. Recorded in the report:
+
+| | |
+|---|---|
+| model | `zielinski2019.recombinant-insulin`, v1.0.0, `10.1016/j.jbiotec.2019.03.011` |
+| run | `zielinski-replay` |
+| graph digest | `2f5a2820c622b74d2ad46fcf9b6f90a5632d249dec9ec27b7523a3a588ce5fad` |
+| missing parameters examined | `MP-GROWTH-KINETICS`, `MP-OXYGEN-TRANSFER`, `MP-INDUCTION-TIME` |
+
+The digest is the one the run actually reported, read from the result document
+rather than remembered — a test asserts they match. The report also states what
+that digest **covers**: the graph document, not the numeric results. It pins
+which graph was executed; it does not attest to the values.
+
+### 11.7 Conflicting evidence
+
+Detection is mechanical and the conflicts it finds are left open. Three rules:
+
+- **value disagreement** — two findings for one quantity, same unit, disjoint
+  reported intervals;
+- **not independent of target** — a passage occurring in the target publication;
+- **condition disagreement** — two sources disagreeing about the process itself
+  for one port (one matches a critical dimension, the other does not).
+
+One conflict is currently registered: CF-003's non-independence. Every conflict
+carries `resolved: false` and `requires: explicit human direction`. The system
+reports disagreements; it does not settle them, and there is no code path that
+sets `resolved` to true.
+
+Scope limit, stated rather than implied: intervals are compared only when the
+units match, and no conflict is claimed between findings whose units differ.
+
+### 11.8 The honest result
 
 **No compatible source was found.** For `specific_growth_rate` the search
 returned two candidates, both incompatible. `dissolved_oxygen` and
@@ -488,21 +570,36 @@ literature, the panel's closing action is to **propose a separate, explicitly
 parameterised model fitted to batch data from this strain** — not to import a
 number measured elsewhere.
 
-### 11.5 Verification
+### 11.9 Verification
 
-`composition/tests/test_evidence_catalogue.py` — **36 tests**, including:
+`composition/tests/test_evidence_catalogue.py` — **62 tests**, including:
 
-- every finding carries a DOI, a section, and a quote longer than 40 characters;
+- **the circularity regression guard**: the defect is reproduced deliberately
+  (a finding built from the target's own records) and asserted not to read as
+  found; no candidate may restate the target's conditions wholesale; no finding
+  is reported `FOUND`;
+- every target condition is bound to a passage on file, and conditions the
+  paper does not state carry **no** quote — attaching one would manufacture
+  support;
+- every candidate condition carries a quote from its own source and from a
+  source other than the target;
+- similar is never sufficient: `"GMS medium"` against `"GMS medium plus 2x yeast
+  extract"` is `partial`, not `match`;
+- different named entities are a `mismatch`, not an `unknown` (ML30 vs E. coli
+  20); a fermenter model number is never read as a volume;
+- substrate concentration is not mistaken for substance identity;
+- `"not stated"` scores `unknown`, never a match;
 - a reported range is never collapsed to an interior midpoint;
-- `"not stated"` scores as `unknown`, never as a match — the distinction that
-  stops an unreported condition reading as agreement;
-- no registered finding validates, and each reports *which* criterion failed;
-- `validate()` cannot be waived: remove the source and the same object fails;
-- the `--result` file contract Godot depends on is tested, including that the
-  write is guarded and never lands in the repository;
+- VC-10 blocks validation of any non-independent finding;
+- the graph digest equals the one the run actually reported;
+- conflicts are detected on disjoint intervals, never raised on overlapping ones
+  or across differing units, and are never marked resolved;
+- `validate()` cannot be waived — its only parameter is the finding;
+- the `--result` contract Godot depends on is tested, including that the write
+  is guarded and never lands in the repository;
 - no module imports a model package or mutates `sys.path` (AST walk).
 
-Interface acceptance — **30 checks, 0 failures**, run against the real scene in
+Interface acceptance — **38 checks, 0 failures**, run against the real scene in
 a real window. Highlights:
 
 - `specific_growth_rate`, `dissolved_oxygen` and `induction_time` are still
@@ -510,23 +607,34 @@ a real window. Highlights:
 - the 196-output model result is **byte-identical** before and after
   investigating, after recording a proposal, and after switching targets;
 - the catalogue loads asynchronously through the same verified Python boundary;
-- the panel shows the DOI, the citation, the quoted passage, the section
-  locator, the units, the candidate and target conditions, the method and the
-  uncertainty;
+- the panel shows the records examined and the digest, with a statement of what
+  the digest does not cover;
+- the DOI, citation, quoted passage, section locator, units, candidate
+  conditions and uncertainty are all displayed;
+- a non-independent finding is labelled as such **directly under its verdict**,
+  not hidden behind an expander;
+- conflicting evidence is displayed with the records it affects and the fact
+  that it requires human direction;
+- nothing claims validation;
 - an empty-candidate target says so and still offers the action.
 
-One real defect was found and fixed during this pass: the proposal string was
-built with `\` continuation, so `%` bound tighter than `+` and the first
-fragment shipped with literal `%s` to the user. The harness now asserts that no
-unformatted placeholder reaches the screen.
+Two real defects were found and fixed in this work:
 
-### 11.6 What did not change
+1. The proposal string was built with `\` continuation, so `%` bound tighter
+   than `+` and the first fragment shipped with a literal placeholder to the
+   user. The harness now asserts none reaches the screen.
+2. The non-independence warning was rendered *below* the conditions list, so a
+   reader could see "compatible" before the fact that disqualified it. It now
+   sits directly under the verdict badge.
 
-`Models/Zielinski` is byte-for-byte unmodified — `git status -- Models/` is
-empty. The model still reports `specific_growth_rate`, `dissolved_oxygen`,
-`induction_time` and every range-valued quantity as `unknown`. No candidate
-value was merged into any output, and no published evidence was altered. The
-proposal action writes to a log line in the scene and to nothing else.
+### 11.10 What did not change
+
+`Models/Zielinski` is byte-for-byte unmodified — `git diff -- Models/` is empty
+against both prior commits. The model still reports `specific_growth_rate`,
+`dissolved_oxygen`, `induction_time` and every range-valued quantity as
+`unknown`. No candidate value was merged into any output, and no published
+evidence was altered. The proposal action writes to a log line in the scene and
+to nothing else.
 
 ---
 
@@ -546,7 +654,7 @@ proposal action writes to a log line in the scene and to nothing else.
 
 ```bash
 # composition suite
-cd composition && python -m pytest tests        # 164 (128 pre-existing + 36 evidence)
+cd composition && python -m pytest tests        # 190 (128 pre-existing + 62 evidence)
 
 # existing model suites, reported separately
 cd Models/Morris    && python -m pytest tests   # 186

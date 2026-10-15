@@ -1,26 +1,28 @@
 """Literature-based investigation of quantities a model could not resolve.
 
-See :mod:`composition.evidence.candidate` for the record schema and the
-compatibility rules, and :mod:`composition.evidence.catalogue` for the curated
-findings. Nothing in this package writes to, imports from, or executes a model
-package; it produces a proposal for a reader to accept, reject or act on.
+This package records evidence, scores compatibility against the target process
+under declared rules, and reports what is present, absent and conflicting. It
+does not merge anything into a model, settle a conflict, or decide that two
+wordings mean the same thing. See ``candidate`` for the record schema and
+``sourcing`` for why each condition carries a quote from its own publication.
 """
 
 from .candidate import (  # noqa: F401
     CRITICAL_DIMENSIONS,
+    TARGET_PASSAGES,
     TARGET_PROCESS,
     VALIDATION_CRITERIA,
     CandidateFinding,
     CompatibilityAssessment,
+    DimensionVerdict,
     ExtractionConfidence,
-    ExperimentalConditions,
+    Independence,
     Provenance,
     SourceLocation,
     UncertaintyRecord,
     ValidationCriterion,
     ValidationReport,
     Verdict,
-    Match,
     assess,
     candidates_for,
     catalogue_payload,
@@ -30,34 +32,75 @@ from .catalogue import (  # noqa: F401
     FINDINGS,
     SEARCH_SCOPE,
     TARGETS,
+    ZIELINSKI_RECORD,
     findings_for_port,
     inventory,
     main,
+    missing_information_required,
+)
+from .conflicts import (  # noqa: F401
+    Conflict,
+    ConflictKind,
+    RecordExamined,
+    detect,
+    summarise,
+)
+from .sourcing import (  # noqa: F401
+    DIMENSION_ORDER,
+    IDENTITY_DIMENSIONS,
+    NUMERIC_DIMENSIONS,
+    Condition,
+    Match,
+    TargetPassage,
+    TargetSource,
+    compare,
+    compare_all,
+    load_target_source,
+    target_conditions,
 )
 
 __all__ = [
+    "CRITICAL_DIMENSIONS",
     "CandidateFinding",
     "CompatibilityAssessment",
-    "CRITICAL_DIMENSIONS",
+    "Condition",
+    "Conflict",
+    "ConflictKind",
+    "DIMENSION_ORDER",
+    "DimensionVerdict",
     "ExtractionConfidence",
-    "ExperimentalConditions",
     "FINDINGS",
+    "IDENTITY_DIMENSIONS",
+    "Independence",
     "Match",
+    "NUMERIC_DIMENSIONS",
     "Provenance",
+    "RecordExamined",
     "SEARCH_SCOPE",
     "SourceLocation",
+    "TARGET_PASSAGES",
     "TARGET_PROCESS",
     "TARGETS",
+    "TargetPassage",
+    "TargetSource",
     "UncertaintyRecord",
     "VALIDATION_CRITERIA",
     "ValidationCriterion",
     "ValidationReport",
     "Verdict",
+    "ZIELINSKI_RECORD",
     "assess",
     "candidates_for",
     "catalogue_payload",
+    "compare",
+    "compare_all",
+    "detect",
     "findings_for_port",
     "inventory",
+    "load_target_source",
     "main",
+    "missing_information_required",
+    "summarise",
+    "target_conditions",
     "validate",
 ]

@@ -5,15 +5,30 @@ during development, and each carries the passage it was taken from. Nothing is
 inferred from a title or an abstract summary alone: ``quote`` holds the text the
 extraction was based on.
 
-Three findings are registered. Together they demonstrate the three outcomes the
-workflow has to distinguish:
+Each finding's conditions are transcribed in **that paper's own wording**, each
+bound to a passage from that paper. The target process is transcribed the same
+way from the Zielinski publication. Agreement between the two is therefore a
+claim about two independently checkable passages, not an artefact of writing the
+same string on both sides.
 
-* **incompatible** -- a published kinetic constant whose measurement conditions
-  do not match the target process (CF-001, CF-002);
-* **found, but not sufficient** -- a perfectly matched source that supplies no
-  kinetic parameter at all and therefore cannot close the gap (CF-003);
+Correction to an earlier version of this file. CF-003 was previously recorded as
+a *found* external source: a 2017 paper from the same institute, on the same
+strain, vector and medium. That verdict was circular -- the candidate's
+condition strings had been written identical to the target's, and the supporting
+passage turns out to occur verbatim in the Zielinski 2019 text itself. The 2019
+methods section and the 2017 methods section describe the same run in
+near-identical wording. CF-003 is therefore the target publication's own content
+reached through a second paper. It is retained, but it is flagged as
+non-independent by :mod:`composition.evidence.sourcing` and can no longer be
+recorded as found.
+
+The three findings now demonstrate three outcomes:
+
+* **incompatible, independent** -- a published kinetic constant measured under
+  conditions that do not match the target process (CF-001, CF-002);
+* **not independent** -- a source whose passages are the target's own (CF-003);
 * **no candidates at all** -- quantities for which nothing was found, recorded
-  honestly as an empty result with a stated search scope.
+  as an empty result with a stated search scope.
 
 Nothing here modifies or is imported by ``Models/Zielinski``. The model keeps
 reporting its unknowns as unknown.
@@ -27,14 +42,37 @@ from typing import Any
 
 from .candidate import (
     CandidateFinding,
-    CompatibilityAssessment,
     ExtractionConfidence,
-    ExperimentalConditions,
+    Independence,
     Provenance,
     SourceLocation,
     UncertaintyRecord,
     Verdict,
     catalogue_payload,
+)
+from .conflicts import Conflict, RecordExamined, detect
+from .sourcing import Condition
+
+#: The exact artefact every verdict below was made against. Reproducibility
+#: digest included, so a later reader can tell which model state produced them.
+#: Taken from the Zielinski evidence-replay run; see VALIDATION_REPORT.md.
+ZIELINSKI_RECORD = RecordExamined(
+    model_id="zielinski2019.recombinant-insulin",
+    model_source="Zielinski M, Kwiatkowski SC, Groszkowski M, Nedelec JM, "
+                 "Soshiyama T (2019). Development of a continuous bioprocess for "
+                 "recombinant human insulin production in an Escherichia coli 20 "
+                 "strain. Journal of Biotechnology 243:63-69.",
+    model_doi="10.1016/j.jbiotec.2019.03.011",
+    model_version="1.0.0",
+    run_id="zielinski-replay",
+    graph_reproducibility_digest=(
+        "2f5a2820c622b74d2ad46fcf9b6f90a5632d249dec9ec27b7523a3a588ce5fad"
+    ),
+    missing_parameters_examined=(
+        "MP-GROWTH-KINETICS",
+        "MP-OXYGEN-TRANSFER",
+        "MP-INDUCTION-TIME",
+    ),
 )
 
 # --------------------------------------------------------------------------- #
@@ -115,6 +153,12 @@ SEARCH_SCOPE: dict[str, Any] = {
 # Findings
 # --------------------------------------------------------------------------- #
 
+#: The passage each finding's central value was taken from, kept here so the
+#: condition records above can quote the same text without repeating it.
+_S = ("Depending on the model used, calculated glucose concentrations "
+      "supporting half maximum growth rate (Ks) were in the range of 40-88 "
+      "micrograms.1-1.")
+
 CF_001 = CandidateFinding(
     finding_id="CF-001",
     target_missing_parameter="MP-GROWTH-KINETICS",
@@ -142,20 +186,43 @@ CF_001 = CandidateFinding(
             "micrograms.1-1."
         ),
     ),
-    conditions=ExperimentalConditions(
-        organism="Escherichia coli",
-        strain="E. coli ML30",
-        construct="none; wild type, no recombinant plasmid",
-        product="none; no heterologous product expressed",
-        medium="minimal medium, carbon limited",
-        substrate="glucose",
-        mode="continuous glucose-limited chemostat",
-        temperature_c="not stated",
-        ph="not stated",
-        oxygen_transfer="not stated",
-        measurement="population growth rate against steady-state glucose concentration",
-        scale="laboratory chemostat",
-    ),
+    conditions={
+        # Transcribed from Senn 1994's own wording. Where the abstract does not
+        # state a condition it is recorded as "not stated", never omitted -- an
+        # omitted condition would read as agreement.
+        "organism": Condition(
+            "organism", "Escherichia coli", _S, "senn1994"),
+        "strain": Condition(
+            "strain", "Escherichia coli ML30",
+            "The relationship between specific growth rate (mu) and steady-state "
+            "glucose concentration was investigated for Escherichia coli ML30 in "
+            "carbon-limited chemostat culture.", "senn1994"),
+        "construct": Condition(
+            "construct", "none; wild type",
+            "Escherichia coli ML30 in carbon-limited chemostat culture", "senn1994"),
+        "product": Condition(
+            "product", "none; no heterologous product expressed",
+            "Escherichia coli ML30 in carbon-limited chemostat culture", "senn1994"),
+        "medium": Condition(
+            "medium", "minimal medium, carbon limited",
+            "carbon-limited chemostat culture", "senn1994"),
+        "substrate": Condition(
+            "substrate", "glucose",
+            "steady-state glucose concentration", "senn1994"),
+        "mode": Condition(
+            "mode", "continuous glucose-limited chemostat",
+            "in carbon-limited chemostat culture", "senn1994"),
+        "temperature_c": Condition("temperature_c", "not stated", "", "senn1994"),
+        "ph": Condition("ph", "not stated", "", "senn1994"),
+        "oxygen_transfer": Condition("oxygen_transfer", "not stated", "", "senn1994"),
+        "measurement": Condition(
+            "measurement", "population growth rate against steady-state glucose concentration",
+            "The relationship between specific growth rate (mu) and steady-state "
+            "glucose concentration was investigated", "senn1994"),
+        "scale_l": Condition(
+            "scale_l", "not stated",
+            "laboratory chemostat", "senn1994"),
+    },
     method=(
         "Steady-state glucose-limited chemostat. Cells were adapted for 100-200 "
         "volume changes at D = 0.6 h-1 before steady state. Ks was fitted between "
@@ -215,20 +282,46 @@ CF_002 = CandidateFinding(
             "from mu = 0.19 h-1 to mu = 0.61 h-1 (see Figure 2B)."
         ),
     ),
-    conditions=ExperimentalConditions(
-        organism="Escherichia coli",
-        strain="E. coli MG1655 transformed with pVWEx1-gfpUV",
-        construct="pVWEx1-gfpUV, a GFP reporter plasmid; not an insulin expression construct",
-        product="green fluorescent protein, a visualisation reporter rather than insulin",
-        medium="M9 minimal medium",
-        substrate="glucose, 1% w/v",
-        mode="microfluidic perfusion and agarose-pad single-cell cultivation",
-        temperature_c="37",
-        ph="not stated",
-        oxygen_transfer="not applicable at this scale; not stated",
-        measurement="single-cell optical dry mass by quantitative phase imaging",
-        scale="microscale; 606 pL picolitre batch chambers, 1.5 um growth channels",
-    ),
+    conditions={
+        # Transcribed from the open-access full text of Smaluch 2023.
+        "organism": Condition(
+            "organism", "Escherichia coli",
+            "the well-known and well-characterized Escherichia coli MG-1655", "smaluch2023"),
+        "strain": Condition(
+            "strain", "Escherichia coli MG1655",
+            "we decided to investigate the growth kinetics and stoichiometry of the "
+            "well-known and well-characterized Escherichia coli MG-1655", "smaluch2023"),
+        "construct": Condition(
+            "construct", "pVWEx1-gfpUV",
+            "Escherichia coli MG-1655 transformed with the GFP expression plasmid "
+            "pVWEx1-gfpUV", "smaluch2023"),
+        "product": Condition(
+            "product", "green fluorescent protein",
+            "the GFP expression plasmid pVWEx1-gfpUV", "smaluch2023"),
+        "medium": Condition(
+            "medium", "M9 minimal medium",
+            "Escherichia coli MG-1655 was cultivated in M9 minimal medium "
+            "supplemented with trace elements and 1% (w/v) glucose", "smaluch2023"),
+        "substrate": Condition(
+            "substrate", "glucose, 1% (w/v)",
+            "1% (w/v) glucose", "smaluch2023"),
+        "mode": Condition(
+            "mode", "microfluidic perfusion and agarose-pad single-cell cultivation",
+            "cultivated in microfluidic perfusion systems on agarose pads",
+            "smaluch2023"),
+        "temperature_c": Condition(
+            "temperature_c", "37",
+            "all experiments were conducted at 37 degrees Celsius", "smaluch2023"),
+        "ph": Condition("ph", "not stated", "", "smaluch2023"),
+        "oxygen_transfer": Condition("oxygen_transfer", "not stated", "", "smaluch2023"),
+        "measurement": Condition(
+            "measurement", "single-cell optical dry mass by quantitative phase imaging",
+            "specific growth rates of individual microcolonies based on quantitative "
+            "phase imaging measurements", "smaluch2023"),
+        "scale_l": Condition(
+            "scale_l", "606 pL",
+            "picoliter batch reactors with a volume of 606 pL", "smaluch2023"),
+    },
     method=(
         "Quantitative phase imaging of single cells on agarose pads over a glucose "
         "range, giving a per-cell growth rate. Growth rate is normalised to optical "
@@ -287,20 +380,51 @@ CF_003 = CandidateFinding(
             "its concentration in the medium was reduced to 0 g/dL."
         ),
     ),
-    conditions=ExperimentalConditions(
-        organism="Escherichia coli",
-        strain="E. coli 20 (CSH50R derivative)",
-        construct="pIBAINS (SOD-INS fusion, TetR, deoP1P2 promoter)",
-        product="recombinant human insulin analogs as SOD fusions; the 2019 process expresses wild-type insulin",
-        medium="GMS minimal medium",
-        substrate="glucose, 40% w/v feed",
-        mode="batch with pH-stat glucose feeding",
-        temperature_c="37",
-        ph="controlled with 16% NH4OH, dead band 0.01",
-        oxygen_transfer="not reported",
-        measurement="population OD600",
-        scale="4 L working volume in a 7.5 L fermenter",
-    ),
+    conditions={
+        # Transcribed from Mikiewicz 2017's own wording, NOT harmonised to the
+        # target's phrasing. These passages substantially overlap the Zielinski
+        # 2019 methods section, which is exactly what the independence check is
+        # there to detect -- and it does detect it.
+        "organism": Condition(
+            "organism", "Escherichia coli",
+            "Escherichia coli 20 (IBA 1)", "mikiewicz2017"),
+        "strain": Condition(
+            "strain", "Escherichia coli 20 (IBA 1)",
+            "Escherichia coli 20 (IBA 1), a derivative of Escherichia coli CSH50R",
+            "mikiewicz2017"),
+        "construct": Condition(
+            "construct", "pIBAINS",
+            "Escherichia coli 20 (IBA 1) harboring pIBAINS", "mikiewicz2017"),
+        "product": Condition(
+            "product", "recombinant human insulin analogs",
+            "soluble insulin analogs expressed as fusions with superoxide dismutase",
+            "mikiewicz2017"),
+        "medium": Condition(
+            "medium", "GMS medium",
+            "cultivated in GMS medium supplemented with tetracycline, proline "
+            "and thiamine", "mikiewicz2017"),
+        "substrate": Condition(
+            "substrate", "40% glucose",
+            "40% (w/v) glucose was exponentially added as the carbon source",
+            "mikiewicz2017"),
+        "mode": Condition(
+            "mode", "batch culture; glucose fed by pH-stat control",
+            "glucose feeding was limited until its concentration in the medium was "
+            "reduced to 0 g/dL", "mikiewicz2017"),
+        "temperature_c": Condition(
+            "temperature_c", "37",
+            "cells were grown for 15-16 h at 37 degrees Celsius", "mikiewicz2017"),
+        "ph": Condition(
+            "ph", "pH-stat cascade control, dead band 0.01",
+            "pH-stat control using cascade", "mikiewicz2017"),
+        "oxygen_transfer": Condition("oxygen_transfer", "not reported", "", "mikiewicz2017"),
+        "measurement": Condition(
+            "measurement", "optical density at 600 nm",
+            "When OD600 reached about 25-35", "mikiewicz2017"),
+        "scale_l": Condition(
+            "scale_l", "7.5 L",
+            "a Bioflo Celligen 310 7.5 L fermenter", "mikiewicz2017"),
+    },
     method=(
         "Operational description of the same institute's production culture on the "
         "same host and vector. Reported as prose ranges, not as fitted kinetics."
@@ -339,26 +463,105 @@ def findings_for_port(port_id: str) -> tuple[CandidateFinding, ...]:
     return tuple(f for f in FINDINGS if port_id in f.target_quantity_ids)
 
 
+def missing_information_required(port_id: str) -> list[str]:
+    """What would actually be needed to close this gap, stated concretely.
+
+    A gap that says only "more information needed" is not actionable. Each entry
+    names the specific measurement and the process conditions it would have to
+    come from.
+    """
+    matched = findings_for_port(port_id)
+    if not matched:
+        base = [
+            "A measurement of this quantity made in this process: the same host "
+            "strain carrying pIBAINS, in GMS medium, batch-fed by pH-stat, at "
+            "37 degrees Celsius, in a 7.5 L fermenter.",
+            "Either the raw time-series data behind it, or the fitted parameters "
+            "with their stated fitting procedure.",
+        ]
+        if port_id.endswith("dissolved_oxygen"):
+            base.append("Agitation rate, air flow and sparger geometry, so that a "
+                        "kLa can be estimated rather than assumed.")
+        if port_id.endswith("induction_time"):
+            base.append("The point in the batch at which induction was triggered, "
+                        "or the rule by which it was triggered.")
+        return base
+
+    needed: list[str] = []
+    for f in matched:
+        for reason in f.assess().reasons:
+            if "differs from the target process" in reason or "not stated" in reason:
+                needed.append("For %s: a measurement with %s." % (f.finding_id, reason))
+    return needed or [
+        "No candidate examined supplies this quantity under conditions matching "
+        "the target process."
+    ]
+
+
 def inventory() -> dict[str, Any]:
-    """What is registered, and what is known to be absent."""
-    out: dict[str, Any] = {"targets": {}, "findings": []}
+    """The full machine-readable report.
+
+    Structured to the nine required outputs: paper identity and provenance,
+    records examined, extracted evidence with units and context, compatibility
+    classification, reasons, missing information, conflicting evidence, and
+    the unresolved-questions statement. Registry changes are not applied here;
+    the report records what a reader might propose and leaves it at that.
+    """
+    conflicts = detect(FINDINGS)
+    out: dict[str, Any] = {
+        "report_version": "2",
+        "records_examined": ZIELINSKI_RECORD.to_dict(),
+        "targets": {},
+        "findings": [],
+        "conflicts": [c.to_dict() for c in conflicts],
+        "search_scope": SEARCH_SCOPE,
+    }
+
     for port_id, info in TARGETS.items():
         matched = findings_for_port(port_id)
         verdicts = [f.assess().verdict.value for f in matched]
+        independent = [
+            f.finding_id for f in matched
+            if f.assess().independence is Independence.EXTERNAL
+        ]
         out["targets"][port_id] = {
             **info,
             "candidate_count": len(matched),
             "verdicts": verdicts,
+            "independent_candidates": independent,
             "resolved": False,
+            "missing_information_required": missing_information_required(port_id),
             "search_scope": SEARCH_SCOPE,
         }
+
     for f in FINDINGS:
         out["findings"].append(f.to_dict())
-    out["search_scope"] = SEARCH_SCOPE
+
     out["totals"] = {
         "targets": len(TARGETS),
         "findings": len(FINDINGS),
         "by_verdict": _verdict_counts(),
+        "by_independence": _independence_counts(),
+        "conflicts": summarise_conflicts(conflicts),
+        "unresolved": sum(
+            1 for f in FINDINGS if f.assess().verdict is not Verdict.VALIDATED
+        ),
+    }
+    # The governing statement, in the artefact itself rather than only in prose.
+    out["authority"] = {
+        "may_do": [
+            "determine what is present, absent, inconsistent, or mechanically "
+            "connectable under the declared rules",
+        ],
+        "may_not_do": [
+            "invent a missing scientific value",
+            "settle a conflict between sources",
+            "infer equivalence from similar wording",
+            "modify an existing model",
+            "treat a literature match as validation",
+        ],
+        "validated_findings": 0,
+        "registry_changes_applied": 0,
     }
     return out
 
@@ -368,6 +571,18 @@ def _verdict_counts() -> dict[str, int]:
     for f in FINDINGS:
         counts[f.assess().verdict.value] += 1
     return counts
+
+
+def _independence_counts() -> dict[str, int]:
+    counts = {i.value: 0 for i in Independence}
+    for f in FINDINGS:
+        counts[f.assess().independence.value] += 1
+    return counts
+
+
+def summarise_conflicts(conflicts) -> dict[str, int]:
+    from .conflicts import summarise
+    return summarise(conflicts)
 
 
 def main(argv: list[str] | None = None) -> int:

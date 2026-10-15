@@ -27,6 +27,11 @@ const VERDICT_PLAIN := {
 	"unverified": "Plausibly related, needs checking",
 	"incompatible": "Incompatible conditions",
 }
+const INDEPENDENCE_PLAIN := {
+	"external": "Independent of the target paper",
+	"target_source": "NOT INDEPENDENT - the supporting text also appears in the target paper",
+	"undetermined": "Independence could not be determined",
+}
 const MATCH_COLOUR := {
 	"match": Color(0.52, 0.82, 0.58),
 	"partial": Color(0.90, 0.78, 0.42),
@@ -119,6 +124,19 @@ func _render_target(port_id: String) -> void:
 	_toggle.text = "▾  Investigating: %s" % str(t.get("label", port_id))
 	_toggle.button_pressed = true
 
+	# ---- what was checked against -------------------------------------
+	var record: Dictionary = _catalogue.get("records_examined", {})
+	if not record.is_empty():
+		_body.add_child(_heading("Records examined", Color(0.82, 0.88, 0.96)))
+		_body.add_child(_note("Model: %s (v%s, doi:%s)" % [
+			_bb(str(record.get("model_id", ""))),
+			str(record.get("model_version", "")),
+			_bb(str(record.get("model_doi", "")))]))
+		_body.add_child(_note("Run %s, graph digest %s. The digest covers %s." % [
+			_bb(str(record.get("run_id", ""))),
+			_bb(str(record.get("graph_reproducibility_digest", "")).substr(0, 16) + "..."),
+			_bb(str(record.get("digest_covers", "")))]))
+
 	# ---- what is missing and why it matters --------------------------
 	var head := _heading("What is missing", Color(0.82, 0.88, 0.96))
 	_body.add_child(head)
@@ -168,9 +186,30 @@ func _render_target(port_id: String) -> void:
 		proposal_requested.emit(port_id, str(t.get("label", port_id))))
 	_body.add_child(propose)
 
+	_render_conflicts()
+
+
+## Conflicting evidence, reported and left open. This system identifies a
+## disagreement; it does not decide which source is right.
+func _render_conflicts() -> void:
+	var conflicts: Array = _catalogue.get("conflicts", [])
+	if conflicts.is_empty():
+		return
+	_body.add_child(_heading("Conflicting evidence (unresolved)", Color(0.94, 0.62, 0.48)))
+	for c in conflicts:
+		var entry: Dictionary = c
+		var cl := _note("[%s] %s" % [
+			str(entry.get("conflict_id", "")), _bb(str(entry.get("explanation", "")))])
+		cl.modulate = Color(0.94, 0.72, 0.62)
+		_body.add_child(cl)
+		_body.add_child(_note("     affects: %s   ·   %s" % [
+			_bb(", ".join(entry.get("affected_records", []) as Array)),
+			_bb(str(entry.get("requires", "")))]))
+
 
 func _render_finding(f: Dictionary) -> void:
-	var verdict := str((f.get("assessment", {}) as Dictionary).get("verdict", "unverified"))
+	var assessment: Dictionary = f.get("assessment", {})
+	var verdict := str(assessment.get("verdict", "unverified"))
 	var card := VBoxContainer.new()
 	card.add_theme_constant_override("separation", 2)
 	_body.add_child(card)
@@ -186,6 +225,20 @@ func _render_finding(f: Dictionary) -> void:
 	badge.add_theme_font_size_override("font_size", 10)
 	badge.modulate = VERDICT_COLOUR.get(verdict, Color(1, 1, 1))
 	card.add_child(badge)
+
+	# Independence sits directly under the verdict. A source whose supporting
+	# text also appears in the target paper cannot corroborate the target paper,
+	# whatever its conditions happen to match, so it must not be something the
+	# reader has to expand a panel to discover.
+	var indep := str(assessment.get("independence", "undetermined"))
+	if indep != "external":
+		var ib := Label.new()
+		ib.text = "  %s" % str(INDEPENDENCE_PLAIN.get(indep, indep)).to_upper()
+		ib.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ib.add_theme_font_size_override("font_size", 10)
+		ib.modulate = VERDICT_COLOUR["incompatible"]
+		ib.custom_minimum_size = Vector2(500, 0)
+		card.add_child(ib)
 
 	# the extracted value, with its unit and provenance
 	var value_line := Label.new()
@@ -222,8 +275,18 @@ func _render_finding(f: Dictionary) -> void:
 			str(u.get("kind", "")), ReplayData.format_number(float(u.get("lo", 0.0))),
 			ReplayData.format_number(float(u.get("hi", 0.0))), _bb(str(u.get("basis", "")))]))
 
+	# The conditions it was measured under are part of the evidence, so they are
+	# shown without having to expand anything.
+	var conds: Dictionary = f.get("conditions", {})
+	if not conds.is_empty():
+		card.add_child(_note("     measured under:"))
+		for dim in ["organism", "strain", "construct", "medium", "mode",
+				"temperature_c", "scale_l"]:
+			if conds.has(dim):
+				var cv := str((conds[dim] as Dictionary).get("value", ""))
+				card.add_child(_note("       · %s: %s" % [dim, _bb(cv)]))
+
 	# why it does not fit
-	var assessment: Dictionary = f.get("assessment", {})
 	var reasons: Array = assessment.get("reasons", [])
 	if verdict == "incompatible" or verdict == "unverified":
 		card.add_child(_note("     why it does not fit:"))

@@ -1,0 +1,98 @@
+{
+  "_comment": [
+    "Passages of the TARGET source (Zielinski et al. 2019) that the evidence",
+    "catalogue compares candidate findings against.",
+    "",
+    "These are transcribed from Models/Zielinski/models/data/paper_pages.json, the",
+    "same extracted page text the model's own citation tests verify against. They",
+    "are duplicated here on purpose: the evidence package takes no run-time",
+    "dependency on a model package, so it needs its own copy of the target's",
+    "wording in order to do two things the catalogue must be able to do -",
+    "transcribe each target condition with a checkable quote, and detect when a",
+    "'candidate' is actually quoting the target paper back to us.",
+    "",
+    "Page numbering follows the model: printed_page = pdf_page + 62 for this",
+    "paper, which occupies printed pages 63-69.",
+    "",
+    "SCOPE LIMIT, stated so it is not mistaken for stronger than it is: overlap",
+    "is checked against these passages only, not the full text of every page."
+  ],
+  "source_id": "zielinski2019",
+  "citation": "Zielinski M, Kwiatkowski SC, Groszkowski M, Nedelec JM, Toshiyuki S (2019). Development of a continuous bioprocess for recombinant human insulin production in an Escherichia coli 20 strain. Journal of Biotechnology 243:63-69.",
+  "doi": "10.1016/j.jbiotec.2019.03.011",
+  "printed_pages": "63-69",
+  "passages": [
+    {
+      "id": "TS-1",
+      "topic": "host strain",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.2 Host strain",
+      "text": "The E. coli 20 strain IBA 1 (F- lambda-ara Δ(pro lac) rpsL thi recA cytR) is a derivative of the E. coli CSH50R strain. It is a laboratory strain derived from E.coli K-12"
+    },
+    {
+      "id": "TS-2",
+      "topic": "host strain, materials",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.1 Materials",
+      "text": "Escherichia coli 20 IBA 1 strain is a laboratory derivative of E.coli CSH50R [ATCC: 39111]"
+    },
+    {
+      "id": "TS-3",
+      "topic": "growth temperature",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.2 Host strain",
+      "text": "The optimal growth temperature is 37 °C."
+    },
+    {
+      "id": "TS-4",
+      "topic": "inoculum medium",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.3 Cultivation",
+      "text": "E. coli 20 cells harboring plasmid pIBAINS with the human insulin gene were grown for 18 h at 30 °C in shaking flasks containing 50 mL GMS medium [ 11] supplemented with tetracycline (100 μg/mL) proline (600 μg/mL) and thiamine (2 μg/mL)"
+    },
+    {
+      "id": "TS-5",
+      "topic": "fermenter scale",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.3 Cultivation",
+      "text": "The flasks were used as an inoculum for a Bioflo Celligen 310 7.5 L fermenter (starting GMS medium volume 4 L). In the fermenter antibiotics were not used."
+    },
+    {
+      "id": "TS-6",
+      "topic": "growth stage conditions",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.3 Cultivation",
+      "text": "Cells were grown for 15–16 h at 37 °C. During the growth stage of the culture 40% glucose and 12 mg/mL proline were exponentially added as the carbon source (to maintain glucose concentration range 70 –120 mg/dL)."
+    },
+    {
+      "id": "TS-7",
+      "topic": "glucose limitation",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.3 Cultivation",
+      "text": "OD 600 nm reached about 25 –35 the glucose feeding was limited until its concentration in the medium was reduced to 0 g/dL"
+    },
+    {
+      "id": "TS-8",
+      "topic": "pH-stat control",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.3 Cultivation",
+      "text": "Then the glucose feeding was connected to a pump with acid (pH-stat control using cascade). Glucose was automatically added by the controller whenever the pH exceeded the set point (dead band was 0.01). The glucose level was maintained by the pH-stat in the concentration range of 30 –50 mg/ dL."
+    },
+    {
+      "id": "TS-9",
+      "topic": "stationary phase",
+      "pdf_page": 2,
+      "printed_page": 64,
+      "section": "2.3 Cultivation",
+      "text": "After induction the culture was grown for 4 –5 h until OD 600 nm was about 50– 60 reaching the stationary phase of growth"
+    }
+  ]
+}

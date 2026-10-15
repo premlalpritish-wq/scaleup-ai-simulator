@@ -33,6 +33,15 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping, Sequence
 
+from .sourcing import (
+    Condition,
+    TargetPassage,
+    compare_all,
+    load_target_source,
+    target_conditions,
+    to_dict,
+)
+
 
 class Provenance(Enum):
     """Mirrors ``scaleup_ai.provenance.Provenance`` without importing it."""
@@ -135,141 +144,96 @@ class UncertaintyRecord:
         return {"kind": self.kind, "lo": self.lo, "hi": self.hi, "basis": self.basis}
 
 
-#: The Zielinski 2019 fermenter, exactly as the source publication states it.
-#: Every comparison is against this, and every one of its fields is visible to
-#: the reader so a verdict can be checked by hand rather than taken on trust.
-TARGET_PROCESS: Mapping[str, str] = {
-    "organism": "Escherichia coli",
-    "strain": "E. coli 20 (CSH50R derivative)",
-    "construct": "pIBAINS (SOD-INS fusion, TetR, deoP1P2 promoter)",
-    "product": "recombinant human insulin, inclusion bodies",
-    "medium": "GMS minimal medium",
-    "substrate": "glucose, 40% w/v feed",
-    "mode": "batch with pH-stat glucose feeding",
-    "temperature_c": "37",
-    "ph": "controlled with 16% NH4OH, dead band 0.01",
-    "oxygen_transfer": "not reported",
-    "measurement": "population OD600",
-    "scale": "4 L working volume in a 7.5 L fermenter",
-}
+#: The target process is transcribed from the target publication itself, one
+#: condition at a time, each bound to the passage it was read from. See
+#: :mod:`composition.evidence.sourcing` for why this is not just tidiness.
+_TARGET_SOURCE = load_target_source()
+
+#: dimension -> Condition, each carrying the Zielinski 2019 passage it came from.
+TARGET_PROCESS: Mapping[str, Condition] = target_conditions(_TARGET_SOURCE)
+
+#: The passages a candidate is checked against to decide whether it is actually
+#: independent of the target publication.
+TARGET_PASSAGES: tuple[TargetPassage, ...] = _TARGET_SOURCE.passages
 
 
-@dataclass(frozen=True)
-class ExperimentalConditions:
-    """The experimental context a value was measured under.
+class Independence(Enum):
+    """Whether a candidate is genuinely external evidence.
 
-    Every field is a string so that a missing condition is recorded as an
-    explicit ``"not stated"`` rather than silently omitted. An omitted field
-    would read as agreement.
+    ``EXTERNAL``   the supporting passage does not occur in the target source
+    ``TARGET``     the passage occurs in the target publication, so the
+                   "candidate" is the target paper's own wording reached through
+                   a second paper -- not independent corroboration
+    ``UNDETERMINED`` the check could not be completed; never treated as
+                   evidence of independence
     """
 
-    organism: str
-    strain: str
-    construct: str
-    product: str
-    medium: str
-    substrate: str
-    mode: str
-    temperature_c: str
-    ph: str
-    oxygen_transfer: str
-    measurement: str
-    scale: str
-
-    def dimensions(self) -> dict[str, str]:
-        return {
-            "organism": self.organism,
-            "strain": self.strain,
-            "construct": self.construct,
-            "product": self.product,
-            "medium": self.medium,
-            "substrate": self.substrate,
-            "mode": self.mode,
-            "temperature_c": self.temperature_c,
-            "ph": self.ph,
-            "oxygen_transfer": self.oxygen_transfer,
-            "measurement": self.measurement,
-            "scale": self.scale,
-        }
+    EXTERNAL = "external"
+    TARGET = "target_source"
+    UNDETERMINED = "undetermined"
 
 
-#: Dimensions compared literally against :data:`TARGET_PROCESS`.
-#: Anything not listed is compared by hand in :func:`_compare`.
-_KEYWORD_MATCHES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
-    # dimension: (terms indicating agreement, terms indicating disagreement)
-    "organism": (("escherichia coli", "e. coli"), ("coli bacillus", "yeast")),
-    "temperature_c": (("37",), ("30", "25", "22")),
-    "mode": (
-        ("batch", "pH-stat", "fed"),
-        ("chemostat", "microfluidic", "picoliter", "continuous perfusion"),
-    ),
-    "measurement": (("od600", "population", "biomass"), ("single cell", "single-cell")),
-}
+def _independent(finding: "CandidateFinding") -> tuple[Independence, tuple[str, ...]]:
+    """Decide whether a candidate's supporting passage is genuinely external.
 
-
-def _normalise(text: str) -> str:
-    return " ".join(str(text).lower().replace("‑", "-").split())
-
-
-def _compare(dimension: str, candidate: str, target: str) -> Match:
-    """Compare one dimension conservatively.
-
-    ``"not stated"`` is ``UNKNOWN``, never a match. That distinction is the whole
-    point: an unreported condition must not be scored as agreement.
+    Every passage a finding relies on -- the value's own quote and each
+    condition quote -- is tested against the target publication. If one occurs
+    there, the finding is the target paper's wording reached through a second
+    paper, and it cannot corroborate the target paper.
     """
-    c, t = _normalise(candidate), _normalise(target)
-    if c in ("", "not stated", "not reported", "unknown", "n/a"):
-        return Match.UNKNOWN
+    overlaps: list[str] = []
+    passages = [finding.source.quote]
+    for condition in finding.conditions.values():
+        if condition.quote:
+            passages.append(condition.quote)
 
-    rules = _KEYWORD_MATCHES.get(dimension)
-    if rules is not None:
-        agree, disagree = rules
-        if any(k in c for k in disagree):
-            return Match.MISMATCH
-        if any(k in c for k in agree) and any(k in t for k in agree):
-            return Match.MATCH
-
-    # Strain: exact match, or one naming the other as a derivative/parent.
-    if dimension == "strain":
-        if c == t:
-            return Match.MATCH
-        if c in t or t in c:
-            return Match.PARTIAL
-        return Match.MISMATCH
-
-    # Everything else: normalised equality, else partial.
-    return Match.MATCH if c == t else Match.PARTIAL
+    for quote in passages:
+        hit = _TARGET_SOURCE.overlap(quote)
+        if hit is not None:
+            overlaps.append(
+                "a passage attributed to %s occurs in the target publication "
+                "(%s, printed p.%d), so it is not independent evidence."
+                % (finding.source.citation.split("(")[0].strip(),
+                   hit.passage_id, hit.printed_page)
+            )
+    if overlaps:
+        return Independence.TARGET, tuple(overlaps)
+    return Independence.EXTERNAL, ()
 
 
 @dataclass(frozen=True)
 class DimensionVerdict:
     dimension: str
-    candidate: str
-    target: str
-    match: Match
+    candidate: Condition
+    target: Condition
+    match: str
     critical: bool
+    note: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "dimension": self.dimension,
+            "critical": self.critical,
+            "verdict": self.match,
+            "candidate": to_dict(self.candidate),
+            "target": to_dict(self.target),
+            "note": self.note,
+        }
 
 
 @dataclass(frozen=True)
 class CompatibilityAssessment:
     verdict: Verdict
+    independence: Independence
     dimensions: tuple[DimensionVerdict, ...]
     reasons: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "verdict": self.verdict.value,
+            "independence": self.independence.value,
             "reasons": list(self.reasons),
-            "dimensions": [
-                {
-                    "dimension": d.dimension,
-                    "candidate": d.candidate,
-                    "target": d.target,
-                    "match": d.match.value,
-                    "critical": d.critical,
-                }
-                for d in self.dimensions
-            ],
+            "dimensions": [d.to_dict() for d in self.dimensions],
         }
 
 
@@ -279,31 +243,36 @@ def assess(finding: "CandidateFinding") -> CompatibilityAssessment:
     Deterministic and conservative. Never returns ``VALIDATED`` -- only
     :func:`validate` may grant that.
     """
-    target = dict(TARGET_PROCESS)
-    dims: list[DimensionVerdict] = []
-    for name, value in finding.conditions.dimensions().items():
-        dims.append(
-            DimensionVerdict(
-                dimension=name,
-                candidate=value,
-                target=target[name],
-                match=_compare(name, value, target[name]),
-                critical=name in CRITICAL_DIMENSIONS,
-            )
+    matches = compare_all(finding.conditions, TARGET_PROCESS)
+    dims = tuple(
+        DimensionVerdict(
+            dimension=m.dimension,
+            candidate=m.candidate,
+            target=m.target,
+            match=m.verdict,
+            critical=m.dimension in CRITICAL_DIMENSIONS,
+            note=m.note,
         )
+        for m in matches
+    )
+    independence, overlap_reasons = _independent(finding)
 
-    mismatched = [d for d in dims if d.critical and d.match is Match.MISMATCH]
-    unknown_critical = [d for d in dims if d.critical and d.match is Match.UNKNOWN]
-    partial_critical = [d for d in dims if d.critical and d.match is Match.PARTIAL]
-    noncritical_mismatch = [d for d in dims if not d.critical and d.match is Match.MISMATCH]
+    def of(verdict: str, critical_only: bool = True) -> list[DimensionVerdict]:
+        return [d for d in dims
+                if d.match == verdict and (d.critical or not critical_only)]
+
+    mismatched = of("mismatch")
+    unknown_critical = of("unknown")
+    partial_critical = of("partial")
+    noncritical_mismatch = of("mismatch", critical_only=False)
 
     reasons: list[str] = []
     if mismatched:
         verdict = Verdict.INCOMPATIBLE
         for d in mismatched:
             reasons.append(
-                "%s differs from the target process: candidate %r, target %r."
-                % (d.dimension, d.candidate, d.target)
+                "%s differs from the target process: the candidate states %r, the "
+                "target publication states %r." % (d.dimension, d.candidate.value, d.target.value)
             )
     elif unknown_critical:
         verdict = Verdict.UNVERIFIED
@@ -315,20 +284,26 @@ def assess(finding: "CandidateFinding") -> CompatibilityAssessment:
         verdict = Verdict.UNVERIFIED
         for d in partial_critical:
             reasons.append(
-                "%s only partially matches: candidate %r, target %r."
-                % (d.dimension, d.candidate, d.target)
+                "%s: %s Candidate states %r; target states %r."
+                % (d.dimension, d.note, d.candidate.value, d.target.value)
             )
     else:
         verdict = Verdict.FOUND
 
+    if independence is Independence.TARGET:
+        # Not independent evidence. It may not be recorded as found, whatever
+        # its conditions say.
+        verdict = Verdict.INCOMPATIBLE
+        reasons.extend(overlap_reasons)
+
     for d in noncritical_mismatch:
         reasons.append(
             "Non-critical difference in %s: candidate %r, target %r."
-            % (d.dimension, d.candidate, d.target)
+            % (d.dimension, d.candidate.value, d.target.value)
         )
     if not reasons:
         reasons.append("Every compared dimension matches the target process.")
-    return CompatibilityAssessment(verdict, tuple(dims), tuple(reasons))
+    return CompatibilityAssessment(verdict, independence, dims, tuple(reasons))
 
 
 # --------------------------------------------------------------------------- #
@@ -355,6 +330,10 @@ VALIDATION_CRITERIA: tuple[ValidationCriterion, ...] = (
     ValidationCriterion("VC-7", "temperature is stated and within 1 degree C of the target"),
     ValidationCriterion("VC-8", "an uncertainty is reported and the value lies inside it"),
     ValidationCriterion("VC-9", "the measurement basis matches the target's"),
+    ValidationCriterion(
+        "VC-10",
+        "the supporting passages are independent of the target publication",
+    ),
 )
 
 
@@ -383,11 +362,23 @@ def validate(finding: "CandidateFinding") -> ValidationReport:
     condition stopped it. Nothing here can be waived.
     """
     c = finding.conditions
-    t = dict(TARGET_PROCESS)
+    t = TARGET_PROCESS
     results: list[tuple[str, bool, str]] = []
 
     def add(crit: ValidationCriterion, ok: bool, detail: str) -> None:
         results.append((crit.criterion_id, ok, detail))
+
+    def blank(dim: str) -> Condition:
+        return Condition(dim, "", "", "")
+
+    def text(dim: str) -> str:
+        cond = c.get(dim) or blank(dim)
+        return " ".join(str(cond.value).lower().split())
+
+    def same(dim: str) -> bool:
+        a, b = c.get(dim), t.get(dim)
+        return a is not None and b is not None and text(dim) == " ".join(
+            str(b.value).lower().split())
 
     for crit in VALIDATION_CRITERIA:
         if crit.criterion_id == "VC-1":
@@ -401,29 +392,37 @@ def validate(finding: "CandidateFinding") -> ValidationReport:
                 % (finding.quantity_id, finding.unit,
                    ", ".join(finding.target_quantity_ids) or "nothing"))
         elif crit.criterion_id == "VC-3":
-            ok = _normalise(c.strain) == _normalise(t["strain"])
-            add(crit, ok, "candidate strain %r vs target %r" % (c.strain, t["strain"]))
+            add(crit, same("strain"),
+                "candidate strain %r vs target %r"
+                % (text("strain"), " ".join(str(t["strain"].value).lower().split())))
         elif crit.criterion_id == "VC-4":
-            ok = _normalise(c.construct) == _normalise(t["construct"]) and \
-                _normalise(c.product) == _normalise(t["product"])
-            add(crit, ok, "candidate construct %r" % c.construct)
+            add(crit, same("construct") and same("product"),
+                "candidate construct %r" % text("construct"))
         elif crit.criterion_id == "VC-5":
-            ok = _normalise(c.medium) == _normalise(t["medium"]) and \
-                _normalise(c.substrate) == _normalise(t["substrate"])
-            add(crit, ok, "candidate medium %r" % c.medium)
+            add(crit, same("medium") and same("substrate"),
+                "candidate medium %r" % text("medium"))
         elif crit.criterion_id == "VC-6":
-            ok = _normalise(c.mode) == _normalise(t["mode"])
-            add(crit, ok, "candidate mode %r vs target %r" % (c.mode, t["mode"]))
+            add(crit, same("mode"),
+                "candidate mode %r vs target %r"
+                % (text("mode"), " ".join(str(t["mode"].value).lower().split())))
         elif crit.criterion_id == "VC-7":
-            ok = _normalise(c.temperature_c) == _normalise(t["temperature_c"])
-            add(crit, ok, "candidate %r C vs target %r C" % (c.temperature_c, t["temperature_c"]))
+            cand, targ = c.get("temperature_c"), t.get("temperature_c")
+            cn = cand.number() if cand else None
+            tn = targ.number() if targ else None
+            add(crit, cn is not None and tn is not None and abs(cn - tn) <= 1.0,
+                "candidate %r C vs target %r C" % (cn, tn))
         elif crit.criterion_id == "VC-8":
             u = finding.uncertainty
             ok = u is not None and u.contains(finding.value)
             add(crit, ok, "uncertainty %s" % (u.to_dict() if u else "not reported"))
         elif crit.criterion_id == "VC-9":
-            ok = _normalise(c.measurement) == _normalise(t["measurement"])
-            add(crit, ok, "candidate measurement %r vs target %r" % (c.measurement, t["measurement"]))
+            add(crit, same("measurement"),
+                "candidate measurement %r vs target %r"
+                % (text("measurement"), " ".join(str(t["measurement"].value).lower().split())))
+        elif crit.criterion_id == "VC-10":
+            a = finding.assess()
+            ok = a.independence is Independence.EXTERNAL
+            add(crit, ok, "independence: %s" % a.independence.value)
 
     return ValidationReport(all(ok for _, ok, _ in results), tuple(results))
 
@@ -446,7 +445,7 @@ class CandidateFinding:
     unit: str
     provenance: Provenance
     source: SourceLocation
-    conditions: ExperimentalConditions
+    conditions: Mapping[str, Condition]
     method: str
     uncertainty: UncertaintyRecord | None
     extraction_confidence: ExtractionConfidence
@@ -483,7 +482,7 @@ class CandidateFinding:
                 "quote": self.source.quote,
                 "locator": self.source.locator(),
             },
-            "conditions": self.conditions.dimensions(),
+            "conditions": {k: to_dict(v) for k, v in self.conditions.items()},
             "method": self.method,
             "uncertainty": self.uncertainty.to_dict() if self.uncertainty else None,
             "extraction_confidence": self.extraction_confidence.value,
