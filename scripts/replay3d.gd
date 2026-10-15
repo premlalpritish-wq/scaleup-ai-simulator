@@ -92,6 +92,9 @@ var _key_grid: GridContainer
 var _growth_grid: GridContainer
 var _purify_grid: GridContainer
 var _absent_grid: GridContainer
+var _absent_action: VBoxContainer
+var _evidence: ReplayEvidencePanel
+var _proposal_log: RichTextLabel
 var _tree: Tree
 var _detail: RichTextLabel
 var _diagnostics: RichTextLabel
@@ -105,6 +108,14 @@ var _btn_reset: Button
 var _pid := -1
 var _exec_started_ms := 0
 var _result_path := ""
+
+## Asynchronous handle for the evidence catalogue, kept separate from the
+## model run so a slow catalogue never delays or corrupts the model result.
+var _evidence_pid := -1
+var _evidence_result_path := ""
+var _evidence_open_request := ""
+var _evidence_started_ms := 0
+const EVIDENCE_TIMEOUT_MS := 60000
 
 var _playing := false
 var _hour := 0.0
@@ -299,9 +310,29 @@ func _build_right_column() -> Control:
 	right.add_child(_numbered_header("4", "What this model cannot tell us"))
 	right.add_child(_note(
 		"These quantities were asked for and are genuinely unknown. The model refuses to "
-		+ "substitute zero or a guess, and nothing on this screen is derived from them."))
+		+ "substitute zero or a guess, and nothing on this screen is derived from them. "
+		+ "Choose one below to see what the published literature can and cannot supply."))
 	_absent_grid = _make_grid()
 	right.add_child(_absent_grid)
+
+	# The action that replaces the dead end. One button per unknown quantity,
+	# built by _rebuild_key_panel once the model has reported.
+	_absent_action = VBoxContainer.new()
+	_absent_action.add_theme_constant_override("separation", 3)
+	right.add_child(_absent_action)
+
+	_proposal_log = RichTextLabel.new()
+	_proposal_log.bbcode_enabled = true
+	_proposal_log.fit_content = true
+	_proposal_log.custom_minimum_size = Vector2(0, 0)
+	_proposal_log.add_theme_font_size_override("normal_font_size", 10)
+	_proposal_log.modulate.a = 0.0
+	right.add_child(_proposal_log)
+
+	_evidence = ReplayEvidencePanel.new()
+	_evidence.name = "EvidencePanel"
+	_evidence.proposal_requested.connect(_on_proposal_requested)
+	right.add_child(_evidence)
 
 	# ---- 5. detailed evidence ------------------------------------------
 	right.add_child(_numbered_header("5", "Detailed evidence and technical diagnostics"))
@@ -776,7 +807,22 @@ func _update_clock() -> void:
 
 func _process(delta: float) -> void:
 	_poll_execution()
+	_poll_evidence()
 	_advance(delta)
+
+
+## The explicit action. It records an intent and changes nothing: no value, no
+## model, no published evidence. The gap stays open until someone builds and
+## validates a separate parameterised model.
+func _on_proposal_requested(target_id: String, target_label: String) -> void:
+	# `%` binds tighter than `+`, so the substitution has to be parenthesised;
+	# otherwise the first fragment ships with its placeholders unformatted.
+	var line := ("[b]Proposed:[/b] a separate model or parameter set for '%s' (%s). "
+		+ "Recorded as an action only - no value was proposed, nothing was merged, "
+		+ "and the model still reports this as unknown.") % [
+			_bb(target_label), _bb(target_id)]
+	_proposal_log.text = _proposal_log.text + line + "\n"
+	_proposal_log.modulate.a = 1.0
 
 
 # -------------------------------------------------------------------- panels
@@ -790,6 +836,8 @@ func _rebuild_key_panel() -> void:
 		c.queue_free()
 	for c in _absent_grid.get_children():
 		c.queue_free()
+	for c in _absent_action.get_children():
+		c.queue_free()
 	var by_port := {}
 	for o in _data.raw_outputs:
 		by_port[str((o.get("ref", {}) as Dictionary).get("port_id", ""))] = o.get("value", {})
@@ -802,6 +850,97 @@ func _rebuild_key_panel() -> void:
 		_kv(_purify_grid, by_port, str(entry[0]), str(entry[1]))
 	for entry in KEY_ABSENT:
 		_kv(_absent_grid, by_port, str(entry[0]), str(entry[1]))
+		_investigate_button(str(entry[1]), str(entry[0]))
+
+
+## The action that turns a dead end into an investigation. It opens the
+## evidence panel; it never proposes a value and never changes the model.
+func _investigate_button(port_id: String, caption: String) -> void:
+	var b := Button.new()
+	b.text = "Investigate: %s" % caption
+	b.add_theme_font_size_override("font_size", 10)
+	b.pressed.connect(func() -> void: _on_investigate_pressed(port_id))
+	_absent_action.add_child(b)
+
+
+func _on_investigate_pressed(port_id: String) -> void:
+	if _evidence == null:
+		return
+	if _evidence.has_catalogue():
+		_evidence.open_target(port_id)
+		return
+	_evidence_open_request = port_id
+	_status.text = "Loading the evidence catalogue..."
+	_start_evidence_catalogue()
+
+
+## Load the curated catalogue through the same verified boundary the model run
+## uses, and with the same `--result <path>` file contract, so the payload is
+## read from disk rather than captured from a subprocess's stdout.
+func _start_evidence_catalogue() -> void:
+	if _evidence_pid > 0:
+		return
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(RESULT_DIR))
+	_evidence_result_path = RESULT_DIR.path_join("evidence_catalogue.json")
+	if FileAccess.file_exists(_evidence_result_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(_evidence_result_path))
+	var argv := _runner.prepare(PackedStringArray([
+		"-m", "composition.evidence",
+		"--result", _evidence_result_path,
+	]))
+	_evidence_pid = OS.create_process(_runner.python_executable(), argv)
+	_evidence_started_ms = Time.get_ticks_msec()
+
+
+func _poll_evidence() -> void:
+	if _evidence_pid <= 0:
+		return
+	if OS.is_process_running(_evidence_pid):
+		if Time.get_ticks_msec() - _evidence_started_ms > EVIDENCE_TIMEOUT_MS:
+			OS.kill(_evidence_pid)
+			_evidence_pid = -1
+			_status.text = "The evidence catalogue did not load within %d s." % (
+				EVIDENCE_TIMEOUT_MS / 1000)
+		return
+	var code := OS.get_process_exit_code(_evidence_pid)
+	_evidence_pid = -1
+	if code != 0:
+		_status.text = "The evidence catalogue could not be built (exit %d)." % code
+		return
+	if apply_evidence_catalogue(_read_text_file(_evidence_result_path)):
+		_status.text = ""
+		if not _evidence_open_request.is_empty():
+			var port := _evidence_open_request
+			_evidence_open_request = ""
+			_evidence.open_target(port)
+	else:
+		_status.text = "The evidence catalogue was produced but could not be read."
+
+
+func _read_text_file(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		return ""
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return ""
+	var text := f.get_as_text()
+	f.close()
+	return text
+
+
+## Load an already-captured catalogue payload, used by the harness and by any
+## caller that already has the JSON.
+func apply_evidence_catalogue(text: String) -> bool:
+	if _evidence == null:
+		return false
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		return false
+	var data: Variant = json.get_data()
+	if not data is Dictionary:
+		return false
+	_evidence.set_catalogue(data)
+	return true
 
 
 ## One key/value row. A quantity the model could not establish is reported as

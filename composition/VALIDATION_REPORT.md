@@ -46,7 +46,9 @@ two model roots to `sys.path` and never writes to them.
 | `tests/test_acceptance.py` | 86 |
 | `tests/test_quantities.py` | 26 |
 | `tests/test_contracts.py` | 16 |
-| **composition total** | **128 passed** |
+| **pre-existing total** | **128 passed** |
+| `tests/test_evidence_catalogue.py` | 36 (new — §11) |
+| **composition total** | **164 passed** |
 
 The acceptance suite is organised as one class per criterion with a
 `CG_COVERAGE` table that the suite checks for completeness, so a criterion
@@ -59,8 +61,11 @@ interface rather than an internal detail.
 | | |
 |---|---|
 | existing model suites | 409 |
-| composition suite | 128 |
-| **total** | **537 passed** |
+| composition suite | 164 |
+| **total** | **573 passed** |
+
+The pre-existing figure was 537 (409 + 128). The 36 additional tests cover the
+literature-evidence workflow added in §11; no pre-existing test was modified.
 
 ### 2.4 Godot project
 
@@ -399,6 +404,130 @@ measurement.
 | `composition` | 128 passed |
 | **existing total** | **537 passed — unchanged** |
 
+Those harnesses were temporary and were deleted after they ran, so they are not
+re-runnable. The 30 checks in §11.5 are reported the same way.
+
+---
+
+## 11. Literature-based missing-evidence discovery
+
+The Zieliński 2019 model reports several quantities as `unknown`. Until now the
+interface stopped there: the reader was told a quantity was missing and then
+given nothing to do. This section records the workflow that replaces that dead
+end, and — more importantly — what the literature search actually turned up.
+
+### 11.1 What was targeted
+
+`MP-GROWTH-KINETICS` states: *"No specific growth rate, saturation constant,
+maintenance coefficient or feed rate is reported anywhere in the paper."* It
+blocks `od600_from_inputs`, `wet_biomass_from_inputs` and `glucose_consumed`.
+Two further gaps were registered: `MP-OXYGEN_TRANSFER` and
+`MP-INDUCTION-TIME`.
+
+The target process, as published: **E. coli 20** (a K-12 derivative of CSH50R),
+carrying **pIBAINS** (TetR, `deoP1P2` promoter), in **GMS minimal medium**,
+**batch** with pH-stat glucose feeding, 4 L in a 7.5 L fermenter, 37 °C, pH
+controlled with 16 % NH₄OH. Dissolved oxygen is not reported.
+
+### 11.2 Reused schema
+
+`scaleup_ai.provenance` already defines `Provenance`, `Uncertainty` and
+`MissingParameter`. The first two are reused verbatim in shape and vocabulary
+(`reported` / `digitized` / `derived` / `assumed` / `unknown`; `kind`, `lo`,
+`hi`, `basis`). `EvidenceRef` could **not** be reused: its `__post_init__`
+enforces `pdf_page == printed_page - 62`, the Zieliński page offset, so it
+cannot address a different paper. A source-location type that is not bound to
+one publication was needed.
+
+The new package takes **no run-time dependency on a model** — it neither imports
+`scaleup_ai` nor writes to `Models/`. A test asserts this by walking the AST.
+
+### 11.3 What the search actually found
+
+Three findings are registered. All three were retrieved and are quoted verbatim.
+
+| ID | Quantity | Source | Verdict |
+|---|---|---|---|
+| CF-001 | Monod Ks, 40–88 µg/L | Senn *et al.* 1994, BBA 1201(3):424–436, `10.1016/0304-4165(94)90072-8` | **incompatible** |
+| CF-002 | Single-cell μ, 0.19–0.61 h⁻¹ | Smaluch *et al.* 2023, Eng Life Sci 23(1):e2100157, `10.1002/elsc.202100157` | **incompatible** |
+| CF-003 | Growth-phase OD600 ranges | Mikiewicz *et al.* 2017, PLoS ONE 12(3):e0172600, `10.1371/journal.pone.0172600` | **found** |
+
+**Zero findings are validated.** The four verdicts are produced by
+`assess()`, which never returns `VALIDATED`; only `validate()` may grant it, and
+only if all nine registered criteria pass.
+
+The reasoning behind each:
+
+- **CF-001** — a steady-state glucose-limited chemostat on strain ML30. The
+  target is a pH-stat fed batch on a different strain. Critically, the source's
+  own conclusion is that a single set of kinetic "constants" probably cannot
+  describe the bacterium, because published Ks values differ by orders of
+  magnitude depending on how far the cells were adapted. It reports a *range*,
+  so the upper bound is carried and the full range kept in the uncertainty
+  record. **No midpoint was invented.**
+- **CF-002** — single-cell rates from quantitative phase imaging at 606 pL.
+  Temperature (37 °C) matches; strain, construct, medium, mode and measurement
+  basis do not. A single-cell rate is not the population rate the process
+  observed.
+- **CF-003** — the closest-matched publication that exists: same institute, same
+  strain, same vector, same medium, same supplements, same fermenter, same
+  pH-stat strategy. Every compared dimension matches. **It reports no kinetic
+  parameter of any kind.** It is registered precisely because it matches and
+  still does not supply the missing number.
+
+### 11.4 The honest result
+
+**No compatible source was found.** For `specific_growth_rate` the search
+returned two candidates, both incompatible. `dissolved_oxygen` and
+`induction_time` returned none at all. The workflow reports that as an empty
+result with the search scope attached, rather than quietly presenting the
+closest-looking number.
+
+Because no parameter measured under this process's conditions exists in the
+literature, the panel's closing action is to **propose a separate, explicitly
+parameterised model fitted to batch data from this strain** — not to import a
+number measured elsewhere.
+
+### 11.5 Verification
+
+`composition/tests/test_evidence_catalogue.py` — **36 tests**, including:
+
+- every finding carries a DOI, a section, and a quote longer than 40 characters;
+- a reported range is never collapsed to an interior midpoint;
+- `"not stated"` scores as `unknown`, never as a match — the distinction that
+  stops an unreported condition reading as agreement;
+- no registered finding validates, and each reports *which* criterion failed;
+- `validate()` cannot be waived: remove the source and the same object fails;
+- the `--result` file contract Godot depends on is tested, including that the
+  write is guarded and never lands in the repository;
+- no module imports a model package or mutates `sys.path` (AST walk).
+
+Interface acceptance — **30 checks, 0 failures**, run against the real scene in
+a real window. Highlights:
+
+- `specific_growth_rate`, `dissolved_oxygen` and `induction_time` are still
+  `unknown` with `value: null` after the entire workflow;
+- the 196-output model result is **byte-identical** before and after
+  investigating, after recording a proposal, and after switching targets;
+- the catalogue loads asynchronously through the same verified Python boundary;
+- the panel shows the DOI, the citation, the quoted passage, the section
+  locator, the units, the candidate and target conditions, the method and the
+  uncertainty;
+- an empty-candidate target says so and still offers the action.
+
+One real defect was found and fixed during this pass: the proposal string was
+built with `\` continuation, so `%` bound tighter than `+` and the first
+fragment shipped with literal `%s` to the user. The harness now asserts that no
+unformatted placeholder reaches the screen.
+
+### 11.6 What did not change
+
+`Models/Zielinski` is byte-for-byte unmodified — `git status -- Models/` is
+empty. The model still reports `specific_growth_rate`, `dissolved_oxygen`,
+`induction_time` and every range-valued quantity as `unknown`. No candidate
+value was merged into any output, and no published evidence was altered. The
+proposal action writes to a log line in the scene and to nothing else.
+
 ---
 
 ## 7. Environment
@@ -417,11 +546,15 @@ measurement.
 
 ```bash
 # composition suite
-cd composition && python -m pytest tests
+cd composition && python -m pytest tests        # 164 (128 pre-existing + 36 evidence)
 
 # existing model suites, reported separately
 cd Models/Morris    && python -m pytest tests   # 186
 cd Models/Zielinski && python -m pytest tests   # 223
+
+# the evidence catalogue, the same invocation the Godot scene makes
+cd composition
+python -m composition.evidence --result evidence_catalogue.json
 
 # the runner directly
 cd composition

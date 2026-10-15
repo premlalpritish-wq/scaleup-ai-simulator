@@ -149,7 +149,7 @@ The default view is organised in five sections:
 3. **Purification results** — the instrument signal after each purification
    step.
 4. **What this model cannot tell us** — the unresolved quantities, each with the
-   model's own reason.
+   model's own reason, and a button to investigate it.
 5. **Detailed evidence and technical diagnostics** *(collapsed)* — every one of
    the 196 published values with its exact field names, its method, its source
    and its full provenance chain.
@@ -157,6 +157,45 @@ The default view is organised in five sections:
 Every displayed value carries a plain-language provenance label — *stated in the
 source*, *read from a published figure*, *calculated from the available data*,
 or *not established by the available evidence*.
+
+---
+
+### Investigating a missing quantity
+
+An unknown quantity used to be a dead end: the screen said what was missing and
+stopped. Under each one there is now an **Investigate** button.
+
+Pressing it opens a panel that shows:
+
+- what is missing and what it blocks, in the model's own words;
+- what was searched, and what the search returned;
+- each candidate finding — the extracted value with its unit, the publisher's
+  citation, a DOI, a section locator, and the **verbatim quoted passage** it came
+  from;
+- how the candidate's conditions differ from the target process, dimension by
+  dimension (strain, construct, medium, mode, temperature, pH, scale,
+  measurement basis), with critical dimensions marked;
+- a verdict: **incompatible conditions**, **needs checking**, or **compatible but
+  not yet validated**;
+- what the candidate would *not* settle even if it were adopted;
+- a checkable list of the nine validation criteria, showing which passed;
+- an action to **propose a separate model or parameter set**.
+
+The catalogue is static curated data, not a search engine. It is produced by
+`python -m composition.evidence` and read by the scene through the same verified
+GDScript → Python boundary the model run uses.
+
+**For the growth-rate gap the answer is no.** A literature search found two
+published kinetic constants, and both are incompatible — one measured on a
+different strain in a continuous chemostat, one a single-cell rate measured at
+microlitre scale. The closest-matched publication in existence — same institute,
+same strain, same vector, same medium, same fermenter — reports no kinetic
+parameter at all. So the panel says the gap is unresolved and points at the only
+route that would actually close it: build a separate, explicitly parameterised
+model fitted to batch data from this strain.
+
+Nothing here merges a value into the model. The model still reports every one of
+these quantities as unknown, and `Models/Zielinski` is unmodified.
 
 ---
 
@@ -168,7 +207,7 @@ is required.
 
 ```bash
 # composition layer
-cd composition && python -m pytest tests          # 128
+cd composition && python -m pytest tests          # 164 (128 pre-existing + 36 evidence)
 
 # Morris 2011 material balance
 cd Models/Morris    && python -m pytest tests     # 186
@@ -177,7 +216,8 @@ cd Models/Morris    && python -m pytest tests     # 186
 cd Models/Zielinski && python -m pytest tests     # 223
 ```
 
-**Total: 537 tests.**
+**Total: 573 tests** (409 existing model tests, unchanged, plus 164 in the
+composition layer).
 
 To regenerate the Zieliński reference artifacts (optional; they are not tracked):
 
@@ -197,8 +237,9 @@ scenes/
 scripts/                 all GDScript (UI and the GDScript -> Python boundary)
 composition/
   composition/           the composition layer
+    evidence/            candidate literature evidence for unresolved quantities
   examples/              six example graphs with pinned exit codes
-  tests/                 128 tests
+  tests/                 164 tests
   replay/                the standalone graph the 3D scene executes
 Models/
   Morris/                material-balance model + 186 tests
