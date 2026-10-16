@@ -173,6 +173,11 @@ exit code, status, run id, graph id, versions, the graph digest and every
 diagnostic with its code, origin and location. Both were permanently hidden by a
 single missing `body.visible` assignment; see §13.
 
+The table's first column shows the variable name (`inoculum_volume`) rather than
+the full identifier (`node:N01#inoculum_volume`). The full identifier stays in
+the row and in its tooltip, and is what selection, provenance and evidence
+lookups use — see §14.
+
 Pressing it opens a panel that shows:
 
 - which model, version and run this was checked against, with the run's graph

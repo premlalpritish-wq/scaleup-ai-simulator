@@ -879,6 +879,67 @@ provenance census is intact (131 reported, 23 derived, 20 digitized, 22 unknown)
 
 ---
 
+## 14. Human-readable output port names
+
+### 14.1 What changed
+
+Section 5's "output port" column showed the whole canonical identifier
+(`node:N01#inoculum_volume`). It now shows the variable name
+(`inoculum_volume`), which is what a reader scanning for a quantity actually
+looks for.
+
+The rule is the one the model adapters already use —
+`port_id.rsplit("#", 1)[-1]` in `composition/adapters/zielinski.py` — applied
+here because the table is drawn on the GDScript side and cannot call into
+Python. No second parser was invented; the GDScript helper and the Python one
+were checked to agree on **all 196 real port ids with zero mismatches**.
+
+### 14.2 What did not change
+
+The canonical identifier is untouched and remains the identity of record. It is
+still stored in the row's metadata, still what selection and evidence lookups
+match on, and still written into `raw_outputs`. The registry, the provenance
+census and the result document are unaffected.
+
+### 14.3 Duplicate variable names
+
+Thirteen variable names are published by more than one port — `reaction_time`
+by four nodes, `fraction_volume` by four streams. A bare variable name is
+therefore ambiguous, so:
+
+- every row carries a **tooltip** with its full canonical identifier;
+- the detail pane states `variable: <name>`;
+- when a name is shared, the pane says so and names this row's scope —
+  *"shared name: 4 ports publish "reaction_time"; this row is from node:N06"*;
+- when a name is unique, the pane names the publishing scope instead.
+
+The table is not widened to a fourth column.
+
+### 14.4 Fallback
+
+An identifier with no `#`, or one whose variable part is empty, is returned
+whole. Verified against `no_hash_at_all`, `node:N01#` and a bare `#` — none is
+silently dropped.
+
+### 14.5 Verification
+
+44 acceptance checks, 0 failures, against the real scene in a real window.
+Highlights: the five requested examples plus `inoculum_thiamine` and a
+stream-scoped port all render their variable names; values, provenance and the
+131/23/20/22 census are unchanged with zero mismatches; selection still resolves
+the canonical id from metadata; duplicate rows report their share count and
+their own scope; the filter still narrows to 23 rows and restores 197.
+
+Two notes on the harness, because both are easy to get wrong: column 0 holds
+the name and column 1 the value, so a value assertion that reads column 0
+fails without the product being wrong; and the filter must be driven through
+`_on_filter_selected` rather than by assigning `OptionButton.selected`, which
+does not emit `item_selected` reliably in a test context.
+
+Nothing under `Models/` was modified and the 196-output result is unchanged.
+
+---
+
 ## 7. Environment
 
 | | |

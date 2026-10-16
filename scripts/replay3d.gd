@@ -100,6 +100,9 @@ var _detail: RichTextLabel
 var _diagnostics: RichTextLabel
 var _filter: OptionButton
 var _speed: OptionButton
+#: How many registered ports share each variable name. Computed per rebuild so a
+#: name that several nodes publish can say so, instead of looking unique.
+var _name_counts: Dictionary = {}
 
 var _btn_start: Button
 var _btn_pause: Button
@@ -1011,22 +1014,60 @@ func _selected_provenance() -> String:
 	return ""
 
 
+## The variable name from a canonical port id.
+##
+## The rule is the one the model adapters already use
+## (`port_id.rsplit("#", 1)[-1]`, `composition/adapters/zielinski.py`), applied
+## here because the table is drawn on the GDScript side and cannot call into
+## Python. The full canonical id is kept in the row's metadata and is what
+## selection, provenance and evidence lookups continue to match on.
+##
+## An id with no '#' -- or one whose variable part is empty -- is returned
+## whole. An unparseable identifier must still identify itself; silently
+## dropping it would be the failure this display must not have.
+static func _variable_name(port_id: String) -> String:
+	var parts := port_id.rsplit("#", true, 1)
+	if parts.size() < 2:
+		return port_id
+	var name := str(parts[1])
+	return name if name != "" else port_id
+
+
+## The originating scope (`node:N01`, `stream:S09_deae_fraction`). Shown when a
+## variable name is published by more than one port, so duplicates stay
+## distinguishable without widening the table.
+static func _scope_of(port_id: String) -> String:
+	var parts := port_id.rsplit("#", true, 1)
+	return str(parts[0]) if parts.size() >= 2 else ""
+
+
 func _rebuild_tree() -> void:
 	_tree.clear()
 	var root := _tree.create_item()
 	var wanted := _selected_provenance()
 	var shown := 0
+	# Counted over the whole dataset, not just the rows currently shown, so a
+	# name that several nodes publish says so even when a filter hides the rest.
+	_name_counts = {}
+	for o in _data.raw_outputs:
+		var name := _variable_name(str((o.get("ref", {}) as Dictionary).get("port_id", "")))
+		_name_counts[name] = int(_name_counts.get(name, 0)) + 1
 	for o in _data.raw_outputs:
 		var ref: Dictionary = o.get("ref", {})
 		var v: Dictionary = o.get("value", {})
 		var prov := str(v.get("provenance", "?"))
 		if wanted != "" and prov != wanted:
 			continue
+		var port_id := str(ref.get("port_id", ""))
 		var item := _tree.create_item(root)
-		item.set_text(0, str(ref.get("port_id", "")))
+		# The variable name is what the eye scans; the canonical id stays in the
+		# row's metadata and in the tooltip, so nothing that keys on identity --
+		# selection, provenance, evidence -- is affected by the display choice.
+		item.set_text(0, _variable_name(port_id))
 		item.set_text(1, _tree_value(v))
 		item.set_text(2, prov)
-		item.set_metadata(0, str(ref.get("port_id", "")))
+		item.set_metadata(0, port_id)
+		item.set_tooltip_text(0, port_id)
 		item.set_custom_color(2, PROVENANCE_COLOUR.get(prov, Color(0.80, 0.82, 0.86)))
 		if prov == "unknown":
 			item.set_custom_color(1, Color(0.95, 0.70, 0.58))
@@ -1073,7 +1114,23 @@ func _on_output_selected() -> void:
 		var v: Dictionary = o.get("value", {})
 		var prov := str(v.get("provenance", ""))
 		var lines := PackedStringArray()
+		# The canonical id stays the headline, because it is the identity every
+		# other subsystem keys on. The variable name is shown alongside it so a
+		# reader scanning for a quantity does not have to parse the id format.
 		lines.append("[b]%s[/b]   — %s" % [_bb(port_id), str(PROVENANCE_PLAIN.get(prov, prov))])
+		lines.append("variable: %s" % _bb(_variable_name(port_id)))
+		# A name published by more than one port is ambiguous on its own. Saying
+		# how many, and naming this row's scope, is what makes it resolvable.
+		var name := _variable_name(port_id)
+		var shared := int(_name_counts.get(name, 0))
+		if shared > 1:
+			lines.append("[color=#e8c07a]shared name: %d ports publish \"%s\"; "
+				% [shared, _bb(name)]
+				+ "this row is from %s[/color]" % _bb(_scope_of(port_id)))
+		else:
+			var scope := _scope_of(port_id)
+			if scope != "":
+				lines.append("published by %s" % _bb(scope))
 		lines.append("contract fields   provenance: %s    unit: %s    is_resolved: %s" % [
 			_bb(prov), _bb(str(v.get("unit", ""))), str(bool(v.get("is_resolved", false)))])
 		lines.append("value: %s %s" % [ReplayData.format_number(_as_float(v.get("value"))), _bb(str(v.get("unit", "")))])
