@@ -16,6 +16,9 @@ extends Control
 ##   3  purification results
 ##   4  what this model cannot tell us
 ##   5  detailed evidence and technical diagnostics (collapsed by default)
+##   6  related research and connected knowledge: the other registered
+##      models and ingested papers, and what the compatibility engine says
+##      about composing them with this replay
 ##
 ## Plain-language labels are used throughout. The exact schema field names
 ## (`provenance`, port ids, the provenance chain) stay available in section 5.
@@ -94,6 +97,7 @@ var _purify_grid: GridContainer
 var _absent_grid: GridContainer
 var _absent_action: VBoxContainer
 var _evidence: ReplayEvidencePanel
+var _cross: CrossPaperPanel
 var _proposal_log: RichTextLabel
 var _tree: Tree
 var _detail: RichTextLabel
@@ -120,6 +124,16 @@ var _evidence_open_request := ""
 var _evidence_started_ms := 0
 const EVIDENCE_TIMEOUT_MS := 60000
 
+## Asynchronous handles for the cross-paper context: the authoritative
+## compatibility position first, then the assembled context. Both are read
+## from result files through the same verified boundary the model run uses.
+var _context_pid := -1
+var _context_stage := ""
+var _connections_payload := {}
+var _context_result_path := ""
+var _context_started_ms := 0
+const CONTEXT_TIMEOUT_MS := 120000
+
 var _playing := false
 var _hour := 0.0
 var _speed_scale := 1.0
@@ -134,6 +148,7 @@ func _ready() -> void:
 	_reset_replay_clock()
 	_set_state("Not run yet", "press Run model to execute the model")
 	_start_execution()
+	_start_cross_paper()
 
 
 # ------------------------------------------------------------------- layout
@@ -383,6 +398,21 @@ func _build_right_column() -> Control:
 	_diagnostics.custom_minimum_size = Vector2(0, 130)
 	_diagnostics.add_theme_font_size_override("normal_font_size", 10)
 	technical["body"].add_child(_diagnostics)
+
+	# ---- 6. related research -------------------------------------------
+	# Open by default: the connection to the rest of the project's research
+	# library is the point of this section, and a collapsed section that
+	# happens to be the new content would hide the change it makes.
+	right.add_child(_numbered_header("6", "Related research and connected knowledge"))
+	right.add_child(_note(
+		"Other models and papers this project has already ingested, and what the "
+		+ "compatibility engine says about composing them with this replay. The "
+		+ "verdicts are read from the engine's declared position; none of these "
+		+ "models drives this replay."))
+	_cross = CrossPaperPanel.new()
+	_cross.name = "CrossPaperPanel"
+	_cross.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.add_child(_cross)
 
 	return right
 
@@ -819,6 +849,7 @@ func _update_clock() -> void:
 func _process(delta: float) -> void:
 	_poll_execution()
 	_poll_evidence()
+	_poll_cross_paper()
 	_advance(delta)
 
 
@@ -926,6 +957,111 @@ func _poll_evidence() -> void:
 			_evidence.open_target(port)
 	else:
 		_status.text = "The evidence catalogue was produced but could not be read."
+
+
+# ------------------------------------------------- cross-paper context load
+
+## The focus model, read from the graph document this scene executes rather
+## than named here: the panel must follow whichever model the graph declares,
+## so a change of subject needs no edit to this file.
+func _focus_model_id() -> String:
+	var path := ProjectSettings.globalize_path(GRAPH_PATH)
+	if not FileAccess.file_exists(path):
+		return ""
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return ""
+	var text := f.get_as_text()
+	f.close()
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		return ""
+	var data: Variant = json.get_data()
+	if not data is Dictionary:
+		return ""
+	var instances: Array = (data as Dictionary).get("instances", [])
+	if instances.is_empty():
+		return ""
+	return str((instances[0] as Dictionary).get("model_id", ""))
+
+
+## Start the cross-paper context load. Two subprocesses, sequential: the
+## authoritative compatibility position first, then the assembled context.
+## Both are read from result files through the same `--result` contract the
+## model run and the evidence catalogue use.
+func _start_cross_paper() -> void:
+	if _context_pid > 0:
+		return
+	var focus := _focus_model_id()
+	if focus == "":
+		_status.text = "The replay graph declares no model, so no cross-paper context can be loaded."
+		return
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(RESULT_DIR))
+	_context_stage = "connections"
+	_context_result_path = RESULT_DIR.path_join("cross_paper_connections.json")
+	if FileAccess.file_exists(_context_result_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(_context_result_path))
+	var argv := _runner.prepare(PackedStringArray([
+		"-m", "composition.runner",
+		"--describe-connections",
+		"--result", _context_result_path,
+	]))
+	_context_pid = OS.create_process(_runner.python_executable(), argv)
+	_context_started_ms = Time.get_ticks_msec()
+
+
+func _poll_cross_paper() -> void:
+	if _context_pid <= 0:
+		return
+	if OS.is_process_running(_context_pid):
+		if Time.get_ticks_msec() - _context_started_ms > CONTEXT_TIMEOUT_MS:
+			OS.kill(_context_pid)
+			_context_pid = -1
+			_status.text = "The cross-paper context did not load within %d s." % (
+				CONTEXT_TIMEOUT_MS / 1000)
+		return
+	var code := OS.get_process_exit_code(_context_pid)
+	_context_pid = -1
+	if code != 0:
+		_status.text = "The compatibility position could not be loaded (exit %d)." % code
+		return
+	if _context_stage == "connections":
+		var payload := _runner.read_result(_context_result_path)
+		if payload.is_empty():
+			_status.text = "The compatibility position was produced but could not be read."
+			return
+		_connections_payload = payload
+		# The context payload carries the registry-derived descriptions; it is
+		# the larger of the two and runs second.
+		_context_stage = "context"
+		var focus := _focus_model_id()
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(RESULT_DIR))
+		_context_result_path = RESULT_DIR.path_join("cross_paper_context.json")
+		if FileAccess.file_exists(_context_result_path):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(_context_result_path))
+		var argv := _runner.prepare(PackedStringArray([
+			"-m", "composition.runner",
+			"--describe-cross-paper-context", focus,
+			"--result", _context_result_path,
+		]))
+		_context_pid = OS.create_process(_runner.python_executable(), argv)
+		_context_started_ms = Time.get_ticks_msec()
+		return
+	if _context_stage == "context":
+		var payload := _runner.read_result(_context_result_path)
+		if payload.is_empty():
+			_status.text = "The cross-paper context was produced but could not be read."
+			return
+		if payload.get("resolved", false) == true:
+			_cross.set_context(payload, _connections_payload)
+			_status.text = ""
+		else:
+			var message := "the compatibility engine could not resolve the focus model"
+			for d in payload.get("diagnostics", []):
+				message = str((d as Dictionary).get("message", message))
+				break
+			_status.text = "The cross-paper context could not be loaded: %s" % message
+		_context_stage = ""
 
 
 func _read_text_file(path: String) -> String:
