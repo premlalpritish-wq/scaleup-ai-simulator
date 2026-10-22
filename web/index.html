@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101715">
+  <title>ScaleUp AI — Scientific Simulation Workshop</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="scene.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">S</span><span>ScaleUp <b>AI</b><small>SCIENTIFIC WORKSHOP</small></span></a>
+    <div class="top-meta"><span class="live-dot"></span><span id="api-state">Connecting to execution service</span><span class="separator">/</span><span>Ganjave et al. · 2022</span></div>
+    <button class="quiet-button" id="about-button">About this model ↗</button>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div><div class="eyebrow">LIVE SCIENTIFIC EXECUTION</div><h1>From operating conditions<br><em>to a computed trajectory.</em></h1></div>
+      <p>Explore a fed-batch culture model, inspect its evidence, adjust declared inputs, then run the Python model behind the results.</p>
+    </section>
+
+    <section class="workspace">
+      <div class="visual-column">
+        <div class="viewer-card">
+          <div class="viewer-head"><div><span class="section-label">BIOREACTOR VIEW</span><h2>Shake flask · 500 mL</h2></div><span class="status-chip" id="result-chip">NO RUN YET</span></div>
+          <div class="scene" id="scene" aria-label="Interactive 3D shake-flask schematic">
+            <div class="scene-grid"></div><div class="axis-label">SCHEMATIC VESSEL · LIQUID HEIGHT TRACKS COMPUTED CULTURE VOLUME</div>
+            <canvas id="vessel3d" class="vessel-canvas" aria-label="3D shake-flask schematic; liquid appears only after a computed result"></canvas>
+            <div class="scene-bottom"><span>DRAG TO ORBIT</span><span class="scene-legend"><i></i>culture volume <b id="volume-readout">—</b></span></div>
+          </div>
+          <div class="timeline-block">
+            <div class="timeline-controls"><button class="play-button" id="play-button" disabled aria-label="Play">▶</button><button class="text-button" id="reset-button" disabled>Reset</button><span class="time-readout"><b id="time-value">0.0</b> h <small>/ <span id="duration-value">—</span> h</small></span><span class="timeline-hint" id="timeline-hint">Run the model to load its computed time axis</span></div>
+            <input id="timeline" type="range" min="0" max="1000" value="0" disabled aria-label="Simulation timeline">
+            <div class="timeline-scale"><span id="time-start">0 h</span><span id="time-end">—</span></div>
+          </div>
+          <div class="metric-row">
+            <div class="metric"><span>DRY BIOMASS</span><strong id="biomass-value">—</strong><small>g/L · returned model quantity</small></div>
+            <div class="metric"><span>DISSOLVED OXYGEN</span><strong id="oxygen-value">—</strong><small>% · returned model quantity</small></div>
+            <div class="metric"><span>CULTURE VOLUME</span><strong id="volume-metric">—</strong><small>L · returned model quantity</small></div>
+          </div>
+        </div>
+        <div class="note-card"><span class="note-icon">i</span><p><b>What you are seeing.</b> The vessel is a schematic. Its liquid height follows the model’s returned culture-volume trajectory; the model does not calculate bubbles, mixing, flow, or spatial gradients.</p></div>
+      </div>
+
+      <aside class="control-column">
+        <div class="panel run-panel"><div class="panel-heading"><span class="section-label">MODEL WORKSPACE</span><span class="model-tag" id="model-tag">Loading registry</span></div><h2>Operating inputs</h2><p class="panel-copy">Values are sent to the registered Python model with their declared units and provenance.</p>
+          <div id="input-fields" class="input-fields"><div class="skeleton"></div></div>
+          <div id="stale-notice" class="stale-notice" hidden><span>●</span> Inputs changed. The displayed result is stale.</div>
+          <button id="run-button" class="run-button" disabled><span>Run scientific model</span><span>↗</span></button>
+          <div id="run-status" class="run-status" role="status">Connecting to the Python execution API…</div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Research panels">
+          <button class="tab active" data-panel="evidence">Evidence</button><button class="tab" data-panel="gaps">Gaps</button><button class="tab" data-panel="models">Models</button><button class="tab" data-panel="report">Report</button><button class="tab" data-panel="research">Research</button>
+        </div>
+        <section class="details-panel" id="details-panel"><div class="empty-panel">Load the model context to inspect evidence, gaps, compatibility, provenance, and related papers.</div></section>
+      </aside>
+    </section>
+
+    <footer><span>ScaleUp AI <span class="footer-dim">· scientific composition, with provenance</span></span><span id="footer-version">Execution API · connecting</span></footer>
+  </main>
+  <script src="config.js"></script><script src="scene3d.js"></script><script src="app.js"></script>
+</body>
+</html>

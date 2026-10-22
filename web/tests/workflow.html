@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>Browser workflow acceptance</title>
+<pre id="result">RUNNING</pre><iframe id="app" src="../index.html?api=http%3A%2F%2Flocalhost%3A8080" style="width:100%;height:900px;border:0"></iframe>
+<script>
+const result=document.querySelector('#result'), frame=document.querySelector('#app');
+const fail=(e)=>{result.textContent=`FAIL: ${e}`;document.title='FAIL';};
+frame.addEventListener('load',()=>{
+  const w=frame.contentWindow, d=frame.contentDocument; let cycles=0;
+  const timer=setInterval(async()=>{
+    try {
+      if(++cycles>360) throw new Error('Timed out waiting for the app workflow');
+      if(d.querySelector('#api-state')?.textContent!=='Python execution service online') return;
+      clearInterval(timer);
+      const first=d.querySelector('#input-fields input'); if(!first) throw new Error('No model inputs loaded');
+      first.value=String(Number(first.value)+0.001); first.dispatchEvent(new Event('input',{bubbles:true}));
+      d.querySelector('#run-button').click();
+      const runTimer=setInterval(async()=>{
+        try {
+          const status=d.querySelector('#run-status').textContent;
+          if(status.startsWith('Computed by ')) {
+            clearInterval(runTimer);
+            if(d.querySelector('#result-chip').textContent!=='PYTHON RESULT') throw new Error('Result not labelled as Python computed');
+            if(d.querySelector('#timeline').disabled) throw new Error('Timeline was not driven by returned data');
+            if(d.querySelector('#volume-readout').textContent==='—'||d.querySelector('#biomass-value').textContent==='—'||d.querySelector('#oxygen-value').textContent==='—') throw new Error('Returned quantities did not update readouts');
+            const slider=d.querySelector('#timeline'); slider.value='500'; slider.dispatchEvent(new Event('input',{bubbles:true}));
+            const before=d.querySelector('#time-value').textContent;
+            first.value=String(Number(first.value)+0.001);first.dispatchEvent(new Event('input',{bubbles:true}));
+            if(d.querySelector('#result-chip').textContent!=='STALE RESULT') throw new Error('Input edit did not mark the prior trajectory stale');
+            const invalid=await fetch(`${w.SCALEUP_API_BASE||'http://localhost:8080'}/api/validate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({graph:{contract_version:'0.1.0',graph_id:'browser_invalid',instances:[{instance_id:'x',model_id:'unregistered.python.module'}],connections:[],literal_inputs:{}}})});
+            if(invalid.status!==400) throw new Error(`Invalid model request was not rejected (${invalid.status})`);
+            result.textContent=`PASS: Chromium loaded model metadata, changed an input, received actual Python trajectories, updated the timeline/readouts, marked edited results stale, and confirmed invalid model identifiers are rejected. Scrubbed time: ${before} h.`;document.title='PASS';
+          } else if(d.querySelector('#run-status').classList.contains('error')) throw new Error(status);
+        } catch(e){clearInterval(runTimer);fail(e.message||e);}
+      },200);
+    } catch(e){clearInterval(timer);fail(e.message||e);}
+  },200);
+});
+</script>

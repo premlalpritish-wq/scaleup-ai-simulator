@@ -95,6 +95,10 @@ class WorkerResponse:
 #: It is a performance cache, not a memo of judgement: a failed call is cached
 #: too, so a broken model does not turn into a hang.
 _WORKER_CACHE: dict[tuple[str, str, str], "WorkerResponse"] = {}
+# API clients can submit many distinct, validated operating configurations. Keep
+# the deterministic-response cache useful without letting an unbounded request
+# history retain trajectories for the lifetime of the hosted process.
+WORKER_CACHE_MAX_ENTRIES = 16
 
 
 def clear_worker_cache() -> None:
@@ -149,6 +153,8 @@ class JsonWorker:
             return response
         response = self._call_uncached(request)
         self._cache[key] = response
+        if len(_WORKER_CACHE) >= WORKER_CACHE_MAX_ENTRIES:
+            _WORKER_CACHE.pop(next(iter(_WORKER_CACHE)))
         _WORKER_CACHE[global_key] = response
         return response
 

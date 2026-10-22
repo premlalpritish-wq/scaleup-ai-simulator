@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: scaleup-ai-api
+    runtime: docker
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: .
+    plan: 1c-2g
+    healthCheckPath: /api/health
+    envVars:
+      - key: SCALEUP_CORS_ORIGIN
+        fromService:
+          type: web
+          name: scaleup-ai-web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: SCALEUP_MAX_CONCURRENT_RUNS
+        value: "1"
+      - key: SCALEUP_RATE_LIMIT_PER_MINUTE
+        value: "20"
+      - key: SCALEUP_TRUST_FORWARDED_CLIENT_IP
+        value: "true"
+      - key: SCALEUP_MAX_BODY_BYTES
+        value: "262144"
+  - type: web
+    name: scaleup-ai-web
+    runtime: static
+    rootDir: web
+    buildCommand: python3 build_config.py
+    staticPublishPath: .
+    envVars:
+      - key: API_BASE_URL
+        fromService:
+          type: web
+          name: scaleup-ai-api
+          envVarKey: RENDER_EXTERNAL_URL
