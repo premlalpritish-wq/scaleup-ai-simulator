@@ -1,0 +1,572 @@
+{
+  "ok": true,
+  "status": "ready_with_warnings",
+  "prompt": "Simulate the Zielinski insulin production process for 19 hours and show OD600, wet biomass, inclusion bodies and insulin activity.",
+  "interpretation_method": "local_rules",
+  "llm_used": false,
+  "target_process": {
+    "supported": true,
+    "matched_markers": [
+      "insulin",
+      "zielinski"
+    ],
+    "implicit_target": false,
+    "reason": "The prompt names the supported recombinant human insulin process.",
+    "supported_process": "Recombinant human insulin production from E. coli 20 IBA 1 carrying pIBAINS, in GMS medium, in the Zielinski et al. (2019) batch with pH-stat glucose feeding."
+  },
+  "selected_model": {
+    "model_id": "zielinski2019.rhi_process",
+    "model_version": "1.0.0",
+    "reference": "zielinski2019.rhi_process@1.0.0",
+    "title": "Recombinant human insulin from Escherichia coli 20 (Zielinski et al. 2019)",
+    "summary": "15 operations, 17 material streams, 20 declared equation bindings. Evidence replay restates the paper's reported numbers and applies only the accounting identities the paper supports; predictive mode starts from declared inputs and fails closed.",
+    "source_ref": "M. Zielinski, A. Romanik-Chruscielewska, D. Mikiewicz, N. Lukasiewicz, I. Sokolowska, J. Antosik, A. Sobolewska-Ruta, A. Bierczynska-Krzysik, P. Zaleski, A. Plucienniczak, 'Expression and purification of recombinant human insulin from E. coli 20 strain', Protein Expression and Purification 157 (2019) 63-69.",
+    "selection_reason": "The prompt names the supported recombinant human insulin process.",
+    "only_executable_target": true
+  },
+  "duration": {
+    "requested_hours": 19.0,
+    "published_max_hours": 19.0,
+    "source": "prompt",
+    "within_published_trajectory": true,
+    "assumption": ""
+  },
+  "requested_variables": [
+    {
+      "key": "od600",
+      "label": "OD600 growth trajectory",
+      "available": true,
+      "port_ids": [
+        "stream:S02_culture_broth#od600_h01",
+        "stream:S02_culture_broth#od600_h02",
+        "stream:S02_culture_broth#od600_h03",
+        "stream:S02_culture_broth#od600_h04",
+        "stream:S02_culture_broth#od600_h05",
+        "stream:S02_culture_broth#od600_h06",
+        "stream:S02_culture_broth#od600_h07",
+        "stream:S02_culture_broth#od600_h08",
+        "stream:S02_culture_broth#od600_h09",
+        "stream:S02_culture_broth#od600_h10",
+        "stream:S02_culture_broth#od600_h11",
+        "stream:S02_culture_broth#od600_h12",
+        "stream:S02_culture_broth#od600_h13",
+        "stream:S02_culture_broth#od600_h14",
+        "stream:S02_culture_broth#od600_h15",
+        "stream:S02_culture_broth#od600_h16",
+        "stream:S02_culture_broth#od600_h17",
+        "stream:S02_culture_broth#od600_h18",
+        "stream:S02_culture_broth#od600_h19",
+        "stream:S02_culture_broth#od600_plateau_max",
+        "stream:S02_culture_broth#od600_25_crossing_h",
+        "stream:S02_culture_broth#od600_50_crossing_h"
+      ]
+    },
+    {
+      "key": "wet_biomass",
+      "label": "Wet biomass",
+      "available": true,
+      "port_ids": [
+        "node:N02#wet_biomass_g_per_L",
+        "stream:S03_wet_biomass#wet_biomass_total"
+      ]
+    },
+    {
+      "key": "inclusion_bodies",
+      "label": "Inclusion bodies",
+      "available": true,
+      "port_ids": [
+        "node:N03#inclusion_bodies_g_per_L",
+        "node:N03#inclusion_body_fraction_of_biomass",
+        "stream:S04_inclusion_bodies#inclusion_bodies_total"
+      ]
+    },
+    {
+      "key": "activity",
+      "label": "Insulin activity",
+      "available": true,
+      "port_ids": [
+        "node:N15#batch_activity"
+      ]
+    }
+  ],
+  "requested_outputs": [
+    {
+      "key": "od600",
+      "label": "OD600 growth trajectory",
+      "matched_text": "od600",
+      "kind": "trajectory",
+      "port_ids": [
+        "stream:S02_culture_broth#od600_h01",
+        "stream:S02_culture_broth#od600_h02",
+        "stream:S02_culture_broth#od600_h03",
+        "stream:S02_culture_broth#od600_h04",
+        "stream:S02_culture_broth#od600_h05",
+        "stream:S02_culture_broth#od600_h06",
+        "stream:S02_culture_broth#od600_h07",
+        "stream:S02_culture_broth#od600_h08",
+        "stream:S02_culture_broth#od600_h09",
+        "stream:S02_culture_broth#od600_h10",
+        "stream:S02_culture_broth#od600_h11",
+        "stream:S02_culture_broth#od600_h12",
+        "stream:S02_culture_broth#od600_h13",
+        "stream:S02_culture_broth#od600_h14",
+        "stream:S02_culture_broth#od600_h15",
+        "stream:S02_culture_broth#od600_h16",
+        "stream:S02_culture_broth#od600_h17",
+        "stream:S02_culture_broth#od600_h18",
+        "stream:S02_culture_broth#od600_h19",
+        "stream:S02_culture_broth#od600_plateau_max",
+        "stream:S02_culture_broth#od600_25_crossing_h",
+        "stream:S02_culture_broth#od600_50_crossing_h"
+      ],
+      "ports": [
+        {
+          "port_id": "stream:S02_culture_broth#od600_h01",
+          "label": "OD600 at t = 1 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h02",
+          "label": "OD600 at t = 2 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h03",
+          "label": "OD600 at t = 3 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h04",
+          "label": "OD600 at t = 4 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h05",
+          "label": "OD600 at t = 5 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h06",
+          "label": "OD600 at t = 6 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h07",
+          "label": "OD600 at t = 7 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h08",
+          "label": "OD600 at t = 8 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h09",
+          "label": "OD600 at t = 9 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h10",
+          "label": "OD600 at t = 10 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h11",
+          "label": "OD600 at t = 11 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h12",
+          "label": "OD600 at t = 12 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h13",
+          "label": "OD600 at t = 13 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h14",
+          "label": "OD600 at t = 14 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h15",
+          "label": "OD600 at t = 15 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h16",
+          "label": "OD600 at t = 16 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h17",
+          "label": "OD600 at t = 17 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h18",
+          "label": "OD600 at t = 18 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h19",
+          "label": "OD600 at t = 19 h (Fig. 3, digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_plateau_max",
+          "label": "Maximum OD600 read off the Fig. 3 plateau (digitized)",
+          "quantity": "dimensionless",
+          "unit": "OD600",
+          "direction": "output",
+          "state": "number",
+          "provenance": "digitized",
+          "source_ref": "",
+          "citation": "p.67, Fig. 3, 4.2",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_25_crossing_h",
+          "label": "Time at which OD600 reaches the reported glucose-limitation threshold of 25",
+          "quantity": "time",
+          "unit": "h",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_50_crossing_h",
+          "label": "Time at which OD600 reaches 50",
+          "quantity": "time",
+          "unit": "h",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        }
+      ],
+      "available": true,
+      "reason": ""
+    },
+    {
+      "key": "wet_biomass",
+      "label": "Wet biomass",
+      "matched_text": "wet biomass",
+      "kind": "scalar",
+      "port_ids": [
+        "node:N02#wet_biomass_g_per_L",
+        "stream:S03_wet_biomass#wet_biomass_total"
+      ],
+      "ports": [
+        {
+          "port_id": "node:N02#wet_biomass_g_per_L",
+          "label": "mass_per_volume",
+          "quantity": "mass_concentration",
+          "unit": "g/L",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S03_wet_biomass#wet_biomass_total",
+          "label": "Total wet biomass",
+          "quantity": "mass",
+          "unit": "g",
+          "direction": "output",
+          "state": "number",
+          "provenance": "reported",
+          "source_ref": "we obtained about 224 g of wet biomass",
+          "citation": "p.66, 4.2",
+          "available": true,
+          "reason": ""
+        }
+      ],
+      "available": true,
+      "reason": ""
+    },
+    {
+      "key": "inclusion_bodies",
+      "label": "Inclusion bodies",
+      "matched_text": "inclusion bodies",
+      "kind": "scalar",
+      "port_ids": [
+        "node:N03#inclusion_bodies_g_per_L",
+        "node:N03#inclusion_body_fraction_of_biomass",
+        "stream:S04_inclusion_bodies#inclusion_bodies_total"
+      ],
+      "ports": [
+        {
+          "port_id": "node:N03#inclusion_bodies_g_per_L",
+          "label": "mass_per_volume",
+          "quantity": "mass_concentration",
+          "unit": "g/L",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "node:N03#inclusion_body_fraction_of_biomass",
+          "label": "fraction",
+          "quantity": "dimensionless",
+          "unit": "1",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S04_inclusion_bodies#inclusion_bodies_total",
+          "label": "Total inclusion bodies",
+          "quantity": "mass",
+          "unit": "g",
+          "direction": "output",
+          "state": "number",
+          "provenance": "reported",
+          "source_ref": "we obtained about 58 g of inclusion bodies",
+          "citation": "p.66, 4.3",
+          "available": true,
+          "reason": ""
+        }
+      ],
+      "available": true,
+      "reason": ""
+    },
+    {
+      "key": "activity",
+      "label": "Insulin activity",
+      "matched_text": "activity",
+      "kind": "scalar",
+      "port_ids": [
+        "node:N15#batch_activity"
+      ],
+      "ports": [
+        {
+          "port_id": "node:N15#batch_activity",
+          "label": "total_activity",
+          "quantity": "activity",
+          "unit": "IU",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        }
+      ],
+      "available": true,
+      "reason": ""
+    }
+  ],
+  "requested_parameters": [],
+  "configuration": {
+    "graph_id": "zielinski-prompt",
+    "base_graph": "composition/replay/zielinski_replay.json",
+    "instance_id": "zielinski_replay",
+    "model_id": "zielinski2019.rhi_process",
+    "model_version": "1.0.0",
+    "execution": {
+      "mode": "evidence_replay"
+    },
+    "duration_hours": 19.0,
+    "published_max_hours": 19.0,
+    "literal_inputs": {}
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "required_inputs": [],
+    "literal_count": 0,
+    "graph_id": "zielinski-prompt"
+  },
+  "missing_information": [],
+  "clarification": [],
+  "assumptions": [
+    "The target is the existing Zielinski evidence replay, not a predictive kinetic simulator.",
+    "No cloud LLM was used. The prompt was interpreted by deterministic local rules over the model manifest.",
+    "Only manifest-declared input ports can be set; no equation, unit or parameter was generated.",
+    "No parameter changes were requested, so the original replay configuration is used unchanged."
+  ],
+  "warnings": [
+    "This is an evidence replay: reported values are not recalculated by a kinetic model. A parameter change is recorded and validated, and the execution report states whether any published output changed."
+  ],
+  "model_summary": {
+    "input_ports": 139,
+    "output_ports": 57,
+    "published_max_hours": 19.0
+  },
+  "diagnostics": []
+}

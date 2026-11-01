@@ -63,8 +63,11 @@ from .contracts import (
     load_graph,
 )
 from .diagnostics import DiagnosticCode, ModelDiagnostic, Origin, Severity
+from . import compatibility
 from . import cross_model
 from . import cross_paper
+from . import gaps as scientific_gaps
+from . import prompt as prompt_interpreter
 from . import report
 from .engine import CompositionEngine
 from .quantities import describe_registry
@@ -507,12 +510,145 @@ def run_graph(
 
     payload = result.to_dict()
     payload["runner_version"] = __version__
+    # Which paper encodes each instance, and what that model is relative to the
+    # insulin process. The engine owns whether two instances are connected; this
+    # block owns attribution, and it never claims a connection the graph lacks.
+    payload["composition"] = compatibility.compose_block(payload.get("results"))
 
     if result.status is RunStatus.INVALID or result.status is RunStatus.REFUSED:
         return payload, EXIT_INVALID
     if result.status is RunStatus.FAILED:
         return payload, EXIT_FAILED
     return payload, EXIT_OK
+
+
+def compare_composition(base: Path | None = None) -> dict[str, Any]:
+    """Run the baseline replay and the multi-model composition, and compare them.
+
+    Two in-process runs of two shipped graphs, then a values-only comparison of the
+    insulin instance. Nothing is connected between the models, and the comparison
+    exists to show that adding the second instance changed no baseline value.
+    """
+    root = base or Path(__file__).resolve().parents[2]
+    plan = {
+        "baseline": ("replay/zielinski_replay.json", "zielinski_replay"),
+        "composed": ("replay/zielinski_multimodel.json", "zielinski_baseline"),
+    }
+    payloads: dict[str, dict[str, Any]] = {}
+    codes: dict[str, int] = {}
+    for name, (relative, _instance) in plan.items():
+        path = root / "composition" / relative
+        graph = json.loads(path.read_text(encoding="utf-8"))
+        payload, code = run_graph(graph, base=base)
+        payloads[name] = payload
+        codes[name] = code
+
+    comparison = compatibility.compare_runs(
+        payloads["baseline"],
+        payloads["composed"],
+        baseline_instance=plan["baseline"][1],
+        composed_instance=plan["composed"][1],
+    )
+    return {
+        "contract_version": CONTRACT_VERSION,
+        "baseline": {
+            "graph": plan["baseline"][0],
+            "graph_id": payloads["baseline"].get("graph_id", ""),
+            "status": payloads["baseline"].get("status", ""),
+            "exit_code": codes["baseline"],
+            "instance": plan["baseline"][1],
+        },
+        "composed": {
+            "graph": plan["composed"][0],
+            "graph_id": payloads["composed"].get("graph_id", ""),
+            "status": payloads["composed"].get("status", ""),
+            "exit_code": codes["composed"],
+            "instance": plan["composed"][1],
+        },
+        "comparison": comparison,
+        "composition": payloads["composed"].get("composition", {}),
+        "note": (
+            "The baseline is executed on its own graph; the composed run executes "
+            "the same insulin configuration beside an independently runnable "
+            "second model. The comparison is values-only, because attribution "
+            "fields name the instance and must differ. A successful exit here is "
+            "evidence that the pipeline and the separation work -- it is not "
+            "evidence that either model's numbers are right."
+        ),
+    }
+
+
+def _prompt_failure(interpretation: dict[str, Any]) -> dict[str, Any]:
+    payload = dict(interpretation)
+    clarification = interpretation.get("clarification", ()) or ()
+    payload["status"] = "invalid"
+    payload["error_count"] = max(1, len(clarification))
+    payload["warning_count"] = len(interpretation.get("warnings", ()) or ())
+    payload["results"] = []
+    payload["prompt_interpretation"] = interpretation
+    payload["notes"] = (
+        "The prompt was not executed. The clarification and missing-information "
+        "entries state what is needed; no default, process or scientific value "
+        "was substituted."
+    )
+    payload["diagnostics"] = [
+        {
+            "code": item.get("code", "prompt.clarification"),
+            "severity": "error",
+            "message": item.get("message", ""),
+            "where": ["prompt"],
+            "origin": "runner",
+        }
+        for item in clarification
+    ] + list(interpretation.get("diagnostics", ()) or ())
+    return payload
+
+
+def run_prompt(
+    text: str, base: Path | None = None
+) -> tuple[dict[str, Any], int]:
+    """Interpret, validate, and execute one natural-language prompt.
+
+    The configured graph is the original replay graph plus declared literal
+    inputs. The original graph is also run, so the returned ``prompt_effect``
+    can state whether any published value changed.
+    """
+    interpretation = prompt_interpreter.interpret(text, base=base)
+    if not interpretation.get("ok") or not interpretation.get("validation", {}).get("ok", False):
+        return _prompt_failure(interpretation), EXIT_BAD_INPUT
+
+    manifest, diagnostics = prompt_interpreter.load_manifest(base)
+    if manifest is None:
+        interpretation["ok"] = False
+        interpretation["status"] = "rejected"
+        interpretation["clarification"] = [{
+            "code": "model_unavailable",
+            "message": "The Zielinski model package or manifest could not be read.",
+        }]
+        return _prompt_failure(interpretation), EXIT_RUNNER_ERROR
+
+    graph = prompt_interpreter.build_graph(interpretation, base)
+    validation = prompt_interpreter.validate_graph(graph, manifest)
+    interpretation["validation"] = validation
+    if not validation.get("ok"):
+        interpretation["ok"] = False
+        interpretation["status"] = "needs_clarification"
+        interpretation["clarification"] = list(validation.get("errors", ()))
+        return _prompt_failure(interpretation), EXIT_BAD_INPUT
+
+    root = base or prompt_interpreter.ROOT
+    baseline_graph = json.loads(
+        (root / "composition/replay/zielinski_replay.json").read_text(encoding="utf-8")
+    )
+    baseline, baseline_code = run_graph(baseline_graph, base=base)
+    configured, configured_code = run_graph(graph, base=base)
+    configured["prompt_interpretation"] = interpretation
+    configured["prompt_effect"] = prompt_interpreter.compare_effect(
+        baseline, configured, interpretation
+    )
+    configured["prompt_effect"]["baseline_exit_code"] = baseline_code
+    configured["prompt_effect"]["configured_exit_code"] = configured_code
+    return configured, configured_code
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -556,6 +692,26 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--describe-compatibility",
+        action="store_true",
+        help=(
+            "print the standing of every model in the project against the "
+            "Zielinski insulin simulation as JSON and exit: its classification, "
+            "what was inspected, why it cannot contribute, and which dynamic "
+            "connections the engine actually permits"
+        ),
+    )
+    parser.add_argument(
+        "--compare-composition",
+        action="store_true",
+        help=(
+            "execute the baseline replay and the multi-model composition graph, "
+            "compare the insulin instance's values across the two runs, and "
+            "exit: reports whether adding the independent instance changed any "
+            "baseline value"
+        ),
+    )
+    parser.add_argument(
         "--describe-cross-paper-context",
         metavar="<model_id>[@<version>]",
         help=(
@@ -564,6 +720,47 @@ def main(argv: list[str] | None = None) -> int:
             "share with it, what the compatibility engine says about "
             "composing them, and the papers examined against its declared "
             "gaps"
+        ),
+    )
+    parser.add_argument(
+        "--describe-papers",
+        action="store_true",
+        help=(
+            "print the ingested-paper corpus index as JSON and exit: every "
+            "paper folder under Models/, the model that encodes it if one "
+            "exists, whether that model is registered, and the recorded reason "
+            "for the ones no model encodes. This is not a compatibility "
+            "position -- an entry here is never an executable component"
+        ),
+    )
+    parser.add_argument(
+        "--describe-gaps",
+        action="store_true",
+        help=(
+            "print the scientific gap discovery for the Zielinski insulin "
+            "simulation as JSON and exit: the gaps declared by the model, the "
+            "existing literature that partly informs or merely touches each "
+            "one, the research recommendations, and the project's prior "
+            "literature investigation. No model is executed or modified"
+        ),
+    )
+    parser.add_argument(
+        "--interpret-prompt",
+        metavar="TEXT",
+        help=(
+            "interpret a natural-language request against the Zielinski manifest "
+            "and print the structured interpretation, configuration and validation "
+            "as JSON. Nothing is executed"
+        ),
+    )
+    parser.add_argument(
+        "--run-prompt",
+        metavar="TEXT",
+        help=(
+            "interpret and validate a natural-language request, run the original "
+            "Zielinski replay and the configured replay, and write the configured "
+            "result with its prompt interpretation and an unchanged-baseline "
+            "comparison"
         ),
     )
     parser.add_argument(
@@ -605,6 +802,27 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.write(text)
         return EXIT_OK
 
+    if args.describe_compatibility:
+        payload = compatibility.describe()
+        payload["problems"] = compatibility.problem_messages(compatibility.problems())
+        text = json.dumps(payload, indent=2, default=str) + "\n"
+        if args.result:
+            write_result(Path(args.result), payload)
+        sys.stdout.write(text)
+        return EXIT_OK
+
+    if args.compare_composition:
+        payload = compare_composition(base)
+        text = json.dumps(payload, indent=2, default=str) + "\n"
+        if args.result:
+            write_result(Path(args.result), payload)
+        sys.stdout.write(text)
+        both_ok = (
+            payload["baseline"]["exit_code"] == EXIT_OK
+            and payload["composed"]["exit_code"] == EXIT_OK
+        )
+        return EXIT_OK if both_ok else EXIT_FAILED
+
     if args.describe_cross_paper_context is not None:
         payload, code = cross_paper.context_for(
             args.describe_cross_paper_context, base=base,
@@ -614,6 +832,44 @@ def main(argv: list[str] | None = None) -> int:
             write_result(Path(args.result), payload)
         if code == EXIT_OK or not args.result:
             sys.stdout.write(text)
+        return code
+
+    if args.describe_papers:
+        # Imported lazily: the evidence package is only needed for this question,
+        # and it carries a Zielinski-specific catalogue the runner otherwise
+        # never reads.
+        from .evidence import papers as paper_index
+
+        payload = paper_index.audit()
+        text = json.dumps(payload, indent=2, default=str) + "\n"
+        if args.result:
+            write_result(Path(args.result), payload)
+        sys.stdout.write(text)
+        return EXIT_OK
+
+    if args.describe_gaps:
+        payload = scientific_gaps.describe()
+        payload["problems"] = scientific_gaps.problems(payload)
+        text = json.dumps(payload, indent=2, default=str) + "\n"
+        if args.result:
+            write_result(Path(args.result), payload)
+        sys.stdout.write(text)
+        return EXIT_OK
+
+    if args.interpret_prompt is not None:
+        payload = prompt_interpreter.interpret(args.interpret_prompt, base=base)
+        text = json.dumps(payload, indent=2, default=str) + "\n"
+        if args.result:
+            write_result(Path(args.result), payload)
+        sys.stdout.write(text)
+        return EXIT_OK
+
+    if args.run_prompt is not None:
+        payload, code = run_prompt(args.run_prompt, base=base)
+        text = json.dumps(payload, indent=2, default=str) + "\n"
+        if args.result:
+            write_result(Path(args.result), payload)
+        sys.stdout.write(text)
         return code
 
     if not args.graph:

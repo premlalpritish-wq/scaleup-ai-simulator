@@ -1172,6 +1172,12 @@ class CompositionResult:
     reproducibility: str = ""
     model_versions: Mapping[str, str] = field(default_factory=dict)
     notes: str = ""
+    #: The evidence-backed account of this graph: every connection's standing,
+    #: the evidence for it, what is unresolved, and the scientific validation
+    #: status of each model and of the combination. Present on every document,
+    #: including one that refused before executing. ``{}`` means the caller did
+    #: not build one -- which the report marks as absent rather than as clean.
+    composition_report: Mapping[str, Any] = field(default_factory=dict)
 
     @property
     def errors(self) -> list[ModelDiagnostic]:
@@ -1242,6 +1248,7 @@ class CompositionResult:
             "error_count": len(self.errors),
             "warning_count": len(self.warnings),
             "notes": self.notes,
+            "composition_report": dict(self.composition_report),
         }
 
     def to_json(self, indent: int = 2) -> str:

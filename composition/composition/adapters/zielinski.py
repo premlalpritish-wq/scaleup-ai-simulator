@@ -201,8 +201,12 @@ class ZielinskiAdapter(ModelAdapter):
                 )
                 continue
             location = port_id.split("#", 1)[0]
-            payload_inputs[f"{location}:{port_id}"] = {
-                "quantity_id": port_id,
+            quantity_id = port_id.rsplit("#", 1)[-1]
+            payload_inputs[f"{location}:{quantity_id}"] = {
+                # The worker keys the model's ProcessState by the quantity id,
+                # not by the full graph port id. Passing `node:N01#x` here made
+                # the literal land under a different key and silently do nothing.
+                "quantity_id": quantity_id,
                 "label": port_id,
                 "value": float(literal.value.value),
                 "unit": literal.value.unit,

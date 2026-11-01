@@ -22,6 +22,8 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
 from .adapters import DEFAULT_VERSIONS, adapter_for
+from . import cross_model
+from . import report
 from .contracts import (
     CONTRACT_VERSION,
     CompositionGraph,
@@ -447,6 +449,20 @@ class CompositionEngine:
             self._validate_capabilities(connection, source_port, target_port,
                                         source_manifest, target_manifest)
         )
+
+        # -- cross-model standing (XM-01) -----------------------------------
+        # Last, and only when nothing above has already refused the connection.
+        # The mechanical rules are more specific about *what* is wrong, and a
+        # second diagnostic saying "this boundary is not supported" on top of
+        # "the quantities differ" would be noise. What reaches this point has
+        # passed quantity, unit, component, direction and capability -- which is
+        # exactly the set of connections whose soundness turns on whether the
+        # two models mean the same thing, and the set the engine cannot judge.
+        if not any(d.is_error for d in out):
+            out.extend(
+                self._validate_cross_model(connection, source_port, target_port,
+                                          source_manifest, target_manifest)
+            )
         return out
 
     @staticmethod
@@ -568,6 +584,55 @@ class CompositionEngine:
                     )
                 )
         return out
+
+    @staticmethod
+    def _validate_cross_model(
+        connection: Connection,
+        source_port: PortDefinition,
+        target_port: PortDefinition,
+        source_manifest: ModelManifest,
+        target_manifest: ModelManifest,
+    ) -> list[ModelDiagnostic]:
+        """Does this connection mean anything between *these two* models?
+
+        Everything above is mechanical. This is the semantic half, and it is
+        data rather than inference: :mod:`composition.cross_model` states the
+        position between every registered pair and says why. A boundary the
+        engine already refuses elsewhere contributes nothing here.
+        """
+        verdict = cross_model.check(
+            source_model=source_manifest.model_id,
+            source_port_id=source_port.port_id,
+            source_quantity=source_port.quantity.value,
+            target_model=target_manifest.model_id,
+            target_port_id=target_port.port_id,
+            target_quantity=target_port.quantity.value,
+        )
+        if verdict is None or verdict.permitted:
+            return []
+        return [
+            ModelDiagnostic(
+                code=DiagnosticCode.CONNECTION_CROSS_MODEL_REFUSED,
+                severity=Severity.ERROR,
+                message=(
+                    f"{connection.source.key} -> {connection.target.key} is "
+                    f"dimensionally legal and scientifically unsupported. "
+                    f"{verdict.reason}"
+                ),
+                where=("connection", connection.connection_id),
+                origin=Origin.CONNECTION,
+                remediation=verdict.remediation,
+                model_id=source_manifest.model_id,
+                model_version=source_manifest.model_version,
+                detail={
+                    "stance": verdict.stance,
+                    "quantity_pair": list(verdict.quantity_pair)
+                    if verdict.quantity_pair else None,
+                    "evidence": list(verdict.evidence),
+                    "unresolved": list(verdict.unresolved),
+                },
+            )
+        ]
 
     @staticmethod
     def _validate_capabilities(
@@ -824,6 +889,9 @@ class CompositionEngine:
                 status=status,
                 plan=plan,
                 diagnostics=tuple(diagnostics),
+                composition_report=report.build_report(
+                    graph, loaded, diagnostics, None, execution_attempted=False
+                ),
                 notes=(
                     "The graph was not executed. Every diagnostic above names what "
                     "to change; nothing was silently repaired or partially run."
@@ -871,7 +939,7 @@ class CompositionEngine:
         )
 
         if plan_only:
-            return CompositionResult(
+            planned = CompositionResult(
                 run_id=f"{graph.graph_id}::plan",
                 graph_id=graph.graph_id,
                 contract_version=CONTRACT_VERSION,
@@ -880,6 +948,24 @@ class CompositionEngine:
                 diagnostics=tuple(diagnostics),
                 model_versions=model_versions,
                 notes="Validation and ordering only; nothing was executed.",
+            )
+            # Validation and ordering decide every connection's standing, so a
+            # plan-only run has just as much to report as a full one. It simply
+            # has nothing to say about execution, and the report says that
+            # rather than presenting the absence as a refusal.
+            return CompositionResult(
+                run_id=planned.run_id,
+                graph_id=planned.graph_id,
+                contract_version=planned.contract_version,
+                status=planned.status,
+                plan=planned.plan,
+                diagnostics=planned.diagnostics,
+                model_versions=planned.model_versions,
+                notes=planned.notes,
+                composition_report=report.build_report(
+                    graph, loaded, planned.diagnostics, planned,
+                    execution_attempted=False, plan_only=True,
+                ),
             )
 
         results, provenance_index = self._execute_steps(
@@ -918,6 +1004,13 @@ class CompositionEngine:
             reproducibility=digest,
             model_versions=result.model_versions,
             notes=result.notes,
+            # Built after the digest on purpose: the report is a description of
+            # the run, and folding it into the reproducibility digest would make
+            # the digest change when only the wording of an explanation changed.
+            composition_report=report.build_report(
+                graph, loaded, result.diagnostics, result,
+                execution_attempted=not plan_only,
+            ),
         )
 
     # -- execution internals -------------------------------------------------

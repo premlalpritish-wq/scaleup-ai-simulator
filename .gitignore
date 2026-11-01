@@ -58,6 +58,14 @@ Models/Zielinski/out/
 # A stray result document from a manual run, not part of the project.
 composition/out.json
 
+# --- Held-out validation: per-run scratch ------------------------------------
+# The graphs and result documents written by
+# `python composition/tools/evaluate_heldout_biomass.py`. Regenerable, and ~200 MB,
+# because each result carries the solver's full dense trajectory. The result that
+# matters -- data/ganjave2022/results/evaluation_results.json -- is tracked, and a
+# test fails if the frozen inputs stop matching the digests it records.
+data/ganjave2022/results/runs/
+
 # Regenerate with:  cd composition && python -m composition.evidence --result <path>
 # The curated catalogue is code, not data; this is only the rendered copy.
 composition/evidence_catalogue.json
@@ -75,3 +83,7 @@ composition/model_registry.json
 # the original PDF, and it is a manual developer utility.
 papers/
 *.pdf
+# Staging deployment candidate (generated)\nstaging/
+export/
+export_presets.cfg
+

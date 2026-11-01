@@ -82,6 +82,7 @@ var _data := ReplayData.new()
 var _view: ReplayVesselView
 var _growth: GrowthChart
 var _cascade: CascadeChart
+var _timeline: HSlider
 
 var _status: Label
 var _clock: Label
@@ -98,6 +99,8 @@ var _absent_grid: GridContainer
 var _absent_action: VBoxContainer
 var _evidence: ReplayEvidencePanel
 var _cross: CrossPaperPanel
+var _composition: CompositionPanel
+var _gaps: ScientificGapPanel
 var _proposal_log: RichTextLabel
 var _tree: Tree
 var _detail: RichTextLabel
@@ -147,7 +150,46 @@ func _ready() -> void:
 	_build_ui()
 	_reset_replay_clock()
 	_set_state("Not run yet", "press Run model to execute the model")
-	_start_execution()
+	if OS.get_name() != "Web":
+		_start_execution()
+	else:
+		_btn_start.disabled = true
+		# Load the stored replay data directly from the bundled JSON resource
+		var json_resource = ResourceLoader.load("res://assets/zielinski_replay_result.json", "JSON")
+		if json_resource:
+			var payload = json_resource.get_data()
+			if payload is Dictionary:
+				var data = ReplayData.new()
+				data.load_payload(payload, INSTANCE_ID)
+				_data = data
+				_data.exit_code = 0
+				_executed = true
+				_view.set_fill_fraction(_data.fill_fraction())
+				_growth.set_data(_data)
+				_cascade.set_data(_data)
+				_rebuild_key_panel()
+				_rebuild_tree()
+				_render_diagnostics(payload, 0)
+				_btn_start.disabled = false
+				_btn_pause.disabled = false
+				_progress.visible = false
+				if _timeline != null:
+					if _data.has_trajectory():
+						_timeline.min_value = _data.hours[0]
+						_timeline.max_value = _data.hours[_data.hours.size() - 1]
+						_timeline.visible = true
+					else:
+						_timeline.visible = false
+				# The replay always starts at the documented initial observation.
+				_reset_replay_clock()
+				_status.text = _headline()
+				_playing = true
+				_btn_pause.text = "Pause"
+				_set_state("Playing", "replaying the published growth curve")
+			else:
+				_set_state("Error", "Loaded replay data is not a valid dictionary")
+		else:
+			_set_state("Error", "Could not load replay data resource")
 	_start_cross_paper()
 
 
@@ -254,6 +296,7 @@ func _build_left_column() -> Control:
 	left.add_child(_clock)
 
 	_growth = GrowthChart.new()
+	_growth.scrubbed.connect(_on_scrub)
 	_growth.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.add_child(_growth)
 
@@ -414,6 +457,39 @@ func _build_right_column() -> Control:
 	_cross.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_child(_cross)
 
+	# ---- 7. which models may contribute to this process -----------------
+	# Open by default. The question "what else in this project could join this
+	# simulation, and why doesn't it" is the one this section answers, and a
+	# collapsed section would hide it.
+	right.add_child(_numbered_header("7", "Models assessed against this simulation"))
+	right.add_child(_note(
+		"Every model in the project, assessed against the process this replay "
+		+ "republishes. No model may be dynamically connected to it, and the panel "
+		+ "states why for each. It can also execute the baseline and a multi-model "
+		+ "run side by side, to show that the baseline is unchanged."))
+	_composition = CompositionPanel.new()
+	_composition.name = "CompositionPanel"
+	_composition.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.add_child(_composition)
+	_composition.setup(_runner.python_executable(), _runner.composition_directory())
+	_composition.request()
+
+	# ---- 8. scientific gap discovery ------------------------------------
+	# The feature is a section rather than a new window: it answers a question
+	# about this simulation, and the replay's existing layout already reads from
+	# the model outwards to the library. The analysis is only run when asked, so
+	# opening the replay is not delayed by a second Python call.
+	right.add_child(_numbered_header("8", "Scientific Gap Discovery"))
+	right.add_child(_note(
+		"Ask what scientific information the insulin simulation is still missing, "
+		+ "which papers in the project's library touch each gap, and what to look "
+		+ "for next. The analysis is read-only and does not change the replay."))
+	_gaps = ScientificGapPanel.new()
+	_gaps.name = "ScientificGapPanel"
+	_gaps.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.add_child(_gaps)
+	_gaps.setup(_runner.python_executable(), _runner.composition_directory())
+
 	return right
 
 
@@ -566,9 +642,19 @@ func _transport_row() -> Control:
 	row.add_child(spacer)
 
 	var back := Button.new()
-	back.text = "Back to graph editor"
+	back.text = "Back to workshop" if OS.get_name() == "Web" else "Back to graph editor"
 	back.pressed.connect(_on_back_pressed)
 	row.add_child(back)
+
+	_timeline = HSlider.new()
+	_timeline.name = "TimelineSlider"
+	_timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_timeline.min_value = 1.0
+	_timeline.max_value = 19.0
+	_timeline.step = 0.05
+	_timeline.value = 1.0
+	_timeline.visible = false
+	_timeline.value_changed.connect(_on_scrub)
 
 	_busy = Label.new()
 	_busy.name = "BusyLine"
@@ -584,6 +670,7 @@ func _transport_row() -> Control:
 
 	var stack := VBoxContainer.new()
 	stack.add_child(row)
+	stack.add_child(_timeline)
 	stack.add_child(_progress)
 	stack.add_child(_busy)
 	return stack
@@ -700,8 +787,17 @@ func _finish_execution(code: int) -> void:
 
 	_btn_start.disabled = false
 	_btn_pause.disabled = false
+	if OS.get_name() == "Web":
+		_progress.visible = false
+	if _timeline != null:
+		if _data.has_trajectory():
+			_timeline.min_value = _data.hours[0]
+			_timeline.max_value = _data.hours[_data.hours.size() - 1]
+			_timeline.visible = true
+		else:
+			_timeline.visible = false
 
-	# The replay always starts at the documented initial state.
+	# The replay starts at the documented initial observation.
 	_reset_replay_clock()
 	_status.text = _headline()
 	if code == 0:
@@ -774,7 +870,7 @@ func _on_pause_pressed() -> void:
 
 func _on_reset_pressed() -> void:
 	_playing = false
-	_btn_pause.text = "Pause"
+	_btn_pause.text = "Resume"
 	_reset_replay_clock()
 	_view.reset_camera()
 	_status.text = _headline()
@@ -782,7 +878,10 @@ func _on_reset_pressed() -> void:
 
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/composition.tscn")
+	if OS.get_name() == "Web":
+		get_tree().change_scene_to_file("res://scenes/workshop.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/composition.tscn")
 
 
 func _on_speed_selected(index: int) -> void:
@@ -790,28 +889,44 @@ func _on_speed_selected(index: int) -> void:
 
 
 func _reset_replay_clock() -> void:
-	_hour = 0.0
-	_growth.set_cursor(0.0, false)
-	_view.set_turbidity(0.0)
-	_od_readout.text = "Density: not shown"
-	_od_unit.text = ""
-	_od_note.text = ""
-	_update_clock()
+	if _data != null and _data.has_trajectory():
+		_hour = _data.hours[0]
+		_apply_hour(_hour)
+	else:
+		_hour = 0.0
+		_growth.set_cursor(0.0, false)
+		_view.set_turbidity(0.0)
+		_od_readout.text = "Density: not shown"
+		_od_unit.text = ""
+		_od_note.text = ""
+		_update_clock()
+		if _timeline != null:
+			_timeline.set_value_no_signal(_hour)
 
 
-func _advance(delta: float) -> void:
-	if not _playing or not _executed:
+func _on_scrub(value: float) -> void:
+	if not _executed or not _data.has_trajectory():
 		return
+	var first: float = _data.hours[0]
+	var last: float = _data.hours[_data.hours.size() - 1]
+	_hour = clampf(value, first, last)
+	_apply_hour(_hour)
+
+
+func _apply_hour(h: float) -> void:
+	_hour = h
 	if not _data.has_trajectory():
+		_growth.set_cursor(0.0, false)
+		_view.set_turbidity(0.0)
+		_od_readout.text = "Density: not shown"
+		_od_unit.text = ""
+		_od_note.text = ""
+		_update_clock()
 		return
-	_hour += delta * HOURS_PER_SECOND * _speed_scale
-	var last := _data.hours[_data.hours.size() - 1]
-	if _hour >= last:
-		_hour = last
-		_playing = false
-		_btn_pause.text = "Resume"
-		_set_state("Replay complete", "reached the last published culture hour")
+
 	_growth.set_cursor(_hour, true)
+	if _timeline != null:
+		_timeline.set_value_no_signal(_hour)
 
 	var sample := _data.sample_at(_hour)
 	if sample.has("od") and not is_nan(float(sample["od"])):
@@ -830,6 +945,21 @@ func _advance(delta: float) -> void:
 	_update_clock()
 
 
+func _advance(delta: float) -> void:
+	if not _playing or not _executed:
+		return
+	if not _data.has_trajectory():
+		return
+	_hour += delta * HOURS_PER_SECOND * _speed_scale
+	var last: float = _data.hours[_data.hours.size() - 1]
+	if _hour >= last:
+		_hour = last
+		_playing = false
+		_btn_pause.text = "Resume"
+		_set_state("Replay complete", "reached the last published culture hour")
+	_apply_hour(_hour)
+
+
 func _update_clock() -> void:
 	if not _executed:
 		_clock.text = "Culture time: not available"
@@ -839,8 +969,9 @@ func _update_clock() -> void:
 		return
 	var first := int(_data.hours[0])
 	var last := int(_data.hours[_data.hours.size() - 1])
-	if _hour <= 0.0:
-		_clock.text = "Culture time  0 hours   (before the first published reading, at %d h)" % first
+	if _hour < float(first):
+		_clock.text = "Culture time  %s hours   (before the first published reading, at %d h)" % [
+			ReplayData.format_number(_hour), first]
 	else:
 		_clock.text = "Culture time  %s hours   (within the published %d–%d hour batch)" % [
 			ReplayData.format_number(_hour), first, last]
@@ -920,6 +1051,9 @@ func _on_investigate_pressed(port_id: String) -> void:
 ## uses, and with the same `--result <path>` file contract, so the payload is
 ## read from disk rather than captured from a subprocess's stdout.
 func _start_evidence_catalogue() -> void:
+	if OS.get_name() == "Web":
+		_status.text = "The evidence catalogue requires offline execution."
+		return
 	if _evidence_pid > 0:
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(RESULT_DIR))
@@ -990,6 +1124,8 @@ func _focus_model_id() -> String:
 ## Both are read from result files through the same `--result` contract the
 ## model run and the evidence catalogue use.
 func _start_cross_paper() -> void:
+	if OS.get_name() == "Web":
+		return
 	if _context_pid > 0:
 		return
 	var focus := _focus_model_id()

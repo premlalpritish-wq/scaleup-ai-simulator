@@ -20,6 +20,8 @@ const X_AXIS := "hours of culture"
 const CAPTION := "read from the published growth figure, not calculated; each point +/-%.1f OD"
 
 var data: ReplayData = null
+signal scrubbed(hour: float)
+
 var cursor_hour := 0.0
 var cursor_visible := false
 
@@ -35,7 +37,28 @@ const COL_TEXT := Color(0.72, 0.75, 0.80)
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(0, 198)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+
+func _gui_input(event: InputEvent) -> void:
+	if data == null or not data.has_trajectory():
+		return
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
+			_handle_scrub(mb.position)
+	elif event is InputEventMouseMotion:
+		var mm := event as InputEventMouseMotion
+		if mm.button_mask & MOUSE_BUTTON_MASK_LEFT:
+			_handle_scrub(mm.position)
+
+
+func _handle_scrub(pos: Vector2) -> void:
+	var r := _plot_rect()
+	var t := clampf((pos.x - r.position.x) / maxf(r.size.x, 1.0), 0.0, 1.0)
+	var h := data.hours[0] + t * data.span_h()
+	scrubbed.emit(h)
 
 
 func set_data(d: ReplayData) -> void:

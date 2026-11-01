@@ -3,9 +3,13 @@ extends Control
 ## One model instance on the canvas: a header, its typed ports, and the drag
 ## handles that start and finish connections.
 ##
-## Ports are rendered from the model's manifest, so a port the model does not
-## declare cannot be created here. The port's colour encodes its physical
-## quantity, which is the compatibility key of the whole system.
+## Ports are rendered from the model's own manifest, read across the
+## GDScript -> Python boundary by `ModelRegistry`. The port's colour encodes its
+## physical quantity, which is the compatibility key of the whole system.
+##
+## A port list being drawable says nothing about whether two ports may be
+## connected: that decision is made by the engine, from the manifest, and a
+## refusal comes back as a diagnostic. This node only draws what was declared.
 
 signal port_pressed(instance_id: String, port_id: String, direction: String, port_global: Vector2)
 signal port_released(instance_id: String, port_id: String, direction: String, port_global: Vector2)
@@ -25,8 +29,13 @@ var model_id := ""
 var label := ""
 var role := ""
 var ports: Array[Dictionary] = []
+## Where `ports` came from: "instance", "manifest", "instance_parameterised"
+## or "none". Shown in the inspector so a rendered port list is never mistaken
+## for one the model declared.
+var ports_source := "none"
 var selected := false
 
+var _instance: Dictionary = {}
 var _port_rows: Array[HBoxContainer] = []
 var _port_hit: Array[Control] = []
 var _header: PanelContainer = null
@@ -34,6 +43,7 @@ var _title_label: Label = null
 var _subtitle_label: Label = null
 var _vbox: VBoxContainer = null
 var _registry: ModelRegistry = null
+var _manifest_wired := false
 var _drag_offset := Vector2.ZERO
 
 
@@ -42,49 +52,120 @@ func setup(inst: Dictionary, registry: ModelRegistry) -> void:
 	model_id = str(inst["model_id"])
 	label = str(inst.get("label", model_id))
 	role = str(inst.get("role", ""))
+	_instance = inst
 	_registry = registry
 	ports = _collect_ports(inst)
+	_rebuild()
+	_ensure_manifest()
+
+
+## Ask for this model's manifest if the registry has not read it yet, and redraw
+## the port list when it arrives.
+##
+## The boundary call is synchronous, so on a warm cache this returns having
+## already redrawn. It is wired before the request so that case is not missed.
+func _ensure_manifest() -> void:
+	if _registry == null or _manifest_wired:
+		return
+	if _registry.has_manifest(model_id):
+		return
+	_manifest_wired = true
+	_registry.manifest_loaded.connect(_on_manifest_loaded)
+	_registry.manifest_failed.connect(_on_manifest_failed)
+	_registry.request_manifest(model_id)
+
+
+func _on_manifest_loaded(loaded_model_id: String, _manifest: Dictionary) -> void:
+	if loaded_model_id != model_id:
+		return
+	ports = _collect_ports(_instance)
+	_rebuild()
+
+
+func _on_manifest_failed(failed_model_id: String, _message: String) -> void:
+	# The port list stays as it is. An absent manifest is not a reason to draw
+	# ports the model never declared, and the inspector reports why it is absent.
+	if failed_model_id != model_id:
+		return
+	ports = _collect_ports(_instance)
 	_rebuild()
 
 
 func _collect_ports(inst: Dictionary) -> Array[Dictionary]:
-	"""Ports come from the manifest the Python runner published, falling back to
-	whatever the document carries so a hand-edited graph still opens."""
+	## Where this node's port list came from.
+	##
+	## In precedence order:
+	##
+	##  1. `"instance"`               -- the graph instance configures its own ports;
+	##  2. `"manifest"`               -- the model published these in its manifest;
+	##  3. `"instance_parameterised"` -- the model declares its ports per instance,
+	##                                   so this instance's own parameters are the
+	##                                   only place they can be read from;
+	##  4. `"none"`                   -- nothing declared, or nothing known yet.
+	##
+	## No port is ever inferred from a display name, a label or an identifier, and
+	## a port the model does not declare cannot be drawn here.
 	var out: Array[Dictionary] = []
 	var params: Dictionary = inst.get("parameters", {})
+
+	# 1. Explicit configuration carried by the graph instance, verbatim.
 	if params.has("ports"):
 		for p in params["ports"]:
 			out.append(p)
+		if not out.is_empty():
+			ports_source = "instance"
+			return out
+
+	# 2. The ports the model itself published.
+	if _registry != null:
+		var declared := _registry.ports_for(model_id)
+		if declared.size() > 0:
+			for p in declared:
+				out.append(p)
+			ports_source = "manifest"
+			return out
+
+	# 3. Instance-parameterised ports. Legitimate only for a model that says its
+	#    port set is not fixed at model level. Otherwise an empty list is the
+	#    honest answer -- "this model published nothing" -- and is left alone.
+	if _registry == null or not params.has("system"):
+		ports_source = "none"
 		return out
+	if _registry.port_dependence_for(model_id) != "instance":
+		ports_source = "none"
+		return out
+
 	# A Morris instance declares its control volume inline; derive the same port
 	# surface the runner would, so the canvas matches what will actually run.
-	if params.has("system"):
-		var system: Dictionary = params["system"]
-		for stream in system.get("streams", []):
-			var sid := str(stream["stream_id"])
-			var slabel := str(stream.get("label", sid))
-			if stream.has("amount"):
-				out.append(_port("in:%s:total" % sid, "input", str(stream["amount"].get("kind", "mass")), str(stream["amount"].get("unit", "kg")), "%s: total" % slabel, null, []))
-			for cid in stream.get("mass_fractions", {}):
-				var frac: Dictionary = stream["mass_fractions"][cid]
-				out.append(_port("in:%s:w:%s" % [sid, cid], "input", "mass_fraction", str(frac.get("unit", "1")), "%s: w(%s)" % [slabel, cid], cid, [cid]))
-			for cid in stream.get("component_amounts", {}):
-				var comp: Dictionary = stream["component_amounts"][cid]
-				out.append(_port("in:%s:%s" % [sid, cid], "input", str(comp.get("kind", "mass")), str(comp.get("unit", "kg")), "%s: %s" % [slabel, cid], cid, [cid]))
-		for stream in system.get("streams", []):
-			var sid2 := str(stream["stream_id"])
-			var slabel2 := str(stream.get("label", sid2))
-			var kind := "mass"
-			if stream.has("amount"):
-				kind = str(stream["amount"].get("kind", "mass"))
-			for cid in stream.get("component_amounts", {}):
-				out.append(_port("out:%s:%s" % [sid2, cid], "output", kind, "kg", "%s: %s" % [slabel2, cid], cid, [cid]))
-			for cid in stream.get("mass_fractions", {}):
-				out.append(_port("out:%s:w:%s" % [sid2, cid], "output", "mass_fraction", "1", "%s: w(%s)" % [slabel2, cid], cid, [cid]))
-			out.append(_port("out:%s:total" % sid2, "output", kind, "kg", "%s: total" % slabel2, null, []))
-		out.append(_port("out:residual:total", "output", "mass", "kg", "total mass residual", null, []))
-		for comp in system.get("components", []):
-			out.append(_port("out:residual:%s" % str(comp["component_id"]), "output", "mass", "kg", "%s residual" % str(comp.get("label", comp["component_id"])), str(comp["component_id"]), [str(comp["component_id"])]))
+	var system: Dictionary = params["system"]
+	for stream in system.get("streams", []):
+		var sid := str(stream["stream_id"])
+		var slabel := str(stream.get("label", sid))
+		if stream.has("amount"):
+			out.append(_port("in:%s:total" % sid, "input", str(stream["amount"].get("kind", "mass")), str(stream["amount"].get("unit", "kg")), "%s: total" % slabel, null, []))
+		for cid in stream.get("mass_fractions", {}):
+			var frac: Dictionary = stream["mass_fractions"][cid]
+			out.append(_port("in:%s:w:%s" % [sid, cid], "input", "mass_fraction", str(frac.get("unit", "1")), "%s: w(%s)" % [slabel, cid], cid, [cid]))
+		for cid in stream.get("component_amounts", {}):
+			var comp: Dictionary = stream["component_amounts"][cid]
+			out.append(_port("in:%s:%s" % [sid, cid], "input", str(comp.get("kind", "mass")), str(comp.get("unit", "kg")), "%s: %s" % [slabel, cid], cid, [cid]))
+	for stream in system.get("streams", []):
+		var sid2 := str(stream["stream_id"])
+		var slabel2 := str(stream.get("label", sid2))
+		var kind := "mass"
+		if stream.has("amount"):
+			kind = str(stream["amount"].get("kind", "mass"))
+		for cid in stream.get("component_amounts", {}):
+			var comp: Dictionary = stream["component_amounts"][cid]
+			out.append(_port("out:%s:%s" % [sid2, cid], "output", kind, "kg", "%s: %s" % [slabel2, cid], cid, [cid]))
+		for cid in stream.get("mass_fractions", {}):
+			var frac: Dictionary = stream["mass_fractions"][cid]
+			out.append(_port("out:%s:w:%s" % [sid2, cid], "output", "mass_fraction", "1", "%s: w(%s)" % [slabel2, cid], cid, [cid]))
+		out.append(_port("out:%s:total" % sid2, "output", kind, "kg", "%s: total" % slabel2, null, []))
+	out.append(_port("out:residual:total", "output", "mass", "kg", "total mass residual", null, []))
+	for comp in system.get("components", []):
+		out.append(_port("out:residual:%s" % str(comp["component_id"]), "output", "mass", "kg", "%s residual" % str(comp.get("label", comp["component_id"])), str(comp["component_id"]), [str(comp["component_id"])]))
+	ports_source = "instance_parameterised"
 	return out
 
 

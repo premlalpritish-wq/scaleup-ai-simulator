@@ -317,9 +317,17 @@ class MorrisAdapter(ModelAdapter):
             if port_id in seen:
                 continue
             seen.add(port_id)
-            chain = (origin,)
-            if port_id in transfer_chain:
-                chain = transfer_chain[port_id] + (origin,)
+            # A value that arrived at this instance through a connection keeps
+            # the record of where it came from. The match is the *same declared
+            # variable on the same stream* -- `in:A:w:Cu` -> `out:A:w:Cu` -- and
+            # nothing else. Where an output has no injected counterpart the
+            # chain is left alone rather than assuming a dependency that was
+            # never computed: a solved total is not credited to whatever
+            # happened to be fed in, because this engine does not publish a
+            # dependency map and inventing one would assert a provenance it
+            # cannot show.
+            carried = _carried_chains(spec, transfer_chain, port_id)
+            chain = carried + (origin,) if carried else (origin,)
             extra = item.get("extra") or {}
             if "within_tolerance" in extra and port_id.startswith("out:residual:"):
                 residuals.append(
@@ -516,6 +524,47 @@ class MorrisAdapter(ModelAdapter):
                 )
             )
         return notes
+
+
+def _carried_chains(
+    spec: Mapping[str, Any],
+    transfer_chain: Mapping[str, tuple[ProvenanceRecord, ...]],
+    port_id: str,
+) -> tuple[ProvenanceRecord, ...]:
+    """The chain an output inherits, when it is literally the value that came in.
+
+    Morris publishes ``out:<stream>:<component>`` and ``out:<stream>:w:<component>``
+    and accepts ``in:<stream>:<component>`` and ``in:<stream>:w:<component>``.
+    For those, the output *is* the injected value re-published, so the upstream
+    record travels with it.
+
+    A stream **total** is deliberately excluded. ``out:<stream>:total`` is the
+    sum the balance computes, and crediting it to an upstream total would assert
+    that the sum equals what was fed in -- which is the thing a material balance
+    exists to test, not to assume. A balance that did not close would still
+    carry the upstream chain, and the evidence for closure would be gone.
+
+    Nothing else gets a chain either: where an output has no injected
+    counterpart, the record names only this instance, because this adapter
+    computes no dependency map and inventing one would assert a provenance it
+    cannot show.
+    """
+    if not port_id.startswith("out:"):
+        return ()
+    parts = port_id.split(":")
+    # out:<stream>:<component> -> 3 parts; out:<stream>:w:<component> -> 4.
+    if len(parts) == 3 and parts[2] != "total":
+        pass                                            # a component amount
+    elif len(parts) == 4 and parts[2] == "w":
+        pass                                            # a mass fraction
+    else:
+        return ()                                       # the stream total, or something else
+    mirror = "in:" + port_id[len("out:"):]
+    if mirror not in transfer_chain:
+        return ()
+    if MorrisAdapter._slot_map(spec).get(mirror) is None:
+        return ()
+    return tuple(transfer_chain[mirror])
 
 
 def _quantity_from_morris_kind(kind: str) -> Quantity:

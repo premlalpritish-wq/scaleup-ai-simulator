@@ -5,11 +5,20 @@ extends PanelContainer
 ##
 ## A diagnostic the model reported keeps the model's own severity. The panel does
 ## not reclassify anything -- it renders.
+##
+## Every structured field the runner published is kept: `code`, `severity`,
+## `origin`, `where`, `model_id`, `model_version`, `detail`, `remediation`, and
+## both `message` (origin-prefixed) and `raw_message` (not). A field the runner did
+## not send is shown as absent, never guessed at, so a thin diagnostic stays
+## visibly thin.
 
 var _list: VBoxContainer = null
 var _summary_label: Label = null
 var _count_label: Label = null
 var _on_diagnostic_selected: Callable = Callable()
+## Longest `detail` rendering before it is elided. A traceback belongs in the
+## runner's output, not in a panel row.
+const MAX_DETAIL_CHARS := 1200
 
 
 func setup() -> void:
@@ -52,6 +61,25 @@ func show_diagnostics(payload: Dictionary) -> void:
 	for child in _list.get_children():
 		child.queue_free()
 
+	if not payload.has("diagnostics"):
+		# An absent diagnostics key is not an absence of diagnostics. The runner
+		# publishes the key on every document it writes, so a document without it
+		# did not come from a runner this panel understands, and saying "no
+		# diagnostics" here would read as a clean run.
+		_summary_label.text = "No diagnostics field in this document"
+		_summary_label.modulate = Color(0.95, 0.72, 0.45)
+		_count_label.text = ""
+		var missing := Label.new()
+		missing.text = (
+			"The result document has no 'diagnostics' key. This is not a clean run: "
+			+ "it means the document was not produced by this runner, or it did not "
+			+ "survive the boundary intact."
+		)
+		missing.autowrap_mode = TextServer.AUTOWRAP_WORD
+		missing.modulate = Color(0.95, 0.72, 0.45)
+		_list.add_child(missing)
+		return
+
 	var diagnostics: Array = payload.get("diagnostics", [])
 	var errors := 0
 	var warnings := 0
@@ -77,7 +105,11 @@ func show_diagnostics(payload: Dictionary) -> void:
 
 	if diagnostics.is_empty():
 		var empty := Label.new()
-		empty.text = "No diagnostics. The graph validated and executed without a remark."
+		empty.text = (
+			"No diagnostics. The runner reported none for this run -- which is not "
+			+ "the same as a statement that the result is scientifically correct."
+		)
+		empty.autowrap_mode = TextServer.AUTOWRAP_WORD
 		empty.modulate = Color(0.62, 0.88, 0.62)
 		_list.add_child(empty)
 		return
@@ -126,11 +158,35 @@ func _diagnostic_row(d: Dictionary) -> Control:
 		origin_label.modulate = colour
 		title.add_child(origin_label)
 
+	var model_id := str(d.get("model_id", ""))
+	var model_version := str(d.get("model_version", ""))
+	if model_id != "":
+		# Which model, at which version. A finding about a model's own source is
+		# not the same claim as a finding about the composition.
+		var subject := Label.new()
+		subject.text = model_id if model_version == "" else "%s@%s" % [model_id, model_version]
+		subject.add_theme_font_size_override("font_size", 10)
+		subject.modulate = Color(1, 1, 1, 0.55)
+		title.add_child(subject)
+
 	var message := Label.new()
 	message.text = str(d.get("message", ""))
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD
 	message.add_theme_font_size_override("font_size", 11)
 	vb.add_child(message)
+
+	# `message` carries the origin prefix the runner added; `raw_message` is the
+	# text without it. Showing both keeps a reader from having to strip one to
+	# match a message against a log.
+	var raw := str(d.get("raw_message", ""))
+	var prefixed := str(d.get("message", ""))
+	if raw != "" and raw != prefixed:
+		var raw_label := Label.new()
+		raw_label.text = "unprefixed:  " + raw
+		raw_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		raw_label.add_theme_font_size_override("font_size", 10)
+		raw_label.modulate = Color(1, 1, 1, 0.45)
+		vb.add_child(raw_label)
 
 	var where: Array = d.get("where", [])
 	if not where.is_empty():
@@ -149,6 +205,17 @@ func _diagnostic_row(d: Dictionary) -> Control:
 		fix.modulate = Color(0.72, 0.92, 0.78)
 		vb.add_child(fix)
 
+	var detail: Variant = d.get("detail", {})
+	if detail is Dictionary and not (detail as Dictionary).is_empty():
+		var rendered: String = _render_detail(detail as Dictionary)
+		if rendered != "":
+			var detail_label := Label.new()
+			detail_label.text = rendered
+			detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+			detail_label.add_theme_font_size_override("font_size", 10)
+			detail_label.modulate = Color(1, 1, 1, 0.45)
+			vb.add_child(detail_label)
+
 	if not _on_diagnostic_selected.is_null():
 		row.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.gui_input.connect(func(event):
@@ -157,6 +224,35 @@ func _diagnostic_row(d: Dictionary) -> Control:
 		)
 
 	return row
+
+
+## Render the `detail` mapping the runner attached, one `key: value` per line.
+##
+## Detail is evidence, so it is shown verbatim and elided only when it is too
+## long to read. Nothing here interprets a key: `blocked_by` and `traceback` are
+## displayed, not classified.
+func _render_detail(detail: Dictionary) -> String:
+	var lines := PackedStringArray()
+	for key in detail.keys():
+		var value: Variant = detail[key]
+		if value is Dictionary or value is Array:
+			var text := JSON.stringify(value)
+			if text.length() > MAX_DETAIL_CHARS:
+				text = "%s ... (%d characters)" % [
+					text.substr(0, MAX_DETAIL_CHARS), text.length(),
+				]
+			lines.append("%s: %s" % [str(key), text])
+		else:
+			lines.append("%s: %s" % [str(key), _clip(str(value))])
+	return "detail:\n" + "\n".join(lines)
+
+
+func _clip(text: String) -> String:
+	if text.length() <= MAX_DETAIL_CHARS:
+		return text
+	return "%s ... (%d characters)" % [
+		text.substr(0, MAX_DETAIL_CHARS), text.length(),
+	]
 
 
 func _panel_style(colour: Color) -> StyleBoxFlat:

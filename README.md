@@ -11,6 +11,18 @@ It has three parts:
 | **Composition layer** | `composition/` | A typed, auditable layer that connects independent models through declared ports and runs them in dependency order. It is *import-only*: it never writes into a model package. |
 | **Graph editor** | `scenes/composition.tscn` | A Godot window for editing composition graphs and running them against the Python runner. |
 | **3D evidence replay** | `scenes/replay3d.tscn` | An orbitable schematic of the fermentation vessel plus the model's published growth and purification data. |
+| **Scientific Gap Discovery** | section 8 of the replay | What scientific models and experimental evidence the insulin simulation is missing, which existing papers touch each gap, and what to look for next. |
+| **Prompt to simulation** | `scenes/prompt_simulation.tscn` | Describe the Zielinski insulin run in words; the local interpreter maps it to real model ports, validates the configuration and executes the existing replay. |
+
+`python -m composition.gaps --check` verifies the Scientific Gap Discovery
+analysis against the model, compatibility records and paper library. The full
+write-up, example payload and test results are in
+[`reports/SCIENTIFIC_GAP_DISCOVERY.md`](reports/SCIENTIFIC_GAP_DISCOVERY.md).
+
+**Prompt to simulation** is reached from the workshop header. It uses a local,
+deterministic interpreter rather than a cloud LLM, and validates every mapped
+parameter against the Zielinski manifest before executing. See
+[`reports/PROMPT_TO_SIMULATION.md`](reports/PROMPT_TO_SIMULATION.md).
 
 The two scientific models live under `Models/` and are untouched by the
 composition layer:
@@ -117,12 +129,50 @@ one-line edits are needed. This is a known rough edge, not a design:
 
 ### The graph editor
 
+The **Models** panel above the canvas lists every model the composition layer
+has registered — read from `python -m composition.runner --list-models`, never
+from a list kept in the editor. Press **Add** on a row, fill in what that model
+declares it needs, and the instance appears on the canvas.
+
+Nothing is defaulted on your behalf. A required input with no value blocks the
+Add button and quotes the model's own reason for having no default. Units come
+from the contract, so a value can only be typed in a unit its quantity actually
+has.
+
+Each row also carries the compatibility engine's standing for that model, read
+from `python -m composition.runner --describe-connections`: the engine's own
+reason on the row, and its evidence basis and remediation in the tooltip. A model
+the engine refuses says so before it is added, and the verdicts narrow to the
+models already in the graph. The editor holds no rule of its own — change a
+verdict in `composition/cross_model.py` and the rows change with it. The panel
+also says that its verdicts cover registered models only: an artefact with no
+adapter produces no boundary in the engine's payload, so leaving it out of the
+list is not a judgement about it.
+
+Below it, **Ingested papers** lists every paper folder under `Models/`, read from
+`python -m composition.runner --describe-papers`. Each entry names its source and
+states whether it can execute and whether the engine has a position on it, with
+the recorded reason when it does not. Nothing in that list has an **Add** button:
+a paper with no model is shown so that it cannot be silently absent, not so that
+it can be run.
+
+Two shapes of model, because the models themselves differ:
+
+| Shape | What the form asks for |
+|---|---|
+| **Fixed port set** (Zieliński, Ganjave) | The input ports the manifest marks `required`, with their declared quantity, unit and the model's own explanation. Optional ports are behind a toggle. |
+| **Declared per instance** (Morris) | A control volume. The model publishes no model-level ports until one exists, so the form offers a blank declaration and every declaration the project already ships, with their provenance. |
+
 Press **Run** to validate and execute the loaded graph. Press **Validate only**
 to produce an execution plan without running anything.
 
 Choose a graph from the **Load example** menu. Each shipped example has a
 documented exit code; rejected examples are meant to fail, and their failure
 messages are the demonstration.
+
+**Zieliński replay** opens a separate scene that re-plays one published batch.
+It is a predefined experiment, not a simulation — see the warning at the top of
+this file — and it is not how you reach a model.
 
 ### The 3D evidence replay
 
@@ -140,7 +190,7 @@ a second or two.
 | left-drag on the 3D view | Orbit the camera |
 | mouse wheel | Zoom |
 
-The default view is organised in five sections:
+The default view is organised in six sections:
 
 1. **Reactor and operating conditions** — the vessel, and the stated operating
    conditions.
@@ -153,6 +203,17 @@ The default view is organised in five sections:
 5. **Detailed evidence and technical diagnostics** *(collapsed)* — every one of
    the 196 published values with its exact field names, its method, its source
    and its full provenance chain.
+6. **Related research and connected knowledge** — the other models and papers
+   this project has already ingested, and what the compatibility engine says
+   about composing them with this replay. Open by default: each related model
+   is a card showing its title, versioned reference, source paper, what it
+   shares with this paper, the permitted / conditionally permitted / refused /
+   unresolved verdict read from the engine's declared position, the evidence,
+   and — for refused pairs — the specific difference, what would resolve the
+   gap, and what to do instead. Clicking **Inspect scientific context** opens
+   the full assessment in place. Every card states that the model is context
+   only: none of them drives this replay, and the replay's graph declares no
+   connections.
 
 Every displayed value carries a plain-language provenance label — *stated in the
 source*, *read from a published figure*, *calculated from the available data*,
@@ -341,7 +402,9 @@ and the quantities differ.
   `zoom_to_fit` runs against node sizes that are still being computed, so some
   saved graphs open clipped. This is presentation only and does not affect
   validation, execution or results.
-* The "Add model" palette is a placeholder; load an example graph instead.
+* The **Zieliński replay** button opens a separate, predefined-experiment
+  replay scene. It is deliberately not the way to reach a model; every
+  registered model is added from the palette instead.
 * Saving from the editor rewrites integer literals as floats, which changes the
   reproducibility digest without changing any scientific content.
 * The Godot-side UI acceptance checks (77 assertions) and replay behaviour

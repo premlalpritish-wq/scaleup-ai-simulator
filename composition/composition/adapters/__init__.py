@@ -13,6 +13,7 @@ from typing import Any, Mapping
 
 from ..diagnostics import DiagnosticCode, ModelDiagnostic, Origin, Severity
 from .base import AdapterError, JsonWorker, ModelAdapter
+from .ganjave import GanjaveAdapter
 from .morris import MorrisAdapter
 from .zielinski import ZielinskiAdapter
 
@@ -53,12 +54,28 @@ REGISTRATIONS: tuple[AdapterRegistration, ...] = (
         model_subdirectory="Models/Zielinski",
         worker_module="composition._workers.zielinski_worker",
     ),
+    # Ganjave's identifier is deliberately shorter than the two above. The two
+    # older ones follow `<author><year>.<thing>`; this one follows the brief for
+    # this integration, and the paper's full citation travels in the manifest's
+    # `source_ref` and in every output's provenance chain instead of the id.
+    AdapterRegistration(
+        model_id="ganjave",
+        model_version="0.1.0",
+        factory=GanjaveAdapter,
+        model_subdirectory="Models/Ganjave",
+        worker_module="composition._workers.ganjave_worker",
+    ),
 )
 
 #: model_id -> the default declared version, for graphs that omit it.
 DEFAULT_VERSIONS: Mapping[str, str] = {
     reg.model_id: reg.model_version for reg in REGISTRATIONS
 }
+
+#: Separates a model id from its version in an unambiguous reference. Declared
+#: here, where the registrations are, and reused by the runner's reference
+#: resolution so the two cannot drift apart.
+REFERENCE_SEPARATOR = "@"
 
 
 def model_root(model_subdirectory: str, base: Path | None = None) -> Path:
@@ -118,12 +135,24 @@ def adapter_for(
 
 
 def known_models(base: Path | None = None) -> list[dict[str, Any]]:
+    """Every registered model, whether its package is reachable, and by what name.
+
+    ``reference`` is the unambiguous ``model_id@model_version``; it is assembled
+    from the registration itself and asserts nothing about the model. A
+    ``label`` is deliberately absent: no artefact supplies a human-readable name
+    at model level, and inventing one here would put a string in the UI that
+    nothing can be checked against.
+    """
     out: list[dict[str, Any]] = []
     for registration in REGISTRATIONS:
         root = model_root(registration.model_subdirectory, base)
         out.append({
             "model_id": registration.model_id,
             "model_version": registration.model_version,
+            "reference": (
+                f"{registration.model_id}"
+                f"{REFERENCE_SEPARATOR}{registration.model_version}"
+            ),
             "package": str(root),
             "available": (root / "pyproject.toml").is_file(),
         })

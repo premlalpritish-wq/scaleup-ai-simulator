@@ -48,6 +48,41 @@ MORRIS_KIND_TO_QUANTITY: dict[str, Quantity] = {
     "amount_flow": Quantity.AMOUNT_FLOW,
 }
 
+#: Ganjave ``QuantityKind.value`` -> composition ``Quantity``.
+#:
+#: Two of these mappings are the whole reason the table is spelled out rather
+#: than inherited from the symbol.  Ganjave registers ``g/L`` for a culture
+#: concentration, a half-saturation constant *and* the oxygen saturation
+#: concentration, and ``%`` for a half-saturation constant *and* the
+#: dissolved-oxygen reading.  Only the port surface crosses the boundary, so
+#: only the quantities a port can carry need a home here -- but the
+#: half-saturation kinds are included so that a future port exposing one is a
+#: visible, correct mapping rather than a guess.
+GANJAVE_KIND_TO_QUANTITY: dict[str, Quantity] = {
+    # -- quantities a Ganjave port carries ---------------------------------
+    "time": Quantity.TIME,
+    "volume": Quantity.VOLUME,
+    "volume_flow": Quantity.VOLUME_FLOW,
+    "mass_concentration": Quantity.MASS_CONCENTRATION,
+    # dissolved_oxygen_percent: a percentage of the probe's saturation reading.
+    # DIMENSIONLESS is Zielinski's *generic* percent reading, which is the only
+    # percent this contract has that is not a mass fraction.  It is the closest
+    # correct home, and Ganjave refuses the mass-fraction reading explicitly --
+    # see the connection contract in ``adapters/ganjave_contract.py``.
+    "dissolved_oxygen_percent": Quantity.DIMENSIONLESS,
+    # -- kinds Ganjave does not currently publish as ports ------------------
+    "specific_growth_rate": Quantity.DIMENSIONLESS,
+    "half_saturation_concentration": Quantity.MASS_CONCENTRATION,
+    "half_saturation_dissolved_oxygen": Quantity.DIMENSIONLESS,
+    "yield": Quantity.DIMENSIONLESS,
+    "enzyme_ratio": Quantity.DIMENSIONLESS,
+    "oxygen_transfer_coefficient": Quantity.DIMENSIONLESS,
+    "oxygen_saturation_concentration": Quantity.MASS_CONCENTRATION,
+    "feed_percent_weight_volume": Quantity.DIMENSIONLESS,
+    "optical_density": Quantity.DIMENSIONLESS,
+    "fold": Quantity.DIMENSIONLESS,
+}
+
 #: The reverse direction, used when a Morris manifest declares its ports.
 QUANTITY_TO_MORRIS_KIND: dict[Quantity, str] = {
     q: name for name, q in MORRIS_KIND_TO_QUANTITY.items()
@@ -64,3 +99,17 @@ def quantity_for_zielinski_dimension(dimension: str, unit: str) -> Quantity | No
     if not dimension:
         return None
     return ZIELINSKI_DIMENSION_TO_QUANTITY.get(dimension)
+
+
+def quantity_for_ganjave_kind(kind: str, unit: str) -> Quantity | None:
+    """Map a Ganjave ``QuantityKind.value`` to a contract quantity.
+
+    ``None`` means the model declared a kind this contract has never heard of,
+    which is a reportable gap rather than a reason to guess.  The unit is taken
+    as an argument so the caller can report *which* symbol failed to resolve,
+    but it never decides the quantity: ``g/L`` and ``%`` each denote two or
+    three different things across the two existing models.
+    """
+    if not kind:
+        return None
+    return GANJAVE_KIND_TO_QUANTITY.get(kind)

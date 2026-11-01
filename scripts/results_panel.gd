@@ -130,6 +130,9 @@ func _outputs_tree(outputs: Array) -> Tree:
 	tree.set_column_title(1, "state")
 	tree.set_column_title(2, "value")
 	tree.set_column_title(3, "unit")
+	# The provenance column keeps the runner's own vocabulary intact. A reported
+	# observation and a derived value are different claims, and relabelling
+	# either one here would blur exactly the distinction this column exists for.
 	tree.set_column_title(4, "provenance")
 	tree.hide_root = true
 	tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -142,6 +145,24 @@ func _outputs_tree(outputs: Array) -> Tree:
 		item.set_text(2, str(value.get("display", "")))
 		item.set_text(3, str(value.get("unit", "")))
 		item.set_text(4, str(value.get("provenance", "")))
+
+		# An observed reading and a computed value are told apart by colour as
+		# well as by text, because "the model produced a number" is not a claim
+		# the number was measured.
+		var provenance := str(value.get("provenance", ""))
+		match provenance:
+			"reported", "digitized":
+				item.set_custom_color(4, Color(0.62, 0.88, 0.62))
+			"derived", "solved", "transferred":
+				item.set_custom_color(4, Color(0.62, 0.78, 0.95))
+			"assumed":
+				item.set_custom_color(4, Color(0.95, 0.82, 0.45))
+			"unknown":
+				item.set_custom_color(4, Color(0.95, 0.72, 0.45))
+			_:
+				item.set_custom_color(4, Color(1, 1, 1, 0.5))
+
+		item.set_tooltip_text(4, _provenance_tooltip(value))
 		match str(value.get("state", "")):
 			"number", "zero":
 				item.set_custom_color(1, Color(0.62, 0.88, 0.62))
@@ -165,6 +186,34 @@ func _outputs_tree(outputs: Array) -> Tree:
 		if str(value.get("determination", "")) != "":
 			item.set_tooltip_text(2, "Determination: %s" % str(value["determination"]))
 	return tree
+
+
+## What the runner can say about where one value came from.
+##
+## Every field is printed only if the runner published it. The summary never
+## upgrades a value's standing: a value whose provenance is `unknown` is not
+## described as reported, and a value that ran successfully is not described as
+## scientifically validated.
+func _provenance_tooltip(value: Dictionary) -> String:
+	var lines := PackedStringArray()
+	lines.append("provenance: %s" % str(value.get("provenance", "(absent)")))
+	lines.append("state: %s" % str(value.get("state", "(absent)")))
+	if str(value.get("method", "")) != "":
+		lines.append("method: %s" % str(value["method"]))
+	if str(value.get("source_ref", "")) != "":
+		lines.append("source: %s" % str(value["source_ref"]))
+	if str(value.get("determination", "")) != "":
+		lines.append("determination: %s" % str(value["determination"]))
+	if str(value.get("reason", "")) != "":
+		lines.append("reason: %s" % str(value["reason"]))
+	var conversion: Variant = value.get("conversion", null)
+	if conversion != null and not str(conversion).is_empty():
+		lines.append("conversion: %s" % JSON.stringify(conversion))
+	var chain: Array = value.get("provenance_chain", [])
+	if chain.is_empty():
+		lines.append("")
+		lines.append("no provenance chain was published for this value")
+	return "\n".join(lines)
 
 
 func _residuals(residuals: Array) -> VBoxContainer:

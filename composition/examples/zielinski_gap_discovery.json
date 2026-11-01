@@ -1,0 +1,2509 @@
+{
+  "contract_version": "0.1.0",
+  "target": {
+    "model_id": "zielinski2019.rhi_process",
+    "model_version": "1.0.0",
+    "paper": "Zielinski et al. (2019)",
+    "label": "Zielinski insulin production",
+    "process": "E. coli 20 IBA 1 (CSH50R derivative), plasmid pIBAINS, GMS medium, 4 L in a 7.5 L Bioflo Celligen 310, batch with pH-stat glucose feeding, 30 degC"
+  },
+  "claim_scope": "A gap states what the project's own model, compatibility and paper records do not contain. It is not a claim that no research exists. A paper is never upgraded because it is relevant; every classification below is copied unchanged from composition.compatibility. A gap is 'addressed' only when an assessment explicitly supplies target-context evidence.",
+  "summary": {
+    "gaps": 12,
+    "fully_addressed": 0,
+    "partially_addressed": 2,
+    "unresolved": 12,
+    "no_literature_contribution": 10,
+    "composition_enabling": 4,
+    "validation_improving": 11,
+    "papers_assessed": 7,
+    "by_category": {
+      "model_parameters": 2,
+      "experimental_measurements": 2,
+      "biological_context": 1,
+      "process_conditions": 3,
+      "mathematical_relationships": 2,
+      "independent_validation": 1,
+      "composition_blockers": 1
+    },
+    "by_status": {
+      "addressed": 0,
+      "partially_addressed": 2,
+      "unresolved": 10
+    },
+    "classifications": {
+      "dynamically_composable": 1,
+      "contextually_relevant_not_composable": 5,
+      "incompatible": 1
+    },
+    "evidence_roles": {
+      "baseline_reference": 1,
+      "relevant_literature": 6
+    },
+    "fully_addressed_gaps": [],
+    "partially_addressed_gaps": [
+      "GAP-MP-GROWTH-KINETICS",
+      "GAP-MP-OXYGEN-TRANSFER"
+    ]
+  },
+  "categories": [
+    {
+      "id": "model_parameters",
+      "title": "Model parameters",
+      "question": "Which numbers do the equations need that the model does not have?",
+      "count": 2,
+      "gap_ids": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-GROWTH-KINETICS"
+      ]
+    },
+    {
+      "id": "experimental_measurements",
+      "title": "Experimental measurements",
+      "question": "Which observations or calibrations does the process lack?",
+      "count": 2,
+      "gap_ids": [
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION"
+      ]
+    },
+    {
+      "id": "biological_context",
+      "title": "Biological context",
+      "question": "Is the organism, strain and construct the same as the target?",
+      "count": 1,
+      "gap_ids": [
+        "GAP-BIOLOGICAL-CONTEXT"
+      ]
+    },
+    {
+      "id": "process_conditions",
+      "title": "Process conditions",
+      "question": "Are temperature, pH, medium, feeding and reactor configuration reported?",
+      "count": 3,
+      "gap_ids": [
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME"
+      ]
+    },
+    {
+      "id": "mathematical_relationships",
+      "title": "Mathematical relationships",
+      "question": "Which governing equations or rate laws are absent?",
+      "count": 2,
+      "gap_ids": [
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-MP-OXYGEN-TRANSFER"
+      ]
+    },
+    {
+      "id": "independent_validation",
+      "title": "Independent experimental validation",
+      "question": "Is there evidence that this process reproduces outside one batch?",
+      "count": 1,
+      "gap_ids": [
+        "GAP-INDEPENDENT-VALIDATION"
+      ]
+    },
+    {
+      "id": "composition_blockers",
+      "title": "Missing information preventing composition",
+      "question": "What prevents a legitimate model connection?",
+      "count": 1,
+      "gap_ids": [
+        "GAP-COMPOSITION-BOUNDARY"
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "gap_id": "GAP-MP-DISSOLUTION-VOLUME",
+      "category": "model_parameters",
+      "category_title": "Model parameters",
+      "title": "The dissolution buffer volume is missing",
+      "description": "MP-DISSOLUTION-VOLUME is declared on N04 (Inclusion-body dissolution): sec. 2.6 specifies buffer composition but no volume, and sec. 4.4 reports 5460 AU without a concentration. The dissolved protein concentration is therefore not computable. The blocked targets are dissolved_protein_concentration.",
+      "why_it_matters": "The dissolved protein concentration cannot be computed. The paper reports 5460 AU after dissolving a 17.9 g inclusion-body aliquot, but without a volume the AU reading cannot become a concentration.",
+      "variables": [
+        "N04:dissolved_protein_concentration"
+      ],
+      "model_component": "N04",
+      "parameter_id": "MP-DISSOLUTION-VOLUME",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N04].missing_parameters[MP-DISSOLUTION-VOLUME]",
+          "statement": "sec. 2.6 specifies buffer composition but no volume, and sec. 4.4 reports 5460 AU without a concentration. The dissolved protein concentration is therefore not computable.",
+          "kind": "model_declaration"
+        }
+      ],
+      "missing_evidence": [
+        "The buffer volume used to dissolve the 17.9 g inclusion-body aliquot, or the final solution volume.",
+        "A measured protein concentration or an A280 value with a stated path length for the dissolved inclusion-body solution.",
+        "The mass of buffer salts and the pH adjustment volume, if they change the final volume."
+      ],
+      "search_terms": [
+        "\"inclusion bodies\" dissolution volume \"Escherichia coli\" insulin",
+        "\"NaHCO3\" \"EDTA\" inclusion bodies dissolution",
+        "\"17.9 g\" inclusion bodies dissolution insulin",
+        "\"A280\" dissolved inclusion bodies concentration"
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "The missing volume, or a concentration measurement that makes the reported AU interpretable."
+        ],
+        "why_it_is_needed": "MP-DISSOLUTION-VOLUME blocks dissolved_protein_concentration. Supplying a volume from a different protocol would change the concentration the paper implies.",
+        "suitable_paper_must_report": [
+          "The same inclusion-body isolation and dissolution protocol.",
+          "The buffer composition, its volume and the final solution volume.",
+          "A concentration, A280 with path length, or mass balance that closes the reported AU."
+        ],
+        "what_scaleup_can_do": "Record the volume as a protocol parameter, recompute the concentration transparently, and leave the original AU value untouched.",
+        "gap_id": "GAP-MP-DISSOLUTION-VOLUME",
+        "search_terms": [
+          "\"inclusion bodies\" dissolution volume \"Escherichia coli\" insulin",
+          "\"NaHCO3\" \"EDTA\" inclusion bodies dissolution",
+          "\"17.9 g\" inclusion bodies dissolution insulin",
+          "\"A280\" dissolved inclusion bodies concentration"
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-MP-GROWTH-KINETICS",
+      "category": "model_parameters",
+      "category_title": "Model parameters",
+      "title": "No growth or substrate-uptake parameters for the insulin batch",
+      "description": "MP-GROWTH-KINETICS is declared on N01 (Fermentation): No specific growth rate, saturation constant, maintenance coefficient or feed rate is reported anywhere in the paper. The blocked targets are od600_from_inputs, wet_biomass_from_inputs, glucose_consumed.",
+      "why_it_matters": "The replay can restate the published OD600 curve, but no equation can compute OD600 from the operating conditions. Without growth and uptake parameters the simulation cannot answer a new batch or a scale question; it can only repeat the single published batch.",
+      "variables": [
+        "N01:od600_from_inputs",
+        "N01:wet_biomass_from_inputs",
+        "N01:glucose_consumed"
+      ],
+      "model_component": "N01",
+      "parameter_id": "MP-GROWTH-KINETICS",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N01].missing_parameters[MP-GROWTH-KINETICS]",
+          "statement": "No specific growth rate, saturation constant, maintenance coefficient or feed rate is reported anywhere in the paper.",
+          "kind": "model_declaration"
+        }
+      ],
+      "missing_evidence": [
+        "A specific growth rate measured for E. coli 20 IBA 1 carrying pIBAINS, with the medium and feeding policy that produced it.",
+        "Glucose saturation and maintenance parameters for the same strain, medium and fed-batch mode, with the fitting procedure stated.",
+        "The numerical pH-stat feed law actually used: set point, dead band, pump rate or a reported feed-volume time course."
+      ],
+      "search_terms": [
+        "\"Escherichia coli 20 IBA 1\" growth rate",
+        "\"pIBAINS\" fed-batch growth kinetics",
+        "\"GMS medium\" \"Escherichia coli\" glucose",
+        "\"pH-stat\" glucose feeding \"Escherichia coli\" specific growth rate",
+        "\"Escherichia coli\" maintenance coefficient \"GMS medium\""
+      ],
+      "composition_enabling": true,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "Target-context growth and glucose-uptake parameters, or the raw time series needed to estimate them."
+        ],
+        "why_it_is_needed": "The model declares MP-GROWTH-KINETICS as the reason it cannot compute OD600, wet biomass or glucose consumption from inputs. A relationship from another strain or medium would transfer parameters across experiments and is refused by the identity rules in composition.evidence.sourcing.",
+        "suitable_paper_must_report": [
+          "The host strain (E. coli 20 IBA 1 or an explicit CSH50R derivative) and the plasmid pIBAINS.",
+          "GMS medium, the glucose/proline feed strategy and the pH-stat control settings.",
+          "Either a fitted growth/uptake model with its parameters and fitting method, or the raw OD600, glucose and feed-volume series."
+        ],
+        "what_scaleup_can_do": "Register the reported relationship as a candidate finding, run the existing identity comparison against the target passages, and only then consider declaring a port. No classification is upgraded by relevance alone.",
+        "gap_id": "GAP-MP-GROWTH-KINETICS",
+        "search_terms": [
+          "\"Escherichia coli 20 IBA 1\" growth rate",
+          "\"pIBAINS\" fed-batch growth kinetics",
+          "\"GMS medium\" \"Escherichia coli\" glucose",
+          "\"pH-stat\" glucose feeding \"Escherichia coli\" specific growth rate",
+          "\"Escherichia coli\" maintenance coefficient \"GMS medium\""
+        ]
+      },
+      "status": "partially_addressed",
+      "addressed_by": [],
+      "partly_addressed_by": [
+        "ganjave",
+        "baez",
+        "lin",
+        "nanchen"
+      ],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        },
+        {
+          "key": "ganjave",
+          "display_name": "Ganjave 2022 -- cybernetic fed-batch growth",
+          "citation": "Ganjave et al. (2022), cybernetic growth and fed-batch model, Biotechnology Reports 33:e00694",
+          "paper_folder": "Ganjave",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "partially_addresses",
+          "relevance": "A cybernetic fed-batch growth model with equations (8)-(16) and a fitted Table 2, including biomass, glycerol, complex substrate, dissolved oxygen and volume states.",
+          "contribution": "A cybernetic fed-batch growth model with equations (8)-(16) and a fitted Table 2, including biomass, glycerol, complex substrate, dissolved oxygen and volume states.",
+          "what_information_it_contributes": "A cybernetic fed-batch growth model with equations (8)-(16) and a fitted Table 2, including biomass, glycerol, complex substrate, dissolved oxygen and volume states.",
+          "remains_missing": "It is fitted for glycerol plus a lumped complex substrate in a 3 L vessel over 24 h, not for glucose in GMS under pH-stat feeding, and it reports no target strain or dry-to-wet biomass factor.",
+          "what_remains_missing": "It is fitted for glycerol plus a lumped complex substrate in a 3 L vessel over 24 h, not for glucose in GMS under pH-stat feeding, and it reports no target strain or dry-to-wet biomass factor.",
+          "suitability": "Not evidence-compatible either: a Ganjave finding fails the project's identity rules on substrate, mode and scale before any number is compared.",
+          "evidence_role": "relevant_literature",
+          "model_id": "ganjave",
+          "package": "Models/Ganjave"
+        },
+        {
+          "key": "baez",
+          "display_name": "Baez 2014 -- oxygen-induced recombinant protein expression",
+          "citation": "A. Baez, N. Majdalani, J. Shiloach (2014), Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "paper_folder": "Baez",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "partially_addresses",
+          "relevance": "Prints an exponential feed equation with mu_set, Y_XS, m and S_F, and reports growth at two dissolved-oxygen levels.",
+          "contribution": "Prints an exponential feed equation with mu_set, Y_XS, m and S_F, and reports growth at two dissolved-oxygen levels.",
+          "what_information_it_contributes": "Prints an exponential feed equation with mu_set, Y_XS, m and S_F, and reports growth at two dissolved-oxygen levels.",
+          "remains_missing": "It is W3110 with a soxS-driven construct at 37 degC, not E. coli 20 IBA 1 / pIBAINS at the target conditions; it prints no growth law and no target-context maintenance or saturation parameter.",
+          "what_remains_missing": "It is W3110 with a soxS-driven construct at 37 degC, not E. coli 20 IBA 1 / pIBAINS at the target conditions; it prints no growth law and no target-context maintenance or saturation parameter.",
+          "suitability": "Not evidence-compatible: the strain, construct, induction mode and scale all fail the project's identity dimensions.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Baez"
+        },
+        {
+          "key": "lin",
+          "display_name": "Lin 2001 -- maximum glucose and oxygen uptake capacities",
+          "citation": "H. Y. Lin et al. (2000), Determination of the maximum specific uptake capacities for glucose and oxygen in glucose-limited fed-batch cultivations",
+          "paper_folder": "Lin",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "partially_addresses",
+          "relevance": "A complete glucose-limited fed-batch model: seven printed ODEs, the subsidiary chain, two correction branches, Table I parameters and reported glucose/oxygen uptake capacities.",
+          "contribution": "A complete glucose-limited fed-batch model: seven printed ODEs, the subsidiary chain, two correction branches, Table I parameters and reported glucose/oxygen uptake capacities.",
+          "what_information_it_contributes": "A complete glucose-limited fed-batch model: seven printed ODEs, the subsidiary chain, two correction branches, Table I parameters and reported glucose/oxygen uptake capacities.",
+          "remains_missing": "It is W3110/RB791 in mineral salt medium at 35 degC in a 15 L or 6 L reactor, not E. coli 20 IBA 1 / pIBAINS in GMS at the target conditions; two initial-enzyme factors are never valued.",
+          "what_remains_missing": "It is W3110/RB791 in mineral salt medium at 35 degC in a 15 L or 6 L reactor, not E. coli 20 IBA 1 / pIBAINS in GMS at the target conditions; two initial-enzyme factors are never valued.",
+          "suitability": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Lin"
+        },
+        {
+          "key": "nanchen",
+          "display_name": "Nanchen 2006 -- growth-rate-dependent maintenance and yield",
+          "citation": "A. Nanchen, A. Schicker, U. Sauer (2006), Nonlinear dependency of intracellular fluxes on growth rate in miniaturized continuous cultures",
+          "paper_folder": "nanchen",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "partially_addresses",
+          "relevance": "Pirt's chemostat relation fitted for E. coli MG1655, with a maintenance coefficient and maximal molar yield.",
+          "contribution": "Pirt's chemostat relation fitted for E. coli MG1655, with a maintenance coefficient and maximal molar yield.",
+          "what_information_it_contributes": "Pirt's chemostat relation fitted for E. coli MG1655, with a maintenance coefficient and maximal molar yield.",
+          "remains_missing": "It is a non-recombinant MG1655 in a 10 mL chemostat at 37 degC, not the production strain in GMS under pH-stat feeding; the paper states that maintenance and yield depend on exactly those conditions.",
+          "what_remains_missing": "It is a non-recombinant MG1655 in a 10 mL chemostat at 37 degC, not the production strain in GMS under pH-stat feeding; the paper states that maintenance and yield depend on exactly those conditions.",
+          "suitability": "Not evidence-compatible: the paper states that maintenance and yield depend on temperature, medium and strain, and all three differ.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/nanchen"
+        }
+      ],
+      "prior_investigation": {
+        "port_id": "node:N01#specific_growth_rate",
+        "label": "Growth rate of the culture",
+        "why_it_matters": "Without a specific growth rate the model cannot predict biomass from the feed, cannot integrate growth over time, and cannot say how much substrate the batch consumed.",
+        "resolved": false,
+        "candidate_count": 2,
+        "verdicts": [
+          "incompatible",
+          "incompatible"
+        ],
+        "findings": [
+          {
+            "finding_id": "CF-001",
+            "citation": "Senn H, Lendenmann U, Snozzi M, Hamer G, Egli T (1994). The growth of Escherichia coli in glucose-limited chemostat cultures: a re-examination of the kinetics. Biochim Biophys Acta 1201(3):424-436.",
+            "verdict": "incompatible",
+            "independence": "external",
+            "reasons": [
+              "strain differs from the target process: the candidate states 'Escherichia coli ML30', the target publication states 'E. coli 20 IBA 1 (F- lambda-ara Δ(pro lac) rpsL thi recA cytR), a derivative of E. coli CSH50R'.",
+              "construct differs from the target process: the candidate states 'none; wild type', the target publication states 'plasmid pIBAINS carrying the human insulin gene'.",
+              "mode differs from the target process: the candidate states 'continuous glucose-limited chemostat', the target publication states 'batch culture; glucose fed by pH-stat control using cascade'.",
+              "Non-critical difference in strain: candidate 'Escherichia coli ML30', target 'E. coli 20 IBA 1 (F- lambda-ara Δ(pro lac) rpsL thi recA cytR), a derivative of E. coli CSH50R'.",
+              "Non-critical difference in construct: candidate 'none; wild type', target 'plasmid pIBAINS carrying the human insulin gene'.",
+              "Non-critical difference in product: candidate 'none; no heterologous product expressed', target 'human insulin'.",
+              "Non-critical difference in mode: candidate 'continuous glucose-limited chemostat', target 'batch culture; glucose fed by pH-stat control using cascade'."
+            ],
+            "does_not_resolve": [
+              "The maintenance coefficient ms is not reported by this source.",
+              "No oxygen-transfer parameter (kLa, agitation or air flow) is reported.",
+              "The source itself concludes that published Ks values differ by orders of magnitude because of how far the cells were adapted, and that it is \"probably not possible to describe the kinetic properties of a bacterium with a single set of kinetic 'constants'\"."
+            ]
+          },
+          {
+            "finding_id": "CF-002",
+            "citation": "Smaluch K, Wollenhaupt B, Steinhoff H, Kohlheyer D, Gruenberger A, Dusny C (2023). Assessing the growth kinetics and stoichiometry of Escherichia coli at the single-cell level. Eng Life Sci 23(1):e2100157.",
+            "verdict": "incompatible",
+            "independence": "external",
+            "reasons": [
+              "strain differs from the target process: the candidate states 'Escherichia coli MG1655', the target publication states 'E. coli 20 IBA 1 (F- lambda-ara Δ(pro lac) rpsL thi recA cytR), a derivative of E. coli CSH50R'.",
+              "medium differs from the target process: the candidate states 'M9 minimal medium', the target publication states 'GMS medium'.",
+              "mode differs from the target process: the candidate states 'microfluidic perfusion and agarose-pad single-cell cultivation', the target publication states 'batch culture; glucose fed by pH-stat control using cascade'.",
+              "Non-critical difference in strain: candidate 'Escherichia coli MG1655', target 'E. coli 20 IBA 1 (F- lambda-ara Δ(pro lac) rpsL thi recA cytR), a derivative of E. coli CSH50R'.",
+              "Non-critical difference in medium: candidate 'M9 minimal medium', target 'GMS medium'.",
+              "Non-critical difference in mode: candidate 'microfluidic perfusion and agarose-pad single-cell cultivation', target 'batch culture; glucose fed by pH-stat control using cascade'.",
+              "Non-critical difference in scale_l: candidate '606 pL', target 'Bioflo Celligen 310 7.5 L fermenter, starting volume 4 L'."
+            ],
+            "does_not_resolve": [
+              "The measurement is a single-cell rate, which is not the population rate the 2019 process observed.",
+              "The source reports no saturation constant of its own; the value it cites for comparison belongs to another paper.",
+              "Nothing here speaks to a stirred-tank culture at litre scale."
+            ]
+          }
+        ],
+        "missing_information_required": [
+          "For CF-001: a measurement with strain differs from the target process: the candidate states 'Escherichia coli ML30', the target publication states 'E. coli 20 IBA 1 (F- lambda-ara Δ(pro lac) rpsL thi recA cytR), a derivative of E. coli CSH50R'..",
+          "For CF-001: a measurement with construct differs from the target process: the candidate states 'none; wild type', the target publication states 'plasmid pIBAINS carrying the human insulin gene'..",
+          "For CF-001: a measurement with mode differs from the target process: the candidate states 'continuous glucose-limited chemostat', the target publication states 'batch culture; glucose fed by pH-stat control using cascade'..",
+          "For CF-002: a measurement with strain differs from the target process: the candidate states 'Escherichia coli MG1655', the target publication states 'E. coli 20 IBA 1 (F- lambda-ara Δ(pro lac) rpsL thi recA cytR), a derivative of E. coli CSH50R'..",
+          "For CF-002: a measurement with medium differs from the target process: the candidate states 'M9 minimal medium', the target publication states 'GMS medium'..",
+          "For CF-002: a measurement with mode differs from the target process: the candidate states 'microfluidic perfusion and agarose-pad single-cell cultivation', the target publication states 'batch culture; glucose fed by pH-stat control using cascade'.."
+        ],
+        "note": "This is the project's existing literature investigation, reused as recorded. It did not resolve the target gap; a finding here is a proposal with a verdict, never a value adopted by the model."
+      }
+    },
+    {
+      "gap_id": "GAP-MP-A280-SOLUTION",
+      "category": "experimental_measurements",
+      "category_title": "Experimental measurements",
+      "title": "The A280 values and path length needed by two printed formulas are absent",
+      "description": "MP-A280-SOLUTION is declared on N06/N07 (Citraconylation + Trypsinization): The citraconylation and trypsin dosing formulas (secs. 2.8, 2.9) require A280nm, but the paper reports neither the A280 of any solution nor the path length. The blocked targets are citraconic_anhydride_volume_from_formula, trypsin_volume_from_formula.",
+      "why_it_matters": "The citraconylation and trypsin dosing formulas require A280nm, but the paper reports neither the A280 of any solution nor the cuvette path length. Two printed formulas therefore cannot be executed.",
+      "variables": [
+        "N06:citraconic_anhydride_volume_from_formula",
+        "N06:trypsin_volume_from_formula",
+        "N07:citraconic_anhydride_volume_from_formula",
+        "N07:trypsin_volume_from_formula"
+      ],
+      "model_component": "N06/N07",
+      "parameter_id": "MP-A280-SOLUTION",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N06/N07].missing_parameters[MP-A280-SOLUTION]",
+          "statement": "The citraconylation and trypsin dosing formulas (secs. 2.8, 2.9) require A280nm, but the paper reports neither the A280 of any solution nor the path length.",
+          "kind": "model_declaration"
+        }
+      ],
+      "missing_evidence": [
+        "The A280 of the citraconylated solution and of the trypsin-treated solution, with the wavelength and path length.",
+        "The dilution or concentration step applied before each absorbance reading.",
+        "A measured protein concentration that can replace the ambiguous absorbance term in the printed formulas."
+      ],
+      "search_terms": [
+        "\"A280\" path length citraconylation insulin",
+        "\"trypsin\" \"A280\" insulin precursor",
+        "\"citraconic anhydride\" insulin A280 volume",
+        "\"insulin\" \"trypsin\" absorbance units dosing"
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A280 readings with their path length, or a concentration measurement that makes the printed dosing rules executable."
+        ],
+        "why_it_is_needed": "MP-A280-SOLUTION blocks citraconic_anhydride_volume_from_formula and trypsin_volume_from_formula. The model already refuses these equations rather than guessing the missing term.",
+        "suitable_paper_must_report": [
+          "The same citraconylation and trypsinization steps.",
+          "A280 values, wavelength, path length and any dilution.",
+          "Enough detail to reproduce the reagent volume from the printed formula."
+        ],
+        "what_scaleup_can_do": "Record the measurement and re-run the two refused equations with traceable inputs, keeping the original refusal visible until the input is actually supplied.",
+        "gap_id": "GAP-MP-A280-SOLUTION",
+        "search_terms": [
+          "\"A280\" path length citraconylation insulin",
+          "\"trypsin\" \"A280\" insulin precursor",
+          "\"citraconic anhydride\" insulin A280 volume",
+          "\"insulin\" \"trypsin\" absorbance units dosing"
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-MP-AU-CALIBRATION",
+      "category": "experimental_measurements",
+      "category_title": "Experimental measurements",
+      "title": "Absorbance units cannot be converted to insulin mass or activity",
+      "description": "MP-AU-CALIBRATION is declared on N15 (Final product characterization): sec. 2.18 states the spectrophotometer was calibrated with water. No path length and no extinction coefficient are given, so the AU scale is instrument-relative and cannot be converted to grams, molarity or IU. The blocked targets are insulin_mass_from_au, stage_recovery_percent, final_activity_from_au.",
+      "why_it_matters": "Every downstream mass, recovery and activity claim depends on an AU-to-mass conversion that does not exist. The paper calibrated the spectrophotometer with water and reports no path length or extinction coefficient, so the AU scale is instrument-relative.",
+      "variables": [
+        "N15:insulin_mass_from_au",
+        "N15:stage_recovery_percent",
+        "N15:final_activity_from_au"
+      ],
+      "model_component": "N15",
+      "parameter_id": "MP-AU-CALIBRATION",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N15].missing_parameters[MP-AU-CALIBRATION]",
+          "statement": "sec. 2.18 states the spectrophotometer was calibrated with water. No path length and no extinction coefficient are given, so the AU scale is instrument-relative and cannot be converted to grams, molarity or IU.",
+          "kind": "model_declaration"
+        }
+      ],
+      "missing_evidence": [
+        "The calibration standard, path length and extinction coefficient used to convert A280 or AU into protein mass.",
+        "An AU-to-mass or AU-to-IU conversion measured for this insulin construct and matrix, with its uncertainty.",
+        "The assay that produced the reported IU/L activity and its relationship, if any, to the AU measurements."
+      ],
+      "search_terms": [
+        "\"A280\" insulin extinction coefficient",
+        "\"absorbance units\" insulin calibration \"Escherichia coli\"",
+        "\"RP-HPLC\" insulin quantification absorbance units",
+        "\"insulin\" \"IU\" \"A280\" conversion",
+        "\"recombinant human insulin\" quantification \"AU\""
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A documented calibration from the absorbance scale used in this process to protein mass or IU."
+        ],
+        "why_it_is_needed": "MP-AU-CALIBRATION blocks insulin_mass_from_au, stage_recovery_percent and final_activity_from_au. Without it the model can compare AU values but cannot claim a mass yield.",
+        "suitable_paper_must_report": [
+          "The same insulin construct and sample matrix, or a standard that is explicitly applicable.",
+          "Path length, wavelength, extinction coefficient and standard curve.",
+          "The link between the AU measurement and the activity assay."
+        ],
+        "what_scaleup_can_do": "Store the calibration as a separate evidence record and apply it only in a labelled calculation; the replay's reported AU values remain reported, not converted.",
+        "gap_id": "GAP-MP-AU-CALIBRATION",
+        "search_terms": [
+          "\"A280\" insulin extinction coefficient",
+          "\"absorbance units\" insulin calibration \"Escherichia coli\"",
+          "\"RP-HPLC\" insulin quantification absorbance units",
+          "\"insulin\" \"IU\" \"A280\" conversion",
+          "\"recombinant human insulin\" quantification \"AU\""
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-BIOLOGICAL-CONTEXT",
+      "category": "biological_context",
+      "category_title": "Biological context",
+      "title": "No target-context biological characterisation in the assessed library",
+      "description": "Every assessed candidate differs from the target on organism, strain or construct. The compatibility records state, per candidate, that the organism is a different E. coli lineage or that the construct is absent or different. The baseline paper is the only record of E. coli 20 IBA 1 carrying pIBAINS, and it is not an independent source for its own gaps.",
+      "why_it_matters": "A parameter or relationship measured in a different strain or construct cannot be entered as target-context evidence. The compatibility engine refuses such a candidate before any number is compared, so without a matched biological source no candidate can reach evidence_compatible or be composed.",
+      "variables": [
+        "zielinski2019.rhi_process:organism",
+        "zielinski2019.rhi_process:construct",
+        "N01:operating_conditions"
+      ],
+      "model_component": "zielinski2019.rhi_process",
+      "parameter_id": "",
+      "existing_evidence": [
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "TARGET_PROCESS",
+          "statement": "The target process is recorded as: E. coli 20 IBA 1 (CSH50R derivative), plasmid pIBAINS, GMS medium, 4 L in a 7.5 L Bioflo Celligen 310, batch with pH-stat glucose feeding, 30 degC",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['ganjave'].blockers/evidence_check",
+          "statement": "Different substrate: glycerol plus a lumped complex substrate, fitted with one yield. Zielinski's carbon source is glucose in GMS medium. Different biomass basis: Ganjave's biomass is dry-cell weight; Zielinski reports wet biomass. No source here prints the factor between them. Different scale and mode: a 3 L vessel over 24 h of feeding, against a 4 L / 7.5 L reactor with pH-stat feeding. No port pair is permitted: every Zielinski <-> Ganjave pairing is mechanically legal and scientifically unsupported, so the policy fails closed.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['morris'].blockers/evidence_check",
+          "statement": "Zielinski publishes process roles, not conserved chemical entities: no stream of its own carries a component amount or a mass fraction. A Morris port must name a component, and the names cannot agree; a control-volume total would require every entering unit to be attributable to one, and it is not. The engine already refuses this boundary (component identity), so the position is enforced rather than merely declared.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['baez'].blockers/evidence_check",
+          "statement": "Different strain (W3110) and a different construct. Different induction mechanism: the paper's product is driven by a dissolved-oxygen step to 300% air saturation; Zielinski induces with IPTG. Different operating policy: an exponential feed in a 5 L reactor at 37 degC, against pH-stat feeding in a 4 L / 7.5 L reactor at 30 degC. No interface: the package is deliberately unregistered, publishes no ports and declares no supplyable quantity.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['lin'].blockers/evidence_check",
+          "statement": "Different strain: K12 W3110 / RB791, with plasmids present but uninduced. Zielinski's culture is 20 IBA 1 carrying pIBAINS and producing insulin. Different medium, reactor and temperature: mineral salt medium, 15 L / 6 L Biostat ED, 35 degC, against GMS, a 7.5 L Celligen 310 and 30 degC. Its ports carry the state of its own culture (mu, qO, DOT, X, S). Handing those to Zielinski would transfer one experiment's state into another's. No interface: standalone and unregistered, with five constants the paper never values.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['nanchen'].blockers/evidence_check",
+          "statement": "Different strain: non-recombinant MG1655, not 20 IBA 1 / pIBAINS. Different mode: steady-state continuous culture, not a fed-batch trajectory with pH-stat feeding. Different scale and temperature: a 10 mL mini-scale chemostat at 37 degC. Its maintenance coefficient and maximal yield are fitted for that chemostat and that medium. Transferring them would silently re-parameterise the insulin process. No interface: standalone and unregistered.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['simensen'].blockers/evidence_check",
+          "statement": "No shared quantity: Zielinski reports no biomass composition, and the dataset has no input port to receive one of its outputs. Different condition: MG1655 in M9 with 2% glucose at 37 degC, and the paper states that biomass composition is condition-dependent. It is a static table. A dataset cannot be executed as a dynamic component.",
+          "kind": "compatibility_record"
+        }
+      ],
+      "missing_evidence": [
+        "An independent characterisation of E. coli 20 IBA 1 carrying pIBAINS in GMS medium, not merely a restatement of the baseline paper.",
+        "Plasmid burden, stability and induction response for pIBAINS in this host.",
+        "A physiological parameter set measured for this strain and construct under the target process conditions, if a candidate model states which quantity it needs."
+      ],
+      "search_terms": [
+        "\"Escherichia coli 20 IBA 1\" \"pIBAINS\"",
+        "\"Escherichia coli 20\" \"CSH50R\" insulin",
+        "\"pIBAINS\" plasmid stability \"Escherichia coli\"",
+        "\"Escherichia coli 20\" GMS medium physiology"
+      ],
+      "composition_enabling": true,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A biological characterisation made on the same host and construct as the target, independent of Zielinski et al. (2019)."
+        ],
+        "why_it_is_needed": "The compatibility engine's identity dimensions require the same organism, strain, construct, medium and mode. No assessed candidate satisfies them, so the target's own biology remains a single-paper record.",
+        "suitable_paper_must_report": [
+          "E. coli 20 IBA 1 or an explicitly identified CSH50R derivative.",
+          "The plasmid pIBAINS and its induction/expression behaviour.",
+          "GMS medium and the fed-batch operating policy, or a clear statement of which dimensions differ."
+        ],
+        "what_scaleup_can_do": "Run the existing identity comparison against the new source and record which dimensions match. Only a full match could support a compatibility reclassification; relevance alone cannot.",
+        "gap_id": "GAP-BIOLOGICAL-CONTEXT",
+        "search_terms": [
+          "\"Escherichia coli 20 IBA 1\" \"pIBAINS\"",
+          "\"Escherichia coli 20\" \"CSH50R\" insulin",
+          "\"pIBAINS\" plasmid stability \"Escherichia coli\"",
+          "\"Escherichia coli 20\" GMS medium physiology"
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        },
+        {
+          "key": "ganjave",
+          "display_name": "Ganjave 2022 -- cybernetic fed-batch growth",
+          "citation": "Ganjave et al. (2022), cybernetic growth and fed-batch model, Biotechnology Reports 33:e00694",
+          "paper_folder": "Ganjave",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "A second E. coli fed-batch model with a declared K-12 lineage and a documented substrate context.",
+          "contribution": "A second E. coli fed-batch model with a declared K-12 lineage and a documented substrate context.",
+          "what_information_it_contributes": "A second E. coli fed-batch model with a declared K-12 lineage and a documented substrate context.",
+          "remains_missing": "The organism is not E. coli 20 IBA 1 and the construct is not pIBAINS; the compatibility assessment records the strain and substrate mismatch as blockers.",
+          "what_remains_missing": "The organism is not E. coli 20 IBA 1 and the construct is not pIBAINS; the compatibility assessment records the strain and substrate mismatch as blockers.",
+          "suitability": "Not evidence-compatible either: a Ganjave finding fails the project's identity rules on substrate, mode and scale before any number is compared.",
+          "evidence_role": "relevant_literature",
+          "model_id": "ganjave",
+          "package": "Models/Ganjave"
+        },
+        {
+          "key": "morris",
+          "display_name": "Morris 2011 -- non-reacting material balances",
+          "citation": "R. Morris, G. Geiger, L. Fine (2011), material balances (Chapter 4)",
+          "paper_folder": "Morris",
+          "classification": "incompatible",
+          "classification_number": 4,
+          "classification_label": "incompatible",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "A generic balance method, not an organism model.",
+          "contribution": "A generic balance method, not an organism model.",
+          "what_information_it_contributes": "A generic balance method, not an organism model.",
+          "remains_missing": "It contributes no biological context for E. coli 20 IBA 1 or pIBAINS and cannot represent a reaction.",
+          "what_remains_missing": "It contributes no biological context for E. coli 20 IBA 1 or pIBAINS and cannot represent a reaction.",
+          "suitability": "Not evidence-compatible: a balance is a method, not a measurement of this process, so it has no value to check.",
+          "evidence_role": "relevant_literature",
+          "model_id": "morris2011.material_balance",
+          "package": "Models/Morris"
+        },
+        {
+          "key": "baez",
+          "display_name": "Baez 2014 -- oxygen-induced recombinant protein expression",
+          "citation": "A. Baez, N. Majdalani, J. Shiloach (2014), Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "paper_folder": "Baez",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "Recombinant protein production in E. coli, with a documented host and oxygen-induced expression mechanism.",
+          "contribution": "Recombinant protein production in E. coli, with a documented host and oxygen-induced expression mechanism.",
+          "what_information_it_contributes": "Recombinant protein production in E. coli, with a documented host and oxygen-induced expression mechanism.",
+          "remains_missing": "Different strain (W3110), different construct and the opposite induction mechanism (dissolved oxygen, not IPTG), so it is not context-matched evidence.",
+          "what_remains_missing": "Different strain (W3110), different construct and the opposite induction mechanism (dissolved oxygen, not IPTG), so it is not context-matched evidence.",
+          "suitability": "Not evidence-compatible: the strain, construct, induction mode and scale all fail the project's identity dimensions.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Baez"
+        },
+        {
+          "key": "lin",
+          "display_name": "Lin 2001 -- maximum glucose and oxygen uptake capacities",
+          "citation": "H. Y. Lin et al. (2000), Determination of the maximum specific uptake capacities for glucose and oxygen in glucose-limited fed-batch cultivations",
+          "paper_folder": "Lin",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "A glucose-limited E. coli fed-batch context with a plasmid present but uninduced.",
+          "contribution": "A glucose-limited E. coli fed-batch context with a plasmid present but uninduced.",
+          "what_information_it_contributes": "A glucose-limited E. coli fed-batch context with a plasmid present but uninduced.",
+          "remains_missing": "The strain, construct and induction state differ: W3110/RB791 with an uninduced plasmid, not E. coli 20 IBA 1 producing insulin from pIBAINS.",
+          "what_remains_missing": "The strain, construct and induction state differ: W3110/RB791 with an uninduced plasmid, not E. coli 20 IBA 1 producing insulin from pIBAINS.",
+          "suitability": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Lin"
+        },
+        {
+          "key": "nanchen",
+          "display_name": "Nanchen 2006 -- growth-rate-dependent maintenance and yield",
+          "citation": "A. Nanchen, A. Schicker, U. Sauer (2006), Nonlinear dependency of intracellular fluxes on growth rate in miniaturized continuous cultures",
+          "paper_folder": "nanchen",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "A wild-type E. coli K-12 growth-characterisation context.",
+          "contribution": "A wild-type E. coli K-12 growth-characterisation context.",
+          "what_information_it_contributes": "A wild-type E. coli K-12 growth-characterisation context.",
+          "remains_missing": "No recombinant construct and not E. coli 20 IBA 1 / pIBAINS, so it cannot support a target-context biological parameter.",
+          "what_remains_missing": "No recombinant construct and not E. coli 20 IBA 1 / pIBAINS, so it cannot support a target-context biological parameter.",
+          "suitability": "Not evidence-compatible: the paper states that maintenance and yield depend on temperature, medium and strain, and all three differ.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/nanchen"
+        },
+        {
+          "key": "simensen",
+          "display_name": "Simensen 2022 -- measured E. coli biomass composition",
+          "citation": "V. Simensen et al. (2022), Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+          "paper_folder": "Simensen",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "A measured macromolecular biomass composition of E. coli in g gCDW-1.",
+          "contribution": "A measured macromolecular biomass composition of E. coli in g gCDW-1.",
+          "what_information_it_contributes": "A measured macromolecular biomass composition of E. coli in g gCDW-1.",
+          "remains_missing": "It is MG1655 in M9 with 2% glucose at 37 degC, not E. coli 20 IBA 1 / pIBAINS in GMS, and the paper states that composition is condition-dependent.",
+          "what_remains_missing": "It is MG1655 in M9 with 2% glucose at 37 degC, not E. coli 20 IBA 1 / pIBAINS in GMS, and the paper states that composition is condition-dependent.",
+          "suitability": "Not evidence-compatible as supplied: the condition differs, and no Zielinski output is a biomass composition to compare against.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Simensen"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-MP-CULTURE-MEDIUM",
+      "category": "process_conditions",
+      "category_title": "Process conditions",
+      "title": "GMS medium composition is cited, not enumerated",
+      "description": "MP-CULTURE-MEDIUM is declared on N01 (Fermentation): GMS medium is cited to WO96/20724 A1 and never enumerated in this paper, so the substrate concentrations needed for any growth or substrate balance are unavailable. The blocked targets are glucose_initial_concentration, nutrient_balance.",
+      "why_it_matters": "No growth or substrate balance can be closed without the medium's initial glucose, nitrogen, phosphate and trace-element concentrations. The paper points to WO96/20724 A1 instead of printing the recipe.",
+      "variables": [
+        "N01:glucose_initial_concentration",
+        "N01:nutrient_balance"
+      ],
+      "model_component": "N01",
+      "parameter_id": "MP-CULTURE-MEDIUM",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N01].missing_parameters[MP-CULTURE-MEDIUM]",
+          "statement": "GMS medium is cited to WO96/20724 A1 and never enumerated in this paper, so the substrate concentrations needed for any growth or substrate balance are unavailable.",
+          "kind": "model_declaration"
+        }
+      ],
+      "missing_evidence": [
+        "The full GMS medium composition, including glucose, nitrogen, phosphate, trace elements and the proline/thiamine/tetracycline supplements used for the inoculum.",
+        "The 40% glucose and 12 mg/mL proline feed-solution composition and the concentrations actually delivered.",
+        "Which medium components were measured, and how the 70-120 mg/dL and 30-50 mg/dL glucose bands were maintained."
+      ],
+      "search_terms": [
+        "\"GMS medium\" \"Escherichia coli\" composition",
+        "\"GMS medium\" glucose proline \"Escherichia coli 20\"",
+        "\"WO9620724\" GMS medium composition",
+        "\"pH-stat\" \"GMS medium\" \"Escherichia coli\""
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "An enumerated GMS recipe or a measurement of the medium's substrate concentrations in this exact process."
+        ],
+        "why_it_is_needed": "MP-CULTURE-MEDIUM blocks glucose_initial_concentration and nutrient_balance. A medium from a different E. coli process cannot be substituted without changing the experiment.",
+        "suitable_paper_must_report": [
+          "The complete GMS recipe, or an explicit citation to an enumerated formulation plus the supplements used.",
+          "Glucose and proline concentrations in the batch and feed.",
+          "The strain and process context in which the recipe was used."
+        ],
+        "what_scaleup_can_do": "Attach the recipe as a source-qualified evidence record and check whether every component name and concentration has a target-context match before any balance is attempted.",
+        "gap_id": "GAP-MP-CULTURE-MEDIUM",
+        "search_terms": [
+          "\"GMS medium\" \"Escherichia coli\" composition",
+          "\"GMS medium\" glucose proline \"Escherichia coli 20\"",
+          "\"WO9620724\" GMS medium composition",
+          "\"pH-stat\" \"GMS medium\" \"Escherichia coli\""
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        },
+        {
+          "key": "baez",
+          "display_name": "Baez 2014 -- oxygen-induced recombinant protein expression",
+          "citation": "A. Baez, N. Majdalani, J. Shiloach (2014), Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "paper_folder": "Baez",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "Reports a feed solution containing 282 g/L yeast extract and 141 g/L glucose.",
+          "contribution": "Reports a feed solution containing 282 g/L yeast extract and 141 g/L glucose.",
+          "what_information_it_contributes": "Reports a feed solution containing 282 g/L yeast extract and 141 g/L glucose.",
+          "remains_missing": "That is not GMS medium, and it is not the target's 40% glucose / 12 mg/mL proline feed.",
+          "what_remains_missing": "That is not GMS medium, and it is not the target's 40% glucose / 12 mg/mL proline feed.",
+          "suitability": "Not evidence-compatible: the strain, construct, induction mode and scale all fail the project's identity dimensions.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Baez"
+        },
+        {
+          "key": "lin",
+          "display_name": "Lin 2001 -- maximum glucose and oxygen uptake capacities",
+          "citation": "H. Y. Lin et al. (2000), Determination of the maximum specific uptake capacities for glucose and oxygen in glucose-limited fed-batch cultivations",
+          "paper_folder": "Lin",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "An enumerated phosphate-buffered mineral salt medium and feed solution, with glucose and (NH4)2SO4 concentrations.",
+          "contribution": "An enumerated phosphate-buffered mineral salt medium and feed solution, with glucose and (NH4)2SO4 concentrations.",
+          "what_information_it_contributes": "An enumerated phosphate-buffered mineral salt medium and feed solution, with glucose and (NH4)2SO4 concentrations.",
+          "remains_missing": "That is a different medium from GMS and does not supply the target's medium composition or its 40% glucose / proline feed.",
+          "what_remains_missing": "That is a different medium from GMS and does not supply the target's medium composition or its 40% glucose / proline feed.",
+          "suitability": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Lin"
+        },
+        {
+          "key": "nanchen",
+          "display_name": "Nanchen 2006 -- growth-rate-dependent maintenance and yield",
+          "citation": "A. Nanchen, A. Schicker, U. Sauer (2006), Nonlinear dependency of intracellular fluxes on growth rate in miniaturized continuous cultures",
+          "paper_folder": "nanchen",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "An enumerated M9 minimal medium with 1 g/L glucose.",
+          "contribution": "An enumerated M9 minimal medium with 1 g/L glucose.",
+          "what_information_it_contributes": "An enumerated M9 minimal medium with 1 g/L glucose.",
+          "remains_missing": "M9 is not GMS, and the paper's carbon-limited chemostat feed is not the target's pH-stat glucose/proline feed.",
+          "what_remains_missing": "M9 is not GMS, and the paper's carbon-limited chemostat feed is not the target's pH-stat glucose/proline feed.",
+          "suitability": "Not evidence-compatible: the paper states that maintenance and yield depend on temperature, medium and strain, and all three differ.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/nanchen"
+        },
+        {
+          "key": "simensen",
+          "display_name": "Simensen 2022 -- measured E. coli biomass composition",
+          "citation": "V. Simensen et al. (2022), Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+          "paper_folder": "Simensen",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "An enumerated M9 medium with 2% glucose.",
+          "contribution": "An enumerated M9 medium with 2% glucose.",
+          "what_information_it_contributes": "An enumerated M9 medium with 2% glucose.",
+          "remains_missing": "It does not enumerate GMS and does not report the target's glucose or proline feed.",
+          "what_remains_missing": "It does not enumerate GMS and does not report the target's glucose or proline feed.",
+          "suitability": "Not evidence-compatible as supplied: the condition differs, and no Zielinski output is a biomass composition to compare against.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Simensen"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-MP-HOMOGENIZER",
+      "category": "process_conditions",
+      "category_title": "Process conditions",
+      "title": "Homogenizer pressure and pass count are not reported",
+      "description": "MP-HOMOGENIZER is declared on N03 (Cell lysis and inclusion-body isolation): sec. 2.5 states only that cells 'were lysed by a high-pressure homogenizer', with no pressure, valve setting or cycle count. The blocked targets are lysis_efficiency.",
+      "why_it_matters": "Lysis efficiency cannot be predicted or checked. The model knows the operation happened but not the mechanical energy that determined how much inclusion-body protein was released.",
+      "variables": [
+        "N03:lysis_efficiency"
+      ],
+      "model_component": "N03",
+      "parameter_id": "MP-HOMOGENIZER",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N03].missing_parameters[MP-HOMOGENIZER]",
+          "statement": "sec. 2.5 states only that cells 'were lysed by a high-pressure homogenizer', with no pressure, valve setting or cycle count.",
+          "kind": "model_declaration"
+        }
+      ],
+      "missing_evidence": [
+        "Homogenizer pressure, valve setting or pass count used for the E. coli 20 IBA 1 cell suspension.",
+        "Lysis efficiency measured by protein release, cell disruption or inclusion-body recovery in this process."
+      ],
+      "search_terms": [
+        "\"high-pressure homogenizer\" \"Escherichia coli\" inclusion bodies pressure passes",
+        "\"Escherichia coli 20\" lysis inclusion bodies",
+        "\"inclusion body\" recovery \"homogenizer\" \"Escherichia coli\""
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A lysis record for this process, or a measured lysis/recovery efficiency that can be attached to the operation."
+        ],
+        "why_it_is_needed": "MP-HOMOGENIZER blocks lysis_efficiency, so the model cannot connect the harvested biomass to the inclusion bodies actually released without inventing a recovery.",
+        "suitable_paper_must_report": [
+          "The same strain and inclusion-body system, or a clearly stated reason the mechanical treatment transfers.",
+          "Pressure, pass count and temperature.",
+          "Measured lysis or inclusion-body recovery with its assay."
+        ],
+        "what_scaleup_can_do": "Attach the measured recovery to the lysis operation as a context-tagged value and show its effect separately from the published replay.",
+        "gap_id": "GAP-MP-HOMOGENIZER",
+        "search_terms": [
+          "\"high-pressure homogenizer\" \"Escherichia coli\" inclusion bodies pressure passes",
+          "\"Escherichia coli 20\" lysis inclusion bodies",
+          "\"inclusion body\" recovery \"homogenizer\" \"Escherichia coli\""
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-MP-INDUCTION-TIME",
+      "category": "process_conditions",
+      "category_title": "Process conditions",
+      "title": "The time of induction is not reported and cannot be recovered",
+      "description": "MP-INDUCTION-TIME is declared on N01 (Fermentation): sec. 2.4 states a total growth time and a post-induction duration but never states when induction occurred. It cannot be recovered from Fig. 3 either. The blocked targets are induction_time_h, post_induction_start_h.",
+      "why_it_matters": "The growth phase and the insulin-production phase cannot be separated. The model already records a source discrepancy: the narrative order cannot be reconciled with Fig. 3, and induction may have preceded the glucose limitation.",
+      "variables": [
+        "N01:induction_time_h",
+        "N01:post_induction_start_h"
+      ],
+      "model_component": "N01",
+      "parameter_id": "MP-INDUCTION-TIME",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N01].missing_parameters[MP-INDUCTION-TIME]",
+          "statement": "sec. 2.4 states a total growth time and a post-induction duration but never states when induction occurred. It cannot be recovered from Fig. 3 either.",
+          "kind": "model_declaration"
+        },
+        {
+          "source": "Models/Zielinski/out/run_summary.md",
+          "location": "source_discrepancy:induction_order",
+          "statement": "The model records that the narrative order cannot be reconciled with Fig. 3; induction may have preceded the glucose limitation.",
+          "kind": "model_report"
+        }
+      ],
+      "missing_evidence": [
+        "The induction time and OD600 at induction, or the rule that triggered it, for the reported batch.",
+        "The IPTG concentration and the post-induction duration actually used, if induction was chemical rather than DO-triggered.",
+        "An independent record that resolves the ordering conflict between section 2.4 and Fig. 3."
+      ],
+      "search_terms": [
+        "\"Escherichia coli 20\" \"pIBAINS\" IPTG induction OD600",
+        "\"recombinant insulin\" \"Escherichia coli\" induction time fed-batch",
+        "\"pH-stat\" induction \"Escherichia coli\" OD600",
+        "Zielinski insulin 2019 induction optical density"
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A primary record of when induction happened in this process, or enough time-resolved product data to identify the transition."
+        ],
+        "why_it_is_needed": "MP-INDUCTION-TIME blocks induction_time_h and post_induction_start_h. Guessing it would silently change the meaning of the growth and production phases.",
+        "suitable_paper_must_report": [
+          "The same host/vector/medium and the induction trigger.",
+          "Induction time or OD600, IPTG concentration and post-induction duration.",
+          "Enough detail to tell whether induction preceded or followed the pH-stat glucose limitation."
+        ],
+        "what_scaleup_can_do": "Store the induction record with its context, re-run the existing source-discrepancy check, and keep the conflict visible rather than resolving it by assumption.",
+        "gap_id": "GAP-MP-INDUCTION-TIME",
+        "search_terms": [
+          "\"Escherichia coli 20\" \"pIBAINS\" IPTG induction OD600",
+          "\"recombinant insulin\" \"Escherichia coli\" induction time fed-batch",
+          "\"pH-stat\" induction \"Escherichia coli\" OD600",
+          "Zielinski insulin 2019 induction optical density"
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        }
+      ],
+      "prior_investigation": {
+        "port_id": "node:N01#induction_time",
+        "label": "Time at which protein expression was induced",
+        "why_it_matters": "Separates the growth phase from the production phase. The paper reports a total growth time and a post-induction duration but never states when induction happened.",
+        "resolved": false,
+        "candidate_count": 0,
+        "verdicts": [],
+        "findings": [],
+        "missing_information_required": [
+          "A measurement of this quantity made in this process: the same host strain carrying pIBAINS, in GMS medium, batch-fed by pH-stat, at 37 degrees Celsius, in a 7.5 L fermenter.",
+          "Either the raw time-series data behind it, or the fitted parameters with their stated fitting procedure.",
+          "The point in the batch at which induction was triggered, or the rule by which it was triggered."
+        ],
+        "note": "This is the project's existing literature investigation, reused as recorded. It did not resolve the target gap; a finding here is a proposal with a verdict, never a value adopted by the model."
+      }
+    },
+    {
+      "gap_id": "GAP-MP-FOLDING-MODEL",
+      "category": "mathematical_relationships",
+      "category_title": "Mathematical relationships",
+      "title": "No renaturation rate or yield relationship exists",
+      "description": "MP-FOLDING-MODEL is declared on N05 (Protein renaturation): sec. 4.5 reports two yields at two temperatures and states that refolding depends on redox potential and pH but NOT on temperature. Two observations cannot define a yield function, and the paper's own conclusion contradicts a temperature-driven reading. The blocked targets are refolding_yield_predictive, refolding_time_predictive.",
+      "why_it_matters": "Two yields at two temperatures cannot define a yield function, and the paper itself says refolding depends on redox potential and pH but not on temperature. A temperature-driven model would contradict the source it is built from.",
+      "variables": [
+        "N05:refolding_yield_predictive",
+        "N05:refolding_time_predictive"
+      ],
+      "model_component": "N05",
+      "parameter_id": "MP-FOLDING-MODEL",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N05].missing_parameters[MP-FOLDING-MODEL]",
+          "statement": "sec. 4.5 reports two yields at two temperatures and states that refolding depends on redox potential and pH but NOT on temperature. Two observations cannot define a yield function, and the paper's own conclusion contradicts a temperature-driven reading.",
+          "kind": "model_declaration"
+        },
+        {
+          "source": "Models/Zielinski/out/run_summary.md",
+          "location": "source_discrepancy:refolding_yield_vs_au",
+          "statement": "The model records that the reported 5460 AU and 5450 AU imply 99.82%, while the paper also states 95-96%; both are retained.",
+          "kind": "model_report"
+        }
+      ],
+      "missing_evidence": [
+        "Time-resolved renaturation yield and aggregate fraction under the reported buffer, redox potential and pH.",
+        "A rate law or fitted kinetic model with its parameters and fitting procedure, not two endpoint yields.",
+        "The relationship between the 5460 AU after dissolution and the 5450 AU after renaturation, and the basis of the reported 95-96% and ~99% yields."
+      ],
+      "search_terms": [
+        "\"insulin\" renaturation kinetics redox pH",
+        "\"inclusion bodies\" refolding yield time course \"Escherichia coli\"",
+        "\"insulin precursor\" refolding aggregate fraction",
+        "\"recombinant insulin\" renaturation 18 h yield"
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A time-resolved renaturation data set or a printed rate law for this insulin precursor and buffer system."
+        ],
+        "why_it_is_needed": "MP-FOLDING-MODEL blocks refolding_yield_predictive and refolding_time_predictive. The model keeps the two reported yields as observations rather than inventing a function.",
+        "suitable_paper_must_report": [
+          "The same precursor, redox system, pH and temperature range.",
+          "Yield and aggregate fraction over time, with replicates.",
+          "A rate law or the data needed to fit one, including the fitting method and uncertainty."
+        ],
+        "what_scaleup_can_do": "Register the kinetic model as a candidate, compare its buffer and redox conditions with the target, and keep the existing source discrepancy about the reported yields visible.",
+        "gap_id": "GAP-MP-FOLDING-MODEL",
+        "search_terms": [
+          "\"insulin\" renaturation kinetics redox pH",
+          "\"inclusion bodies\" refolding yield time course \"Escherichia coli\"",
+          "\"insulin precursor\" refolding aggregate fraction",
+          "\"recombinant insulin\" renaturation 18 h yield"
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-MP-OXYGEN-TRANSFER",
+      "category": "mathematical_relationships",
+      "category_title": "Mathematical relationships",
+      "title": "No oxygen-transfer or oxygen-uptake relationship for the fermenter",
+      "description": "MP-OXYGEN-TRANSFER is declared on N01 (Fermentation): The paper reports no air flow, agitation rate, dissolved-oxygen trace or kLa, so it is not possible to know whether growth was oxygen limited. The blocked targets are dissolved_oxygen_profile, specific_growth_rate_mu_max.",
+      "why_it_matters": "The replay cannot say whether growth was oxygen limited. Without a transfer/uptake relationship, any growth model attached to this process could fail for an unobserved reason, and no scale-up extrapolation is defensible.",
+      "variables": [
+        "N01:dissolved_oxygen_profile",
+        "N01:specific_growth_rate_mu_max"
+      ],
+      "model_component": "N01",
+      "parameter_id": "MP-OXYGEN-TRANSFER",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/out/graph.json",
+          "location": "nodes[N01].missing_parameters[MP-OXYGEN-TRANSFER]",
+          "statement": "The paper reports no air flow, agitation rate, dissolved-oxygen trace or kLa, so it is not possible to know whether growth was oxygen limited.",
+          "kind": "model_declaration"
+        }
+      ],
+      "missing_evidence": [
+        "A measured kLa, oxygen-uptake rate (OUR) or oxygen-transfer rate (OTR) at the target reactor scale and operating point.",
+        "Air flow, agitation, sparger configuration and the dissolved-oxygen set point or trace for the 4 L / 7.5 L Bioflo Celligen 310 run.",
+        "Oxygen solubility and the medium properties needed to convert a measured transfer coefficient into a dissolved-oxygen prediction."
+      ],
+      "search_terms": [
+        "\"Escherichia coli\" \"kLa\" \"7.5 L\" bioreactor",
+        "\"oxygen transfer\" \"pH-stat\" \"Escherichia coli\"",
+        "\"OUR\" \"OTR\" \"Escherichia coli\" fed-batch \"dissolved oxygen\"",
+        "\"Bioflo Celligen\" \"kLa\" \"Escherichia coli\"",
+        "\"dissolved oxygen\" \"recombinant insulin\" \"Escherichia coli\""
+      ],
+      "composition_enabling": true,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A transfer/uptake relationship measured under the target reactor's hydrodynamics, not a correlation borrowed from a different vessel."
+        ],
+        "why_it_is_needed": "MP-OXYGEN-TRANSFER blocks dissolved_oxygen_profile and specific_growth_rate_mu_max. The project's existing evidence catalogue records that no candidate examined supplies a dissolved-oxygen measurement under matching conditions.",
+        "suitable_paper_must_report": [
+          "The same strain, medium and fed-batch mode, or a clear statement that the correlation is geometry-specific and why it transfers.",
+          "Air flow, agitation, sparger geometry and dissolved-oxygen measurements over time.",
+          "kLa, OUR or OTR with the measurement method and uncertainty."
+        ],
+        "what_scaleup_can_do": "Record the correlation as context-tagged evidence, compare its conditions against the target passages, and expose the residual against the dissolved-oxygen target without changing the replay.",
+        "gap_id": "GAP-MP-OXYGEN-TRANSFER",
+        "search_terms": [
+          "\"Escherichia coli\" \"kLa\" \"7.5 L\" bioreactor",
+          "\"oxygen transfer\" \"pH-stat\" \"Escherichia coli\"",
+          "\"OUR\" \"OTR\" \"Escherichia coli\" fed-batch \"dissolved oxygen\"",
+          "\"Bioflo Celligen\" \"kLa\" \"Escherichia coli\"",
+          "\"dissolved oxygen\" \"recombinant insulin\" \"Escherichia coli\""
+        ]
+      },
+      "status": "partially_addressed",
+      "addressed_by": [],
+      "partly_addressed_by": [
+        "baez",
+        "lin"
+      ],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        },
+        {
+          "key": "baez",
+          "display_name": "Baez 2014 -- oxygen-induced recombinant protein expression",
+          "citation": "A. Baez, N. Majdalani, J. Shiloach (2014), Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "paper_folder": "Baez",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "partially_addresses",
+          "relevance": "Reports air at 0.075 vvm, 100 rpm, a dissolved-oxygen step from 30% to 300% air saturation, and growth observations at two oxygen levels.",
+          "contribution": "Reports air at 0.075 vvm, 100 rpm, a dissolved-oxygen step from 30% to 300% air saturation, and growth observations at two oxygen levels.",
+          "what_information_it_contributes": "Reports air at 0.075 vvm, 100 rpm, a dissolved-oxygen step from 30% to 300% air saturation, and growth observations at two oxygen levels.",
+          "remains_missing": "The package's own missing_models list states that it prints no kLa, OUR or OTR and no oxygen balance; the reactor and strain also differ from the target.",
+          "what_remains_missing": "The package's own missing_models list states that it prints no kLa, OUR or OTR and no oxygen balance; the reactor and strain also differ from the target.",
+          "suitability": "Not evidence-compatible: the strain, construct, induction mode and scale all fail the project's identity dimensions.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Baez"
+        },
+        {
+          "key": "lin",
+          "display_name": "Lin 2001 -- maximum glucose and oxygen uptake capacities",
+          "citation": "H. Y. Lin et al. (2000), Determination of the maximum specific uptake capacities for glucose and oxygen in glucose-limited fed-batch cultivations",
+          "paper_folder": "Lin",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "partially_addresses",
+          "relevance": "Reports oxygen-uptake capacity (5 mmol g-1 h-1 at the end of fed-batch) and dissolved oxygen held above 20% with 0.002-2 vvm and 200-800 rpm in cascade.",
+          "contribution": "Reports oxygen-uptake capacity (5 mmol g-1 h-1 at the end of fed-batch) and dissolved oxygen held above 20% with 0.002-2 vvm and 200-800 rpm in cascade.",
+          "what_information_it_contributes": "Reports oxygen-uptake capacity (5 mmol g-1 h-1 at the end of fed-batch) and dissolved oxygen held above 20% with 0.002-2 vvm and 200-800 rpm in cascade.",
+          "remains_missing": "It prints no oxygen-transfer correlation, models no oxygen limitation, and its strain, medium, scale and temperature differ; the capacity is not a kLa for the target vessel.",
+          "what_remains_missing": "It prints no oxygen-transfer correlation, models no oxygen limitation, and its strain, medium, scale and temperature differ; the capacity is not a kLa for the target vessel.",
+          "suitability": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Lin"
+        }
+      ],
+      "prior_investigation": {
+        "port_id": "node:N01#dissolved_oxygen",
+        "label": "Dissolved oxygen during the batch",
+        "why_it_matters": "Without it there is no way to know whether growth was oxygen limited, so no kinetic parameter can be assumed transferable.",
+        "resolved": false,
+        "candidate_count": 0,
+        "verdicts": [],
+        "findings": [],
+        "missing_information_required": [
+          "A measurement of this quantity made in this process: the same host strain carrying pIBAINS, in GMS medium, batch-fed by pH-stat, at 37 degrees Celsius, in a 7.5 L fermenter.",
+          "Either the raw time-series data behind it, or the fitted parameters with their stated fitting procedure.",
+          "Agitation rate, air flow and sparger geometry, so that a kLa can be estimated rather than assumed."
+        ],
+        "note": "This is the project's existing literature investigation, reused as recorded. It did not resolve the target gap; a finding here is a proposal with a verdict, never a value adopted by the model."
+      }
+    },
+    {
+      "gap_id": "GAP-INDEPENDENT-VALIDATION",
+      "category": "independent_validation",
+      "category_title": "Independent experimental validation",
+      "title": "The process has one published batch and no independent validation record",
+      "description": "The baseline's growth evidence is a single digitized figure, and its harvest, purification and activity numbers are single-run reports. No assessed paper repeats the Zielinski process. The compatibility records contain no context-matched evidence and no independently validated candidate.",
+      "why_it_matters": "A replay of one batch establishes what the paper says, not whether the process reproduces. Without an independent batch or an orthogonal measurement, a residual difference between a candidate model and the target cannot be attributed to science rather than batch variability.",
+      "variables": [
+        "S02_culture_broth:od600_25_crossing_h",
+        "S02_culture_broth:od600_50_crossing_h",
+        "N02:wet_biomass_g_per_L",
+        "N15:batch_activity"
+      ],
+      "model_component": "zielinski2019.rhi_process",
+      "parameter_id": "",
+      "existing_evidence": [
+        {
+          "source": "Models/Zielinski/MODEL_REPORT.md",
+          "location": "3.2 Figure 3 growth trajectory (digitized, replay only)",
+          "statement": "The growth evidence is one digitized Fig. 3 trajectory with declared uncertainty of +/-0.1 h and +/-0.5 OD600, not replicates.",
+          "kind": "model_report"
+        },
+        {
+          "source": "Models/Zielinski/out/run_summary.md",
+          "location": "Cross-checks and source discrepancies",
+          "statement": "The model records failed cross-checks (CC05 water volume and CC08 CPB dose) and states that the paper reports no replicates, standard or error bars for the mass deviation.",
+          "kind": "model_report"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "summary()['counts']",
+          "statement": "The compatibility summary records that no candidate is evidence_compatible (0) and that no permitted connection touches the target.",
+          "kind": "compatibility_record"
+        }
+      ],
+      "missing_evidence": [
+        "A replicate of the same process, ideally from an independent group, with the same host, construct, medium and feeding policy.",
+        "Replicate measurements or error bars for OD600, wet biomass, inclusion bodies, AU and activity.",
+        "An orthogonal insulin mass or activity measurement that does not depend on the uncalibrated AU scale."
+      ],
+      "search_terms": [
+        "\"Zielinski\" 2019 insulin independent replication",
+        "\"recombinant human insulin\" \"Escherichia coli\" fed-batch replicate",
+        "\"insulin inclusion bodies\" \"mass balance\" \"AU\"",
+        "\"Escherichia coli 20\" insulin batch reproducibility"
+      ],
+      "composition_enabling": false,
+      "validation_improving": true,
+      "recommendation": {
+        "what_information_is_needed": [
+          "An independent repeat of the target process, or at least replicated measurements of its key outputs."
+        ],
+        "why_it_is_needed": "The baseline is an evidence replay of one publication. Without a second batch, validation claims would rest on the same record that defines the model.",
+        "suitable_paper_must_report": [
+          "The same host, construct, medium and operating policy, or an explicitly justified equivalent.",
+          "Raw time series and endpoint measurements with replicates.",
+          "The calibration and assay methods, not only the final values."
+        ],
+        "what_scaleup_can_do": "Hold the independent batch as a held-out record, compare it with the replay without changing the baseline, and report residuals with the batch variability stated.",
+        "gap_id": "GAP-INDEPENDENT-VALIDATION",
+        "search_terms": [
+          "\"Zielinski\" 2019 insulin independent replication",
+          "\"recombinant human insulin\" \"Escherichia coli\" fed-batch replicate",
+          "\"insulin inclusion bodies\" \"mass balance\" \"AU\"",
+          "\"Escherichia coli 20\" insulin batch reproducibility"
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        },
+        {
+          "key": "ganjave",
+          "display_name": "Ganjave 2022 -- cybernetic fed-batch growth",
+          "citation": "Ganjave et al. (2022), cybernetic growth and fed-batch model, Biotechnology Reports 33:e00694",
+          "paper_folder": "Ganjave",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "An independent fed-batch data set and model in a different experimental context.",
+          "contribution": "An independent fed-batch data set and model in a different experimental context.",
+          "what_information_it_contributes": "An independent fed-batch data set and model in a different experimental context.",
+          "remains_missing": "It does not repeat the Zielinski process, so it cannot validate that process or bound its batch-to-batch variability.",
+          "what_remains_missing": "It does not repeat the Zielinski process, so it cannot validate that process or bound its batch-to-batch variability.",
+          "suitability": "Not evidence-compatible either: a Ganjave finding fails the project's identity rules on substrate, mode and scale before any number is compared.",
+          "evidence_role": "relevant_literature",
+          "model_id": "ganjave",
+          "package": "Models/Ganjave"
+        },
+        {
+          "key": "baez",
+          "display_name": "Baez 2014 -- oxygen-induced recombinant protein expression",
+          "citation": "A. Baez, N. Majdalani, J. Shiloach (2014), Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "paper_folder": "Baez",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "An independent recombinant E. coli fed-batch data set.",
+          "contribution": "An independent recombinant E. coli fed-batch data set.",
+          "what_information_it_contributes": "An independent recombinant E. coli fed-batch data set.",
+          "remains_missing": "It uses a different process and does not validate the Zielinski batch or its reported yields.",
+          "what_remains_missing": "It uses a different process and does not validate the Zielinski batch or its reported yields.",
+          "suitability": "Not evidence-compatible: the strain, construct, induction mode and scale all fail the project's identity dimensions.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Baez"
+        },
+        {
+          "key": "lin",
+          "display_name": "Lin 2001 -- maximum glucose and oxygen uptake capacities",
+          "citation": "H. Y. Lin et al. (2000), Determination of the maximum specific uptake capacities for glucose and oxygen in glucose-limited fed-batch cultivations",
+          "paper_folder": "Lin",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "Independent glucose-limited fed-batch experiments and capacities.",
+          "contribution": "Independent glucose-limited fed-batch experiments and capacities.",
+          "what_information_it_contributes": "Independent glucose-limited fed-batch experiments and capacities.",
+          "remains_missing": "They are not repeats of the Zielinski process and cannot validate its growth, yields or activity.",
+          "what_remains_missing": "They are not repeats of the Zielinski process and cannot validate its growth, yields or activity.",
+          "suitability": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Lin"
+        }
+      ],
+      "prior_investigation": null
+    },
+    {
+      "gap_id": "GAP-COMPOSITION-BOUNDARY",
+      "category": "composition_blockers",
+      "category_title": "Missing information preventing composition",
+      "title": "No shared quantity or component mapping permits a connection to the insulin process",
+      "description": "The composition engine's permitted-connection list contains no connection that touches zielinski2019.rhi_process. The blockers are not a missing paper: they are missing shared declarations, including a common substrate and medium, a dry-to-wet biomass basis, and a component mapping for the material-balance model. A relevant paper cannot be attached without these.",
+      "why_it_matters": "Composition requires a shared declared quantity and a context that matches. Without that, attaching a candidate would transfer one experiment's state or parameters into another experiment, which this project refuses even when the port shapes are mechanically legal.",
+      "variables": [
+        "zielinski2019.rhi_process (declared ports)",
+        "permitted_connections.touching_target",
+        "S02_culture_broth:wet_biomass_total",
+        "S03_wet_biomass:wet_biomass_total"
+      ],
+      "model_component": "zielinski2019.rhi_process",
+      "parameter_id": "",
+      "existing_evidence": [
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "summary()['connections_touching_target']",
+          "statement": "The compatibility summary lists 0 permitted connection(s) touching the insulin process.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "permitted_connections()",
+          "statement": "The engine permits 2 connection(s) across the whole project; none reaches the target process.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['ganjave'].blockers/evidence_check",
+          "statement": "Different substrate: glycerol plus a lumped complex substrate, fitted with one yield. Zielinski's carbon source is glucose in GMS medium. Different biomass basis: Ganjave's biomass is dry-cell weight; Zielinski reports wet biomass. No source here prints the factor between them. Different scale and mode: a 3 L vessel over 24 h of feeding, against a 4 L / 7.5 L reactor with pH-stat feeding. No port pair is permitted: every Zielinski <-> Ganjave pairing is mechanically legal and scientifically unsupported, so the policy fails closed.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['morris'].blockers/evidence_check",
+          "statement": "Zielinski publishes process roles, not conserved chemical entities: no stream of its own carries a component amount or a mass fraction. A Morris port must name a component, and the names cannot agree; a control-volume total would require every entering unit to be attributable to one, and it is not. The engine already refuses this boundary (component identity), so the position is enforced rather than merely declared.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['lin'].blockers/evidence_check",
+          "statement": "Different strain: K12 W3110 / RB791, with plasmids present but uninduced. Zielinski's culture is 20 IBA 1 carrying pIBAINS and producing insulin. Different medium, reactor and temperature: mineral salt medium, 15 L / 6 L Biostat ED, 35 degC, against GMS, a 7.5 L Celligen 310 and 30 degC. Its ports carry the state of its own culture (mu, qO, DOT, X, S). Handing those to Zielinski would transfer one experiment's state into another's. No interface: standalone and unregistered, with five constants the paper never values.",
+          "kind": "compatibility_record"
+        },
+        {
+          "source": "composition/composition/compatibility.py",
+          "location": "ASSESSMENTS['nanchen'].blockers/evidence_check",
+          "statement": "Different strain: non-recombinant MG1655, not 20 IBA 1 / pIBAINS. Different mode: steady-state continuous culture, not a fed-batch trajectory with pH-stat feeding. Different scale and temperature: a 10 mL mini-scale chemostat at 37 degC. Its maintenance coefficient and maximal yield are fitted for that chemostat and that medium. Transferring them would silently re-parameterise the insulin process. No interface: standalone and unregistered.",
+          "kind": "compatibility_record"
+        }
+      ],
+      "missing_evidence": [
+        "An explicit component mapping between the candidate's conserved entities and Zielinski's process roles.",
+        "A target-context conversion between wet biomass and dry-cell weight, if a dry-biomass model is to be used.",
+        "A shared declared quantity with matching units and a permitted boundary in cross_model.",
+        "A candidate whose organism, strain, construct, medium and mode match the target process."
+      ],
+      "search_terms": [
+        "\"Escherichia coli\" \"wet biomass\" \"dry cell weight\" conversion",
+        "\"insulin\" \"inclusion bodies\" \"mass balance\"",
+        "\"Escherichia coli\" process model component mapping",
+        "\"Escherichia coli 20\" \"pIBAINS\" process model"
+      ],
+      "composition_enabling": true,
+      "validation_improving": false,
+      "recommendation": {
+        "what_information_is_needed": [
+          "A candidate model or measurement set that declares a shared quantity and matches the target's identity dimensions."
+        ],
+        "why_it_is_needed": "No permitted connection touches the target. Supplying a relevant paper is not enough; the project needs an explicit, evidence-backed quantity and component mapping before composition is legitimate.",
+        "suitable_paper_must_report": [
+          "A quantity that Zielinski also declares, with compatible units.",
+          "The same organism, strain, construct, medium and process mode, or an explicit statement of which dimensions differ.",
+          "Enough component identity to map the candidate's state to Zielinski's process roles."
+        ],
+        "what_scaleup_can_do": "Declare the new boundary only after the shared quantity and identity match are recorded; re-run the compatibility check and leave the baseline replay unchanged.",
+        "gap_id": "GAP-COMPOSITION-BOUNDARY",
+        "search_terms": [
+          "\"Escherichia coli\" \"wet biomass\" \"dry cell weight\" conversion",
+          "\"insulin\" \"inclusion bodies\" \"mass balance\"",
+          "\"Escherichia coli\" process model component mapping",
+          "\"Escherichia coli 20\" \"pIBAINS\" process model"
+        ]
+      },
+      "status": "unresolved",
+      "addressed_by": [],
+      "partly_addressed_by": [],
+      "papers": [
+        {
+          "key": "zielinski",
+          "display_name": "Zielinski 2019 -- recombinant human insulin process",
+          "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+          "paper_folder": "Zielinski",
+          "classification": "dynamically_composable",
+          "classification_number": 1,
+          "classification_label": "dynamically composable",
+          "contributes": true,
+          "relation": "defines_gap",
+          "relevance": "Records the process and states the missing item in its model evidence record.",
+          "contribution": "Records the process and states the missing item in its model evidence record.",
+          "what_information_it_contributes": "Records the process and states the missing item in its model evidence record.",
+          "remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "what_remains_missing": "The baseline cannot supply its own missing information; it is the record that makes the gap visible.",
+          "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+          "evidence_role": "baseline_reference",
+          "model_id": "zielinski2019.rhi_process",
+          "package": "Models/Zielinski"
+        },
+        {
+          "key": "ganjave",
+          "display_name": "Ganjave 2022 -- cybernetic fed-batch growth",
+          "citation": "Ganjave et al. (2022), cybernetic growth and fed-batch model, Biotechnology Reports 33:e00694",
+          "paper_folder": "Ganjave",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "Demonstrates the registered-model boundary problem: its ports are mechanically legal but scientifically unsupported, so the policy fails closed.",
+          "contribution": "Demonstrates the registered-model boundary problem: its ports are mechanically legal but scientifically unsupported, so the policy fails closed.",
+          "what_information_it_contributes": "Demonstrates the registered-model boundary problem: its ports are mechanically legal but scientifically unsupported, so the policy fails closed.",
+          "remains_missing": "No shared component set, no explicit dry-to-wet biomass basis and no common medium; the engine permits no connection to the target.",
+          "what_remains_missing": "No shared component set, no explicit dry-to-wet biomass basis and no common medium; the engine permits no connection to the target.",
+          "suitability": "Not evidence-compatible either: a Ganjave finding fails the project's identity rules on substrate, mode and scale before any number is compared.",
+          "evidence_role": "relevant_literature",
+          "model_id": "ganjave",
+          "package": "Models/Ganjave"
+        },
+        {
+          "key": "morris",
+          "display_name": "Morris 2011 -- non-reacting material balances",
+          "citation": "R. Morris, G. Geiger, L. Fine (2011), material balances (Chapter 4)",
+          "paper_folder": "Morris",
+          "classification": "incompatible",
+          "classification_number": 4,
+          "classification_label": "incompatible",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "A control-volume material-balance engine with explicit component identity and a declared time basis.",
+          "contribution": "A control-volume material-balance engine with explicit component identity and a declared time basis.",
+          "what_information_it_contributes": "A control-volume material-balance engine with explicit component identity and a declared time basis.",
+          "remains_missing": "It has no reaction term, no organism and no component mapping for Zielinski's process roles; the engine refuses the boundary on component identity.",
+          "what_remains_missing": "It has no reaction term, no organism and no component mapping for Zielinski's process roles; the engine refuses the boundary on component identity.",
+          "suitability": "Not evidence-compatible: a balance is a method, not a measurement of this process, so it has no value to check.",
+          "evidence_role": "relevant_literature",
+          "model_id": "morris2011.material_balance",
+          "package": "Models/Morris"
+        },
+        {
+          "key": "lin",
+          "display_name": "Lin 2001 -- maximum glucose and oxygen uptake capacities",
+          "citation": "H. Y. Lin et al. (2000), Determination of the maximum specific uptake capacities for glucose and oxygen in glucose-limited fed-batch cultivations",
+          "paper_folder": "Lin",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "Its ports carry mu, qO, DOT, X and S, which is exactly the kind of state transfer the target refuses.",
+          "contribution": "Its ports carry mu, qO, DOT, X and S, which is exactly the kind of state transfer the target refuses.",
+          "what_information_it_contributes": "Its ports carry mu, qO, DOT, X and S, which is exactly the kind of state transfer the target refuses.",
+          "remains_missing": "Handing those states to Zielinski would transfer one experiment's state into another; the model is standalone and unregistered.",
+          "what_remains_missing": "Handing those states to Zielinski would transfer one experiment's state into another; the model is standalone and unregistered.",
+          "suitability": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Lin"
+        },
+        {
+          "key": "nanchen",
+          "display_name": "Nanchen 2006 -- growth-rate-dependent maintenance and yield",
+          "citation": "A. Nanchen, A. Schicker, U. Sauer (2006), Nonlinear dependency of intracellular fluxes on growth rate in miniaturized continuous cultures",
+          "paper_folder": "nanchen",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "An explicit example of condition-dependent maintenance and yield parameters.",
+          "contribution": "An explicit example of condition-dependent maintenance and yield parameters.",
+          "what_information_it_contributes": "An explicit example of condition-dependent maintenance and yield parameters.",
+          "remains_missing": "Transferring its fitted values would silently re-parameterise the insulin process; the model is standalone and unregistered.",
+          "what_remains_missing": "Transferring its fitted values would silently re-parameterise the insulin process; the model is standalone and unregistered.",
+          "suitability": "Not evidence-compatible: the paper states that maintenance and yield depend on temperature, medium and strain, and all three differ.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/nanchen"
+        },
+        {
+          "key": "simensen",
+          "display_name": "Simensen 2022 -- measured E. coli biomass composition",
+          "citation": "V. Simensen et al. (2022), Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+          "paper_folder": "Simensen",
+          "classification": "contextually_relevant_not_composable",
+          "classification_number": 3,
+          "classification_label": "contextually relevant, not composable",
+          "contributes": false,
+          "relation": "relevant_context",
+          "relevance": "A static measured composition that could theoretically constrain a biomass-composition quantity.",
+          "contribution": "A static measured composition that could theoretically constrain a biomass-composition quantity.",
+          "what_information_it_contributes": "A static measured composition that could theoretically constrain a biomass-composition quantity.",
+          "remains_missing": "Zielinski declares no biomass-composition quantity, the dataset has no input port, and the condition differs, so no comparison has a meaning.",
+          "what_remains_missing": "Zielinski declares no biomass-composition quantity, the dataset has no input port, and the condition differs, so no comparison has a meaning.",
+          "suitability": "Not evidence-compatible as supplied: the condition differs, and no Zielinski output is a biomass composition to compare against.",
+          "evidence_role": "relevant_literature",
+          "model_id": "",
+          "package": "Models/Simensen"
+        }
+      ],
+      "prior_investigation": null
+    }
+  ],
+  "papers": [
+    {
+      "key": "zielinski",
+      "display_name": "Zielinski 2019 -- recombinant human insulin process",
+      "citation": "M. Zielinski et al. (2019), Expression and purification of recombinant human insulin from E. coli 20 strain, Protein Expr Purif 157:63-69",
+      "paper": "Zielinski et al. (2019)",
+      "paper_folder": "Zielinski",
+      "package": "Models/Zielinski",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "contributes": true,
+      "classification": "dynamically_composable",
+      "classification_number": 1,
+      "classification_label": "dynamically composable",
+      "blockers": [],
+      "evidence_check": "",
+      "summary": "The baseline. This is the simulation every other model is assessed against: a 15-operation process graph from inoculum to RP-HPLC, run as an evidence replay of the paper's reported numbers.",
+      "suitability": "Defines the target process. It cannot resolve gaps in its own reporting.",
+      "evidence_role": "baseline_reference",
+      "is_baseline": true,
+      "registered": true,
+      "determination": "encoded",
+      "independently_validated": false,
+      "independently_validated_reason": "No assessment records a target-context independent validation. The compatibility summary records zero evidence-compatible models.",
+      "addressed_gaps": [],
+      "partially_addressed_gaps": [],
+      "relevant_context_gaps": [],
+      "unresolved_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "matched_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "gap_counts": {
+        "matched": 12,
+        "addressed": 0,
+        "partially_addressed": 0,
+        "relevant_context": 0,
+        "unresolved": 12
+      }
+    },
+    {
+      "key": "ganjave",
+      "display_name": "Ganjave 2022 -- cybernetic fed-batch growth",
+      "citation": "Ganjave et al. (2022), cybernetic growth and fed-batch model, Biotechnology Reports 33:e00694",
+      "paper": "Ganjave et al. (2022)",
+      "paper_folder": "Ganjave",
+      "package": "Models/Ganjave",
+      "model_id": "ganjave",
+      "model_version": "0.1.0",
+      "contributes": false,
+      "classification": "contextually_relevant_not_composable",
+      "classification_number": 3,
+      "classification_label": "contextually relevant, not composable",
+      "blockers": [
+        "Different substrate: glycerol plus a lumped complex substrate, fitted with one yield. Zielinski's carbon source is glucose in GMS medium.",
+        "Different biomass basis: Ganjave's biomass is dry-cell weight; Zielinski reports wet biomass. No source here prints the factor between them.",
+        "Different scale and mode: a 3 L vessel over 24 h of feeding, against a 4 L / 7.5 L reactor with pH-stat feeding.",
+        "No port pair is permitted: every Zielinski <-> Ganjave pairing is mechanically legal and scientifically unsupported, so the policy fails closed."
+      ],
+      "evidence_check": "Not evidence-compatible either: a Ganjave finding fails the project's identity rules on substrate, mode and scale before any number is compared.",
+      "summary": "A second E. coli fed-batch model, registered in this composition layer. It is not connected to the insulin process, and no rule in the project permits it to be.",
+      "suitability": "Not evidence-compatible either: a Ganjave finding fails the project's identity rules on substrate, mode and scale before any number is compared.",
+      "evidence_role": "relevant_literature",
+      "is_baseline": false,
+      "registered": true,
+      "determination": "encoded",
+      "independently_validated": false,
+      "independently_validated_reason": "No assessment records a target-context independent validation. The compatibility summary records zero evidence-compatible models.",
+      "addressed_gaps": [],
+      "partially_addressed_gaps": [
+        "GAP-MP-GROWTH-KINETICS"
+      ],
+      "relevant_context_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "unresolved_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "matched_gaps": [
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "gap_counts": {
+        "matched": 4,
+        "addressed": 0,
+        "partially_addressed": 1,
+        "relevant_context": 3,
+        "unresolved": 11
+      }
+    },
+    {
+      "key": "morris",
+      "display_name": "Morris 2011 -- non-reacting material balances",
+      "citation": "R. Morris, G. Geiger, L. Fine (2011), material balances (Chapter 4)",
+      "paper": "Morris, Geiger & Fine (2011)",
+      "paper_folder": "Morris",
+      "package": "Models/Morris",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "contributes": false,
+      "classification": "incompatible",
+      "classification_number": 4,
+      "classification_label": "incompatible",
+      "blockers": [
+        "Zielinski publishes process roles, not conserved chemical entities: no stream of its own carries a component amount or a mass fraction.",
+        "A Morris port must name a component, and the names cannot agree; a control-volume total would require every entering unit to be attributable to one, and it is not.",
+        "The engine already refuses this boundary (component identity), so the position is enforced rather than merely declared."
+      ],
+      "evidence_check": "Not evidence-compatible: a balance is a method, not a measurement of this process, so it has no value to check.",
+      "summary": "A generic control-volume balance engine, not an organism model. It shares no quantity with the insulin process and cannot represent a reaction.",
+      "suitability": "Not evidence-compatible: a balance is a method, not a measurement of this process, so it has no value to check.",
+      "evidence_role": "relevant_literature",
+      "is_baseline": false,
+      "registered": true,
+      "determination": "encoded",
+      "independently_validated": false,
+      "independently_validated_reason": "No assessment records a target-context independent validation. The compatibility summary records zero evidence-compatible models.",
+      "addressed_gaps": [],
+      "partially_addressed_gaps": [],
+      "relevant_context_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "unresolved_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "matched_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "gap_counts": {
+        "matched": 2,
+        "addressed": 0,
+        "partially_addressed": 0,
+        "relevant_context": 2,
+        "unresolved": 12
+      }
+    },
+    {
+      "key": "baez",
+      "display_name": "Baez 2014 -- oxygen-induced recombinant protein expression",
+      "citation": "A. Baez, N. Majdalani, J. Shiloach (2014), Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+      "paper": "Baez, Majdalani & Shiloach (2014)",
+      "paper_folder": "Baez",
+      "package": "Models/Baez",
+      "model_id": "",
+      "model_version": "",
+      "contributes": false,
+      "classification": "contextually_relevant_not_composable",
+      "classification_number": 3,
+      "classification_label": "contextually relevant, not composable",
+      "blockers": [
+        "Different strain (W3110) and a different construct.",
+        "Different induction mechanism: the paper's product is driven by a dissolved-oxygen step to 300% air saturation; Zielinski induces with IPTG.",
+        "Different operating policy: an exponential feed in a 5 L reactor at 37 degC, against pH-stat feeding in a 4 L / 7.5 L reactor at 30 degC.",
+        "No interface: the package is deliberately unregistered, publishes no ports and declares no supplyable quantity."
+      ],
+      "evidence_check": "Not evidence-compatible: the strain, construct, induction mode and scale all fail the project's identity dimensions.",
+      "summary": "Recombinant protein production in E. coli, induced by raising dissolved oxygen instead of by an inducer. Its expression mechanism is the opposite of the IPTG-induced pIBAINS process.",
+      "suitability": "Not evidence-compatible: the strain, construct, induction mode and scale all fail the project's identity dimensions.",
+      "evidence_role": "relevant_literature",
+      "is_baseline": false,
+      "registered": false,
+      "determination": "encoded_unregistered",
+      "independently_validated": false,
+      "independently_validated_reason": "No assessment records a target-context independent validation. The compatibility summary records zero evidence-compatible models.",
+      "addressed_gaps": [],
+      "partially_addressed_gaps": [
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-MP-OXYGEN-TRANSFER"
+      ],
+      "relevant_context_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-INDEPENDENT-VALIDATION"
+      ],
+      "unresolved_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "matched_gaps": [
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION"
+      ],
+      "gap_counts": {
+        "matched": 5,
+        "addressed": 0,
+        "partially_addressed": 2,
+        "relevant_context": 3,
+        "unresolved": 10
+      }
+    },
+    {
+      "key": "lin",
+      "display_name": "Lin 2001 -- maximum glucose and oxygen uptake capacities",
+      "citation": "H. Y. Lin et al. (2000), Determination of the maximum specific uptake capacities for glucose and oxygen in glucose-limited fed-batch cultivations",
+      "paper": "Lin et al. (2001)",
+      "paper_folder": "Lin",
+      "package": "Models/Lin",
+      "model_id": "",
+      "model_version": "",
+      "contributes": false,
+      "classification": "contextually_relevant_not_composable",
+      "classification_number": 3,
+      "classification_label": "contextually relevant, not composable",
+      "blockers": [
+        "Different strain: K12 W3110 / RB791, with plasmids present but uninduced. Zielinski's culture is 20 IBA 1 carrying pIBAINS and producing insulin.",
+        "Different medium, reactor and temperature: mineral salt medium, 15 L / 6 L Biostat ED, 35 degC, against GMS, a 7.5 L Celligen 310 and 30 degC.",
+        "Its ports carry the state of its own culture (mu, qO, DOT, X, S). Handing those to Zielinski would transfer one experiment's state into another's.",
+        "No interface: standalone and unregistered, with five constants the paper never values."
+      ],
+      "evidence_check": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+      "summary": "A complete dynamic model of glucose-limited fed-batch E. coli, and the closest scientific neighbour of the insulin process: it models the declining uptake capacity that pH-stat feeding has to manage.",
+      "suitability": "Not evidence-compatible: the identity dimensions (strain, construct, medium, scale, temperature) fail, so even its reported capacities could not be entered as findings.",
+      "evidence_role": "relevant_literature",
+      "is_baseline": false,
+      "registered": false,
+      "determination": "encoded_unregistered",
+      "independently_validated": false,
+      "independently_validated_reason": "No assessment records a target-context independent validation. The compatibility summary records zero evidence-compatible models.",
+      "addressed_gaps": [],
+      "partially_addressed_gaps": [
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-MP-OXYGEN-TRANSFER"
+      ],
+      "relevant_context_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "unresolved_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "matched_gaps": [
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "gap_counts": {
+        "matched": 6,
+        "addressed": 0,
+        "partially_addressed": 2,
+        "relevant_context": 4,
+        "unresolved": 10
+      }
+    },
+    {
+      "key": "nanchen",
+      "display_name": "Nanchen 2006 -- growth-rate-dependent maintenance and yield",
+      "citation": "A. Nanchen, A. Schicker, U. Sauer (2006), Nonlinear dependency of intracellular fluxes on growth rate in miniaturized continuous cultures",
+      "paper": "Nanchen, Schicker & Sauer (2006)",
+      "paper_folder": "nanchen",
+      "package": "Models/nanchen",
+      "model_id": "",
+      "model_version": "",
+      "contributes": false,
+      "classification": "contextually_relevant_not_composable",
+      "classification_number": 3,
+      "classification_label": "contextually relevant, not composable",
+      "blockers": [
+        "Different strain: non-recombinant MG1655, not 20 IBA 1 / pIBAINS.",
+        "Different mode: steady-state continuous culture, not a fed-batch trajectory with pH-stat feeding.",
+        "Different scale and temperature: a 10 mL mini-scale chemostat at 37 degC.",
+        "Its maintenance coefficient and maximal yield are fitted for that chemostat and that medium. Transferring them would silently re-parameterise the insulin process.",
+        "No interface: standalone and unregistered."
+      ],
+      "evidence_check": "Not evidence-compatible: the paper states that maintenance and yield depend on temperature, medium and strain, and all three differ.",
+      "summary": "Pirt's chemostat relation fitted to a non-recombinant MG1655 at steady state. Contextually relevant to fed-batch design, but a chemostat is not a fed batch and MG1655 is not the production strain.",
+      "suitability": "Not evidence-compatible: the paper states that maintenance and yield depend on temperature, medium and strain, and all three differ.",
+      "evidence_role": "relevant_literature",
+      "is_baseline": false,
+      "registered": false,
+      "determination": "encoded_unregistered",
+      "independently_validated": false,
+      "independently_validated_reason": "No assessment records a target-context independent validation. The compatibility summary records zero evidence-compatible models.",
+      "addressed_gaps": [],
+      "partially_addressed_gaps": [
+        "GAP-MP-GROWTH-KINETICS"
+      ],
+      "relevant_context_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "unresolved_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "matched_gaps": [
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "gap_counts": {
+        "matched": 4,
+        "addressed": 0,
+        "partially_addressed": 1,
+        "relevant_context": 3,
+        "unresolved": 11
+      }
+    },
+    {
+      "key": "simensen",
+      "display_name": "Simensen 2022 -- measured E. coli biomass composition",
+      "citation": "V. Simensen et al. (2022), Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+      "paper": "Simensen et al. (2022)",
+      "paper_folder": "Simensen",
+      "package": "Models/Simensen",
+      "model_id": "",
+      "model_version": "",
+      "contributes": false,
+      "classification": "contextually_relevant_not_composable",
+      "classification_number": 3,
+      "classification_label": "contextually relevant, not composable",
+      "blockers": [
+        "No shared quantity: Zielinski reports no biomass composition, and the dataset has no input port to receive one of its outputs.",
+        "Different condition: MG1655 in M9 with 2% glucose at 37 degC, and the paper states that biomass composition is condition-dependent.",
+        "It is a static table. A dataset cannot be executed as a dynamic component."
+      ],
+      "evidence_check": "Not evidence-compatible as supplied: the condition differs, and no Zielinski output is a biomass composition to compare against.",
+      "summary": "A measured macromolecular composition of E. coli in g gCDW-1. It is a dataset, not a model: it has no inputs, no time and no dynamics, so forcing it into the graph would be misuse rather than composition.",
+      "suitability": "Not evidence-compatible as supplied: the condition differs, and no Zielinski output is a biomass composition to compare against.",
+      "evidence_role": "relevant_literature",
+      "is_baseline": false,
+      "registered": false,
+      "determination": "encoded_unregistered",
+      "independently_validated": false,
+      "independently_validated_reason": "No assessment records a target-context independent validation. The compatibility summary records zero evidence-compatible models.",
+      "addressed_gaps": [],
+      "partially_addressed_gaps": [],
+      "relevant_context_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "unresolved_gaps": [
+        "GAP-MP-DISSOLUTION-VOLUME",
+        "GAP-MP-GROWTH-KINETICS",
+        "GAP-MP-A280-SOLUTION",
+        "GAP-MP-AU-CALIBRATION",
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-MP-HOMOGENIZER",
+        "GAP-MP-INDUCTION-TIME",
+        "GAP-MP-FOLDING-MODEL",
+        "GAP-MP-OXYGEN-TRANSFER",
+        "GAP-INDEPENDENT-VALIDATION",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "matched_gaps": [
+        "GAP-BIOLOGICAL-CONTEXT",
+        "GAP-MP-CULTURE-MEDIUM",
+        "GAP-COMPOSITION-BOUNDARY"
+      ],
+      "gap_counts": {
+        "matched": 3,
+        "addressed": 0,
+        "partially_addressed": 0,
+        "relevant_context": 3,
+        "unresolved": 12
+      }
+    }
+  ],
+  "recommendations": [
+    {
+      "what_information_is_needed": [
+        "The missing volume, or a concentration measurement that makes the reported AU interpretable."
+      ],
+      "why_it_is_needed": "MP-DISSOLUTION-VOLUME blocks dissolved_protein_concentration. Supplying a volume from a different protocol would change the concentration the paper implies.",
+      "suitable_paper_must_report": [
+        "The same inclusion-body isolation and dissolution protocol.",
+        "The buffer composition, its volume and the final solution volume.",
+        "A concentration, A280 with path length, or mass balance that closes the reported AU."
+      ],
+      "what_scaleup_can_do": "Record the volume as a protocol parameter, recompute the concentration transparently, and leave the original AU value untouched.",
+      "gap_id": "GAP-MP-DISSOLUTION-VOLUME",
+      "search_terms": [
+        "\"inclusion bodies\" dissolution volume \"Escherichia coli\" insulin",
+        "\"NaHCO3\" \"EDTA\" inclusion bodies dissolution",
+        "\"17.9 g\" inclusion bodies dissolution insulin",
+        "\"A280\" dissolved inclusion bodies concentration"
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "Target-context growth and glucose-uptake parameters, or the raw time series needed to estimate them."
+      ],
+      "why_it_is_needed": "The model declares MP-GROWTH-KINETICS as the reason it cannot compute OD600, wet biomass or glucose consumption from inputs. A relationship from another strain or medium would transfer parameters across experiments and is refused by the identity rules in composition.evidence.sourcing.",
+      "suitable_paper_must_report": [
+        "The host strain (E. coli 20 IBA 1 or an explicit CSH50R derivative) and the plasmid pIBAINS.",
+        "GMS medium, the glucose/proline feed strategy and the pH-stat control settings.",
+        "Either a fitted growth/uptake model with its parameters and fitting method, or the raw OD600, glucose and feed-volume series."
+      ],
+      "what_scaleup_can_do": "Register the reported relationship as a candidate finding, run the existing identity comparison against the target passages, and only then consider declaring a port. No classification is upgraded by relevance alone.",
+      "gap_id": "GAP-MP-GROWTH-KINETICS",
+      "search_terms": [
+        "\"Escherichia coli 20 IBA 1\" growth rate",
+        "\"pIBAINS\" fed-batch growth kinetics",
+        "\"GMS medium\" \"Escherichia coli\" glucose",
+        "\"pH-stat\" glucose feeding \"Escherichia coli\" specific growth rate",
+        "\"Escherichia coli\" maintenance coefficient \"GMS medium\""
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A280 readings with their path length, or a concentration measurement that makes the printed dosing rules executable."
+      ],
+      "why_it_is_needed": "MP-A280-SOLUTION blocks citraconic_anhydride_volume_from_formula and trypsin_volume_from_formula. The model already refuses these equations rather than guessing the missing term.",
+      "suitable_paper_must_report": [
+        "The same citraconylation and trypsinization steps.",
+        "A280 values, wavelength, path length and any dilution.",
+        "Enough detail to reproduce the reagent volume from the printed formula."
+      ],
+      "what_scaleup_can_do": "Record the measurement and re-run the two refused equations with traceable inputs, keeping the original refusal visible until the input is actually supplied.",
+      "gap_id": "GAP-MP-A280-SOLUTION",
+      "search_terms": [
+        "\"A280\" path length citraconylation insulin",
+        "\"trypsin\" \"A280\" insulin precursor",
+        "\"citraconic anhydride\" insulin A280 volume",
+        "\"insulin\" \"trypsin\" absorbance units dosing"
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A documented calibration from the absorbance scale used in this process to protein mass or IU."
+      ],
+      "why_it_is_needed": "MP-AU-CALIBRATION blocks insulin_mass_from_au, stage_recovery_percent and final_activity_from_au. Without it the model can compare AU values but cannot claim a mass yield.",
+      "suitable_paper_must_report": [
+        "The same insulin construct and sample matrix, or a standard that is explicitly applicable.",
+        "Path length, wavelength, extinction coefficient and standard curve.",
+        "The link between the AU measurement and the activity assay."
+      ],
+      "what_scaleup_can_do": "Store the calibration as a separate evidence record and apply it only in a labelled calculation; the replay's reported AU values remain reported, not converted.",
+      "gap_id": "GAP-MP-AU-CALIBRATION",
+      "search_terms": [
+        "\"A280\" insulin extinction coefficient",
+        "\"absorbance units\" insulin calibration \"Escherichia coli\"",
+        "\"RP-HPLC\" insulin quantification absorbance units",
+        "\"insulin\" \"IU\" \"A280\" conversion",
+        "\"recombinant human insulin\" quantification \"AU\""
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A biological characterisation made on the same host and construct as the target, independent of Zielinski et al. (2019)."
+      ],
+      "why_it_is_needed": "The compatibility engine's identity dimensions require the same organism, strain, construct, medium and mode. No assessed candidate satisfies them, so the target's own biology remains a single-paper record.",
+      "suitable_paper_must_report": [
+        "E. coli 20 IBA 1 or an explicitly identified CSH50R derivative.",
+        "The plasmid pIBAINS and its induction/expression behaviour.",
+        "GMS medium and the fed-batch operating policy, or a clear statement of which dimensions differ."
+      ],
+      "what_scaleup_can_do": "Run the existing identity comparison against the new source and record which dimensions match. Only a full match could support a compatibility reclassification; relevance alone cannot.",
+      "gap_id": "GAP-BIOLOGICAL-CONTEXT",
+      "search_terms": [
+        "\"Escherichia coli 20 IBA 1\" \"pIBAINS\"",
+        "\"Escherichia coli 20\" \"CSH50R\" insulin",
+        "\"pIBAINS\" plasmid stability \"Escherichia coli\"",
+        "\"Escherichia coli 20\" GMS medium physiology"
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "An enumerated GMS recipe or a measurement of the medium's substrate concentrations in this exact process."
+      ],
+      "why_it_is_needed": "MP-CULTURE-MEDIUM blocks glucose_initial_concentration and nutrient_balance. A medium from a different E. coli process cannot be substituted without changing the experiment.",
+      "suitable_paper_must_report": [
+        "The complete GMS recipe, or an explicit citation to an enumerated formulation plus the supplements used.",
+        "Glucose and proline concentrations in the batch and feed.",
+        "The strain and process context in which the recipe was used."
+      ],
+      "what_scaleup_can_do": "Attach the recipe as a source-qualified evidence record and check whether every component name and concentration has a target-context match before any balance is attempted.",
+      "gap_id": "GAP-MP-CULTURE-MEDIUM",
+      "search_terms": [
+        "\"GMS medium\" \"Escherichia coli\" composition",
+        "\"GMS medium\" glucose proline \"Escherichia coli 20\"",
+        "\"WO9620724\" GMS medium composition",
+        "\"pH-stat\" \"GMS medium\" \"Escherichia coli\""
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A lysis record for this process, or a measured lysis/recovery efficiency that can be attached to the operation."
+      ],
+      "why_it_is_needed": "MP-HOMOGENIZER blocks lysis_efficiency, so the model cannot connect the harvested biomass to the inclusion bodies actually released without inventing a recovery.",
+      "suitable_paper_must_report": [
+        "The same strain and inclusion-body system, or a clearly stated reason the mechanical treatment transfers.",
+        "Pressure, pass count and temperature.",
+        "Measured lysis or inclusion-body recovery with its assay."
+      ],
+      "what_scaleup_can_do": "Attach the measured recovery to the lysis operation as a context-tagged value and show its effect separately from the published replay.",
+      "gap_id": "GAP-MP-HOMOGENIZER",
+      "search_terms": [
+        "\"high-pressure homogenizer\" \"Escherichia coli\" inclusion bodies pressure passes",
+        "\"Escherichia coli 20\" lysis inclusion bodies",
+        "\"inclusion body\" recovery \"homogenizer\" \"Escherichia coli\""
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A primary record of when induction happened in this process, or enough time-resolved product data to identify the transition."
+      ],
+      "why_it_is_needed": "MP-INDUCTION-TIME blocks induction_time_h and post_induction_start_h. Guessing it would silently change the meaning of the growth and production phases.",
+      "suitable_paper_must_report": [
+        "The same host/vector/medium and the induction trigger.",
+        "Induction time or OD600, IPTG concentration and post-induction duration.",
+        "Enough detail to tell whether induction preceded or followed the pH-stat glucose limitation."
+      ],
+      "what_scaleup_can_do": "Store the induction record with its context, re-run the existing source-discrepancy check, and keep the conflict visible rather than resolving it by assumption.",
+      "gap_id": "GAP-MP-INDUCTION-TIME",
+      "search_terms": [
+        "\"Escherichia coli 20\" \"pIBAINS\" IPTG induction OD600",
+        "\"recombinant insulin\" \"Escherichia coli\" induction time fed-batch",
+        "\"pH-stat\" induction \"Escherichia coli\" OD600",
+        "Zielinski insulin 2019 induction optical density"
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A time-resolved renaturation data set or a printed rate law for this insulin precursor and buffer system."
+      ],
+      "why_it_is_needed": "MP-FOLDING-MODEL blocks refolding_yield_predictive and refolding_time_predictive. The model keeps the two reported yields as observations rather than inventing a function.",
+      "suitable_paper_must_report": [
+        "The same precursor, redox system, pH and temperature range.",
+        "Yield and aggregate fraction over time, with replicates.",
+        "A rate law or the data needed to fit one, including the fitting method and uncertainty."
+      ],
+      "what_scaleup_can_do": "Register the kinetic model as a candidate, compare its buffer and redox conditions with the target, and keep the existing source discrepancy about the reported yields visible.",
+      "gap_id": "GAP-MP-FOLDING-MODEL",
+      "search_terms": [
+        "\"insulin\" renaturation kinetics redox pH",
+        "\"inclusion bodies\" refolding yield time course \"Escherichia coli\"",
+        "\"insulin precursor\" refolding aggregate fraction",
+        "\"recombinant insulin\" renaturation 18 h yield"
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A transfer/uptake relationship measured under the target reactor's hydrodynamics, not a correlation borrowed from a different vessel."
+      ],
+      "why_it_is_needed": "MP-OXYGEN-TRANSFER blocks dissolved_oxygen_profile and specific_growth_rate_mu_max. The project's existing evidence catalogue records that no candidate examined supplies a dissolved-oxygen measurement under matching conditions.",
+      "suitable_paper_must_report": [
+        "The same strain, medium and fed-batch mode, or a clear statement that the correlation is geometry-specific and why it transfers.",
+        "Air flow, agitation, sparger geometry and dissolved-oxygen measurements over time.",
+        "kLa, OUR or OTR with the measurement method and uncertainty."
+      ],
+      "what_scaleup_can_do": "Record the correlation as context-tagged evidence, compare its conditions against the target passages, and expose the residual against the dissolved-oxygen target without changing the replay.",
+      "gap_id": "GAP-MP-OXYGEN-TRANSFER",
+      "search_terms": [
+        "\"Escherichia coli\" \"kLa\" \"7.5 L\" bioreactor",
+        "\"oxygen transfer\" \"pH-stat\" \"Escherichia coli\"",
+        "\"OUR\" \"OTR\" \"Escherichia coli\" fed-batch \"dissolved oxygen\"",
+        "\"Bioflo Celligen\" \"kLa\" \"Escherichia coli\"",
+        "\"dissolved oxygen\" \"recombinant insulin\" \"Escherichia coli\""
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "An independent repeat of the target process, or at least replicated measurements of its key outputs."
+      ],
+      "why_it_is_needed": "The baseline is an evidence replay of one publication. Without a second batch, validation claims would rest on the same record that defines the model.",
+      "suitable_paper_must_report": [
+        "The same host, construct, medium and operating policy, or an explicitly justified equivalent.",
+        "Raw time series and endpoint measurements with replicates.",
+        "The calibration and assay methods, not only the final values."
+      ],
+      "what_scaleup_can_do": "Hold the independent batch as a held-out record, compare it with the replay without changing the baseline, and report residuals with the batch variability stated.",
+      "gap_id": "GAP-INDEPENDENT-VALIDATION",
+      "search_terms": [
+        "\"Zielinski\" 2019 insulin independent replication",
+        "\"recombinant human insulin\" \"Escherichia coli\" fed-batch replicate",
+        "\"insulin inclusion bodies\" \"mass balance\" \"AU\"",
+        "\"Escherichia coli 20\" insulin batch reproducibility"
+      ]
+    },
+    {
+      "what_information_is_needed": [
+        "A candidate model or measurement set that declares a shared quantity and matches the target's identity dimensions."
+      ],
+      "why_it_is_needed": "No permitted connection touches the target. Supplying a relevant paper is not enough; the project needs an explicit, evidence-backed quantity and component mapping before composition is legitimate.",
+      "suitable_paper_must_report": [
+        "A quantity that Zielinski also declares, with compatible units.",
+        "The same organism, strain, construct, medium and process mode, or an explicit statement of which dimensions differ.",
+        "Enough component identity to map the candidate's state to Zielinski's process roles."
+      ],
+      "what_scaleup_can_do": "Declare the new boundary only after the shared quantity and identity match are recorded; re-run the compatibility check and leave the baseline replay unchanged.",
+      "gap_id": "GAP-COMPOSITION-BOUNDARY",
+      "search_terms": [
+        "\"Escherichia coli\" \"wet biomass\" \"dry cell weight\" conversion",
+        "\"insulin\" \"inclusion bodies\" \"mass balance\"",
+        "\"Escherichia coli\" process model component mapping",
+        "\"Escherichia coli 20\" \"pIBAINS\" process model"
+      ]
+    }
+  ],
+  "prior_literature_search": {
+    "available": true,
+    "source": "composition/composition/evidence/catalogue.py",
+    "searched": {
+      "description": "Searched for growth kinetics or substrate-affinity parameters applicable to the Zielinski 2019 fermentation, and for any source that restates the operating ranges the 2019 paper leaves as ranges.",
+      "queries": [
+        "Escherichia coli recombinant human insulin pIBAINS growth kinetics",
+        "Escherichia coli K-12 Monod mu_max Ks glucose minimal medium chemostat"
+      ],
+      "databases": [
+        "general web literature",
+        "Europe PMC REST (bibliographic verification)"
+      ],
+      "result": "No source reports a kinetic parameter for E. coli 20 carrying pIBAINS in GMS medium. The closest-matched publication, from the same institute and the same strain/vector/medium, reports no kinetics at all."
+    },
+    "targets_examined": 5,
+    "findings": 3,
+    "verdicts": {
+      "incompatible": 3
+    },
+    "note": "This is the project's existing literature investigation, reused as recorded. It did not resolve any target gap and was not repeated or extended by this analysis."
+  },
+  "role_legend": {
+    "baseline_reference": "The target paper itself; it defines the gaps, not their answers.",
+    "relevant_literature": "Shares the phenomenon or method but is not target-context evidence.",
+    "context_matched_evidence": "Matches the target context and may constrain a target quantity.",
+    "potentially_composable_model": "Has a permitted, evidence-backed connection to the target.",
+    "independently_validated_evidence": "An independent, target-context validation record.",
+    "note": "No assessed paper is in context_matched_evidence, potentially_composable_model or independently_validated_evidence."
+  },
+  "warnings": [],
+  "traceability": {
+    "read_only": true,
+    "model_artifacts_written": [],
+    "sources": [
+      {
+        "path": "Models/Zielinski/out/graph.json",
+        "sha256": "08376f85d3e010721dc052e4b14f310e2e833b7a095a379b764c9b5ed6dcf542"
+      },
+      {
+        "path": "Models/Zielinski/MODEL_REPORT.md",
+        "sha256": "e59e17d493436663aa32d2e5f741d152766254d527dfe9c7c4a93cde5b49fe94"
+      },
+      {
+        "path": "Models/Zielinski/out/run_summary.md",
+        "sha256": "805d2a6aa74d8f7c5fff3e68940103a760ff900bd8b70afe54cea812ba57b223"
+      },
+      {
+        "path": "Models/Zielinski/models/zielinski_2019.py",
+        "sha256": "24e23b965b1e1f8975019ba268016cdc5c76c9d6fb6893f3b21af6db873552ae"
+      },
+      {
+        "path": "composition/composition/compatibility.py",
+        "sha256": "778054807fdc352b44f99e8022da7b903d97c06a3a7e138099cd6e084a607ff7"
+      },
+      {
+        "path": "composition/composition/evidence/papers.py",
+        "sha256": "9dde352a4c6737f47205247d016ecbb3775460ec7922674f156d130aacfcb2fe"
+      },
+      {
+        "path": "composition/composition/evidence/catalogue.py",
+        "sha256": "b1c27abe25f85e6ac7b1d8ac051cc147540466bb6e9ae46296e3c06e9a553c7e"
+      }
+    ],
+    "model_graph": {
+      "nodes": 15,
+      "streams": 17,
+      "assumptions": 2,
+      "missing_parameters": 9
+    },
+    "note": "The analysis reads existing model artifacts, compatibility records and the paper index. It writes nothing under Models/ and changes no model equation or replay value."
+  },
+  "analysis_digest": "7ab631633c39c9a80320b806299f08c957e0b30edd1fc50cae4eb63abbd59cf4"
+}

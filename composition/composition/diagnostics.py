@@ -48,6 +48,7 @@ class Origin(str, Enum):
     #: raised inside a model and passed through untouched
     MORRIS = "morris2011"
     ZIELINSKI = "zielinski2019"
+    GANJAVE = "ganjave2022"
     RUNNER = "runner"
 
 
@@ -73,6 +74,11 @@ class DiagnosticCode(str, Enum):
     CONNECTION_DIRECTION = "connection.direction_invalid"
     CONNECTION_COMPONENT_MISMATCH = "connection.component_mismatch"
     CONNECTION_COMPONENT_UNATTRIBUTED = "connection.component_unattributed"
+    #: A connection that is mechanically legal -- equal quantity, convertible
+    #: unit, no component clash -- and scientifically unsupported between the
+    #: two models involved.  The mechanical checks cannot see this; the declared
+    #: position in ``composition.cross_model`` does.
+    CONNECTION_CROSS_MODEL_REFUSED = "connection.cross_model_refused"
     CONNECTION_SELF_LOOP = "connection.self_loop"
     CONNECTION_MISSING_REQUIRED = "connection.missing_required_input"
     CONNECTION_CARRIES_UNRESOLVED = "connection.carries_unresolved"

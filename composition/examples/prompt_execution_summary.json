@@ -1,0 +1,168 @@
+{
+  "prompt": "Increase the starting medium volume to 8 L and show wet biomass and insulin activity.",
+  "status": "success_with_warnings",
+  "selected_model": {
+    "model_id": "zielinski2019.rhi_process",
+    "model_version": "1.0.0",
+    "reference": "zielinski2019.rhi_process@1.0.0",
+    "title": "Recombinant human insulin from Escherichia coli 20 (Zielinski et al. 2019)",
+    "summary": "15 operations, 17 material streams, 20 declared equation bindings. Evidence replay restates the paper's reported numbers and applies only the accounting identities the paper supports; predictive mode starts from declared inputs and fails closed.",
+    "source_ref": "M. Zielinski, A. Romanik-Chruscielewska, D. Mikiewicz, N. Lukasiewicz, I. Sokolowska, J. Antosik, A. Sobolewska-Ruta, A. Bierczynska-Krzysik, P. Zaleski, A. Plucienniczak, 'Expression and purification of recombinant human insulin from E. coli 20 strain', Protein Expression and Purification 157 (2019) 63-69.",
+    "selection_reason": "The prompt names the supported recombinant human insulin process.",
+    "only_executable_target": true
+  },
+  "requested_parameters": [
+    {
+      "port_id": "node:N01#starting_medium_volume",
+      "label": "Starting medium volume",
+      "quantity": "volume",
+      "requested_value": 8.0,
+      "requested_unit": "L",
+      "value": 8.0,
+      "unit": "L",
+      "source_text": "starting medium volume to 8 L",
+      "validation": {
+        "ok": true,
+        "message": ""
+      }
+    }
+  ],
+  "requested_outputs": [
+    {
+      "key": "wet_biomass",
+      "label": "Wet biomass",
+      "matched_text": "wet biomass",
+      "kind": "scalar",
+      "port_ids": [
+        "node:N02#wet_biomass_g_per_L",
+        "stream:S03_wet_biomass#wet_biomass_total"
+      ],
+      "ports": [
+        {
+          "port_id": "node:N02#wet_biomass_g_per_L",
+          "label": "mass_per_volume",
+          "quantity": "mass_concentration",
+          "unit": "g/L",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        },
+        {
+          "port_id": "stream:S03_wet_biomass#wet_biomass_total",
+          "label": "Total wet biomass",
+          "quantity": "mass",
+          "unit": "g",
+          "direction": "output",
+          "state": "number",
+          "provenance": "reported",
+          "source_ref": "we obtained about 224 g of wet biomass",
+          "citation": "p.66, 4.2",
+          "available": true,
+          "reason": ""
+        }
+      ],
+      "available": true,
+      "reason": ""
+    },
+    {
+      "key": "activity",
+      "label": "Insulin activity",
+      "matched_text": "activity",
+      "kind": "scalar",
+      "port_ids": [
+        "node:N15#batch_activity"
+      ],
+      "ports": [
+        {
+          "port_id": "node:N15#batch_activity",
+          "label": "total_activity",
+          "quantity": "activity",
+          "unit": "IU",
+          "direction": "output",
+          "state": "number",
+          "provenance": "derived",
+          "source_ref": "",
+          "citation": "",
+          "available": true,
+          "reason": ""
+        }
+      ],
+      "available": true,
+      "reason": ""
+    }
+  ],
+  "prompt_effect": {
+    "compared_ports": 196,
+    "differing_ports": [
+      "node:N02#wet_biomass_g_per_L",
+      "node:N03#inclusion_bodies_g_per_L",
+      "node:N15#batch_activity"
+    ],
+    "requested_differences": [
+      "node:N02#wet_biomass_g_per_L",
+      "node:N15#batch_activity"
+    ],
+    "identical": false,
+    "published_outputs_changed": true,
+    "baseline_status": "success_with_warnings",
+    "configured_status": "success_with_warnings",
+    "parameter_change_count": 1,
+    "note": "The configured graph was run beside the original replay graph. 3 published output value(s) changed; the list names them and no causal attribution beyond the run is claimed.",
+    "baseline_exit_code": 0,
+    "configured_exit_code": 0
+  },
+  "outputs": {
+    "node:N02#wet_biomass_g_per_L": {
+      "value": 28.0,
+      "unit": "g/L",
+      "provenance": "derived",
+      "source_ref": null
+    },
+    "node:N03#inclusion_bodies_g_per_L": {
+      "value": 7.25,
+      "unit": "g/L",
+      "provenance": "derived",
+      "source_ref": null
+    },
+    "node:N03#inclusion_body_fraction_of_biomass": {
+      "value": 0.25892857142857145,
+      "unit": "1",
+      "provenance": "derived",
+      "source_ref": null
+    },
+    "node:N15#batch_activity": {
+      "value": 21600.0,
+      "unit": "IU",
+      "provenance": "derived",
+      "source_ref": null
+    },
+    "node:N08#total_au": {
+      "value": 2142.5,
+      "unit": "AU",
+      "provenance": "derived",
+      "source_ref": null
+    },
+    "node:N11#total_au": {
+      "value": 626.02,
+      "unit": "AU",
+      "provenance": "derived",
+      "source_ref": null
+    },
+    "node:N13#total_au": {
+      "value": 234.73999999999998,
+      "unit": "AU",
+      "provenance": "derived",
+      "source_ref": null
+    },
+    "node:N14#total_au": {
+      "value": 111.28999999999999,
+      "unit": "AU",
+      "provenance": "derived",
+      "source_ref": null
+    }
+  }
+}
