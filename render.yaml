@@ -1,3 +1,8 @@
+# Paid Render reference blueprint only. It is not the $0/month deployment target;
+# do not provision these services for the free-hosting plan.
+#
+# The API service also serves the research explorer at /research/ (page plus
+# /api/research/*), so the explorer needs this service only.
 services:
   - type: web
     name: scaleup-ai-api
@@ -20,6 +25,12 @@ services:
         value: "true"
       - key: SCALEUP_MAX_BODY_BYTES
         value: "262144"
+      - key: SCALEUP_RESEARCH_RETENTION
+        value: "5"
+      # Uncomment and mount a disk to persist researcher feedback; without it the
+      # feedback endpoint reports that the message was not stored.
+      # - key: SCALEUP_FEEDBACK_DIR
+      #   value: /var/data/feedback
   - type: web
     name: scaleup-ai-web
     runtime: static

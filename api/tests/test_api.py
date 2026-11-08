@@ -41,6 +41,15 @@ def test_rejects_bad_shape_and_resource_excess_before_runner():
     with pytest.raises(app.ApiError) as large:
         app._graph_from_request({"graph": graph})
     assert large.value.code == "duration_limit"
+    graph = default_graph()
+    graph["instances"][0]["parameters"]["simulation"]["solver"]["max_steps"] = 200001
+    with pytest.raises(app.ApiError) as too_many_steps:
+        app._graph_from_request({"graph": graph})
+    assert too_many_steps.value.code == "solver_limit"
+    graph["instances"][0]["parameters"]["simulation"]["solver"]["max_steps"] = 1.5
+    with pytest.raises(app.ApiError) as fractional_steps:
+        app._graph_from_request({"graph": graph})
+    assert fractional_steps.value.code == "solver_limit"
     with pytest.raises(app.ApiError) as nonfinite:
         app._graph_from_request({"graph": {"instances": [], "connections": [], "literal_inputs": {"x": {"value": float("inf")}}}})
     assert nonfinite.value.code == "non_finite_number"
@@ -80,6 +89,21 @@ def test_failed_run_is_not_computed_or_reused():
     assert payload["execution_status"] == "failed"
     assert payload["result_kind"] == "none"
     assert payload["trajectories"] == {}
+
+
+def test_solver_step_budget_failure_is_returned_without_a_trajectory():
+    graph = default_graph()
+    graph["instances"][0]["parameters"]["simulation"]["solver"]["max_steps"] = 1
+    result, code = app.run_graph(graph, base=ROOT)
+    payload = app._execution_payload("budget-run", graph, result, code)
+    assert payload["execution_status"] == "failed"
+    assert payload["result_kind"] == "none"
+    assert payload["trajectories"] == {}
+    assert any(item["code"] == "execution.model_failed" for item in payload["diagnostics"])
+    solver_report = payload["result"]["results"][0]["raw_summary"]["solver_report"]
+    assert solver_report["steps_taken"] == 1
+    requested_duration = graph["instances"][0]["parameters"]["simulation"]["duration_h"]
+    assert solver_report["reached_time_h"] < requested_duration
 
 
 def test_response_redacts_server_paths_and_tracebacks():

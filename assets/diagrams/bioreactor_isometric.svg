@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="vesselGlass" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.85" />
+      <stop offset="25%" stop-color="#38bdf8" stop-opacity="0.35" />
+      <stop offset="70%" stop-color="#0284c7" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.9" />
+    </linearGradient>
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94a3b8" />
+      <stop offset="50%" stop-color="#f1f5f9" />
+      <stop offset="100%" stop-color="#64748b" />
+    </linearGradient>
+    <linearGradient id="brothGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#047857" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#10b981" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#065f46" stop-opacity="0.85" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="600" fill="#0b1120" rx="8" />
+  
+  <!-- Technical Grid -->
+  <g stroke="#1e293b" stroke-width="0.8" opacity="0.6">
+    <line x1="100" y1="50" x2="100" y2="550" />
+    <line x1="200" y1="50" x2="200" y2="550" />
+    <line x1="300" y1="50" x2="300" y2="550" />
+    <line x1="400" y1="50" x2="400" y2="550" />
+    <line x1="500" y1="50" x2="500" y2="550" />
+    <line x1="600" y1="50" x2="600" y2="550" />
+    <line x1="700" y1="50" x2="700" y2="550" />
+    <line x1="50" y1="100" x2="750" y2="100" />
+    <line x1="50" y1="200" x2="750" y2="200" />
+    <line x1="50" y1="300" x2="750" y2="300" />
+    <line x1="50" y1="400" x2="750" y2="400" />
+    <line x1="50" y1="500" x2="750" y2="500" />
+  </g>
+
+  <!-- Title & Metadata Card -->
+  <g transform="translate(40, 40)">
+    <rect width="280" height="74" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+    <text x="14" y="24" fill="#38bdf8" font-family="monospace" font-size="12" font-weight="bold">SCALEUP APPARATUS DIAGRAM</text>
+    <text x="14" y="42" fill="#f8fafc" font-family="sans-serif" font-size="13" font-weight="600">Fed-Batch Bioreactor System (5-10 L)</text>
+    <text x="14" y="60" fill="#94a3b8" font-family="sans-serif" font-size="10">Isometric Technical Schematics • Cross-Paper Hot-Swap</text>
+  </g>
+
+  <!-- Vessel Assembly -->
+  <g id="bioreactor_assembly" transform="translate(180, 50)">
+    <!-- Base Plate Stand -->
+    <ellipse cx="220" cy="460" rx="140" ry="24" fill="#334155" stroke="#475569" stroke-width="2" />
+    <ellipse cx="220" cy="455" rx="135" ry="22" fill="url(#steelGrad)" stroke="#64748b" stroke-width="1.5" />
+
+    <!-- Glass Vessel Body -->
+    <path d="M 120 200 L 120 420 A 100 35 0 0 0 320 420 L 320 200 Z" fill="url(#vesselGlass)" stroke="#38bdf8" stroke-width="2" />
+
+    <!-- Fermentation Broth Fluid -->
+    <path d="M 124 280 L 124 416 A 96 32 0 0 0 316 416 L 316 280 Z" fill="url(#brothGrad)" opacity="0.85" />
+    <ellipse cx="220" cy="280" rx="96" ry="18" fill="#34d399" opacity="0.6" stroke="#10b981" stroke-width="1.5" />
+
+    <!-- Impeller & Agitator Shaft -->
+    <line x1="220" y1="120" x2="220" y2="400" stroke="url(#steelGrad)" stroke-width="7" stroke-linecap="round" />
+    <!-- Lower Rushton Turbine -->
+    <rect x="175" y="380" width="90" height="12" rx="2" fill="url(#steelGrad)" stroke="#475569" stroke-width="1.5" />
+    <line x1="175" y1="375" x2="175" y2="397" stroke="#cbd5e1" stroke-width="4" />
+    <line x1="265" y1="375" x2="265" y2="397" stroke="#cbd5e1" stroke-width="4" />
+    <!-- Upper Rushton Turbine -->
+    <rect x="185" y="320" width="70" height="10" rx="2" fill="url(#steelGrad)" stroke="#475569" stroke-width="1.5" />
+
+    <!-- Aeration Ring & Bubbles -->
+    <ellipse cx="220" cy="415" rx="60" ry="12" fill="none" stroke="#e0f2fe" stroke-width="2.5" stroke-dasharray="4,4" />
+    <circle cx="210" cy="360" r="3" fill="#e0f2fe" opacity="0.7" />
+    <circle cx="230" cy="340" r="2.5" fill="#e0f2fe" opacity="0.8" />
+    <circle cx="195" cy="300" r="4" fill="#e0f2fe" opacity="0.6" />
+    <circle cx="240" cy="310" r="3.5" fill="#e0f2fe" opacity="0.7" />
+
+    <!-- Stainless Steel Headplate -->
+    <ellipse cx="220" cy="200" rx="112" ry="25" fill="#475569" stroke="#64748b" stroke-width="2" />
+    <ellipse cx="220" cy="192" rx="110" ry="24" fill="url(#steelGrad)" stroke="#cbd5e1" stroke-width="1.8" />
+
+    <!-- Top Stirrer Motor Drive -->
+    <rect x="195" y="90" width="50" height="65" rx="4" fill="#334155" stroke="#64748b" stroke-width="2" />
+    <rect x="202" y="155" width="36" height="37" fill="url(#steelGrad)" stroke="#475569" stroke-width="1.2" />
+    <ellipse cx="220" cy="90" rx="25" ry="8" fill="#475569" stroke="#64748b" />
+
+    <!-- Sensor Probes (pH, DO, Temp) -->
+    <!-- DO Probe -->
+    <line x1="160" y1="180" x2="160" y2="350" stroke="#f59e0b" stroke-width="3.5" />
+    <circle cx="160" cy="350" r="3.5" fill="#fbbf24" />
+    <!-- pH Electrode -->
+    <line x1="280" y1="185" x2="280" y2="360" stroke="#06b6d4" stroke-width="3" />
+    <circle cx="280" cy="360" r="3" fill="#22d3ee" />
+    <!-- Nutrient Feed Dip Tube -->
+    <path d="M 140 130 L 140 330" fill="none" stroke="#a855f7" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Exhaust Condenser Column -->
+    <rect x="260" y="70" width="22" height="115" rx="3" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+    <path d="M 271 70 L 271 50 L 310 50" fill="none" stroke="#38bdf8" stroke-width="2" />
+  </g>
+
+  <!-- Technical Callout Annotations -->
+  <g font-family="monospace" font-size="11" fill="#e2e8f0">
+    <!-- Motor / Agitation -->
+    <path d="M 400 150 L 490 130 L 580 130" fill="none" stroke="#64748b" stroke-width="1.2" />
+    <text x="585" y="134" fill="#93c5fd">Agitation Drive (N=300-1000 rpm)</text>
+
+    <!-- Nutrient Feed -->
+    <path d="M 320 200 L 230 180 L 110 180" fill="none" stroke="#a855f7" stroke-width="1.2" />
+    <text x="12" y="184" fill="#c084fc">Exponential Glucose Feed F(t)</text>
+
+    <!-- Dissolved Oxygen -->
+    <path d="M 340 370 L 250 340 L 110 340" fill="none" stroke="#f59e0b" stroke-width="1.2" />
+    <text x="12" y="344" fill="#fcd34d">DO Probe (dO2/dt kLa balance)</text>
+
+    <!-- pH / Overflow -->
+    <path d="M 460 380 L 530 350 L 580 350" fill="none" stroke="#06b6d4" stroke-width="1.2" />
+    <text x="585" y="354" fill="#67e8f9">pH &amp; Acetate Sensing Probe</text>
+
+    <!-- Rushton Impeller -->
+    <path d="M 445 440 L 510 430 L 580 430" fill="none" stroke="#10b981" stroke-width="1.2" />
+    <text x="585" y="434" fill="#6ee7b7">Rushton Impeller Gas Dispersion</text>
+
+    <!-- Broth Volume -->
+    <path d="M 360 480 L 270 470 L 110 470" fill="none" stroke="#38bdf8" stroke-width="1.2" />
+    <text x="12" y="474" fill="#7dd3fc">Broth Volume V(t) &amp; DCW X(t)</text>
+  </g>
+
+  <!-- Live Telemetry Badge -->
+  <g transform="translate(540, 480)">
+    <rect width="220" height="80" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="12" y="22" fill="#94a3b8" font-family="monospace" font-size="10">STATUS: VERIFIED READY</text>
+    <text x="12" y="40" fill="#34d399" font-family="sans-serif" font-size="12" font-weight="bold">● Simulation Synchronized</text>
+    <text x="12" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="11">Coupled ODE / Cybernetic Solved</text>
+  </g>
+</svg>

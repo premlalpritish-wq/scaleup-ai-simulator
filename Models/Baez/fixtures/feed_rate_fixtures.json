@@ -1,0 +1,188 @@
+{
+  "equation": "F(t) = (mu_set/Y_XS + m) * (X_F*V_F/S_F) * exp(mu_set*(t - t_F))",
+  "equation_source": "Baez et al. 2014, p. 6, printed",
+  "output_unit": "L/h",
+  "reported_parameters": {
+    "mu_set": "0.35 1/h",
+    "Y_XS": "1.28 g/g",
+    "m": "0.12 g/(g h)",
+    "S_F": "141 g/L"
+  },
+  "derivation": "Computed by fixtures/build_feed_rate_fixtures.py with exact rational arithmetic for the non-exponential part and a 60-digit decimal exponential. The implementation uses IEEE-754 doubles and math.exp; the two paths share no code.",
+  "input_note": "X_F, V_F, t_F and t are illustrative fixture values chosen to exercise the formula. They are not reported values from the paper and are not measurements.",
+  "cases": [
+    {
+      "id": "feed_at_onset",
+      "description": "t = t_F, so the exponential factor is exactly 1 and the result is the pre-exponential factor alone.",
+      "inputs": {
+        "X_F": "10.0",
+        "V_F": "4.0",
+        "t_F": "5.0",
+        "t": "5.0"
+      },
+      "input_units": {
+        "X_F": "g/L",
+        "V_F": "L",
+        "t_F": "h",
+        "t": "h"
+      },
+      "parameters": null,
+      "exact_inputs_in_printed_units": {
+        "X_F": "10/1 g/L",
+        "V_F": "4/1 L",
+        "t_F": "5/1 h",
+        "t": "5/1 h"
+      },
+      "exact_pre_factor_l_per_h": "1259/11280",
+      "exact_exponent_argument": "0/1",
+      "exact_exponential_factor": "exp(0)",
+      "expected_feed_rate_l_per_h": "1.1161347517730496453900709220e-1",
+      "relative_tolerance": 1e-12
+    },
+    {
+      "id": "one_hour_after_onset",
+      "description": "One hour of exponential feeding at the printed mu_set, so the exponent argument is exactly 0.35.",
+      "inputs": {
+        "X_F": "10.0",
+        "V_F": "4.0",
+        "t_F": "5.0",
+        "t": "6.0"
+      },
+      "input_units": {
+        "X_F": "g/L",
+        "V_F": "L",
+        "t_F": "h",
+        "t": "h"
+      },
+      "parameters": null,
+      "exact_inputs_in_printed_units": {
+        "X_F": "10/1 g/L",
+        "V_F": "4/1 L",
+        "t_F": "5/1 h",
+        "t": "6/1 h"
+      },
+      "exact_pre_factor_l_per_h": "1259/11280",
+      "exact_exponent_argument": "7/20",
+      "exact_exponential_factor": "exp(0.35)",
+      "expected_feed_rate_l_per_h": "1.5838706060983252443017979950e-1",
+      "relative_tolerance": 1e-12
+    },
+    {
+      "id": "three_hours_after_onset",
+      "description": "Three hours after feeding starts, so the exponent argument is exactly 1.05.",
+      "inputs": {
+        "X_F": "10.0",
+        "V_F": "4.0",
+        "t_F": "5.0",
+        "t": "8.0"
+      },
+      "input_units": {
+        "X_F": "g/L",
+        "V_F": "L",
+        "t_F": "h",
+        "t": "h"
+      },
+      "parameters": null,
+      "exact_inputs_in_printed_units": {
+        "X_F": "10/1 g/L",
+        "V_F": "4/1 L",
+        "t_F": "5/1 h",
+        "t": "8/1 h"
+      },
+      "exact_pre_factor_l_per_h": "1259/11280",
+      "exact_exponent_argument": "21/20",
+      "exact_exponential_factor": "exp(1.05)",
+      "expected_feed_rate_l_per_h": "3.1895237213134071023396889009e-1",
+      "relative_tolerance": 1e-12
+    },
+    {
+      "id": "same_point_in_other_units",
+      "description": "The same physical point as 'one_hour_after_onset', expressed in mg/L and mL. Exercises the unit conversion path; the expected value is unchanged.",
+      "inputs": {
+        "X_F": "10000.0",
+        "V_F": "4000.0",
+        "t_F": "5.0",
+        "t": "6.0"
+      },
+      "input_units": {
+        "X_F": "mg/L",
+        "V_F": "mL",
+        "t_F": "h",
+        "t": "h"
+      },
+      "parameters": null,
+      "exact_inputs_in_printed_units": {
+        "X_F": "10/1 g/L",
+        "V_F": "4/1 L",
+        "t_F": "5/1 h",
+        "t": "6/1 h"
+      },
+      "exact_pre_factor_l_per_h": "1259/11280",
+      "exact_exponent_argument": "7/20",
+      "exact_exponential_factor": "exp(0.35)",
+      "expected_feed_rate_l_per_h": "1.5838706060983252443017979950e-1",
+      "relative_tolerance": 1e-12
+    },
+    {
+      "id": "overridden_parameters",
+      "description": "The printed parameters replaced by a caller's own values. Exercises the override path; the result must record that it is not the printed parameterisation.",
+      "inputs": {
+        "X_F": "10.0",
+        "V_F": "4.0",
+        "t_F": "5.0",
+        "t": "7.0"
+      },
+      "input_units": {
+        "X_F": "g/L",
+        "V_F": "L",
+        "t_F": "h",
+        "t": "h"
+      },
+      "parameters": {
+        "mu_set": "0.5",
+        "Y_XS": "1.0",
+        "m": "0.1",
+        "S_F": "141.0"
+      },
+      "exact_inputs_in_printed_units": {
+        "X_F": "10/1 g/L",
+        "V_F": "4/1 L",
+        "t_F": "5/1 h",
+        "t": "7/1 h"
+      },
+      "exact_pre_factor_l_per_h": "8/47",
+      "exact_exponent_argument": "1/1",
+      "exact_exponential_factor": "exp(1)",
+      "expected_feed_rate_l_per_h": "4.6268626867388004006132552704e-1",
+      "relative_tolerance": 1e-12
+    },
+    {
+      "id": "zero_biomass_at_onset",
+      "description": "Zero biomass at fed-batch onset. The pre-exponential factor is zero, so the feed rate is exactly zero: a boundary value, not an error.",
+      "inputs": {
+        "X_F": "0.0",
+        "V_F": "4.0",
+        "t_F": "5.0",
+        "t": "5.0"
+      },
+      "input_units": {
+        "X_F": "g/L",
+        "V_F": "L",
+        "t_F": "h",
+        "t": "h"
+      },
+      "parameters": null,
+      "exact_inputs_in_printed_units": {
+        "X_F": "0/1 g/L",
+        "V_F": "4/1 L",
+        "t_F": "5/1 h",
+        "t": "5/1 h"
+      },
+      "exact_pre_factor_l_per_h": "0/1",
+      "exact_exponent_argument": "0/1",
+      "exact_exponential_factor": "exp(0)",
+      "expected_feed_rate_l_per_h": "0.0",
+      "relative_tolerance": 1e-12
+    }
+  ]
+}

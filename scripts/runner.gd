@@ -215,6 +215,43 @@ func run_prompt(prompt_text: String, result_path: String) -> void:
 	))
 
 
+## Run the research-to-simulation workflow for one problem document.
+##
+## The Python workflow owns every scientific stage -- problem ingestion, local
+## literature discovery and acquisition, quote-verified encoding, model
+## construction and execution through `run_graph`. This method only builds the
+## argv and reads the document the runner wrote; it interprets nothing. The
+## artifact directory (`--workflow-out`) is separate from `result_path` on
+## purpose: the scene renders the result document, and the artifacts stay on disk
+## for inspection.
+##
+## The workflow runs the Python runner in a subprocess, so it is not available in
+## the Web export; that is reported as a failure rather than as an empty run.
+func run_research_workflow(
+	problem_path: String, out_dir: String, result_path: String
+) -> void:
+	if _is_web:
+		emit_signal("finished", {
+			"status": "failed",
+			"error_count": 1,
+			"warning_count": 0,
+			"results": [],
+			"diagnostics": [_runner_diagnostic(
+				"runner.workflow_unavailable",
+				"The research workflow invokes the Python composition runner in a subprocess, which the Web export cannot do.",
+				"Run the desktop build for the research-to-simulation workflow."
+			)],
+		})
+		return
+	var args := PackedStringArray([
+		"-m", "composition.runner",
+		"--run-workflow", problem_path,
+		"--workflow-out", out_dir,
+		"--result", result_path,
+	])
+	emit_signal("finished", _execute(args, problem_path, result_path))
+
+
 ## The standing of every model in the project against the insulin process: its
 ## classification, what was inspected, why it cannot contribute, and which
 ## dynamic connections the engine actually permits.

@@ -1,0 +1,73 @@
+{
+  "record_id": "ganjave2022.supplementary_charts",
+  "version": "1.0.0",
+  "data_class": "authors' plotted values, as stored in the supplementary document's native charts. These are the numbers entered into a plotting tool by the authors. They are NOT a digitisation, and they carry no reading uncertainty, because no reading step occurred.",
+  "provenance": {
+    "article_doi": "10.1016/j.btre.2021.e00694",
+    "pmcid": "PMC8718739",
+    "publisher_supplementary_file": "mmc1.docx",
+    "obtained_from": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8718739/supplementaryFiles",
+    "package": "PMC8718739_supplementary.zip",
+    "package_sha256": "f50c75b00f2dbcfeb55290f2534c854aae9580917baac71ce11615d020374e57",
+    "docx_sha256": "2b24a4fd43bf4e94e7a8f30da4c59ae298fc3d512b3b919e51a9de2049b29ee1",
+    "licence": "CC BY-NC-ND 4.0, as stated for the article. The file is stored unmodified; no derivative of it is redistributed."
+  },
+  "extraction": {
+    "method": "OOXML charts store plotted values in <c:numCache> as <c:pt> elements. Values are read verbatim: no smoothing, interpolation, unit conversion or resampling is applied.",
+    "preserves": "the authors' own units as plotted; no axis relabelling"
+  },
+  "charts": [
+    {
+      "chart_part": "word/charts/chart1.xml",
+      "sha256": "e0b6a21f3b95c0ee75eb3deed268ec23959c57ea7d4306852e38ccd5c7aa5460",
+      "size_bytes": 5554,
+      "titles": [
+        "500ml flask; 100ml SOB; 200 rpm; 5cm pitch",
+        "Time(h)",
+        "ln(C*/C*-C)"
+      ],
+      "axis_titles": [
+        "500ml flask; 100ml SOB; 200 rpm; 5cm pitch",
+        "Time(h)",
+        "ln(C*/C*-C)"
+      ],
+      "series": [
+        {
+          "series_index": 0,
+          "name": "",
+          "n_points": 0,
+          "points": []
+        }
+      ]
+    },
+    {
+      "chart_part": "word/charts/chart2.xml",
+      "sha256": "420751868610b2c30e2d86027538962a361e7e242c2424038b86d2d112e75b7a",
+      "size_bytes": 6195,
+      "titles": [
+        "500ml flask; 100ml SOB; 225rpm; 2.5cm pitch",
+        "Time(h)",
+        "ln(C*/C*-C)"
+      ],
+      "axis_titles": [
+        "500ml flask; 100ml SOB; 225rpm; 2.5cm pitch",
+        "Time(h)",
+        "ln(C*/C*-C)"
+      ],
+      "series": [
+        {
+          "series_index": 0,
+          "name": "",
+          "n_points": 0,
+          "points": []
+        },
+        {
+          "series_index": 1,
+          "name": "",
+          "n_points": 0,
+          "points": []
+        }
+      ]
+    }
+  ]
+}

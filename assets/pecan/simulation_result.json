@@ -1,0 +1,1489 @@
+{
+  "run_id": "rna-workflow-464f67b019af::1eaf13055868",
+  "graph_id": "rna-workflow-464f67b019af",
+  "contract_version": "0.1.0",
+  "status": "success_with_warnings",
+  "plan": {
+    "plan_id": "rna-workflow-464f67b019af::1",
+    "graph_id": "rna-workflow-464f67b019af",
+    "contract_version": "0.1.0",
+    "order": [
+      "pecan_rna_audit"
+    ],
+    "steps": [
+      {
+        "index": 1,
+        "instance_id": "pecan_rna_audit",
+        "model_id": "pecan_rna_evidence_audit",
+        "model_version": "0.1.0",
+        "status": "success",
+        "inputs": [],
+        "outputs": [],
+        "residuals": [],
+        "unresolved": [],
+        "diagnostics": []
+      }
+    ],
+    "diagnostics": [],
+    "digest": "1eaf13055868568fe34d118a1d654e2742b6bb9e18bc9e8086a9f2a2ab414ff2"
+  },
+  "results": [
+    {
+      "instance_id": "pecan_rna_audit",
+      "model_id": "pecan_rna_evidence_audit",
+      "model_version": "0.1.0",
+      "status": "success_with_warnings",
+      "inputs": [],
+      "outputs": [
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "step_count"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 18.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "18 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "claim_count"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 25.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "25 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "direct_target_claim_count"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 6.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "6 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "analogue_claim_count"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 17.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "17 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "method_review_claim_count"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 2.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "2 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "reported_parameter_count"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 66.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "66 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "unresolved_parameter_count"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 18.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "18 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "evidence_coverage_ratio"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 0.24,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "0.24 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "protocol_complete_for_target"
+          },
+          "value": {
+            "state": "zero",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 0.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "0 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "quantitative_yield_available_for_target"
+          },
+          "value": {
+            "state": "zero",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 0.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "0 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        },
+        {
+          "ref": {
+            "instance_id": "pecan_rna_audit",
+            "port_id": "analogue_protocol_available"
+          },
+          "value": {
+            "state": "number",
+            "is_resolved": true,
+            "quantity": "dimensionless",
+            "unit": "1",
+            "value": 1.0,
+            "value_range": null,
+            "provenance": "derived",
+            "components": [],
+            "reason": "",
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "method": "derived by counting verified claims, steps and unresolved parameters in the generated model spec",
+            "display": "1 1",
+            "conversion": null,
+            "extra": {
+              "readiness_statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+            },
+            "provenance_chain": [
+              {
+                "kind": "derivation",
+                "producer_model": "pecan_rna_evidence_audit",
+                "producer_version": "0.1.0",
+                "where": "instance:pecan_rna_audit",
+                "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+                "connection_id": null,
+                "source_port": null,
+                "target_port": null,
+                "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+                "inputs": [],
+                "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+                "conversion": null
+              }
+            ]
+          },
+          "provenance_chain": [
+            {
+              "kind": "derivation",
+              "producer_model": "pecan_rna_evidence_audit",
+              "producer_version": "0.1.0",
+              "where": "instance:pecan_rna_audit",
+              "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+              "connection_id": null,
+              "source_port": null,
+              "target_port": null,
+              "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+              "inputs": [],
+              "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+              "conversion": null
+            }
+          ]
+        }
+      ],
+      "residuals": [],
+      "unresolved": [
+        {
+          "target": "pecan_sample_handling: time between harvest and freezing",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan_trizol_extraction: whether the manufacturer's protocol was followed without modification",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan_dnase_treatment: DNase inactivation duration",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan_quality_assessment: which samples were measured and whether any measurement failed",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan_small_rna_enrichment: elution or recovery method after gel excision",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan_cdna_synthesis: reverse-transcriptase enzyme and supplier",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_ctab_extraction: whether this buffer is suitable for pecan embryos",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_ctab_extraction: pH adjustment procedure for the buffer",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_ctab_extraction: whether 100 mg pecan embryo behaves like 100 mg spruce tissue",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_ctab_extraction: whether Proteinase K is needed for pecan embryos",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_phase_separation: number of repeat extractions needed for pecan",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_licl_precipitation: whether pecan RNA precipitates completely under these conditions",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_elution: the exact elution volume for a pecan embryo preparation",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_dnase: whether the pecan DNase step used the same units or time",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_spruce_trizol_finding: whether pecan TRIzol extraction performed as well as the pecan paper implies",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_ctab_extraction: whether 100 mg pecan embryo has the same extraction behaviour",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_ctab_extraction: whether pecan embryos need a longer incubation",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_phase_separation: the number of repeat extractions needed for pecan",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_precipitation: whether a pecan extract needs the same isopropanol volume",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_precipitation: whether pecan RNA pellets as efficiently at this speed",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_precipitation: whether 20 μL is enough to redissolve a pecan RNA pellet",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_dnase: whether pecan RNA requires the same DNase amount",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_quality: the yield of the pecan protocol",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "analogue_pigeonpea_quality: the absorbance ratios of the pecan protocol",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "method_review_caveat: which protocol is actually suitable for pecan embryos",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "method_review_caveat: whether this method was tested on pecan",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-embryo-handling.storage_duration: storage_duration is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-trizol-kit.trizol_volume: trizol_volume is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-trizol-kit.homogenisation_time: homogenisation_time is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-trizol-kit.phase_separation_speed: phase_separation_speed is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-trizol-kit.precipitation_temperature: precipitation_temperature is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-trizol-kit.elution_volume: elution_volume is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-dnase.dnase_amount: dnase_amount is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-dnase.dnase_temperature: dnase_temperature is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-dnase.dnase_time: dnase_time is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-dnase.inactivation_temperature: inactivation_temperature is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-quality-assessment.rna_yield: rna_yield is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-quality-assessment.a260_a280: a260_a280 is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-quality-assessment.a260_a230: a260_a230 is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-quality-assessment.rin: rin is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-small-rna-enrichment.page_gel_percentage: page_gel_percentage is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-small-rna-enrichment.rna_loaded: rna_loaded is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-cdna-synthesis.reaction_volume: reaction_volume is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "pecan-cdna-synthesis.incubation_temperature: incubation_temperature is not stated",
+          "reason": "not stated by the acquired sources"
+        },
+        {
+          "target": "no target-organism RNA yield, RIN or degradation measurement is reported by the acquired pecan source",
+          "reason": "not stated by the acquired sources"
+        }
+      ],
+      "diagnostics": [
+        {
+          "code": "model.finding",
+          "severity": "info",
+          "message": "[execution] 18 parameter(s) are not stated by the acquired sources and remain unknown. They were not defaulted.",
+          "raw_message": "18 parameter(s) are not stated by the acquired sources and remain unknown. They were not defaulted.",
+          "where": [
+            "instance",
+            "pecan_rna_audit"
+          ],
+          "origin": "execution",
+          "remediation": "This is the audit's answer, not a failed run. Read the model spec's unknowns and hypotheses for the detail.",
+          "model_id": "pecan_rna_evidence_audit",
+          "model_version": "0.1.0",
+          "detail": {}
+        },
+        {
+          "code": "model.finding",
+          "severity": "info",
+          "message": "[execution] No target-organism RNA yield, RIN or degradation measurement is reported, so the model returns no prediction for them.",
+          "raw_message": "No target-organism RNA yield, RIN or degradation measurement is reported, so the model returns no prediction for them.",
+          "where": [
+            "instance",
+            "pecan_rna_audit"
+          ],
+          "origin": "execution",
+          "remediation": "This is the audit's answer, not a failed run. Read the model spec's unknowns and hypotheses for the detail.",
+          "model_id": "pecan_rna_evidence_audit",
+          "model_version": "0.1.0",
+          "detail": {}
+        },
+        {
+          "code": "model.finding",
+          "severity": "info",
+          "message": "[execution] An analogue protocol with reported parameters is available as a hypothesis. It has not been validated on the target organism.",
+          "raw_message": "An analogue protocol with reported parameters is available as a hypothesis. It has not been validated on the target organism.",
+          "where": [
+            "instance",
+            "pecan_rna_audit"
+          ],
+          "origin": "execution",
+          "remediation": "This is the audit's answer, not a failed run. Read the model spec's unknowns and hypotheses for the detail.",
+          "model_id": "pecan_rna_evidence_audit",
+          "model_version": "0.1.0",
+          "detail": {}
+        }
+      ],
+      "raw_summary": {
+        "step_count": 18,
+        "claim_count": 25,
+        "unresolved_parameter_count": 18,
+        "direct_target_claim_count": 6,
+        "analogue_claim_count": 17,
+        "model_kind": "evidence_constrained_protocol_audit"
+      },
+      "provenance_index": {
+        "pecan_rna_audit/step_count": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/claim_count": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/direct_target_claim_count": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/analogue_claim_count": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/method_review_claim_count": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/reported_parameter_count": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/unresolved_parameter_count": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/evidence_coverage_ratio": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/protocol_complete_for_target": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/quantitative_yield_available_for_target": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ],
+        "pecan_rna_audit/analogue_protocol_available": [
+          {
+            "kind": "derivation",
+            "producer_model": "pecan_rna_evidence_audit",
+            "producer_version": "0.1.0",
+            "where": "instance:pecan_rna_audit",
+            "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+            "connection_id": null,
+            "source_port": null,
+            "target_port": null,
+            "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+            "inputs": [],
+            "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+            "conversion": null
+          }
+        ]
+      }
+    }
+  ],
+  "diagnostics": [
+    {
+      "code": "capability.unsupported",
+      "severity": "info",
+      "message": "[manifest] pecan_rna_evidence_audit does not support 'quantitative_yield_prediction': No pecan-specific yield, RIN or degradation measurement is in the acquired sources; the model does not invent one.",
+      "raw_message": "pecan_rna_evidence_audit does not support 'quantitative_yield_prediction': No pecan-specific yield, RIN or degradation measurement is in the acquired sources; the model does not invent one.",
+      "where": [
+        "manifest",
+        "pecan_rna_evidence_audit"
+      ],
+      "origin": "manifest",
+      "remediation": "",
+      "model_id": "pecan_rna_evidence_audit",
+      "model_version": "0.1.0",
+      "detail": {}
+    },
+    {
+      "code": "model.finding",
+      "severity": "info",
+      "message": "[execution] 18 parameter(s) are not stated by the acquired sources and remain unknown. They were not defaulted.",
+      "raw_message": "18 parameter(s) are not stated by the acquired sources and remain unknown. They were not defaulted.",
+      "where": [
+        "instance",
+        "pecan_rna_audit"
+      ],
+      "origin": "execution",
+      "remediation": "This is the audit's answer, not a failed run. Read the model spec's unknowns and hypotheses for the detail.",
+      "model_id": "pecan_rna_evidence_audit",
+      "model_version": "0.1.0",
+      "detail": {}
+    },
+    {
+      "code": "model.finding",
+      "severity": "info",
+      "message": "[execution] No target-organism RNA yield, RIN or degradation measurement is reported, so the model returns no prediction for them.",
+      "raw_message": "No target-organism RNA yield, RIN or degradation measurement is reported, so the model returns no prediction for them.",
+      "where": [
+        "instance",
+        "pecan_rna_audit"
+      ],
+      "origin": "execution",
+      "remediation": "This is the audit's answer, not a failed run. Read the model spec's unknowns and hypotheses for the detail.",
+      "model_id": "pecan_rna_evidence_audit",
+      "model_version": "0.1.0",
+      "detail": {}
+    },
+    {
+      "code": "model.finding",
+      "severity": "info",
+      "message": "[execution] An analogue protocol with reported parameters is available as a hypothesis. It has not been validated on the target organism.",
+      "raw_message": "An analogue protocol with reported parameters is available as a hypothesis. It has not been validated on the target organism.",
+      "where": [
+        "instance",
+        "pecan_rna_audit"
+      ],
+      "origin": "execution",
+      "remediation": "This is the audit's answer, not a failed run. Read the model spec's unknowns and hypotheses for the detail.",
+      "model_id": "pecan_rna_evidence_audit",
+      "model_version": "0.1.0",
+      "detail": {}
+    }
+  ],
+  "provenance_index": {
+    "pecan_rna_audit/step_count": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/claim_count": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/direct_target_claim_count": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/analogue_claim_count": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/method_review_claim_count": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/reported_parameter_count": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/unresolved_parameter_count": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/evidence_coverage_ratio": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/protocol_complete_for_target": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/quantitative_yield_available_for_target": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ],
+    "pecan_rna_audit/analogue_protocol_available": [
+      {
+        "kind": "derivation",
+        "producer_model": "pecan_rna_evidence_audit",
+        "producer_version": "0.1.0",
+        "where": "instance:pecan_rna_audit",
+        "detail": "25 verified claims, 18 steps, 18 unresolved parameters",
+        "connection_id": null,
+        "source_port": null,
+        "target_port": null,
+        "method": "derived from quote-verified literature claims in the generated model spec; no yield, RIN or degradation value is computed",
+        "inputs": [],
+        "source_ref": "10.3390/foods13182934; 10.3390/plants13030389; 10.1371/journal.pone.0291949; 10.1186/s13007-024-01198-z; 10.1186/s13007-023-01063-5",
+        "conversion": null
+      }
+    ]
+  },
+  "reproducibility": "0f46c28b546b653331521fd6f9d894a8e9b956d9ed34faaa91c2e7ff07d48b1f",
+  "model_versions": {
+    "pecan_rna_audit": "0.1.0"
+  },
+  "error_count": 0,
+  "warning_count": 0,
+  "notes": "",
+  "composition_report": {
+    "schema": "composition-report/1",
+    "reading_guide": {
+      "dispositions": [
+        "mechanically_invalid",
+        "scientifically_refused",
+        "permitted_conditionally",
+        "permitted",
+        "unresolved"
+      ],
+      "note": "Mechanical validity, semantic compatibility, execution success and scientific validation are four different questions. None of them answers any of the others, and the report never lets one stand in for another.",
+      "not_documented": "not_documented"
+    },
+    "graph": {
+      "graph_id": "rna-workflow-464f67b019af",
+      "title": "Pecan embryo total-RNA extraction: evidence-constrained protocol audit",
+      "notes": "The model is an evidence audit, not a kinetic or yield model. Its outputs count verified claims, unresolved parameters and direct vs analogue evidence. It never reports a pecan RNA yield, RIN or degradation rate that the sources do not state.",
+      "instances": [
+        {
+          "instance_id": "pecan_rna_audit",
+          "model_id": "pecan_rna_evidence_audit",
+          "model_version": "0.1.0",
+          "label": "Pecan embryo total-RNA extraction: evidence-constrained protocol audit"
+        }
+      ],
+      "connection_count": 0
+    },
+    "execution": {
+      "attempted": true,
+      "status": "success_with_warnings",
+      "results_produced": true,
+      "result_count": 1,
+      "run_id": "rna-workflow-464f67b019af::1eaf13055868",
+      "reproducibility": "not_documented",
+      "error_count": 0,
+      "warning_count": 0,
+      "results_invalidated": false,
+      "plan_only": false,
+      "note": "not_documented"
+    },
+    "connections": [],
+    "science": {
+      "models": [
+        {
+          "instance_id": "pecan_rna_audit",
+          "model_id": "pecan_rna_evidence_audit",
+          "model_version": "0.1.0",
+          "implementation_status": "not_documented",
+          "reproduction_status": "not_documented",
+          "source": "not_documented",
+          "basis": "A model that publishes no validation claim through this boundary is reported as not documented. This is neither a validated model nor an unvalidated one.",
+          "limitations": {
+            "declared_unsupported_capabilities": [
+              "cross_species_transfer_validation",
+              "quantitative_yield_prediction"
+            ],
+            "declared_missing_information": [
+              {
+                "item": "pecan RNA extraction parameters",
+                "reason": "TRIzol volumes, incubation times, centrifugation speeds, elution volume, yield and RIN for pecan embryos are not printed in the acquired target-organism source."
+              }
+            ],
+            "declared_missing_models": [],
+            "assumptions": [
+              {
+                "assumption": "Only quote-verified claims enter the model spec."
+              },
+              {
+                "assumption": "An absent parameter is unknown, never zero and never defaulted."
+              }
+            ],
+            "source": "the model's own manifest, as published through --describe-model"
+          }
+        }
+      ],
+      "combined_graph": {
+        "independently_validated": false,
+        "status": "not_established",
+        "basis": "Composing these models produces a system that no published source has evaluated. Validation evidence for an individual model is a statement about that model and does not transfer to the composition, so the combined graph starts from 'not established' and can only be changed by an independent evaluation.",
+        "execution_is_not_validation": "A successful execution is evidence that the pipeline works. It is not evidence that the numbers are right, and nothing in this report upgrades a model's reproduction_status because a test passed.",
+        "resolved_by_diagnostics": []
+      }
+    }
+  },
+  "runner_version": "0.1.0",
+  "composition": {
+    "target": {
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "paper": "Zielinski et al. (2019)",
+      "process": "E. coli 20 IBA 1 (CSH50R derivative), plasmid pIBAINS, GMS medium, 4 L in a 7.5 L Bioflo Celligen 310, batch with pH-stat glucose feeding, 30 degC"
+    },
+    "instances": [
+      {
+        "instance_id": "pecan_rna_audit",
+        "model_id": "pecan_rna_evidence_audit",
+        "model_version": "0.1.0",
+        "paper": "",
+        "paper_folder": "",
+        "role": "",
+        "classification": "",
+        "classification_label": "",
+        "contributes": false,
+        "output_count": 11,
+        "attributed": false
+      }
+    ],
+    "summary": {
+      "assessed": 7,
+      "counts": {
+        "dynamically_composable": 1,
+        "evidence_compatible": 0,
+        "contextually_relevant_not_composable": 5,
+        "incompatible": 1,
+        "insufficient_information": 0
+      },
+      "baseline": [
+        "zielinski"
+      ],
+      "contributors": [
+        "zielinski"
+      ],
+      "evidence_only": [
+        "ganjave",
+        "morris",
+        "baez",
+        "lin",
+        "nanchen",
+        "simensen"
+      ],
+      "permitted_connections": 2,
+      "connections_touching_target": []
+    },
+    "cross_model_links": [
+      {
+        "source_model": "morris2011.material_balance",
+        "target_model": "morris2011.material_balance",
+        "stance": "permitted",
+        "quantity_pairs": [],
+        "assumptions": [],
+        "evidence": [
+          "Morris, Geiger & Fine (2011), Fundamentals of Material Balances with Applications to Non-Reacting Systems, Chapter 4: conservation equations sum(inflow) - sum(outflow) [- accumulation] = 0, with no reaction term.",
+          "composition/composition/adapters/morris.py::_slot_map -- the composition-side port surface derived from a declared control volume.",
+          "composition/examples/brass_batch_chain.json -- the shipped graph that carries material between two Morris instances."
+        ],
+        "unresolved": [],
+        "touches_target": false
+      },
+      {
+        "source_model": "ganjave",
+        "target_model": "ganjave",
+        "stance": "permitted_forward_cascade",
+        "quantity_pairs": [],
+        "assumptions": [
+          "ganjave/initial_glycerol_concentration: The upstream value must be glycerol, in this medium. A mass concentration of another substance is not a substitute, even though the quantities match exactly."
+        ],
+        "evidence": [
+          "Ganjave et al. (2022), Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694. Cybernetic fed-batch culture, equations (8)-(16), parameters from the paper's Table 2 loaded as fitted.",
+          "Models/Ganjave/models/composition.py -- the model's own declaration of its ports, its required inputs and its unsupported capabilities, including component_identity.",
+          "composition/composition/adapters/ganjave_contract.py::INPUT_CONTRACT -- what Ganjave will and will not accept on an input port, in the model's own words."
+        ],
+        "unresolved": [
+          "The cascade is permitted under the model's declared assumption, not validated by it: nothing in the paper seeds a second culture from the first. A run through it demonstrates that the software carries a quantity across the boundary, not that the resulting batch is the one the paper describes."
+        ],
+        "touches_target": false
+      }
+    ],
+    "note": "Each instance is attributed to the paper that encodes it. No cross-model connection touches the insulin process, so a graph that runs more than one model is co-executing independently runnable models, not feeding one into another. Attribution is not composition, and composition is not validation."
+  }
+}

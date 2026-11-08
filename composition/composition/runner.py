@@ -46,31 +46,66 @@ import traceback
 from pathlib import Path
 from typing import Any, Mapping
 
-from . import __version__
-from .adapters import (
-    REFERENCE_SEPARATOR,
-    REGISTRATIONS,
-    AdapterRegistration,
-    adapter_for,
-    known_models,
-)
-from .contracts import (
-    CONTRACT_VERSION,
-    ContractError,
-    ModelManifest,
-    PortDirection,
-    RunStatus,
-    load_graph,
-)
-from .diagnostics import DiagnosticCode, ModelDiagnostic, Origin, Severity
-from . import compatibility
-from . import cross_model
-from . import cross_paper
-from . import gaps as scientific_gaps
-from . import prompt as prompt_interpreter
-from . import report
-from .engine import CompositionEngine
-from .quantities import describe_registry
+try:
+    from . import __version__
+    from .adapters import (
+        REFERENCE_SEPARATOR,
+        REGISTRATIONS,
+        AdapterRegistration,
+        adapter_for,
+        known_models,
+    )
+    from .contracts import (
+        CONTRACT_VERSION,
+        ContractError,
+        ModelManifest,
+        PortDirection,
+        RunStatus,
+        load_graph,
+    )
+    from .diagnostics import DiagnosticCode, ModelDiagnostic, Origin, Severity
+    from . import compatibility
+    from . import cross_model
+    from . import cross_paper
+    from . import gaps as scientific_gaps
+    from . import prompt as prompt_interpreter
+    from . import report
+    from .engine import CompositionEngine
+    from .quantities import describe_registry
+except (ImportError, AttributeError):
+    import sys
+    from pathlib import Path
+    _pkg_root = Path(__file__).resolve().parent
+    if str(_pkg_root.parent) not in sys.path:
+        sys.path.insert(0, str(_pkg_root.parent))
+    if "composition" in sys.modules and not hasattr(sys.modules["composition"], "__version__"):
+        del sys.modules["composition"]
+    import composition
+    from composition import __version__
+    from composition.adapters import (
+        REFERENCE_SEPARATOR,
+        REGISTRATIONS,
+        AdapterRegistration,
+        adapter_for,
+        known_models,
+    )
+    from composition.contracts import (
+        CONTRACT_VERSION,
+        ContractError,
+        ModelManifest,
+        PortDirection,
+        RunStatus,
+        load_graph,
+    )
+    from composition.diagnostics import DiagnosticCode, ModelDiagnostic, Origin, Severity
+    from composition import compatibility
+    from composition import cross_model
+    from composition import cross_paper
+    from composition import gaps as scientific_gaps
+    from composition import prompt as prompt_interpreter
+    from composition import report
+    from composition.engine import CompositionEngine
+    from composition.quantities import describe_registry
 
 EXIT_OK = 0
 EXIT_INVALID = 1
@@ -427,9 +462,19 @@ def write_result(path: Path | None, payload: Mapping[str, Any]) -> None:
 
 
 def run_graph(
-    graph: Mapping[str, Any], *, plan_only: bool = False, base: Path | None = None
+    graph: Mapping[str, Any],
+    *,
+    plan_only: bool = False,
+    base: Path | None = None,
+    adapters: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], int]:
-    """Execute one graph document. Returns ``(result, exit_code)``."""
+    """Execute one graph document. Returns ``(result, exit_code)``.
+
+    ``adapters`` is optional and empty by default. It exists so a model generated
+    for one research run can be executed through the real engine without being
+    added to the global model registry, which would change what every ordinary
+    graph and introspection call sees.
+    """
     try:
         parsed = load_graph(graph)
     except ContractError as exc:
@@ -473,7 +518,7 @@ def run_graph(
             EXIT_BAD_INPUT,
         )
 
-    engine = CompositionEngine(base_path=base)
+    engine = CompositionEngine(base_path=base, adapters=adapters)
     try:
         result = engine.execute(parsed, plan_only=plan_only)
     except Exception as exc:  # noqa: BLE001 - the runner must still report
@@ -764,6 +809,43 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--prompt",
+        metavar="TEXT",
+        help=(
+            "run the unified research-to-simulation pipeline: query central library, "
+            "perform auto-research on miss, generate apparatus diagrams, emit "
+            ".artifacts/latest_prompt_run.json and optionally launch Godot"
+        ),
+    )
+    parser.add_argument(
+        "--auto-research",
+        action="store_true",
+        help="automatically fetch external papers and fill knowledge gaps on cache miss",
+    )
+    parser.add_argument(
+        "--launch-godot",
+        action="store_true",
+        help="spawn the Godot simulation environment upon completion",
+    )
+    parser.add_argument(
+        "--run-workflow",
+        metavar="<problem.json>",
+        help=(
+            "run the research-to-simulation workflow for one problem document: "
+            "problem ingestion, local literature discovery/acquisition, "
+            "quote-verified encoding, model construction, and execution through "
+            "the existing composition runner. Every stage writes an artifact"
+        ),
+    )
+    parser.add_argument(
+        "--workflow-out",
+        metavar="<dir>",
+        help=(
+            "directory for --run-workflow artifacts (default: "
+            "composition/workflow_runs/latest)"
+        ),
+    )
+    parser.add_argument(
         "--repo-root", help="repository root, if it is not the default location"
     )
     args = parser.parse_args(argv)
@@ -866,6 +948,50 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.run_prompt is not None:
         payload, code = run_prompt(args.run_prompt, base=base)
+        text = json.dumps(payload, indent=2, default=str) + "\n"
+        if args.result:
+            write_result(Path(args.result), payload)
+        sys.stdout.write(text)
+        return code
+
+    if args.prompt is not None:
+        from .workflow.skill_research_bridge import resolve_prompt_and_research
+        from .prompt import InsufficientEvidenceError, DomainMismatchError
+
+        try:
+            payload, code = resolve_prompt_and_research(
+                args.prompt,
+                auto_research=args.auto_research,
+                launch_godot=args.launch_godot,
+                base=base,
+            )
+            text = json.dumps(payload, indent=2, default=str) + "\n"
+            if args.result:
+                write_result(Path(args.result), payload)
+            sys.stdout.write(text)
+            return code
+        except (InsufficientEvidenceError, DomainMismatchError) as err:
+            err_payload = {
+                "contract_version": CONTRACT_VERSION,
+                "status": "FAILED",
+                "error_type": err.__class__.__name__,
+                "error": str(err),
+                "prompt": args.prompt,
+            }
+            if args.result:
+                write_result(Path(args.result), err_payload)
+            sys.stderr.write(f"Scientific Integrity Error: {err}\n")
+            return EXIT_FAILED
+
+    if args.run_workflow is not None:
+        # Imported here, not at module scope: the workflow package imports
+        # ``run_graph`` from this module, so a top-level import would be a cycle.
+        from .workflow.execute import run_workflow
+
+        out_dir = Path(args.workflow_out) if args.workflow_out else None
+        payload, code = run_workflow(
+            Path(args.run_workflow), out_dir=out_dir, base=base
+        )
         text = json.dumps(payload, indent=2, default=str) + "\n"
         if args.result:
             write_result(Path(args.result), payload)

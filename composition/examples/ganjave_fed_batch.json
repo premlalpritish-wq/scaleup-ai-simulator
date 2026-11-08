@@ -1,0 +1,94 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "ganjave_fed_batch",
+  "title": "Ganjave et al. (2022) cybernetic fed-batch culture",
+  "description": "One instance of the Ganjave growth model, integrated over 24 h in fed-batch mode on the feed recipe the paper reports as its selected optimum (17.5 % w/v glycerol, 24.5 % w/v yeast extract, 0.72 mL/h from 6 h). The three initial conditions the paper does not state are declared here as literals, because the model requires them and the adapter will not invent a default.",
+  "source_ref": "Ganjave et al. 2022, Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694",
+  "notes": "This graph runs the model; it does not reproduce the paper. The published time courses are figures, no figure was digitised, and the model's reproduction status is not_yet_validated. The three declared initial values are assumptions of this graph, not measurements from the paper.",
+  "instances": [
+    {
+      "instance_id": "ganjave_fed_batch",
+      "model_id": "ganjave",
+      "model_version": "0.1.0",
+      "label": "Cybernetic fed-batch culture, 24 h",
+      "role": "dynamic biological cultivation model",
+      "notes": "Equations (12)-(16). The parameter set is the paper's Table 2, loaded as fitted; the adapter never overrides it.",
+      "position": { "x": 120, "y": 120 },
+      "parameters": {
+        "simulation": {
+          "mode": "fed_batch",
+          "duration_h": 24.0,
+          "output_times_h": [0.0, 6.0, 12.0, 18.0, 24.0],
+          "solver": { "rtol": 1e-6, "atol": 1e-9, "h_max": 0.01 }
+        }
+      }
+    }
+  ],
+  "connections": [],
+  "literal_inputs": {
+    "ganjave_fed_batch/initial_biomass_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 0.05,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 2.2 Batch fermentation, printed p. 2 (initial OD600 0.05, no OD600-to-dry-cell-weight calibration is printed)",
+      "method": "declared graph input; the paper states an initial OD600 but supplies no calibration, so this g/L value is an operator's assumption, not a paper value",
+      "reason": "Required by the model with no default. Not derivable from the reported OD600."
+    },
+    "ganjave_fed_batch/initial_complex_substrate_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 5.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, printed p. 2 (SOB contains 5 g/L yeast extract)",
+      "method": "declared graph input; the medium recipe's yeast-extract concentration is used as the initial lumped complex substrate",
+      "reason": "Required by the model with no default. The paper states no initial S2 for the model, and this value decides whether the culture becomes oxygen-limited."
+    },
+    "ganjave_fed_batch/initial_dissolved_oxygen": {
+      "state": "number",
+      "quantity": "dimensionless",
+      "value": 100.0,
+      "unit": "%",
+      "source_ref": "Ganjave et al. 2022, Notations, printed p. 2 (DO is a percentage of dissolved oxygen)",
+      "method": "declared graph input; the paper does not state an initial dissolved oxygen",
+      "reason": "Required by the model with no default. A percentage of the probe's saturation reading, not a mass fraction and not a concentration."
+    },
+    "ganjave_fed_batch/feed_glycerol_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 175.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed composition 17.5 % glycerol)",
+      "method": "reported feed recipe converted at 1 % w/v = 10 g/L",
+      "reason": "The concentration eq. (13) requires; the paper prints the recipe as percent weight/volume."
+    },
+    "ganjave_fed_batch/feed_complex_substrate_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 245.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed composition 24.5 % yeast extract)",
+      "method": "reported feed recipe converted at 1 % w/v = 10 g/L",
+      "reason": "The concentration eq. (14) requires; the paper prints the recipe as percent weight/volume."
+    },
+    "ganjave_fed_batch/feed_flow_rate": {
+      "state": "number",
+      "quantity": "volume_flow",
+      "value": 0.72,
+      "unit": "mL/h",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed rate 0.72 mL/h)",
+      "method": "reported volumetric feed rate",
+      "reason": "Volumetric, not a mass flow: a mass rate would need a feed density the paper does not state."
+    },
+    "ganjave_fed_batch/feed_start_time": {
+      "state": "number",
+      "quantity": "time",
+      "value": 6.0,
+      "unit": "h",
+      "source_ref": "Ganjave et al. 2022, 3.1, printed p. 3 (feeding begins at 6 h, at the dissolved-oxygen landmark)",
+      "method": "reported feeding schedule",
+      "reason": "The pump starts at the dissolved-oxygen minimum the paper reports."
+    }
+  },
+  "defaults": {}
+}

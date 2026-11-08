@@ -1,0 +1,128 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "zielinski-multimodel",
+  "title": "Zielinski et al. (2019) insulin process — multi-model composition run",
+  "description": "The insulin evidence replay co-executed with the second registered E. coli model, Ganjave et al. (2022), in one run, with per-instance paper attribution. There are NO connections between the two instances, and that is the scientific result rather than an oversight: composition/composition/compatibility.py records that no cross-model boundary touching the insulin process is permitted, so the models are assessed and co-executed, never joined. Compare zielinski_replay.json, which carries the baseline alone; the insulin outputs of this graph are identical to that graph's.",
+  "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002; Ganjave et al. 2022, Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694",
+  "notes": "Composition here means two independently runnable paper models executed in one composition run with full attribution, not one model feeding another. No parameter, state or flux crosses between them, and the compatibility panel states why for each candidate. Nothing in this graph upgrades either model's reproduction_status.",
+  "composition_scope": {
+    "target_model_id": "zielinski2019.rhi_process",
+    "assessed_models": [
+      "zielinski",
+      "ganjave",
+      "morris",
+      "baez",
+      "lin",
+      "nanchen",
+      "simensen"
+    ],
+    "dynamic_connections_added": 0,
+    "assessment": "python -m composition.compatibility",
+    "statement": "Every model in the project is assessed against the insulin process. None may be dynamically connected to it, so this graph contains no cross-model edge. The baseline instance is unchanged when the second instance is disabled."
+  },
+  "instances": [
+    {
+      "instance_id": "zielinski_baseline",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Recombinant human insulin process (baseline)",
+      "role": "baseline",
+      "notes": "Identical configuration to zielinski_replay.json. Its outputs are the baseline; the composition report compares them with the baseline-only run.",
+      "position": {
+        "x": 60,
+        "y": 60
+      },
+      "parameters": {
+        "execution": {
+          "mode": "evidence_replay",
+          "notes": "Evidence replay restates the paper's reported numbers and applies the accounting identities the paper supports. It is not a simulation."
+        }
+      }
+    },
+    {
+      "instance_id": "ganjave_context",
+      "model_id": "ganjave",
+      "model_version": "0.1.0",
+      "label": "Ganjave et al. (2022) cybernetic fed-batch",
+      "role": "co-executed, independently runnable model (not connected)",
+      "notes": "Runs on its own paper's feed recipe and its own declared initial conditions. It publishes nothing into the insulin instance, and consumes nothing from it.",
+      "position": {
+        "x": 60,
+        "y": 220
+      },
+      "parameters": {
+        "simulation": {
+          "duration_h": 24.0,
+          "step_h": 0.1
+        }
+      }
+    }
+  ],
+  "connections": [],
+  "literal_inputs": {
+    "ganjave_context/initial_biomass_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 0.05,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 2.2 Batch fermentation, printed p. 2 (initial OD600 0.05, no OD600-to-dry-cell-weight calibration is printed)",
+      "method": "declared graph input; the paper states an initial OD600 but supplies no calibration, so this g/L value is an operator's assumption, not a paper value",
+      "reason": "Required by the model with no default. Not derivable from the reported OD600."
+    },
+    "ganjave_context/initial_complex_substrate_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 5.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, printed p. 2 (SOB contains 5 g/L yeast extract)",
+      "method": "declared graph input; the medium recipe's yeast-extract concentration is used as the initial lumped complex substrate",
+      "reason": "Required by the model with no default. The paper states no initial S2 for the model, and this value decides whether the culture becomes oxygen-limited."
+    },
+    "ganjave_context/initial_dissolved_oxygen": {
+      "state": "number",
+      "quantity": "dimensionless",
+      "value": 100.0,
+      "unit": "%",
+      "source_ref": "Ganjave et al. 2022, Notations, printed p. 2 (DO is a percentage of dissolved oxygen)",
+      "method": "declared graph input; the paper does not state an initial dissolved oxygen",
+      "reason": "Required by the model with no default. A percentage of the probe's saturation reading, not a mass fraction and not a concentration."
+    },
+    "ganjave_context/feed_glycerol_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 175.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed composition 17.5 % glycerol)",
+      "method": "reported feed recipe converted at 1 % w/v = 10 g/L",
+      "reason": "The concentration eq. (13) requires; the paper prints the recipe as percent weight/volume."
+    },
+    "ganjave_context/feed_complex_substrate_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 245.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed composition 24.5 % yeast extract)",
+      "method": "reported feed recipe converted at 1 % w/v = 10 g/L",
+      "reason": "The concentration eq. (14) requires; the paper prints the recipe as percent weight/volume."
+    },
+    "ganjave_context/feed_flow_rate": {
+      "state": "number",
+      "quantity": "volume_flow",
+      "value": 0.72,
+      "unit": "mL/h",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed rate 0.72 mL/h)",
+      "method": "reported volumetric feed rate",
+      "reason": "Volumetric, not a mass flow: a mass rate would need a feed density the paper does not state."
+    },
+    "ganjave_context/feed_start_time": {
+      "state": "number",
+      "quantity": "time",
+      "value": 6.0,
+      "unit": "h",
+      "source_ref": "Ganjave et al. 2022, 3.1, printed p. 3 (feeding begins at 6 h, at the dissolved-oxygen landmark)",
+      "method": "reported feeding schedule",
+      "reason": "The pump starts at the dissolved-oxygen minimum the paper reports."
+    }
+  },
+  "defaults": {}
+}

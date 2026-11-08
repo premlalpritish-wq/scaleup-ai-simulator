@@ -1,0 +1,931 @@
+{
+  "artefact_id": "lin2000-uptake-capacities",
+  "c_nomenclature_constants": {
+    "H": {
+      "unit": "% L/g",
+      "value": 14000.0
+    }
+  },
+  "disclaimer": "A passing test verifies that this implementation matches the printed equations and the printed parameter table it was built from. It does not establish scientific validity and it reproduces no figure of the paper: the paper prints no digitised trajectory, so a run evaluates the printed model at the caller's own inputs.",
+  "experimental_context": [
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 347,
+        "quote": "Cultivations of Escherichia coli",
+        "section": "Title",
+        "source_id": "lin2000"
+      },
+      "key": "organism",
+      "label": "organism",
+      "value": "Escherichia coli"
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": "Cultivations of E. coli K12 W3110",
+        "section": "Strains",
+        "source_id": "lin2000"
+      },
+      "key": "strain.primary",
+      "label": "primary strain",
+      "value": "E. coli K12 W3110 [F-, IN(rrnD-rrnE)1, l-]"
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": "its lacIq derivative RB791",
+        "section": "Strains",
+        "source_id": "lin2000"
+      },
+      "key": "strain.secondary",
+      "label": "secondary strain",
+      "value": "its lacIq derivative RB791 (lacIq)"
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": "the strains contained the plasmids pDSCrimi",
+        "section": "Strains",
+        "source_id": "lin2000"
+      },
+      "key": "construct",
+      "label": "plasmid construct (present, not induced)",
+      "value": "some experiments used plasmid pDSCrimi or pKK177GlucC/pUBS520; these were not induced for product expression"
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": "Phosphate-buffered mineral salt medium according to Teich",
+        "section": "Cultivation Media and Conditions",
+        "source_id": "lin2000"
+      },
+      "key": "medium",
+      "label": "medium",
+      "value": "phosphate-buffered mineral salt medium (Teich et al., 1998), initial glucose 5 g/L"
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": "The feed solution contained essentially the same components",
+        "section": "Cultivation Media and Conditions",
+        "source_id": "lin2000"
+      },
+      "key": "feed.medium",
+      "label": "feed solution",
+      "value": "same components as the medium except glucose 532 or 200 g/L, (NH4)2SO4 2.0 g/L, trace components 10 mL/L; no MgSO4 7H2O"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 349,
+        "quote": "All fermentations were performed in either a 15 L or a 6 L Biostat",
+        "section": "Materials and Methods",
+        "source_id": "lin2000"
+      },
+      "key": "reactor",
+      "label": "reactor",
+      "value": "15 L or 6 L Biostat ED fermenter (B. Braun Biotech International)"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 349,
+        "quote": "with a starting volume of 7 L or 4 L",
+        "section": "Materials and Methods",
+        "source_id": "lin2000"
+      },
+      "key": "scale",
+      "label": "working volume",
+      "value": "starting volume 7 L (15 L reactor) or 4 L (6 L reactor)"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 349,
+        "quote": "temperature 35",
+        "section": "Materials and Methods",
+        "source_id": "lin2000"
+      },
+      "key": "temperature",
+      "label": "temperature",
+      "value": "35 degC"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 349,
+        "quote": "pH 7.0",
+        "section": "Materials and Methods",
+        "source_id": "lin2000"
+      },
+      "key": "ph",
+      "label": "pH",
+      "value": "7.0, controlled with 25% ammonia"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 349,
+        "quote": "keep the dissolved oxygen tension (DOT) above 20%",
+        "section": "Materials and Methods",
+        "source_id": "lin2000"
+      },
+      "key": "dot",
+      "label": "dissolved oxygen tension held above 20% in the batch phase",
+      "value": "air 0.002 to 2 vvm, stirrer 200 to 800 rpm in cascade"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 349,
+        "quote": "an exponential glucose feed was started",
+        "section": "Materials and Methods",
+        "source_id": "lin2000"
+      },
+      "key": "protocol.exponential",
+      "label": "protocol 1 (exponential feed, Xu et al. 1999)",
+      "value": "batch 0.92 h; exponential feed, initial 5.7 mL/h, rate constant 0.27 1/h, for 9.1 h; then constant at 64 mL/h for 2.5 h; then 57 mL/h"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 349,
+        "quote": "the feeding pump was started at a constant rate",
+        "section": "Materials and Methods",
+        "source_id": "lin2000"
+      },
+      "key": "protocol.constant",
+      "label": "protocol 2 (constant feed, Teich et al. 1998)",
+      "value": "constant feed started at OD500 8, 53.2 mL/h to the end"
+    }
+  ],
+  "missing_models": [
+    {
+      "label": "Digitised time series",
+      "model_id": "data.digitised_trajectory",
+      "why_not_implemented": "Figures 1-9 are referenced but no coordinate set with digitisation provenance has been supplied, so there is nothing to digitise. This package therefore reproduces no figure; it evaluates the printed model."
+    },
+    {
+      "label": "The initial-enzyme factors cS and cO",
+      "model_id": "constants.cS_cO",
+      "why_not_implemented": "The Appendix's initial-value equations multiply by cS and cO; no value for either is printed on any page, so both are required run inputs."
+    },
+    {
+      "label": "An oxygen-transfer correlation for kLa",
+      "model_id": "transfer.oxygen_transfer",
+      "why_not_implemented": "Equation (4) takes kLa as an input; the paper prints no correlation and no value of kLa for these cultivations, so it is a required run input."
+    },
+    {
+      "label": "Coupling to the composition layer",
+      "model_id": "coupling.other_models",
+      "why_not_implemented": "This is a standalone model of Lin et al.'s own experiment. It declares no ports, transfers no parameter, adds no adapter registration and makes no compatibility claim."
+    }
+  ],
+  "no_change_values": {
+    "qEOd": 0.0,
+    "qESd": 0.0
+  },
+  "printed_equations": [
+    {
+      "id": "ode.1",
+      "printed_page": 356,
+      "statement": "V. = F"
+    },
+    {
+      "id": "ode.2",
+      "printed_page": 356,
+      "statement": "X. = (mu - F/V) X"
+    },
+    {
+      "id": "ode.3",
+      "printed_page": 356,
+      "statement": "S. = -(F/V)(S - Si) - qS X"
+    },
+    {
+      "id": "ode.4",
+      "printed_page": 356,
+      "statement": "DOT. = kLa(DOT* - DOT) - qO X H"
+    },
+    {
+      "id": "ode.5",
+      "printed_page": 356,
+      "statement": "A. = -(F/V) A + (qAp - qAc) X"
+    },
+    {
+      "id": "ode.6",
+      "printed_page": 356,
+      "statement": "rS. = YES/X mu - rS (qESd + mu)"
+    },
+    {
+      "id": "ode.7",
+      "printed_page": 356,
+      "statement": "rO. = YEO/X mu - rO (qEOd + mu)"
+    },
+    {
+      "id": "initial.rS0",
+      "printed_page": 356,
+      "statement": "rS0 = cS mu_max / (qESd + mu_max)"
+    },
+    {
+      "id": "initial.rO0",
+      "printed_page": 356,
+      "statement": "rO0 = cO mu_max / (qEOd + mu_max)"
+    },
+    {
+      "id": "initial.mu_max",
+      "printed_page": 356,
+      "statement": "mu_max = (qSmax - qm) YX/S,ox"
+    },
+    {
+      "id": "subsidiary.qScap",
+      "printed_page": 356,
+      "statement": "qScap = qSmax rS / rS0"
+    },
+    {
+      "id": "subsidiary.qOcap",
+      "printed_page": 356,
+      "statement": "qOcap = qOmax rO / rO0"
+    },
+    {
+      "id": "subsidiary.qS",
+      "printed_page": 356,
+      "statement": "qS = qScap S / (S + KS)"
+    },
+    {
+      "id": "subsidiary.qSox",
+      "printed_page": 356,
+      "statement": "qSox = qS"
+    },
+    {
+      "id": "subsidiary.qmr",
+      "printed_page": 356,
+      "statement": "qmr <= min{qm, qSox}"
+    },
+    {
+      "id": "subsidiary.qSoxan",
+      "printed_page": 356,
+      "statement": "qSoxan = (qSox - qmr) YX/S,ox CS"
+    },
+    {
+      "id": "subsidiary.qSoxen",
+      "printed_page": 356,
+      "statement": "qSoxen = qSox - qSoxan"
+    },
+    {
+      "id": "subsidiary.qOs",
+      "printed_page": 356,
+      "statement": "qOs = qSoxen YO/S"
+    },
+    {
+      "id": "subsidiary.clamp_qos",
+      "printed_page": 357,
+      "statement": "if qOs > qOcap: qOs = qOcap; qSoxen = qOcap/YO/S; qSox = (qmr CS YX/S,ox - qSoxen)/(CS YX/S,ox - 1); qSoxan = qSox - qSoxen"
+    },
+    {
+      "id": "subsidiary.floor_qmr",
+      "printed_page": 357,
+      "statement": "if qSox < qmr: qmr = qSox = qSoxen and qSoxan = 0"
+    },
+    {
+      "id": "subsidiary.qSof",
+      "printed_page": 357,
+      "statement": "qSof = qS - qSox"
+    },
+    {
+      "id": "subsidiary.qAc",
+      "printed_page": 357,
+      "statement": "qAc = qAc,max A / (A + KA)"
+    },
+    {
+      "id": "subsidiary.qSofan",
+      "printed_page": 357,
+      "statement": "qSofan = qSof YX/S,of CS"
+    },
+    {
+      "id": "subsidiary.qSofen",
+      "printed_page": 357,
+      "statement": "qSofen = qSof - qSofan"
+    },
+    {
+      "id": "subsidiary.qAcan",
+      "printed_page": 357,
+      "statement": "qAcan = qAc YX/A CA"
+    },
+    {
+      "id": "subsidiary.qAcen",
+      "printed_page": 357,
+      "statement": "qAcen = qAc - qAcan"
+    },
+    {
+      "id": "subsidiary.clamp_qacen",
+      "printed_page": 357,
+      "statement": "if qAcen > qOcap - qOs/YO/A: qAcen = qOcap - qOs/YO/A; qAc = qAcen/(1 - YX/A CA); qAcan = qAc - qAcen"
+    },
+    {
+      "id": "subsidiary.qAp",
+      "printed_page": 357,
+      "statement": "qAp = qSofen YA/S"
+    },
+    {
+      "id": "subsidiary.qO",
+      "printed_page": 357,
+      "statement": "qO = qOs + qAcen YO/A"
+    },
+    {
+      "id": "subsidiary.mu",
+      "printed_page": 357,
+      "statement": "mu = (qSox - qm) YX/S,ox + qSof YX/S,of + qAc YX/A"
+    },
+    {
+      "id": "method.pulse_qScap",
+      "printed_page": 351,
+      "statement": "qScap = (dS + INT(F Si)) / (V X (tR - tP))"
+    }
+  ],
+  "protocol_variants": [
+    {
+      "footnote": "d",
+      "name": "qESd",
+      "note_as_printed": "Synthesis of the uptake system for substrate is controlled by the availability of S",
+      "unit": "g/(g h)",
+      "value": 0.9
+    },
+    {
+      "footnote": "d",
+      "name": "qEOd",
+      "note_as_printed": "Synthesis of the uptake system for oxygen is controlled by the availability of S",
+      "unit": "g/(g h)",
+      "value": 0.35
+    },
+    {
+      "footnote": "d",
+      "name": "YES/X",
+      "note_as_printed": "growth-dependent enzyme yield",
+      "unit": "g/g",
+      "value": 0.51
+    },
+    {
+      "footnote": "d",
+      "name": "YEO/X",
+      "note_as_printed": "growth-dependent enzyme yield",
+      "unit": "g/g",
+      "value": 0.23
+    }
+  ],
+  "registration": {
+    "reason": "no adapter registration was added. The paper's process is not the composition layer's target process, no model id or version was agreed with that layer, and none is guessed",
+    "registered_in_composition_registry": false
+  },
+  "reported_capacities": [
+    {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 1,
+          "printed_page": 347,
+          "quote": "fell to about 0.6 mmol g-1 h-1",
+          "section": "Abstract",
+          "source_id": "lin2000"
+        }
+      ],
+      "inputs": [],
+      "label": "glucose uptake capacity at the end of fed-batch",
+      "method": null,
+      "notes": "reported at mu approximately 0.02 1/h; a separate dimension from Table I's g g-1 h-1, with no printed conversion",
+      "original_text": null,
+      "original_unit": "mmol g-1 h-1",
+      "provenance": "reported",
+      "quantity_id": "capacity.qScap.end",
+      "unit": "mmol/(g h)",
+      "value": 0.6
+    },
+    {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 1,
+          "printed_page": 347,
+          "quote": "was 5 mmol g-1 h-1 at the end",
+          "section": "Abstract",
+          "source_id": "lin2000"
+        }
+      ],
+      "inputs": [],
+      "label": "oxygen uptake capacity at the end of fed-batch",
+      "method": null,
+      "notes": "a separate dimension from Table I's g g-1 h-1; no printed conversion",
+      "original_text": null,
+      "original_unit": "mmol g-1 h-1",
+      "provenance": "reported",
+      "quantity_id": "capacity.qOcap.end",
+      "unit": "mmol/(g h)",
+      "value": 5.0
+    },
+    {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 1,
+          "printed_page": 347,
+          "quote": "below 0.15 h-1",
+          "section": "Abstract",
+          "source_id": "lin2000"
+        }
+      ],
+      "inputs": [],
+      "label": "growth rate below which qScap decreases",
+      "method": null,
+      "notes": "the abstract's stated threshold, not a fitted constant",
+      "original_text": null,
+      "original_unit": null,
+      "provenance": "reported",
+      "quantity_id": "threshold.qScap.mu",
+      "unit": "1/h",
+      "value": 0.15
+    },
+    {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 1,
+          "printed_page": 347,
+          "quote": "below 0.25 h-1",
+          "section": "Abstract",
+          "source_id": "lin2000"
+        }
+      ],
+      "inputs": [],
+      "label": "growth rate below which qOcap decreases",
+      "method": null,
+      "notes": "the abstract's stated threshold, not a fitted constant",
+      "original_text": null,
+      "original_unit": null,
+      "provenance": "reported",
+      "quantity_id": "threshold.qOcap.mu",
+      "unit": "1/h",
+      "value": 0.25
+    }
+  ],
+  "required_run_inputs": [
+    {
+      "defaulted": false,
+      "definition_as_printed": "the factor in the appendix's initial-value equation for rS (rS0 = cS * mu_max / (qESd + mu_max)); the paper defines the symbol but prints no value on any page",
+      "name": "cS"
+    },
+    {
+      "defaulted": false,
+      "definition_as_printed": "the factor in the appendix's initial-value equation for rO (rO0 = cO * mu_max / (qEOd + mu_max)); the paper defines the symbol but prints no value on any page",
+      "name": "cO"
+    },
+    {
+      "defaulted": false,
+      "definition_as_printed": "the volumetric oxygen transfer coefficient equation (4) requires; Table I does not list it and the paper prints no value for these cultivations",
+      "name": "kLa"
+    },
+    {
+      "defaulted": false,
+      "definition_as_printed": "the saturation dissolved oxygen tension in equation (4); the paper prints the symbol DOT* in the nomenclature and no value for it",
+      "name": "DOT_star"
+    },
+    {
+      "defaulted": false,
+      "definition_as_printed": "the Henry's-law constant in equation (4); the nomenclature prints 'H  constant derived from the Henry's law [14 000 % L g-1]', i.e. a value in the nomenclature rather than in Table I",
+      "name": "H"
+    }
+  ],
+  "scope": "The complete simulation model printed in the Appendix of Lin et al. (2001), Biotechnology and Bioengineering 73(5):347-357, together with Table I's parameter set and the paper's reported uptake capacities.",
+  "source": {
+    "authors": [
+      "H. Y. Lin",
+      "B. Mathiszik",
+      "B. Xu",
+      "S.-O. Enfors",
+      "P. Neubauer"
+    ],
+    "citation": "H. Y. Lin, B. Mathiszik, B. Xu, S.-O. Enfors, P. Neubauer, 'Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli', Biotechnology and Bioengineering 73(5):347-357, 2001.",
+    "doi": "10.1002/bit.1078",
+    "issue": "5",
+    "journal": "Biotechnology and Bioengineering",
+    "page_numbering_evidence": "the article is paginated 347-357 and each page carries a running footer whose leading integer is its own printed page number, so pdf_page = printed_page - 346",
+    "pages": "347-357",
+    "printed_pages": [
+      347,
+      357
+    ],
+    "source_id": "lin2000",
+    "title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+    "volume": "73",
+    "year": 2001
+  },
+  "table_i": [
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "KS",
+      "origin_as_printed": "Data fitting",
+      "printed_page": 348,
+      "unit": "g/L",
+      "values": {
+        "rb791_constant": 0.01,
+        "w3110_exponential": 0.035
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "KA",
+      "origin_as_printed": "Data fitting",
+      "printed_page": 348,
+      "unit": "g/L",
+      "values": {
+        "rb791_constant": 0.1,
+        "w3110_exponential": 0.1
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "qm",
+      "origin_as_printed": "Data fitting",
+      "printed_page": 348,
+      "unit": "g/(g h)",
+      "values": {
+        "rb791_constant": 0.03,
+        "w3110_exponential": 0.03
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "qSmax",
+      "origin_as_printed": "Experimental data, data fitting",
+      "printed_page": 348,
+      "unit": "g/(g h)",
+      "values": {
+        "rb791_constant": 1.5,
+        "w3110_exponential": 1.86
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "qOmax",
+      "origin_as_printed": "Experimental data, data fitting",
+      "printed_page": 348,
+      "unit": "g/(g h)",
+      "values": {
+        "rb791_constant": 0.65,
+        "w3110_exponential": 0.607
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "qAc,max",
+      "origin_as_printed": "Experimental data, data fitting",
+      "printed_page": 348,
+      "unit": "g/(g h)",
+      "values": {
+        "rb791_constant": 0.14402,
+        "w3110_exponential": 0.15
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "YX/S,ox",
+      "origin_as_printed": "Experimental data, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "g/g",
+      "values": {
+        "rb791_constant": 0.51,
+        "w3110_exponential": 0.51
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "CS",
+      "origin_as_printed": "Chemical formula, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "mol C/g",
+      "values": {
+        "rb791_constant": 0.0333,
+        "w3110_exponential": 0.0333
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "CA",
+      "origin_as_printed": "Chemical formula, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "mol C/g",
+      "values": {
+        "rb791_constant": 0.0333,
+        "w3110_exponential": 0.0333
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "CX",
+      "origin_as_printed": "Stoichiometric analysis, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "mol C/g",
+      "values": {
+        "rb791_constant": 0.04,
+        "w3110_exponential": 0.04
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "YO/S",
+      "origin_as_printed": "Stoichiometric constant, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "g/g",
+      "values": {
+        "rb791_constant": 1.067,
+        "w3110_exponential": 1.067
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "YX/S,of",
+      "origin_as_printed": "Chen et al., 1997; Varma and Palsson, 1994",
+      "printed_page": 348,
+      "unit": "g/g",
+      "values": {
+        "rb791_constant": 0.15,
+        "w3110_exponential": 0.15
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "YA/S",
+      "origin_as_printed": "Stoichiometric constant, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "g/g",
+      "values": {
+        "rb791_constant": 0.667,
+        "w3110_exponential": 0.667
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "YO/A",
+      "origin_as_printed": "Stoichiometric constant, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "g/g",
+      "values": {
+        "rb791_constant": 1.067,
+        "w3110_exponential": 1.067
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "YX/A",
+      "origin_as_printed": "Experimental data, data fitting, Xu et al., 1999",
+      "printed_page": 348,
+      "unit": "g/g",
+      "values": {
+        "rb791_constant": 0.35085,
+        "w3110_exponential": 0.35085
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "Si",
+      "origin_as_printed": "Input concentration",
+      "printed_page": 348,
+      "unit": "g/L",
+      "values": {
+        "rb791_constant": 200.0,
+        "w3110_exponential": 532.0
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "X0",
+      "origin_as_printed": "Input concentration",
+      "printed_page": 348,
+      "unit": "g/L",
+      "values": {
+        "rb791_constant": 0.0001,
+        "w3110_exponential": 0.121
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "S0",
+      "origin_as_printed": "Input concentration",
+      "printed_page": 348,
+      "unit": "g/L",
+      "values": {
+        "rb791_constant": 5.0,
+        "w3110_exponential": 0.5
+      }
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 348,
+        "quote": null,
+        "section": "Table I",
+        "source_id": "lin2000"
+      },
+      "name": "V0",
+      "origin_as_printed": "Input concentration",
+      "printed_page": 348,
+      "unit": "L",
+      "values": {
+        "rb791_constant": 4.0,
+        "w3110_exponential": 7.0
+      }
+    }
+  ],
+  "table_i_page": 348,
+  "target_process_note": "The composition layer's target process is Zielinski et al. (2019), E. coli 20 IBA 1 / pIBAINS in GMS medium, 4 L in a 7.5 L Bioflo Celligen 310 with pH-stat glucose feeding at 30 degC. Lin et al. use a different strain, a different (uninduced) plasmid, a different medium, different reactors and 35 degC. This package is standalone: it does not register a model, does not declare ports, and transfers no parameter to that process.",
+  "units": {
+    "%": {
+      "dimension": "percent",
+      "note": "dissolved oxygen tension, as printed",
+      "to_base": 1.0
+    },
+    "1/h": {
+      "dimension": "per_hour",
+      "note": "mu and kLa, as the nomenclature prints",
+      "to_base": 1.0
+    },
+    "L": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 1.0
+    },
+    "L/h": {
+      "dimension": "volume_rate",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g": {
+      "dimension": "mass",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/(g h)": {
+      "dimension": "mass_specific_rate",
+      "note": "Table I prints this as 'g g-1 h-1'",
+      "to_base": 1.0
+    },
+    "g/L": {
+      "dimension": "mass_concentration",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/g": {
+      "dimension": "mass_ratio",
+      "note": "",
+      "to_base": 1.0
+    },
+    "h": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 1.0
+    },
+    "mL": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 0.001
+    },
+    "mL/h": {
+      "dimension": "volume_rate",
+      "note": "",
+      "to_base": 0.001
+    },
+    "mg/L": {
+      "dimension": "mass_concentration",
+      "note": "",
+      "to_base": 0.001
+    },
+    "min": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 0.016666666666666666
+    },
+    "mmol/(g h)": {
+      "dimension": "amount_specific_rate",
+      "note": "abstract prints this as 'mmol g-1 h-1'",
+      "to_base": 1.0
+    },
+    "mol C/g": {
+      "dimension": "carbon_content",
+      "note": "Table I prints this as 'mol C g-1'",
+      "to_base": 1.0
+    }
+  },
+  "version": "0.1.0"
+}

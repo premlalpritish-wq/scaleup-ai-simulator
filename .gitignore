@@ -34,6 +34,11 @@ dist/
 # --- Test and tooling scratch ------------------------------------------------
 # conftest pins pytest's basetemp inside the repo so tests never depend on the
 # host temp directory being writable.
+.artifacts/
+.baseline/
+.test-tmp/
+staging/
+staging_backup/
 composition/.artifacts/
 .mypy_cache/
 .ruff_cache/

@@ -1,0 +1,25 @@
+{
+  "text": "Extract high-quality total RNA from pecan (Carya illinoinensis) embryos for small RNA and transcriptome sequencing. Pecan embryos are oil-rich and polyphenol-rich, and the tissue is recalcitrant to standard extraction.",
+  "organism": "Carya illinoinensis",
+  "tissue": "embryo",
+  "molecule": "total RNA",
+  "downstream": [
+    "small RNA sequencing",
+    "transcriptome sequencing"
+  ],
+  "constraints": [
+    "recalcitrant tissue",
+    "polyphenol-rich",
+    "high quality"
+  ],
+  "requested_outputs": [
+    "protocol_steps",
+    "evidence_status",
+    "unknowns",
+    "readiness"
+  ],
+  "literature": {
+    "corpus": "sources.json",
+    "passages": "passages.json"
+  }
+}

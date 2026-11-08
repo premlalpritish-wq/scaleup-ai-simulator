@@ -17,4 +17,4 @@ packages = ["composition", "composition.adapters", "composition._workers", "comp
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q --basetemp=.artifacts/basetemp"

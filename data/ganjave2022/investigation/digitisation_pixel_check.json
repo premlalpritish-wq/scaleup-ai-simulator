@@ -1,0 +1,340 @@
+{
+  "check_id": "ganjave2022.digitisation_pixel_check",
+  "version": "1.0.0",
+  "pdf": "papers\\Ganjave et al 2022.pdf",
+  "pdf_page_index": 5,
+  "panel": "figure_reference_data.json figures['5'] panel 'b' (paper Fig. 3b)",
+  "images_on_page": [
+    {
+      "name": "X1.png",
+      "size": [
+        1400,
+        990
+      ]
+    },
+    {
+      "name": "X1.png",
+      "size": [
+        1800,
+        1230
+      ]
+    }
+  ],
+  "frame_px": {
+    "x": [
+      99,
+      878
+    ],
+    "y": [
+      660,
+      1139
+    ]
+  },
+  "series": {
+    "PDGF": {
+      "rgb": [
+        22,
+        0,
+        255
+      ]
+    },
+    "Model_predicted": {
+      "rgb": [
+        123,
+        50,
+        152
+      ]
+    }
+  },
+  "marks": [
+    {
+      "observation_id": "fig3b:PDGF:0",
+      "t_h": -0.057,
+      "digitised_value_g_per_L": -0.0807,
+      "ink_px": 130,
+      "pixel_xy": [
+        100.87,
+        1136.59
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:1",
+      "t_h": 3.964,
+      "digitised_value_g_per_L": 1.2651,
+      "ink_px": 130,
+      "pixel_xy": [
+        204.26,
+        1105.05
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:2",
+      "t_h": 5.977,
+      "digitised_value_g_per_L": 3.2082,
+      "ink_px": 128,
+      "pixel_xy": [
+        256.01,
+        1059.5
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:3",
+      "t_h": 12.006,
+      "digitised_value_g_per_L": 6.7356,
+      "ink_px": 132,
+      "pixel_xy": [
+        411.02,
+        976.82
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:4",
+      "t_h": 16.026,
+      "digitised_value_g_per_L": 13.0815,
+      "ink_px": 129,
+      "pixel_xy": [
+        514.38,
+        828.07
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:5",
+      "t_h": 18.036,
+      "digitised_value_g_per_L": 15.1854,
+      "ink_px": 130,
+      "pixel_xy": [
+        566.06,
+        778.75
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:6",
+      "t_h": 20.046,
+      "digitised_value_g_per_L": 15.6357,
+      "ink_px": 130,
+      "pixel_xy": [
+        617.74,
+        768.2
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:7",
+      "t_h": 24.072,
+      "digitised_value_g_per_L": 18.7139,
+      "ink_px": 130,
+      "pixel_xy": [
+        721.25,
+        696.05
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    },
+    {
+      "observation_id": "fig3b:PDGF:8",
+      "t_h": 26.08,
+      "digitised_value_g_per_L": 15.3687,
+      "ink_px": 129,
+      "pixel_xy": [
+        772.87,
+        774.46
+      ],
+      "dominant_colour_at_pixel": [
+        22,
+        0,
+        255
+      ],
+      "nearest_series": "PDGF",
+      "colour_distance_to_nearest": null,
+      "colour_distance_to_PDGF": 0.0,
+      "matches_assigned_series": true
+    }
+  ],
+  "note": "Manual diagnostic. The reference PDF is not distributed, so no test may depend on this file.",
+  "image_used": {
+    "name": "X1.png",
+    "size": [
+      1800,
+      1230
+    ]
+  },
+  "curve_near_dispute": [
+    {
+      "t_h": 22.0,
+      "digitised_value_g_per_L": 17.1286,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 22.5,
+      "digitised_value_g_per_L": 17.5625,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 22.666,
+      "digitised_value_g_per_L": 17.7066,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 23.0,
+      "digitised_value_g_per_L": 17.9964,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 23.5,
+      "digitised_value_g_per_L": 18.4304,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 24.0,
+      "digitised_value_g_per_L": 18.703,
+      "rgb": [
+        22,
+        0,
+        255
+      ]
+    },
+    {
+      "t_h": 24.072,
+      "digitised_value_g_per_L": 18.7159,
+      "rgb": [
+        22,
+        0,
+        255
+      ]
+    },
+    {
+      "t_h": 24.5,
+      "digitised_value_g_per_L": 18.2761,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 25.0,
+      "digitised_value_g_per_L": 17.1998,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 25.5,
+      "digitised_value_g_per_L": 16.1235,
+      "rgb": [
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "t_h": 26.0,
+      "digitised_value_g_per_L": 15.3669,
+      "rgb": [
+        22,
+        0,
+        255
+      ]
+    },
+    {
+      "t_h": 26.08,
+      "digitised_value_g_per_L": 15.3669,
+      "rgb": [
+        22,
+        0,
+        255
+      ]
+    }
+  ]
+}

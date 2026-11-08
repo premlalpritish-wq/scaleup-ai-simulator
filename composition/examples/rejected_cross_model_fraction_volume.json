@@ -1,0 +1,137 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "rejected-cross-model-fraction-volume",
+  "title": "Refused: a chromatography fraction volume driving a culture working volume (XM-01)",
+  "description": "Zielinski publishes stream:S09_deae_fraction#fraction_volume, the volume of a chromatographic eluate at one step of its purification, in mL. Ganjave accepts initial_culture_volume, the liquid working volume of the culture at t=0, in L. Both are volumes; one is a purified fraction and the other is a reactor working volume, and no source in this repository relates them. The engine refuses it with the reason attached.",
+  "source_ref": "Zielinski et al. 2019, PEP 157:63-69 sec. 4; Ganjave et al. 2022, Biotech Reports 33:e00694 sec. 2",
+  "notes": "Expected: connection.cross_model_refused. Refused in the opposite direction from rejected_cross_model_dcw.json, to show the rule is not directional.",
+  "instances": [
+    {
+      "instance_id": "zielinski_rhi",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Recombinant human insulin process",
+      "role": "independent published process",
+      "notes": "Runs on its own terms, exactly as in brass_batch_chain.json.",
+      "position": {
+        "x": 560,
+        "y": 120
+      },
+      "parameters": {
+        "execution": {
+          "mode": "evidence_replay"
+        }
+      }
+    },
+    {
+      "instance_id": "ganjave_fed_batch",
+      "model_id": "ganjave",
+      "model_version": "0.1.0",
+      "label": "Cybernetic fed-batch culture, 24 h",
+      "role": "dynamic biological cultivation model",
+      "notes": "Equations (12)-(16). The parameter set is the paper's Table 2, loaded as fitted; the adapter never overrides it.",
+      "position": {
+        "x": 120,
+        "y": 120
+      },
+      "parameters": {
+        "simulation": {
+          "mode": "fed_batch",
+          "duration_h": 24.0,
+          "output_times_h": [
+            0.0,
+            6.0,
+            12.0,
+            18.0,
+            24.0
+          ],
+          "solver": {
+            "rtol": 1e-06,
+            "atol": 1e-09,
+            "h_max": 0.01
+          }
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "fraction-into-culture",
+      "source": {
+        "instance_id": "zielinski_rhi",
+        "port_id": "stream:S09_deae_fraction#fraction_volume"
+      },
+      "target": {
+        "instance_id": "ganjave_fed_batch",
+        "port_id": "initial_culture_volume"
+      },
+      "label": "eluate volume -> culture working volume"
+    }
+  ],
+  "literal_inputs": {
+    "ganjave_fed_batch/initial_biomass_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 0.05,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 2.2 Batch fermentation, printed p. 2 (initial OD600 0.05, no OD600-to-dry-cell-weight calibration is printed)",
+      "method": "declared graph input; the paper states an initial OD600 but supplies no calibration, so this g/L value is an operator's assumption, not a paper value",
+      "reason": "Required by the model with no default. Not derivable from the reported OD600."
+    },
+    "ganjave_fed_batch/initial_complex_substrate_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 5.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, printed p. 2 (SOB contains 5 g/L yeast extract)",
+      "method": "declared graph input; the medium recipe's yeast-extract concentration is used as the initial lumped complex substrate",
+      "reason": "Required by the model with no default. The paper states no initial S2 for the model, and this value decides whether the culture becomes oxygen-limited."
+    },
+    "ganjave_fed_batch/initial_dissolved_oxygen": {
+      "state": "number",
+      "quantity": "dimensionless",
+      "value": 100.0,
+      "unit": "%",
+      "source_ref": "Ganjave et al. 2022, Notations, printed p. 2 (DO is a percentage of dissolved oxygen)",
+      "method": "declared graph input; the paper does not state an initial dissolved oxygen",
+      "reason": "Required by the model with no default. A percentage of the probe's saturation reading, not a mass fraction and not a concentration."
+    },
+    "ganjave_fed_batch/feed_glycerol_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 175.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed composition 17.5 % glycerol)",
+      "method": "reported feed recipe converted at 1 % w/v = 10 g/L",
+      "reason": "The concentration eq. (13) requires; the paper prints the recipe as percent weight/volume."
+    },
+    "ganjave_fed_batch/feed_complex_substrate_concentration": {
+      "state": "number",
+      "quantity": "mass_concentration",
+      "value": 245.0,
+      "unit": "g/L",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed composition 24.5 % yeast extract)",
+      "method": "reported feed recipe converted at 1 % w/v = 10 g/L",
+      "reason": "The concentration eq. (14) requires; the paper prints the recipe as percent weight/volume."
+    },
+    "ganjave_fed_batch/feed_flow_rate": {
+      "state": "number",
+      "quantity": "volume_flow",
+      "value": 0.72,
+      "unit": "mL/h",
+      "source_ref": "Ganjave et al. 2022, 3.3, printed p. 7 (feed rate 0.72 mL/h)",
+      "method": "reported volumetric feed rate",
+      "reason": "Volumetric, not a mass flow: a mass rate would need a feed density the paper does not state."
+    },
+    "ganjave_fed_batch/feed_start_time": {
+      "state": "number",
+      "quantity": "time",
+      "value": 6.0,
+      "unit": "h",
+      "source_ref": "Ganjave et al. 2022, 3.1, printed p. 3 (feeding begins at 6 h, at the dissolved-oxygen landmark)",
+      "method": "reported feeding schedule",
+      "reason": "The pump starts at the dissolved-oxygen minimum the paper reports."
+    }
+  },
+  "defaults": {}
+}

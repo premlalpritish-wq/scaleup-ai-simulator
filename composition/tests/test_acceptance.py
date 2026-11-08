@@ -35,19 +35,62 @@ from conftest import (
 )
 from composition.contracts import (
     CONTRACT_VERSION,
+    ModelManifest,
+    PortDefinition,
     PortDirection,
+    ProvenanceRequirement,
+    TemporalBasis,
+    ValueProvenance,
     ValueState,
     load_graph,
 )
 from composition.diagnostics import DiagnosticCode, Origin, Severity
 from composition.engine import CompositionEngine
-from composition.quantities import Quantity
+from composition.quantities import Quantity, describe_registry
+from composition.runner import (
+    REFERENCE_SEPARATOR,
+    describe_model,
+    registered_references,
+    resolve_model_reference,
+)
 
 
 def _digest(payload: dict) -> str:
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
+
+
+def _find_godot() -> str | None:
+    """The Godot 4.7 console binary, or ``None`` when it is not installed.
+
+    Looked for by name on PATH and in the two conventional install locations. A
+    missing Godot is reported, not hidden: the test that uses this skips with a
+    message saying the GDScript half was not verified.
+    """
+    names = (
+        "Godot_v4.7.2-stable_win64_console.exe",
+        "Godot_v4.7-stable_win64.exe",
+        "godot4",
+        "godot",
+    )
+    import os
+    import shutil
+
+    for name in names:
+        found = shutil.which(name)
+        if found:
+            return found
+    for directory in ("D:/Godot", "C:/Program Files/Godot", "C:/Godot"):
+        candidate = Path(directory)
+        if not candidate.is_dir():
+            continue
+        for path in sorted(candidate.glob("**/*console*.exe")) + \
+                sorted(candidate.glob("**/Godot*.exe")):
+            if path.is_file():
+                return str(path)
+    del os
+    return None
 
 
 def inputs_to(payload: dict, instance_id: str) -> dict[str, dict]:
@@ -981,8 +1024,10 @@ class TestCG14EndToEndExecution:
         assert completed.returncode == 0
         payload = json.loads(completed.stdout)
         available = {m["model_id"] for m in payload["models"] if m["available"]}
+        # The registered set, each of which must be reachable on this host.
         assert available == {"morris2011.material_balance",
-                             "zielinski2019.rhi_process"}
+                             "zielinski2019.rhi_process",
+                             "ganjave"}
 
 
 # --------------------------------------------------------------------------- #
@@ -1056,6 +1101,578 @@ class TestCG15ExistingRegressionSuite:
 
 
 # --------------------------------------------------------------------------- #
+# CG-16 -- the contract boundary the editor reads
+#
+# The Godot editor asks two questions across the GDScript -> Python boundary:
+# "which models exist?" and "what does this model's manifest say?". Both answers
+# must name one exact model and must be byte-identical for identical inputs, or
+# the editor is drawing from a description that cannot be reproduced.
+#
+# Nothing here asserts scientific compatibility. A port resolving structurally --
+# that it has an id, a direction, a quantity and a unit -- says only that the two
+# declarations can be compared. Whether a connection is *permitted* remains the
+# engine's decision, under CG-02, CG-03, CG-08 and CG-09.
+# --------------------------------------------------------------------------- #
+
+
+class TestCG16ContractBoundary:
+    """The model descriptions the editor renders are exact and reproducible."""
+
+    # -- reference resolution ------------------------------------------------
+
+    def test_every_registered_model_resolves_from_its_id_alone(self):
+        """Each id names exactly one version, so a bare id is unambiguous."""
+        for reference in registered_references():
+            registration, diagnostics = resolve_model_reference(
+                reference.split(REFERENCE_SEPARATOR)[0]
+            )
+            assert diagnostics == [], diagnostics
+            assert registration is not None
+            assert registration.model_version == reference.split(
+                REFERENCE_SEPARATOR
+            )[1]
+
+    def test_an_unknown_model_id_is_refused_and_names_what_is_registered(self):
+        registration, diagnostics = resolve_model_reference("no.such_model")
+        assert registration is None
+        assert len(diagnostics) == 1
+        assert "no model is registered" in diagnostics[0].message
+        # What to do instead is in the remediation, not hidden in the message.
+        for reference in registered_references():
+            assert reference in diagnostics[0].remediation, diagnostics[0].remediation
+
+    def test_an_unversioned_reference_is_refused(self):
+        for bad in ("", "   ", "@1.0.0", REFERENCE_SEPARATOR):
+            registration, diagnostics = resolve_model_reference(bad)
+            assert registration is None, bad
+            assert diagnostics, bad
+
+    def test_a_version_that_is_not_registered_is_refused(self):
+        registration, diagnostics = resolve_model_reference(
+            f"zielinski2019.rhi_process{REFERENCE_SEPARATOR}9.9.9"
+        )
+        assert registration is None
+        assert "is not registered" in diagnostics[0].message
+        assert "1.0.0" in diagnostics[0].message
+
+    def test_ambiguity_is_refused_rather_than_resolved_to_one_candidate(self, monkeypatch):
+        """Two registrations of one id must not resolve to whichever came first."""
+        from composition import runner as runner_module
+
+        registration = resolve_model_reference(
+            f"morris2011.material_balance{REFERENCE_SEPARATOR}0.1.0"
+        )[0]
+        twin = type(registration)(
+            model_id=registration.model_id,
+            model_version="0.2.0",
+            factory=registration.factory,
+            model_subdirectory=registration.model_subdirectory,
+            worker_module=registration.worker_module,
+        )
+        monkeypatch.setattr(
+            runner_module, "REGISTRATIONS", (registration, twin)
+        )
+        assert runner_module.resolve_model_reference(
+            registration.model_id
+        )[0] is None
+        resolved, diagnostics = runner_module.resolve_model_reference(
+            registration.model_id
+        )
+        assert "more than one version" in diagnostics[0].message
+        assert resolved is None
+
+    # -- describe-model -------------------------------------------------------
+
+    def test_describe_model_returns_the_manifest_the_engine_compiled(self, engine):
+        """The published manifest is the one the engine itself built, not a
+        parallel description of it."""
+        payload, code = describe_model("zielinski2019.rhi_process", ROOT)
+        assert code == 0
+        assert payload["resolved"] is True
+        assert payload["reference"] == "zielinski2019.rhi_process@1.0.0"
+        assert payload["port_dependence"] == "fixed"
+
+        published = payload["manifest"]
+        graph = load_graph(read_example("brass_batch_chain.json"))
+        compiled = engine.load(graph)["zielinski_rhi"].manifest
+        assert published["ports"] == [p.to_dict() for p in compiled.ports]
+        # The counts the editor draws its port list from are the manifest's own.
+        assert payload["port_counts"] == {
+            "input": len([p for p in compiled.ports if p.direction is PortDirection.INPUT]),
+            "output": len([p for p in compiled.ports if p.direction is PortDirection.OUTPUT]),
+        }
+
+    def test_describe_model_is_byte_identical_across_runs(self, work_dir):
+        """The editor caches a manifest and redraws from it; the answer must not
+        drift between two reads of the same model."""
+        first = json.dumps(describe_model("zielinski2019.rhi_process", ROOT)[0])
+        second = json.dumps(describe_model("zielinski2019.rhi_process", ROOT)[0])
+        assert first == second
+
+    def test_an_instance_parameterised_model_is_reported_as_such_not_as_empty(
+        self,
+    ):
+        """Morris declares its ports per instance. That is not 'no ports', and it
+        is not something the composition layer may fill in."""
+        payload, code = describe_model("morris2011.material_balance", ROOT)
+        assert code == 0, payload["diagnostics"]
+        assert payload["resolved"] is True
+        assert payload["port_dependence"] == "instance"
+        assert payload["manifest"] is None
+        assert payload["port_counts"] == {"input": 0, "output": 0}
+        assert "instance-parameterised" in payload["notes"]
+        # The refusal is reported, not swallowed.
+        assert any(
+            d["code"] == "manifest.invalid" for d in payload["diagnostics"]
+        ), payload["diagnostics"]
+
+    def test_an_unresolvable_reference_exits_with_the_bad_input_code(self):
+        payload, code = describe_model("no.such_model", ROOT)
+        assert code == 3
+        assert payload["resolved"] is False
+        assert payload["model_id"] is None
+        assert payload["registered_references"] == registered_references()
+
+    # -- structural resolvability -------------------------------------------
+
+    def test_every_manifest_port_resolves_against_its_own_declaration(self):
+        """Structural resolvability only: an id, a direction, a quantity and a
+        unit, all of which the contract itself validates."""
+        payload, _code = describe_model("zielinski2019.rhi_process", ROOT)
+        ports = payload["manifest"]["ports"]
+        assert ports
+        registry = describe_registry()
+        declared = set(registry["quantities"])
+        seen = set()
+        for port in ports:
+            rebuilt = PortDefinition.from_dict(port)
+            assert rebuilt.port_id not in seen, f"duplicate port id {rebuilt.port_id}"
+            seen.add(rebuilt.port_id)
+            assert rebuilt.direction in (PortDirection.INPUT, PortDirection.OUTPUT)
+            assert rebuilt.quantity.value in declared, (
+                f"{rebuilt.port_id} declares quantity {rebuilt.quantity.value!r}, "
+                f"which the contract does not define"
+            )
+            # A port the model cannot represent is still published, but says so.
+            assert rebuilt.unit != "" or rebuilt.unavailable_reason != ""
+
+    def test_manifest_ports_can_be_addressed_by_a_graph_that_uses_them(self):
+        """A port id the manifest publishes is an id a connection may name."""
+        payload, _code = describe_model("zielinski2019.rhi_process", ROOT)
+        published = {p["port_id"] for p in payload["manifest"]["ports"]}
+        graph = load_graph(read_example("brass_batch_chain.json"))
+        engine = CompositionEngine(base_path=ROOT)
+        compiled = engine.load(graph)["zielinski_rhi"].manifest
+        assert {p.port_id for p in compiled.ports} == published
+
+    def test_the_documented_count_of_ports_is_still_the_documented_count(self):
+        payload, _code = describe_model("zielinski2019.rhi_process", ROOT)
+        assert len(payload["manifest"]["ports"]) == 196
+
+    # -- the quantity registry ----------------------------------------------
+
+    def test_the_quantity_registry_is_the_engine_s_one(self):
+        """Godot reads `--describe-contract`. There is no second list to keep in
+        step with this one."""
+        registry = describe_registry()
+        assert set(registry["quantities"]) == {q.value for q in Quantity}
+        for quantity, symbols in registry["units_by_quantity"].items():
+            assert Quantity(quantity) in Quantity
+
+    def test_describe_contract_exposes_what_the_editor_renders(self):
+        completed = subprocess.run(
+            [sys.executable, "-m", "composition.runner", "--describe-contract"],
+            cwd=str(COMPOSITION_ROOT), capture_output=True, text=True,
+            env={**_env(), "PYTHONPATH": str(COMPOSITION_ROOT)}, timeout=120,
+        )
+        assert completed.returncode == 0, completed.stderr
+        payload = json.loads(completed.stdout)
+        assert set(payload) == {
+            "contract_version",
+            "quantities",
+            "units_by_quantity",
+            "ambiguous_symbols",
+            "non_linear_symbols",
+        }
+        assert "volume_flow" in payload["units_by_quantity"]
+        assert "mass_concentration" in payload["quantities"]
+
+    def test_the_model_list_carries_the_unambiguous_reference(self):
+        completed = subprocess.run(
+            [sys.executable, "-m", "composition.runner", "--list-models"],
+            cwd=str(COMPOSITION_ROOT), capture_output=True, text=True,
+            env={**_env(), "PYTHONPATH": str(COMPOSITION_ROOT)}, timeout=120,
+        )
+        assert completed.returncode == 0, completed.stderr
+        models = json.loads(completed.stdout)["models"]
+        # Sorted on both sides: `--list-models` emits registration order and
+        # `registered_references()` sorts, so comparing them unsorted would
+        # make the assertion depend on an ordering it never meant to test.
+        assert sorted(m["reference"] for m in models) == registered_references()
+        for entry in models:
+            assert entry["reference"] == (
+                f"{entry['model_id']}{REFERENCE_SEPARATOR}{entry['model_version']}"
+            )
+
+    def test_no_new_model_appears_on_the_boundary(self):
+        """Discovery reports the registered models and nothing else.
+
+        Baez remains unregistered, which is a separate decision that has not
+        been taken. Ganjave *is* registered, with an adapter, a worker, a
+        quantity contract and its own acceptance suite, so it belongs here.
+        """
+        completed = subprocess.run(
+            [sys.executable, "-m", "composition.runner", "--list-models"],
+            cwd=str(COMPOSITION_ROOT), capture_output=True, text=True,
+            env={**_env(), "PYTHONPATH": str(COMPOSITION_ROOT)}, timeout=120,
+        )
+        payload = json.loads(completed.stdout)
+        assert sorted(m["model_id"] for m in payload["models"]) == [
+            "ganjave",
+            "morris2011.material_balance",
+            "zielinski2019.rhi_process",
+        ]
+        assert "baez" not in completed.stdout.lower()
+
+    # -- the Godot side -------------------------------------------------------
+
+    def test_godot_loads_the_models_and_renders_their_declared_ports(self):
+        """Drive the real GDScript -> Python boundary under Godot.
+
+        This is the one check that would have caught the original defect: the
+        editor read its model list from a result file the runner never wrote, so
+        the registry was always empty and every node drew no ports.
+        """
+        godot = _find_godot()
+        if godot is None:
+            pytest.skip(
+                "Godot 4.7 is not on PATH, so the GDScript half of this boundary "
+                "was NOT verified. Run it by hand:\n"
+                "  godot --headless --path . --script "
+                "res://composition/tests/godot/contract_boundary.gd\n"
+                "A skip here is not a pass; the checks below are unverified until "
+                "that command runs."
+            )
+        harness = COMPOSITION_ROOT / "tests" / "godot" / "contract_boundary.gd"
+        assert harness.is_file(), harness
+        completed = subprocess.run(
+            [godot, "--headless", "--path", str(ROOT),
+             "--script", "res://composition/tests/godot/contract_boundary.gd"],
+            cwd=str(ROOT), capture_output=True, text=True, timeout=600,
+        )
+        assert completed.returncode == 0, (
+            "the Godot contract-boundary harness failed:\n"
+            f"{completed.stdout[-4000:]}\n{completed.stderr[-4000:]}"
+        )
+        assert "checks passed" in completed.stdout, completed.stdout[-2000:]
+        assert "FAIL" not in completed.stdout, completed.stdout[-2000:]
+
+    def test_the_godot_harness_asserts_no_scientific_compatibility(self):
+        """The harness checks resolvability, not permission.
+
+        A guard here: the GDScript checks exist to prove the editor can read a
+        description. If one of them ever started asserting that two ports may be
+        connected, it would be asserting something the Python engine owns.
+        """
+        harness = COMPOSITION_ROOT / "tests" / "godot" / "contract_boundary.gd"
+        text = harness.read_text(encoding="utf-8")
+        assert "quantities_can_connect" not in text
+        assert "is_compatible" not in text
+        # The header must say so where a reader will see it.
+        assert "structural only" in text
+        assert "CG-02" in text and "CG-09" in text
+
+    def test_godot_can_add_and_run_every_registered_model_from_the_palette(self):
+        """The palette drives the real scene, and a run is a claim about the UI.
+
+        This is the harness that would have caught the original defect: the
+        editor had no way to place a model, so the only Zielinski-shaped thing
+        about it was the replay scene. It presses the palette's own buttons and
+        the form's own OK, and runs the graph through the Run handler, rather
+        than calling the Python layer directly.
+        """
+        godot = _find_godot()
+        if godot is None:
+            pytest.skip(
+                "Godot 4.7 is not on PATH, so the palette half of the boundary "
+                "was NOT verified. Run it by hand:\n"
+                "  godot --headless --path . --script "
+                "res://composition/tests/godot/palette_graph_run.gd\n"
+                "A skip here is not a pass."
+            )
+        harness = COMPOSITION_ROOT / "tests" / "godot" / "palette_graph_run.gd"
+        assert harness.is_file(), harness
+        completed = subprocess.run(
+            [godot, "--headless", "--path", str(ROOT),
+             "--script", "res://composition/tests/godot/palette_graph_run.gd"],
+            cwd=str(ROOT), capture_output=True, text=True, timeout=900,
+        )
+        assert completed.returncode == 0, (
+            "the Godot palette-graph-run harness failed:\n"
+            f"{completed.stdout[-4000:]}\n{completed.stderr[-4000:]}"
+        )
+        assert "checks passed" in completed.stdout, completed.stdout[-2000:]
+        assert "FAIL" not in completed.stdout, completed.stdout[-2000:]
+
+    def test_the_project_opens_into_the_scientific_simulation_workshop(self):
+        """The default scene is a 3D simulation driven by the runner.
+
+        The workshop harness drives the real scene: it loads it, waits for the
+        runner to produce a result, changes a supported input, checks that the
+        result changes and that a failed run is reported rather than presented
+        as current, and inspects the evidence, gap and compatibility panels.
+
+        It performs several model executions, so it is slow. The timeout is
+        generous on purpose -- a correct simulation that is merely slow must not
+        fail the check.
+        """
+        godot = _find_godot()
+        if godot is None:
+            pytest.skip(
+                "Godot 4.7 is not on PATH, so the simulation workshop was NOT "
+                "verified. Run it by hand:\n"
+                "  godot --headless --path . --script "
+                "res://composition/tests/godot/workshop_graph_run.gd\n"
+                "A skip here is not a pass."
+            )
+        harness = COMPOSITION_ROOT / "tests" / "godot" / "workshop_graph_run.gd"
+        assert harness.is_file(), harness
+        completed = subprocess.run(
+            [godot, "--headless", "--path", str(ROOT),
+             "--script", "res://composition/tests/godot/workshop_graph_run.gd"],
+            cwd=str(ROOT), capture_output=True, text=True, timeout=2400,
+        )
+        assert completed.returncode == 0, (
+            "the Godot workshop harness failed:\n"
+            f"{completed.stdout[-4000:]}\n{completed.stderr[-4000:]}"
+        )
+        assert "checks passed" in completed.stdout, completed.stdout[-2000:]
+        assert "FAIL" not in completed.stdout, completed.stdout[-2000:]
+
+    def test_the_default_scene_is_the_workshop(self):
+        """A cheap guard on the same fact, so a broken project.godot is caught
+        without paying for the full harness."""
+        project = Path(ROOT) / "project.godot"
+        text = project.read_text(encoding="utf-8")
+        assert 'run/main_scene="res://scenes/workshop.tscn"' in text, (
+            "the project does not open in the simulation workshop"
+        )
+        assert (Path(ROOT) / "scenes" / "workshop.tscn").is_file()
+
+    def test_the_palette_keeps_no_second_list_of_model_ids(self):
+        """A model that is registered must appear without editing GDScript.
+
+        The original defect was a missing palette, and the failure mode it risks
+        on the way back is a palette that hard-codes its own list and silently
+        drops the next model someone registers.
+        """
+        palette = Path(ROOT) / "scripts" / "model_palette.gd"
+        text = palette.read_text(encoding="utf-8")
+        for model_id in (
+            "morris2011.material_balance",
+            "zielinski2019.rhi_process",
+            "ganjave",
+        ):
+            assert model_id not in text, (
+                f"{palette.name} hard-codes {model_id!r}; the palette must read "
+                "the registry, which is the only place a model is registered"
+            )
+        assert "model_ids()" in text, "the palette does not read the registry"
+        # And the registry is still the single registration point.
+        from composition.adapters import REGISTRATIONS
+        assert {r.model_id for r in REGISTRATIONS} == {
+            "morris2011.material_balance",
+            "zielinski2019.rhi_process",
+            "ganjave",
+        }
+
+    def test_the_model_library_reads_compatibility_from_the_engine(self):
+        """The library's compatibility column renders the engine; it decides nothing.
+
+        The window asks `--describe-connections` once, and the registry maps two
+        fields the engine itself emits -- `permitted` and `evidence_basis`. If
+        the window stopped asking, the library would fall back to saying nothing
+        about a model the engine refuses; if the palette started reading
+        boundary fields itself, there would be two places to change a verdict
+        and one of them would drift. Both are checked here.
+        """
+        scripts = Path(ROOT) / "scripts"
+        main = (scripts / "main.gd").read_text(encoding="utf-8")
+        registry = (scripts / "model_registry.gd").read_text(encoding="utf-8")
+        palette = (scripts / "model_palette.gd").read_text(encoding="utf-8")
+
+        # The composition window asks the authority, through the one boundary.
+        assert "describe_connections()" in main, (
+            "the composition window never asks the compatibility engine for its "
+            "position, so its model library has none to show"
+        )
+        # The mapping reads the engine's own fields and nothing else.
+        assert "evidence_basis" in registry, (
+            "the registry does not read the engine's evidence basis, so it "
+            "cannot tell a documented refusal from an unclassified pair"
+        )
+        assert "permitted" in registry
+        assert "INTEGRATION_NOT_EVALUATED" in registry
+        # The palette renders that mapping. It does not duplicate it.
+        assert "integration_status(" in palette, (
+            "the palette does not read the registry's compatibility mapping"
+        )
+        assert 'get("evidence_basis"' not in palette and '["evidence_basis"]' not in palette, (
+            "model_palette.gd reads a boundary field directly; the mapping from "
+            "engine fields to states must stay in one place"
+        )
+        assert 'get("stance"' not in palette and '["stance"]' not in palette, (
+            "model_palette.gd reads the engine's stance directly; the mapping "
+            "must stay in one place"
+        )
+        assert 'get("permitted"' not in palette and '["permitted"]' not in palette, (
+            "model_palette.gd reads the engine's permission directly; the mapping "
+            "must stay in one place"
+        )
+
+    def test_the_palette_harness_asserts_no_scientific_compatibility(self):
+        """The palette harness drives the UI; it does not judge science.
+
+        Same guard as the contract-boundary harness: if it ever started
+        asserting that a model is validated, it would be asserting something
+        the models own.
+        """
+        harness = COMPOSITION_ROOT / "tests" / "godot" / "palette_graph_run.gd"
+        text = harness.read_text(encoding="utf-8")
+        assert "quantities_can_connect" not in text
+        assert "is_compatible" not in text
+        assert "is scientifically valid" in text, (
+            "the harness must say plainly that it claims nothing about "
+            "scientific validity"
+        )
+
+
+# --------------------------------------------------------------------------- #
+# CG-17 -- an incomplete composition
+#
+# `incomplete_required_input.json` is incomplete by construction: a zinc make-up
+# charge is never supplied, so an upstream control volume cannot determine one of
+# its outputs, and a downstream control volume that declares it needs that value.
+#
+# The claim under test is narrow and is the one the handoff asks for: a missing
+# input is *identified*, it *blocks* the instance that required it, the
+# diagnostic is *actionable*, and *nothing is substituted* for it.
+# --------------------------------------------------------------------------- #
+
+
+class TestCG17IncompleteComposition:
+    """An unsupplied input stays missing and blocks what required it."""
+
+    @staticmethod
+    def incomplete() -> dict:
+        # Memoised for the session by `run_example`, so calling it per test costs
+        # one run in total.
+        return example_result("incomplete_required_input.json")
+
+    def test_the_missing_input_is_identified_by_its_own_port(self):
+        codes = error_codes(self.incomplete())
+        assert codes == {DiagnosticCode.CONNECTION_CARRIES_UNRESOLVED.value}, codes
+
+    def test_the_diagnostic_names_the_port_the_state_and_the_reason(self):
+        diagnostic = next(
+            d for d in self.incomplete()["diagnostics"]
+            if d["code"] == DiagnosticCode.CONNECTION_CARRIES_UNRESOLVED.value
+        )
+        assert "brass_finish/in:A:Zn" in diagnostic["message"]
+        assert "unresolved" in diagnostic["message"]
+        assert "under-determined" in diagnostic["message"]
+        # Addressable by the editor: which instance, which port.
+        assert diagnostic["where"] == ["instance", "brass_finish", "port", "in:A:Zn"]
+        assert diagnostic["origin"] == Origin.EXECUTION.value
+
+    def test_the_diagnostic_says_what_to_do(self):
+        diagnostic = next(
+            d for d in self.incomplete()["diagnostics"]
+            if d["code"] == DiagnosticCode.CONNECTION_CARRIES_UNRESOLVED.value
+        )
+        assert diagnostic["remediation"].strip(), "an actionable refusal must say what to do"
+        assert "Resolve the upstream port" in diagnostic["remediation"]
+
+    def test_execution_is_blocked_for_the_instance_that_required_it(self):
+        statuses = {r["instance_id"]: r["status"] for r in self.incomplete()["results"]}
+        assert statuses["brass_charge"] == "success"
+        assert statuses["brass_alloying"] == "success_with_warnings"
+        assert statuses["brass_finish"] == "failed"
+        assert self.incomplete()["status"] == "failed"
+
+    def test_the_unresolved_value_never_reaches_the_dependent(self):
+        """No number crosses the connection. The dependent's input record for that
+        port either does not exist or carries the unresolved value itself."""
+        inputs = inputs_to(self.incomplete(), "brass_finish")
+        carried = inputs.get("in:A:Zn")
+        assert carried is None or carried["value"]["state"] != ValueState.NUMBER.value
+        if carried is not None:
+            assert carried["via"] == "connection"
+
+    def test_no_zero_is_substituted_for_the_missing_value(self):
+        """The dependent's own final zinc is reported undetermined. It is not
+        closed with a zero, a mean, or a value borrowed from anywhere else."""
+        final = output_of(self.incomplete(), "brass_finish", "out:Z:Zn")["value"]
+        assert final["state"] == ValueState.UNRESOLVED.value
+        assert final["value"] is None
+        assert final["provenance"] == ValueProvenance.UNKNOWN.value
+        assert final["reason"].strip()
+
+    def test_a_number_the_model_does_publish_is_labelled_not_silent(self):
+        """`out:A:Zn` is 0.0, and that must not read as a determined answer.
+
+        It is the canonical member of a one-parameter family: the model says so
+        in its own `method` string, and the value state is ZERO rather than
+        NUMBER. A reader who quotes it as "the zinc was zero" is misquoting a
+        representative, which is exactly what this labelling exists to prevent.
+        """
+        published = output_of(self.incomplete(), "brass_finish", "out:A:Zn")["value"]
+        assert published["state"] == ValueState.ZERO.value
+        assert published["state"] != ValueState.NUMBER.value
+        assert "representative" in (published["method"] or "") or (
+            "canonical member" in (published["method"] or "")
+        ), published["method"]
+        assert "not a determined value" in (published["method"] or "")
+
+    def test_the_upstream_reports_the_gap_with_its_own_reason(self):
+        """The refusal starts upstream, and is stated there rather than
+        discovered downstream."""
+        upstream = output_of(self.incomplete(), "brass_alloying", "out:E:Zn")["value"]
+        assert upstream["state"] == ValueState.UNRESOLVED.value
+        assert upstream["value"] is None
+        assert "under-determined" in upstream["reason"]
+
+    def test_the_gap_is_reported_as_a_warning_not_as_a_silent_pass(self):
+        warnings = [
+            d for d in self.incomplete()["diagnostics"]
+            if d["code"] == DiagnosticCode.EXECUTION_UNDERDETERMINED.value
+        ]
+        assert warnings, "an under-determined system must say so"
+        assert all(d["severity"] == Severity.WARNING.value for d in warnings)
+
+    def test_the_graph_asserts_no_new_scientific_compatibility(self):
+        """Every instance in this example is the same non-reacting Morris batch
+        model already exercised by brass_batch_chain, and the zinc make-up it
+        omits is the one shipped example declares."""
+        graph = load_graph(read_example("incomplete_required_input.json"))
+        assert {i.model_id for i in graph.instances} == {
+            "morris2011.material_balance"
+        }
+        reference = load_graph(read_example("brass_batch_chain.json"))
+        shipped = next(
+            i for i in reference.instances if i.instance_id == "brass_alloying"
+        )
+        declared = json.loads(json.dumps(shipped.parameters))["system"]["streams"][1]
+        omitted = next(
+            i for i in graph.instances if i.instance_id == "brass_alloying"
+        ).parameters["system"]["streams"][1]
+        assert omitted["component_amounts"]["Zn"] != declared["component_amounts"]["Zn"]
+        assert "NOT SUPPLIED" in omitted["component_amounts"]["Zn"]["reason"]
+        # And nothing was invented to replace it.
+        assert "literal_inputs" not in graph.to_dict() or not graph.literal_inputs
+
+
+# --------------------------------------------------------------------------- #
 # coverage table
 # --------------------------------------------------------------------------- #
 
@@ -1076,6 +1693,8 @@ CG_COVERAGE = {
     "CG-13": TestCG13Reproducibility,
     "CG-14": TestCG14EndToEndExecution,
     "CG-15": TestCG15ExistingRegressionSuite,
+    "CG-16": TestCG16ContractBoundary,
+    "CG-17": TestCG17IncompleteComposition,
 }
 
 
@@ -1083,7 +1702,7 @@ class TestCoverageTable:
     """The table cannot drift away from the suite."""
 
     def test_every_criterion_has_a_class(self):
-        expected = {f"CG-{n:02d}" for n in range(1, 16)}
+        expected = {f"CG-{n:02d}" for n in range(1, 18)}
         assert set(CG_COVERAGE) == expected
 
     def test_every_class_has_tests(self):

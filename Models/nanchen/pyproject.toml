@@ -1,0 +1,23 @@
+[project]
+name = "nanchen2006-pirt-chemostat"
+version = "0.1.0"
+description = "Pirt's chemostat relation (equation 3) with the fitted maintenance parameters of Nanchen, Schicker & Sauer (2006), Applied and Environmental Microbiology 72(2):1164-1172"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["nanchen2006"]
+
+[tool.setuptools.package-data]
+nanchen2006 = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

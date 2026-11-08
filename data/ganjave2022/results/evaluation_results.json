@@ -1,0 +1,1470 @@
+{
+  "result_id": "ganjave2022.heldout_evaluation",
+  "protocol_version": "1.0.0",
+  "protocol_id": "ganjave2022.heldout_evaluation_protocol",
+  "scope": {
+    "what_is_being_evaluated": "the Ganjave et al. (2022) cybernetic growth model, alone",
+    "what_is_NOT_being_evaluated": "any composed process",
+    "why": "reports/COMPOSED_PROCESS_VALIDATION_PLAN.md section 1: every cross-model boundary in this repository is refused, and both permitted boundaries are same-model and have no independent experimental counterpart. No composed-process validation is scientifically possible with what is registered. This configuration therefore evaluates a MODEL, and no result from it may be reported as evidence about composed processes.",
+    "graph_connections": [],
+    "graph_connection_note": "There are none, deliberately. The graph is a single Ganjave instance driven by declared literal inputs. Adding a second instance to manufacture a composition is excluded by the plan's section 1 finding."
+  },
+  "input_digests": {
+    "frozen_configuration.json": "23c585ee06579ab7fc5ada0cd1c6ddb5a8cad92b01b0dd2873ed4fef5d13c0b3",
+    "observations.json": "48141f2947428f3aee06ef0359802888dd020d8e3d12cb23e27cccf32de6a900",
+    "evaluation_protocol.json": "d528e214e48becd934500d85e35743d6ccbb970eafa7b85b2aff69311be4bdfc",
+    "figure_reference_data.json": "46eb120f9553bdd61fa13077cb7865b37bf10063f272a3e6da929803f3d11658",
+    "reference_parameters.json": "3f53c1fdc82449c2d386bf531aea254512fb07f0a002d125b2a0f674e0165961"
+  },
+  "scenarios": [
+    {
+      "scenario_id": "heldout_fig3",
+      "evaluation_role": "primary",
+      "blinded": true,
+      "blinding_note": "This scenario had not been run when these criteria were written. Its result is a genuine pre-registered test.",
+      "paper_figure": 3,
+      "independence": "The paper's own designated validation experiment. Fig. 3's caption states the data 'was not used for estimation of model parameters'. Its feed recipe differs from the fitting experiment (Fig. 2) and from the model-selected optimum (Fig. 5), so it is a genuine out-of-sample test of the trajectory.",
+      "duration_h": 27.0,
+      "run": {
+        "status": "success_with_warnings",
+        "exit_code": 0,
+        "final_biomass_g_per_L": 20.015861,
+        "min_DO_percent_after_feed": 0.477894,
+        "determinism_relative_difference": 0.0,
+        "model_versions": {
+          "ganjave_primary": "0.1.0"
+        },
+        "reproducibility_digest": "48c7094fb90cbf84c4d174eeeebbd21d986520f0779615a2e38868c8362c9185",
+        "error_count": 0,
+        "warning_count": 1,
+        "composition_report": {
+          "schema": "composition-report/1",
+          "execution": {
+            "attempted": true,
+            "status": "success_with_warnings",
+            "results_produced": true,
+            "result_count": 1,
+            "run_id": "ganjave2022-heldout-heldout_fig3-primary::61f0f9c6ab72",
+            "reproducibility": "not_documented",
+            "error_count": 0,
+            "warning_count": 1,
+            "results_invalidated": false,
+            "plan_only": false,
+            "note": "Every instance ran. The warnings are findings about the sources or the models, not failures of the composition."
+          },
+          "connections": [],
+          "combined_graph": {
+            "independently_validated": false,
+            "status": "not_established",
+            "basis": "Composing these models produces a system that no published source has evaluated. Validation evidence for an individual model is a statement about that model and does not transfer to the composition, so the combined graph starts from 'not established' and can only be changed by an independent evaluation.",
+            "execution_is_not_validation": "A successful execution is evidence that the pipeline works. It is not evidence that the numbers are right, and nothing in this report upgrades a model's reproduction_status because a test passed.",
+            "resolved_by_diagnostics": []
+          }
+        },
+        "diagnostics": [
+          {
+            "code": "capability.unsupported",
+            "severity": "info",
+            "message": "[manifest] ganjave does not support 'no_parameter_estimation': no parameter estimation (the paper's genetic-algorithm fit is not reimplemented; Table 2 is loaded as a fitted set)"
+          },
+          {
+            "code": "model.finding",
+            "severity": "warning",
+            "message": "[ganjave2022] TN-02: Table 2 prints the initial enzyme ratio for combination 2 as 'e20/em1'. The denominator of combination 2 must be e_m2; e_m1 is the maximum of combination 1. Decision taken: Read as e2(0)/e_m2 = 0.874. The printed string is preserved in the parameter's source quote so the reading is auditable."
+          },
+          {
+            "code": "model.finding",
+            "severity": "info",
+            "message": "[ganjave2022] ganjave_primary accepted 7 upstream or literal input(s) whose physical premise is the operator's to confirm: feed_complex_substrate_concentration: The upstream stream must be the nitrogen-rich feed on this model's lumped basis.; feed_flow_rate: The upstream flow must be a liquid volumetric rate into this culture. A gas flow, or a per-minute rate, is a unit question rather than a mean"
+          },
+          {
+            "code": "model.finding",
+            "severity": "info",
+            "message": "[ganjave2022] ganjave_primary computed a trajectory from the printed equations. Implementation status implemented; reproduction status not_yet_validated. The published time courses are figures and no figure was digitised, so this result is a simulation of the printed model, not a validated reproduction of the paper."
+          }
+        ],
+        "provenance": {
+          "ganjave_primary": [
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "source",
+              "method": "Ganjave et al. (2022) cybernetic growth model, eq. (1)-(16), integrated by the model's own RK4(3) step-doubling solver"
+            }
+          ]
+        }
+      },
+      "observation_sets": {
+        "ganjave2022.heldout_observations.fig3b": {
+          "rows": [
+            {
+              "observation_id": "fig3b:PDGF:0",
+              "t_h": -0.057,
+              "observed": -0.0807,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": false,
+              "exclusion_reason": "outside the simulated interval [0, 27] h"
+            },
+            {
+              "observation_id": "fig3b:PDGF:1",
+              "t_h": 3.964,
+              "observed": 1.2651,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 1.44672,
+              "residual": 0.18162,
+              "abs_residual": 0.18162,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 0.59,
+              "authors_residual": -0.6751,
+              "authors_abs_residual": 0.6751
+            },
+            {
+              "observation_id": "fig3b:PDGF:2",
+              "t_h": 5.977,
+              "observed": 3.2082,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 3.479099,
+              "residual": 0.270899,
+              "abs_residual": 0.270899,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 2.3768,
+              "authors_residual": -0.8314,
+              "authors_abs_residual": 0.8314
+            },
+            {
+              "observation_id": "fig3b:PDGF:3",
+              "t_h": 12.006,
+              "observed": 6.7356,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 9.164147,
+              "residual": 2.428547,
+              "abs_residual": 2.428547,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 8.1362,
+              "authors_residual": 1.4006,
+              "authors_abs_residual": 1.4006
+            },
+            {
+              "observation_id": "fig3b:PDGF:4",
+              "t_h": 16.026,
+              "observed": 13.0815,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 12.864259,
+              "residual": -0.217241,
+              "abs_residual": 0.217241,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 11.898,
+              "authors_residual": -1.1835,
+              "authors_abs_residual": 1.1835
+            },
+            {
+              "observation_id": "fig3b:PDGF:5",
+              "t_h": 18.036,
+              "observed": 15.1854,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 14.690103,
+              "residual": -0.495297,
+              "abs_residual": 0.495297,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 13.7481,
+              "authors_residual": -1.4373,
+              "authors_abs_residual": 1.4373
+            },
+            {
+              "observation_id": "fig3b:PDGF:6",
+              "t_h": 20.046,
+              "observed": 15.6357,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 16.500081,
+              "residual": 0.864381,
+              "abs_residual": 0.864381,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 15.5811,
+              "authors_residual": -0.0546,
+              "authors_abs_residual": 0.0546
+            },
+            {
+              "observation_id": "fig3b:PDGF:7",
+              "t_h": 24.072,
+              "observed": 18.7139,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 20.079348,
+              "residual": 1.365448,
+              "abs_residual": 1.365448,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 19.2383,
+              "authors_residual": 0.5244,
+              "authors_abs_residual": 0.5244
+            },
+            {
+              "observation_id": "fig3b:PDGF:8",
+              "t_h": 26.08,
+              "observed": 15.3687,
+              "combined_uncertainty": 0.7125,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 21.842476,
+              "residual": 6.473776,
+              "abs_residual": 6.473776,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": null,
+              "authors_residual": null,
+              "authors_abs_residual": null,
+              "authors_unreadable": true
+            }
+          ],
+          "metrics": {
+            "n": 8,
+            "rmse_g_per_L": 2.52037,
+            "mae_g_per_L": 1.537151,
+            "bias_g_per_L": 1.359017,
+            "observed_mean_g_per_L": 11.149262,
+            "normalised_rmse_percent": 22.6057,
+            "max_abs_residual_g_per_L": 6.473776,
+            "within_1_sigma": 4,
+            "within_2_sigma": 6,
+            "fraction_within_2_sigma": 0.75,
+            "n_vs_authors": 7,
+            "authors_unreadable": 1,
+            "authors_rmse_g_per_L": 0.989455,
+            "authors_bias_g_per_L": -0.322414,
+            "authors_within_2_sigma": 6,
+            "rmse_g_per_L_where_authors_readable": 1.128104,
+            "ratio_rmse_ours_over_authors": 1.140127
+          },
+          "quantity": "biomass_concentration",
+          "unit": "g/L",
+          "paper_figure": 3,
+          "metrics_excluding_declared_anomaly": {
+            "n": 7,
+            "rmse_g_per_L": 1.128104,
+            "mae_g_per_L": 0.831919,
+            "bias_g_per_L": 0.628337,
+            "observed_mean_g_per_L": 10.546486,
+            "normalised_rmse_percent": 10.6965,
+            "max_abs_residual_g_per_L": 2.428547,
+            "within_1_sigma": 4,
+            "within_2_sigma": 6,
+            "fraction_within_2_sigma": 0.857143,
+            "n_vs_authors": 7,
+            "authors_unreadable": 0,
+            "authors_rmse_g_per_L": 0.989455,
+            "authors_bias_g_per_L": -0.322414,
+            "authors_within_2_sigma": 6,
+            "rmse_g_per_L_where_authors_readable": 1.128104,
+            "ratio_rmse_ours_over_authors": 1.140127
+          }
+        },
+        "ganjave2022.heldout_observations.fig3c": {
+          "rows": [
+            {
+              "observation_id": "fig3c:PDGF:0",
+              "t_h": -0.055,
+              "observed": 2.7809,
+              "combined_uncertainty": 0.0951,
+              "culture": "PDGF",
+              "compared": false,
+              "exclusion_reason": "outside the simulated interval [0, 27] h"
+            },
+            {
+              "observation_id": "fig3c:PDGF:1",
+              "t_h": 5.974,
+              "observed": 0.0491,
+              "combined_uncertainty": 0.0951,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 1e-06,
+              "residual": -0.049099,
+              "abs_residual": 0.049099,
+              "within_1_sigma": true,
+              "within_2_sigma": true
+            },
+            {
+              "observation_id": "fig3c:PDGF:2",
+              "t_h": 20.048,
+              "observed": 0.0394,
+              "combined_uncertainty": 0.0951,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 0.027809,
+              "residual": -0.011591,
+              "abs_residual": 0.011591,
+              "within_1_sigma": true,
+              "within_2_sigma": true
+            },
+            {
+              "observation_id": "fig3c:PDGF:3",
+              "t_h": 24.066,
+              "observed": 0.0631,
+              "combined_uncertainty": 0.0951,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 0.024657,
+              "residual": -0.038443,
+              "abs_residual": 0.038443,
+              "within_1_sigma": true,
+              "within_2_sigma": true
+            },
+            {
+              "observation_id": "fig3c:PDGF:4",
+              "t_h": 26.081,
+              "observed": 0.0638,
+              "combined_uncertainty": 0.0951,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 0.023896,
+              "residual": -0.039904,
+              "abs_residual": 0.039904,
+              "within_1_sigma": true,
+              "within_2_sigma": true
+            }
+          ],
+          "metrics": {
+            "n": 4,
+            "rmse_g_per_L": 0.037468,
+            "mae_g_per_L": 0.034759,
+            "bias_g_per_L": -0.034759,
+            "observed_mean_g_per_L": 0.05385,
+            "normalised_rmse_percent": 69.5775,
+            "max_abs_residual_g_per_L": 0.049099,
+            "within_1_sigma": 4,
+            "within_2_sigma": 4,
+            "fraction_within_2_sigma": 1.0
+          },
+          "quantity": "glycerol_concentration",
+          "unit": "g/L",
+          "paper_figure": 3
+        }
+      },
+      "endpoint": {
+        "target_h": 24.0,
+        "observed_at_h": 24.072,
+        "observed_g_per_L": 18.7139,
+        "predicted_g_per_L": 20.079348,
+        "error_g_per_L": 1.365448,
+        "within_uncertainty": true
+      },
+      "criteria": {
+        "E_heldout_trajectory": {
+          "statement": "The implementation predicts the paper's held-out experimental biomass trajectory to within 1.5 g/L DCW RMS.",
+          "primary": true,
+          "threshold": {
+            "rmse_g_per_L": "<= 1.5"
+          },
+          "observed": 2.52037,
+          "pass": false,
+          "verdict": "fail",
+          "note": ""
+        },
+        "F_no_worse_than_authors_model": {
+          "statement": "The implementation's trajectory error is not materially worse than the authors' own plotted model curve over the same observations.",
+          "primary": true,
+          "threshold": {
+            "ratio": "<= 1.5"
+          },
+          "observed": 1.140127,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "G_oxygen_limiting_regime": {
+          "statement": "The culture becomes oxygen-limited after feeding starts.",
+          "primary": true,
+          "threshold": {
+            "min_DO_percent": "< 10"
+          },
+          "observed": 0.477894,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "H_agreement_with_reported_uncertainty": {
+          "statement": "A clear majority of observations are reproduced within twice the digitisation's own uncertainty.",
+          "primary": true,
+          "threshold": {
+            "fraction_at_2_sigma": ">= 0.6"
+          },
+          "observed": 0.75,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "J_determinism": {
+          "statement": "Two runs of the same configuration agree.",
+          "primary": false,
+          "threshold": {
+            "relative_difference": "<= 1e-9"
+          },
+          "observed": 0.0,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        }
+      },
+      "decision": {
+        "outcome": "fail",
+        "primary_criteria": [
+          "A clear majority of observations are rep",
+          "The culture becomes oxygen-limited after",
+          "The implementation predicts the paper's ",
+          "The implementation's trajectory error is"
+        ],
+        "failures": [
+          {
+            "criterion": "E_heldout_trajectory",
+            "observed": 2.52037,
+            "threshold": {
+              "rmse_g_per_L": "<= 1.5"
+            }
+          }
+        ],
+        "scope_of_a_pass": "A pass would establish only that this implementation reproduces these observations under these conditions. It is not a validation of any composed process, and not a claim of general predictive accuracy.",
+        "what_this_never_establishes": [
+          "validation of a composed process: no composition was evaluated",
+          "general predictive accuracy beyond paper Fig. 3's and Fig. 5's conditions",
+          "any statement about a second culture, a scale-up, or another strain"
+        ]
+      }
+    },
+    {
+      "scenario_id": "optimum_fig5",
+      "evaluation_role": "secondary",
+      "blinded": false,
+      "blinding_note": "DISCLOSED. The 24 h endpoint for this configuration (18.299 g DCW/L, with S2_0 = 25 g/L) was observed during an unrelated pipeline probe before this protocol was written. This scenario is therefore reported as a secondary, disclosed comparison and is not claimed as a pre-registered test. The primary scenario was not run and is unaffected.",
+      "paper_figure": 5,
+      "independence": "Independent of parameter fitting, but the feed recipe was chosen by optimising the fitted model, so an endpoint match is partly self-fulfilling. Its value is the between-culture spread: five cultures of one process.",
+      "duration_h": 27.0,
+      "run": {
+        "status": "success_with_warnings",
+        "exit_code": 0,
+        "final_biomass_g_per_L": 18.299265,
+        "min_DO_percent_after_feed": 0.868854,
+        "determinism_relative_difference": 0.0,
+        "model_versions": {
+          "ganjave_primary": "0.1.0"
+        },
+        "reproducibility_digest": "6c0690566301b6a3d693596b51a958dcb49d9480dacdfb894fc234a93168a289",
+        "error_count": 0,
+        "warning_count": 1,
+        "composition_report": {
+          "schema": "composition-report/1",
+          "execution": {
+            "attempted": true,
+            "status": "success_with_warnings",
+            "results_produced": true,
+            "result_count": 1,
+            "run_id": "ganjave2022-heldout-optimum_fig5-primary::e3900e02cbe3",
+            "reproducibility": "not_documented",
+            "error_count": 0,
+            "warning_count": 1,
+            "results_invalidated": false,
+            "plan_only": false,
+            "note": "Every instance ran. The warnings are findings about the sources or the models, not failures of the composition."
+          },
+          "connections": [],
+          "combined_graph": {
+            "independently_validated": false,
+            "status": "not_established",
+            "basis": "Composing these models produces a system that no published source has evaluated. Validation evidence for an individual model is a statement about that model and does not transfer to the composition, so the combined graph starts from 'not established' and can only be changed by an independent evaluation.",
+            "execution_is_not_validation": "A successful execution is evidence that the pipeline works. It is not evidence that the numbers are right, and nothing in this report upgrades a model's reproduction_status because a test passed.",
+            "resolved_by_diagnostics": []
+          }
+        },
+        "diagnostics": [
+          {
+            "code": "capability.unsupported",
+            "severity": "info",
+            "message": "[manifest] ganjave does not support 'no_parameter_estimation': no parameter estimation (the paper's genetic-algorithm fit is not reimplemented; Table 2 is loaded as a fitted set)"
+          },
+          {
+            "code": "model.finding",
+            "severity": "warning",
+            "message": "[ganjave2022] TN-02: Table 2 prints the initial enzyme ratio for combination 2 as 'e20/em1'. The denominator of combination 2 must be e_m2; e_m1 is the maximum of combination 1. Decision taken: Read as e2(0)/e_m2 = 0.874. The printed string is preserved in the parameter's source quote so the reading is auditable."
+          },
+          {
+            "code": "model.finding",
+            "severity": "info",
+            "message": "[ganjave2022] ganjave_primary accepted 7 upstream or literal input(s) whose physical premise is the operator's to confirm: feed_complex_substrate_concentration: The upstream stream must be the nitrogen-rich feed on this model's lumped basis.; feed_flow_rate: The upstream flow must be a liquid volumetric rate into this culture. A gas flow, or a per-minute rate, is a unit question rather than a mean"
+          },
+          {
+            "code": "model.finding",
+            "severity": "info",
+            "message": "[ganjave2022] ganjave_primary computed a trajectory from the printed equations. Implementation status implemented; reproduction status not_yet_validated. The published time courses are figures and no figure was digitised, so this result is a simulation of the printed model, not a validated reproduction of the paper."
+          }
+        ],
+        "provenance": {
+          "ganjave_primary": [
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "assumption",
+              "method": "literal input declared on the composition graph"
+            },
+            {
+              "where": "instance:ganjave_primary",
+              "kind": "source",
+              "method": "Ganjave et al. (2022) cybernetic growth model, eq. (1)-(16), integrated by the model's own RK4(3) step-doubling solver"
+            }
+          ]
+        }
+      },
+      "observation_sets": {
+        "ganjave2022.heldout_observations.fig5c": {
+          "rows": [
+            {
+              "observation_id": "fig5c:PDGF:0",
+              "t_h": 8.998,
+              "observed": 6.6099,
+              "combined_uncertainty": 0.8402,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 6.464222,
+              "residual": -0.145678,
+              "abs_residual": 0.145678,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 5.3552,
+              "authors_residual": -1.2547,
+              "authors_abs_residual": 1.2547
+            },
+            {
+              "observation_id": "fig5c:PDGF:1",
+              "t_h": 14.03,
+              "observed": 11.746,
+              "combined_uncertainty": 0.8402,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 11.347463,
+              "residual": -0.398537,
+              "abs_residual": 0.398537,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 10.3092,
+              "authors_residual": -1.4368,
+              "authors_abs_residual": 1.4368
+            },
+            {
+              "observation_id": "fig5c:PDGF:2",
+              "t_h": 17.046,
+              "observed": 16.2774,
+              "combined_uncertainty": 0.8402,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 14.229661,
+              "residual": -2.047739,
+              "abs_residual": 2.047739,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 13.21,
+              "authors_residual": -3.0674,
+              "authors_abs_residual": 3.0674
+            },
+            {
+              "observation_id": "fig5c:PDGF:3",
+              "t_h": 22.073,
+              "observed": 18.8856,
+              "combined_uncertainty": 0.8402,
+              "culture": "PDGF",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 17.72288,
+              "residual": -1.16272,
+              "abs_residual": 1.16272,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 18.0266,
+              "authors_residual": -0.859,
+              "authors_abs_residual": 0.859
+            },
+            {
+              "observation_id": "fig5c:FDH:0",
+              "t_h": 1.949,
+              "observed": 0.2743,
+              "combined_uncertainty": 0.9466,
+              "culture": "FDH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 0.267147,
+              "residual": -0.007153,
+              "abs_residual": 0.007153,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 0.0101,
+              "authors_residual": -0.2642,
+              "authors_abs_residual": 0.2642
+            },
+            {
+              "observation_id": "fig5c:FDH:1",
+              "t_h": 1.968,
+              "observed": -0.1924,
+              "combined_uncertainty": 0.8402,
+              "culture": "FDH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 0.271807,
+              "residual": 0.464207,
+              "abs_residual": 0.464207,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 0.0101,
+              "authors_residual": 0.2025,
+              "authors_abs_residual": 0.2025
+            },
+            {
+              "observation_id": "fig5c:FDH:2",
+              "t_h": 5.985,
+              "observed": 2.8823,
+              "combined_uncertainty": 0.9466,
+              "culture": "FDH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 3.487986,
+              "residual": 0.605686,
+              "abs_residual": 0.605686,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 2.3772,
+              "authors_residual": -0.5051,
+              "authors_abs_residual": 0.5051
+            },
+            {
+              "observation_id": "fig5c:FDH:3",
+              "t_h": 12.017,
+              "observed": 10.614,
+              "combined_uncertainty": 0.9732,
+              "culture": "FDH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 9.404781,
+              "residual": -1.209219,
+              "abs_residual": 1.209219,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 8.3366,
+              "authors_residual": -2.2774,
+              "authors_abs_residual": 2.2774
+            },
+            {
+              "observation_id": "fig5c:FDH:4",
+              "t_h": 18.053,
+              "observed": 16.3908,
+              "combined_uncertainty": 0.9732,
+              "culture": "FDH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 15.186484,
+              "residual": -1.204316,
+              "abs_residual": 1.204316,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 14.1958,
+              "authors_residual": -2.195,
+              "authors_abs_residual": 2.195
+            },
+            {
+              "observation_id": "fig5c:FDH:5",
+              "t_h": 20.066,
+              "observed": 19.4728,
+              "combined_uncertainty": 0.9732,
+              "culture": "FDH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 17.101635,
+              "residual": -2.371165,
+              "abs_residual": 2.371165,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 16.1138,
+              "authors_residual": -3.359,
+              "authors_abs_residual": 3.359
+            },
+            {
+              "observation_id": "fig5c:FDH:6",
+              "t_h": 24.087,
+              "observed": 21.717,
+              "combined_uncertainty": 0.9466,
+              "culture": "FDH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 18.324932,
+              "residual": -3.392068,
+              "abs_residual": 3.392068,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 19.5965,
+              "authors_residual": -2.1205,
+              "authors_abs_residual": 2.1205
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:0",
+              "t_h": 3.791,
+              "observed": 0.9921,
+              "combined_uncertainty": 0.92,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 1.286696,
+              "residual": 0.294596,
+              "abs_residual": 0.294596,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 0.4892,
+              "authors_residual": -0.5029,
+              "authors_abs_residual": 0.5029
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:1",
+              "t_h": 6.176,
+              "observed": 4.2667,
+              "combined_uncertainty": 0.7603,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 3.689632,
+              "residual": -0.577068,
+              "abs_residual": 0.577068,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 2.5649,
+              "authors_residual": -1.7018,
+              "authors_abs_residual": 1.7018
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:2",
+              "t_h": 8.939,
+              "observed": 5.7652,
+              "combined_uncertainty": 0.9466,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 6.406509,
+              "residual": 0.641309,
+              "abs_residual": 0.641309,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 5.2811,
+              "authors_residual": -0.4841,
+              "authors_abs_residual": 0.4841
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:3",
+              "t_h": 9.139,
+              "observed": 5.2212,
+              "combined_uncertainty": 0.8135,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 6.602126,
+              "residual": 1.380926,
+              "abs_residual": 1.380926,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 5.4762,
+              "authors_residual": 0.255,
+              "authors_abs_residual": 0.255
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:4",
+              "t_h": 12.019,
+              "observed": 7.2752,
+              "combined_uncertainty": 0.9466,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 9.406719,
+              "residual": 2.131519,
+              "abs_residual": 2.131519,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 8.3398,
+              "authors_residual": 1.0646,
+              "authors_abs_residual": 1.0646
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:5",
+              "t_h": 15.083,
+              "observed": 10.7484,
+              "combined_uncertainty": 0.9466,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 12.357458,
+              "residual": 1.609058,
+              "abs_residual": 1.609058,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 11.3329,
+              "authors_residual": 0.5845,
+              "authors_abs_residual": 0.5845
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:6",
+              "t_h": 17.046,
+              "observed": 12.1452,
+              "combined_uncertainty": 0.9466,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 14.229661,
+              "residual": 2.084461,
+              "abs_residual": 2.084461,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 13.21,
+              "authors_residual": 1.0648,
+              "authors_abs_residual": 1.0648
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:7",
+              "t_h": 19.055,
+              "observed": 14.2283,
+              "combined_uncertainty": 0.9466,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 16.142198,
+              "residual": 1.913898,
+              "abs_residual": 1.913898,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 15.151,
+              "authors_residual": 0.9227,
+              "authors_abs_residual": 0.9227
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:8",
+              "t_h": 21.067,
+              "observed": 15.7112,
+              "combined_uncertainty": 0.9466,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 17.415967,
+              "residual": 1.704767,
+              "abs_residual": 1.704767,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 17.0682,
+              "authors_residual": 1.357,
+              "authors_abs_residual": 1.357
+            },
+            {
+              "observation_id": "fig5c:G_Can_ADH:9",
+              "t_h": 24.081,
+              "observed": 20.3113,
+              "combined_uncertainty": 0.9466,
+              "culture": "G_Can_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 18.323163,
+              "residual": -1.988137,
+              "abs_residual": 1.988137,
+              "within_1_sigma": false,
+              "within_2_sigma": false,
+              "authors_model": 19.5965,
+              "authors_residual": -0.7148,
+              "authors_abs_residual": 0.7148
+            },
+            {
+              "observation_id": "fig5c:L_Kefir_ADH:0",
+              "t_h": 3.973,
+              "observed": 1.7515,
+              "combined_uncertainty": 0.7869,
+              "culture": "L_Kefir_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 1.455189,
+              "residual": -0.296311,
+              "abs_residual": 0.296311,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 0.5932,
+              "authors_residual": -1.1583,
+              "authors_abs_residual": 1.1583
+            },
+            {
+              "observation_id": "fig5c:L_Kefir_ADH:1",
+              "t_h": 5.977,
+              "observed": 3.6353,
+              "combined_uncertainty": 0.7869,
+              "culture": "L_Kefir_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 3.479099,
+              "residual": -0.156201,
+              "abs_residual": 0.156201,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 2.3706,
+              "authors_residual": -1.2647,
+              "authors_abs_residual": 1.2647
+            },
+            {
+              "observation_id": "fig5c:L_Kefir_ADH:2",
+              "t_h": 7.986,
+              "observed": 5.9503,
+              "combined_uncertainty": 0.8135,
+              "culture": "L_Kefir_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 5.474646,
+              "residual": -0.475654,
+              "abs_residual": 0.475654,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 4.3385,
+              "authors_residual": -1.6118,
+              "authors_abs_residual": 1.6118
+            },
+            {
+              "observation_id": "fig5c:L_Kefir_ADH:3",
+              "t_h": 23.086,
+              "observed": 18.4418,
+              "combined_uncertainty": 0.8402,
+              "culture": "L_Kefir_ADH",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 18.027769,
+              "residual": -0.414031,
+              "abs_residual": 0.414031,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 18.9909,
+              "authors_residual": 0.5491,
+              "authors_abs_residual": 0.5491
+            },
+            {
+              "observation_id": "fig5c:EYFP:0",
+              "t_h": -0.098,
+              "observed": 0.129,
+              "combined_uncertainty": 1.1063,
+              "culture": "EYFP",
+              "compared": false,
+              "exclusion_reason": "outside the simulated interval [0, 27] h"
+            },
+            {
+              "observation_id": "fig5c:EYFP:1",
+              "t_h": 3.974,
+              "observed": 1.8214,
+              "combined_uncertainty": 1.2393,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 1.456131,
+              "residual": -0.365269,
+              "abs_residual": 0.365269,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 0.594,
+              "authors_residual": -1.2274,
+              "authors_abs_residual": 1.2274
+            },
+            {
+              "observation_id": "fig5c:EYFP:2",
+              "t_h": 5.978,
+              "observed": 3.6673,
+              "combined_uncertainty": 1.2393,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 3.48021,
+              "residual": -0.18709,
+              "abs_residual": 0.18709,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 2.3715,
+              "authors_residual": -1.2958,
+              "authors_abs_residual": 1.2958
+            },
+            {
+              "observation_id": "fig5c:EYFP:3",
+              "t_h": 7.996,
+              "observed": 6.0876,
+              "combined_uncertainty": 1.2393,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 5.484408,
+              "residual": -0.603192,
+              "abs_residual": 0.603192,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 4.3468,
+              "authors_residual": -1.7408,
+              "authors_abs_residual": 1.7408
+            },
+            {
+              "observation_id": "fig5c:EYFP:4",
+              "t_h": 10.012,
+              "observed": 7.9637,
+              "combined_uncertainty": 1.2393,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 7.454987,
+              "residual": -0.508713,
+              "abs_residual": 0.508713,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 6.3469,
+              "authors_residual": -1.6168,
+              "authors_abs_residual": 1.6168
+            },
+            {
+              "observation_id": "fig5c:EYFP:5",
+              "t_h": 21.992,
+              "observed": 18.3855,
+              "combined_uncertainty": 0.9466,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 17.69832,
+              "residual": -0.68718,
+              "abs_residual": 0.68718,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 17.9473,
+              "authors_residual": -0.4382,
+              "authors_abs_residual": 0.4382
+            },
+            {
+              "observation_id": "fig5c:EYFP:6",
+              "t_h": 22.161,
+              "observed": 17.7424,
+              "combined_uncertainty": 0.92,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 17.749533,
+              "residual": 0.007133,
+              "abs_residual": 0.007133,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 18.0988,
+              "authors_residual": 0.3564,
+              "authors_abs_residual": 0.3564
+            },
+            {
+              "observation_id": "fig5c:EYFP:7",
+              "t_h": 23.128,
+              "observed": 18.401,
+              "combined_uncertainty": 1.0531,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 18.040319,
+              "residual": -0.360681,
+              "abs_residual": 0.360681,
+              "within_1_sigma": true,
+              "within_2_sigma": true,
+              "authors_model": 19.0398,
+              "authors_residual": 0.6388,
+              "authors_abs_residual": 0.6388
+            },
+            {
+              "observation_id": "fig5c:EYFP:8",
+              "t_h": 24.056,
+              "observed": 20.0151,
+              "combined_uncertainty": 1.0264,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 18.31579,
+              "residual": -1.69931,
+              "abs_residual": 1.69931,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 19.5965,
+              "authors_residual": -0.4186,
+              "authors_abs_residual": 0.4186
+            },
+            {
+              "observation_id": "fig5c:EYFP:9",
+              "t_h": 24.116,
+              "observed": 19.2895,
+              "combined_uncertainty": 0.8934,
+              "culture": "EYFP",
+              "compared": true,
+              "exclusion_reason": "",
+              "predicted": 18.33348,
+              "residual": -0.95602,
+              "abs_residual": 0.95602,
+              "within_1_sigma": false,
+              "within_2_sigma": true,
+              "authors_model": 19.5965,
+              "authors_residual": 0.307,
+              "authors_abs_residual": 0.307
+            }
+          ],
+          "metrics": {
+            "n": 34,
+            "rmse_g_per_L": 1.29241,
+            "mae_g_per_L": 1.0015,
+            "bias_g_per_L": -0.24635,
+            "observed_mean_g_per_L": 10.731756,
+            "normalised_rmse_percent": 12.0429,
+            "max_abs_residual_g_per_L": 3.392068,
+            "within_1_sigma": 19,
+            "within_2_sigma": 27,
+            "fraction_within_2_sigma": 0.794118,
+            "n_vs_authors": 34,
+            "authors_unreadable": 0,
+            "authors_rmse_g_per_L": 1.381214,
+            "authors_bias_g_per_L": -0.712138,
+            "authors_within_2_sigma": 28,
+            "rmse_g_per_L_where_authors_readable": 1.29241,
+            "ratio_rmse_ours_over_authors": 0.935706
+          },
+          "quantity": "biomass_concentration",
+          "unit": "g/L",
+          "paper_figure": 5,
+          "metrics_excluding_declared_anomaly": {
+            "n": 34,
+            "rmse_g_per_L": 1.29241,
+            "mae_g_per_L": 1.0015,
+            "bias_g_per_L": -0.24635,
+            "observed_mean_g_per_L": 10.731756,
+            "normalised_rmse_percent": 12.0429,
+            "max_abs_residual_g_per_L": 3.392068,
+            "within_1_sigma": 19,
+            "within_2_sigma": 27,
+            "fraction_within_2_sigma": 0.794118,
+            "n_vs_authors": 34,
+            "authors_unreadable": 0,
+            "authors_rmse_g_per_L": 1.381214,
+            "authors_bias_g_per_L": -0.712138,
+            "authors_within_2_sigma": 28,
+            "rmse_g_per_L_where_authors_readable": 1.29241,
+            "ratio_rmse_ours_over_authors": 0.935706
+          }
+        }
+      },
+      "endpoint": {
+        "target_h": 24.0,
+        "observed_at_h": 24.056,
+        "observed_g_per_L": 20.0151,
+        "predicted_g_per_L": 18.31579,
+        "error_g_per_L": 1.69931,
+        "within_uncertainty": true
+      },
+      "criteria": {
+        "F_no_worse_than_authors_model": {
+          "statement": "The implementation's trajectory error is not materially worse than the authors' own plotted model curve over the same observations.",
+          "primary": true,
+          "threshold": {
+            "ratio": "<= 1.5"
+          },
+          "observed": 0.935706,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "G_oxygen_limiting_regime": {
+          "statement": "The culture becomes oxygen-limited after feeding starts.",
+          "primary": true,
+          "threshold": {
+            "min_DO_percent": "< 10"
+          },
+          "observed": 0.868854,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "H_agreement_with_reported_uncertainty": {
+          "statement": "A clear majority of observations are reproduced within twice the digitisation's own uncertainty.",
+          "primary": true,
+          "threshold": {
+            "fraction_at_2_sigma": ">= 0.6"
+          },
+          "observed": 0.794118,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "I_reported_endpoint_range": {
+          "statement": "Final biomass lies inside the paper's own reported experimental range for the 24 h fed-batch trials.",
+          "primary": true,
+          "threshold": {
+            "range_g_per_L": "[19.9, 21.5]"
+          },
+          "observed": 18.299265,
+          "pass": false,
+          "verdict": "fail",
+          "note": ""
+        },
+        "J_determinism": {
+          "statement": "Two runs of the same configuration agree.",
+          "primary": false,
+          "threshold": {
+            "relative_difference": "<= 1e-9"
+          },
+          "observed": 0.0,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        }
+      },
+      "decision": {
+        "outcome": "fail",
+        "primary_criteria": [
+          "A clear majority of observations are rep",
+          "Final biomass lies inside the paper's ow",
+          "The culture becomes oxygen-limited after",
+          "The implementation's trajectory error is"
+        ],
+        "failures": [
+          {
+            "criterion": "I_reported_endpoint_range",
+            "observed": 18.299265,
+            "threshold": {
+              "range_g_per_L": "[19.9, 21.5]"
+            }
+          }
+        ],
+        "scope_of_a_pass": "A pass would establish only that this implementation reproduces these observations under these conditions. It is not a validation of any composed process, and not a claim of general predictive accuracy.",
+        "what_this_never_establishes": [
+          "validation of a composed process: no composition was evaluated",
+          "general predictive accuracy beyond paper Fig. 3's and Fig. 5's conditions",
+          "any statement about a second culture, a scale-up, or another strain"
+        ]
+      }
+    }
+  ],
+  "sensitivity": {
+    "heldout_fig3": [
+      {
+        "case_id": "s2_yeast_extract_only",
+        "change": "S2_0 = 5 g/L",
+        "why": "the narrower reading of the medium: yeast extract alone, the alternative the paper does not resolve",
+        "overrides": {
+          "S2_0": 5.0
+        },
+        "final_biomass_g_per_L": 10.600688,
+        "metrics": {
+          "n": 8,
+          "rmse_g_per_L": 5.362637,
+          "mae_g_per_L": 4.644896,
+          "bias_g_per_L": -4.644896,
+          "observed_mean_g_per_L": 11.149262,
+          "normalised_rmse_percent": 48.0986,
+          "max_abs_residual_g_per_L": 8.080694,
+          "within_1_sigma": 1,
+          "within_2_sigma": 1,
+          "fraction_within_2_sigma": 0.125
+        }
+      },
+      {
+        "case_id": "s2_double",
+        "change": "S2_0 = 50 g/L",
+        "why": "an upper bound, to show the endpoint is not saturated in S2",
+        "overrides": {
+          "S2_0": 50.0
+        },
+        "final_biomass_g_per_L": 20.511809,
+        "metrics": {
+          "n": 8,
+          "rmse_g_per_L": 2.823802,
+          "mae_g_per_L": 1.869585,
+          "bias_g_per_L": 1.869585,
+          "observed_mean_g_per_L": 11.149262,
+          "normalised_rmse_percent": 25.3273,
+          "max_abs_residual_g_per_L": 6.963538,
+          "within_1_sigma": 3,
+          "within_2_sigma": 5,
+          "fraction_within_2_sigma": 0.625
+        }
+      },
+      {
+        "case_id": "x0_fourfold",
+        "change": "X0 = 0.2 g/L",
+        "why": "a larger inoculum, to show the initial biomass is not what sets the endpoint",
+        "overrides": {
+          "X0": 0.2
+        },
+        "final_biomass_g_per_L": 21.536755,
+        "metrics": {
+          "n": 8,
+          "rmse_g_per_L": 3.608777,
+          "mae_g_per_L": 2.933842,
+          "bias_g_per_L": 2.933842,
+          "observed_mean_g_per_L": 11.149262,
+          "normalised_rmse_percent": 32.3679,
+          "max_abs_residual_g_per_L": 7.973639,
+          "within_1_sigma": 0,
+          "within_2_sigma": 2,
+          "fraction_within_2_sigma": 0.25
+        }
+      },
+      {
+        "case_id": "x0_tenfold",
+        "change": "X0 = 0.5 g/L",
+        "why": "a much larger inoculum, same purpose",
+        "overrides": {
+          "X0": 0.5
+        },
+        "final_biomass_g_per_L": 16.873792,
+        "metrics": {
+          "n": 8,
+          "rmse_g_per_L": 2.492611,
+          "mae_g_per_L": 2.053209,
+          "bias_g_per_L": 1.267456,
+          "observed_mean_g_per_L": 11.149262,
+          "normalised_rmse_percent": 22.3567,
+          "max_abs_residual_g_per_L": 4.713114,
+          "within_1_sigma": 2,
+          "within_2_sigma": 3,
+          "fraction_within_2_sigma": 0.375
+        }
+      },
+      {
+        "case_id": "do0_80",
+        "change": "DO0 = 80 %",
+        "why": "a lower starting dissolved oxygen, closer to the start of the authors' own curve",
+        "overrides": {
+          "DO0": 80.0
+        },
+        "final_biomass_g_per_L": 20.015754,
+        "metrics": {
+          "n": 8,
+          "rmse_g_per_L": 2.520311,
+          "mae_g_per_L": 1.537097,
+          "bias_g_per_L": 1.358906,
+          "observed_mean_g_per_L": 11.149262,
+          "normalised_rmse_percent": 22.6052,
+          "max_abs_residual_g_per_L": 6.47367,
+          "within_1_sigma": 4,
+          "within_2_sigma": 6,
+          "fraction_within_2_sigma": 0.75
+        }
+      }
+    ]
+  },
+  "composition_finding": {
+    "statement": "No cross-model composition was evaluated. Every cross-model boundary in composition/composition/cross_model.py is refused and both permitted boundaries are same-model, so no composition is scientifically available to validate. See reports/COMPOSED_PROCESS_VALIDATION_PLAN.md.",
+    "cross_model_boundaries_permitted": [
+      "morris2011.material_balance -> morris2011.material_balance",
+      "ganjave -> ganjave"
+    ]
+  }
+}

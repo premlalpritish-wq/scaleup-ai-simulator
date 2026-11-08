@@ -1,0 +1,133 @@
+{
+  "protocol_id": "ganjave2022.heldout_evaluation_protocol",
+  "version": "1.0.0",
+  "written_before": "any prediction for the heldout_fig3 scenario existed",
+  "blinding": {
+    "primary_scenario": "blind. This protocol was written before the heldout_fig3 configuration was ever run. Its result is a genuine pre-registered test.",
+    "secondary_scenario": "DISCLOSED AS NOT BLIND. The 24 h endpoint of the optimum_fig5 configuration (18.299 g DCW/L at S2_0 = 25 g/L) was observed during an unrelated pipeline probe before this protocol was written. Every criterion below is therefore applied to it as a secondary, disclosed comparison, and no pass is claimed from it.",
+    "why_disclosed": "data/ganjave2022/frozen_configuration.json records the same disclosure. Reporting it here rather than in a footnote is the point."
+  },
+
+  "data_separation": {
+    "rule": "The parameter set is Table 2 as printed and is not refitted. No initial condition is tuned against an observation. No criterion is re-selected after a result is seen.",
+    "calibration_data": "None used. This is a zero-calibration evaluation: every parameter comes from the paper's own Table 2.",
+    "evaluation_data": "data/ganjave2022/observations.json -- digitized experimental marks from paper Fig. 3b/3c (held out of parameter estimation) and Fig. 5c (model-selected optimum).",
+    "observations_never_used_as_a_target": "The authors' own model-predicted curve lives in model_predictions, never in points. A test asserts no prediction can be read as a target.",
+    "held_out_from_evaluation": "Paper Fig. 2 (printed p. 5, 30% glycerol / 40% yeast extract / 0.52 mL/h) is the fitting experiment and is excluded by construction."
+  },
+
+  "evaluation_procedure": {
+    "execution": "python -m composition.runner --graph <graph.json> --result <out.json>, the normal ScaleUp AI pipeline.",
+    "prediction_at_observed_time": "The solver's dense output trajectory is linearly interpolated to each observed time. The observation is never interpolated, never smoothed, and never resampled.",
+    "comparison_window": "An observation is compared only if its t lies in the simulated interval [0, duration_h]. This rule is stated in advance and removes marks by time, not by outcome. For the held-out set it admits 8 of 9 marks (the t = -0.057 h origin marker lies before t = 0 and is excluded); the t = 26.080 h mark is admitted because the run is simulated to 27 h.",
+    "residual_definition": "residual = predicted - observed, in g/L DCW.",
+    "uncertainty_convention": "Each observation's combined uncertainty is reading + calibration, per the digitisation's own convention (0.2773 + 0.4352 = 0.7125 g/L). Reported error is compared against this, never dropped."
+  },
+
+  "metrics": [
+    {"id": "rmse", "symbol": "RMSE", "units": "g/L DCW", "definition": "sqrt(mean((predicted - observed)^2)) over compared observations", "role": "primary absolute accuracy"},
+    {"id": "mae", "symbol": "MAE", "units": "g/L DCW", "definition": "mean(|predicted - observed|)", "role": "secondary absolute accuracy, less sensitive to one bad point"},
+    {"id": "normalised_rmse", "symbol": "nRMSE", "units": "% of observed mean", "definition": "RMSE / mean(observed) * 100", "role": "scale-free accuracy"},
+    {"id": "bias", "symbol": "bias", "units": "g/L DCW", "definition": "mean(predicted - observed)", "role": "systematic direction of error"},
+    {"id": "endpoint_error", "symbol": "endpoint", "units": "g/L DCW", "definition": "|predicted(24 h) - observed(24 h)| using the observation nearest 24 h within 1 h", "role": "endpoint performance"},
+    {"id": "within_uncertainty", "symbol": "agree@2sigma", "units": "count / fraction", "definition": "observations with |residual| <= 2 * combined_uncertainty", "role": "agreement with what the source can resolve"},
+    {"id": "authors_model_rmse", "symbol": "RMSE_authors", "units": "g/L DCW", "definition": "RMSE of the authors' own plotted model curve against the same observations", "role": "the like-for-like benchmark for transcription fidelity"}
+  ],
+
+  "criteria": [
+    {
+      "id": "E_heldout_trajectory",
+      "applies_to": ["heldout_fig3"],
+      "primary": true,
+      "statement": "The implementation predicts the paper's held-out experimental biomass trajectory to within 1.5 g/L DCW RMS.",
+      "metric": "rmse",
+      "threshold": {"rmse_g_per_L": "<= 1.5"},
+      "justification": "Two independent bounds, neither derived from our output. (1) The reference data's own resolution: the digitisation's combined uncertainty is 0.7125 g/L, so 1.5 g/L is about 2.1x the smallest difference the figure can resolve; a larger error is a real disagreement, not raster noise. (2) The paper's own model sits about 1 g/L RMS from this same held-out data on a trajectory reaching 20 g/L, recorded in Models/Ganjave/data/validation_fig5.json criterion C. A faithful transcription of the printed equations should land near that, not far from it.",
+      "on_fail": "FAIL. Reported as a disagreement with the authors' measurements, not re-tuned."
+    },
+    {
+      "id": "F_no_worse_than_authors_model",
+      "applies_to": ["heldout_fig3", "optimum_fig5"],
+      "primary": true,
+      "statement": "The implementation's trajectory error is not materially worse than the authors' own plotted model curve over the same observations.",
+      "metric": "ratio_rmse_ours_over_authors",
+      "threshold": {"ratio": "<= 1.5"},
+      "justification": "The sharpest available test of transcription fidelity, and one that cannot be satisfied by tuning: it is a ratio against the same reference points, so any adjustment that helped us would have to help the authors' curve too. The 1.5 factor is transcription tolerance. Independently, the authors' curve is itself read from a raster figure, so exact equality is not the right bar.",
+      "on_fail": "FAIL."
+    },
+    {
+      "id": "G_oxygen_limiting_regime",
+      "applies_to": ["heldout_fig3", "optimum_fig5"],
+      "primary": true,
+      "statement": "The culture becomes oxygen-limited after feeding starts.",
+      "metric": "min_DO_percent_over_6_to_24h",
+      "threshold": {"min_DO_percent": "< 10"},
+      "justification": "Paper-stated, not implementation-stated: printed p. 9, 'Based on the results of the DO profile, it is seen that the growth is limited by oxygen availability beyond 6 h.' The authors' own Fig. 3a and Fig. 5a curves fall to about 1-6 %. Ten per cent separates oxygen limitation from substrate limitation: the S2-limited reading reaches a minimum DO near 60 %, so the criterion discriminates between regimes rather than between two close values. Carried unchanged from validation_fig5.json criterion A.",
+      "on_fail": "FAIL."
+    },
+    {
+      "id": "H_agreement_with_reported_uncertainty",
+      "applies_to": ["heldout_fig3", "optimum_fig5"],
+      "primary": true,
+      "statement": "A clear majority of observations are reproduced within twice the digitisation's own uncertainty.",
+      "metric": "within_uncertainty",
+      "threshold": {"fraction_at_2_sigma": ">= 0.6"},
+      "justification": "Two sigma on a reading whose uncertainty is 0.7125 g/L, i.e. 1.425 g/L. Unanimity is not the right bar: the authors' own model does not fit every one of its own points, and requiring it would test the transcription against the paper's residual fitting error. A clear majority is the weakest bar that still distinguishes 'reproduces the experiment' from 'reproduces the model'.",
+      "on_fail": "FAIL."
+    },
+    {
+      "id": "I_reported_endpoint_range",
+      "applies_to": ["optimum_fig5"],
+      "primary": true,
+      "statement": "Final biomass lies inside the paper's own reported experimental range for the 24 h fed-batch trials.",
+      "metric": "final_biomass_g_per_L",
+      "threshold": {"range_g_per_L": "[19.9, 21.5]"},
+      "justification": "The paper's own measurement: 'The biomass concentrations achieved in 24 h were 19.9-21.5 g DCW/L' (p. 7), abstract value 20.7 g/L. The range rather than the point respects the spread the paper itself reports. Carried unchanged from validation_fig5.json criterion B, where it has already been evaluated once and FAILED at 18.30 g/L; it is not being re-selected after seeing that result.",
+      "on_fail": "FAIL."
+    },
+    {
+      "id": "J_determinism",
+      "applies_to": ["heldout_fig3", "optimum_fig5"],
+      "primary": false,
+      "statement": "Two runs of the same configuration agree.",
+      "metric": "relative_difference",
+      "threshold": {"relative_difference": "<= 1e-9"},
+      "justification": "The solver is deterministic given identical inputs. Divergence above floating-point round-off indicates hidden state or a race and would invalidate every other comparison. A property of the implementation, not of the paper. Carried unchanged from validation_fig5.json criterion D.",
+      "on_fail": "FAIL."
+    }
+  ],
+
+  "decision_rule": {
+    "pass": "Every primary criterion for the primary scenario passes. Even then the conclusion is about the MODEL, never about a composed process, and never about general predictive accuracy beyond these conditions.",
+    "fail": "Any primary criterion for the primary scenario fails. The failure is reported with its metric, its observed value and its threshold, and is NOT resolved by re-tuning an initial condition, selecting a different criterion, or widening a threshold.",
+    "inconclusive": "Fewer than 5 observations are comparable, or the authors' model curve is unreadable over the compared span so criterion F cannot be evaluated. Reported as inconclusive rather than as a pass.",
+    "no_post_hoc_reselection": "Criteria E and H were written from the reference data's resolution and the authors' own model-versus-measurement agreement. Neither value was computed from our output. They are still stated after those facts were known, and this is disclosed rather than concealed: data/ganjave2022/frozen_configuration.json records that the optimum_fig5 endpoint was seen first, and the primary scenario had not been run."
+  },
+
+  "sensitivity": {
+    "requirement": "The two assumed initial conditions (X0, DO0) and the one derived condition (S2_0) are the values the paper does not state. Each is varied and the endpoint effect reported, kept strictly separate from the primary result.",
+    "cases": [
+      {"case_id": "s2_yeast_extract_only", "change": "S2_0 = 5 g/L", "why": "the narrower reading of the medium: yeast extract alone, the alternative the paper does not resolve"},
+      {"case_id": "s2_double", "change": "S2_0 = 50 g/L", "why": "an upper bound, to show the endpoint is not saturated in S2"},
+      {"case_id": "x0_fourfold", "change": "X0 = 0.2 g/L", "why": "a larger inoculum, to show the initial biomass is not what sets the endpoint"},
+      {"case_id": "x0_tenfold", "change": "X0 = 0.5 g/L", "why": "a much larger inoculum, same purpose"},
+      {"case_id": "do0_80", "change": "DO0 = 80 %", "why": "a lower starting dissolved oxygen, closer to the start of the authors' own curve"}
+    ],
+    "reporting": "Sensitivity cases are reported in their own section and never merged into the primary metrics or the pass/fail decision."
+  },
+
+  "known_data_anomalies": [
+    {
+      "observation_id": "fig3b:PDGF:8",
+      "description": "t = 26.080 h reads 15.369 g/L, lower than the t = 24.072 h reading of 18.714 g/L. The model cannot produce a decline: it has no lysis and no decay term, so biomass is monotonic by construction.",
+      "pre_declared_handling": "Report metrics twice: once over all compared observations, once excluding this mark. If the prediction agrees with the t = 24.072 h mark and disagrees with this one, record it as a probable digitisation artefact and say so -- but still report it. It is not deleted.",
+      "why_pre_declared": "Discovered while inspecting the dataset before the run. Declaring the handling in advance is the point; choosing it after seeing which way the residual points would have been cherry-picking."
+    },
+    {
+      "observation_id": "fig3b:PDGF:0",
+      "description": "t = -0.057 h reads -0.081 g/L DCW.",
+      "pre_declared_handling": "Excluded by the comparison-window rule, which admits only t in [0, duration_h]. The value is consistent with zero within its 0.7125 g/L uncertainty.",
+      "why_pre_declared": "The rule is stated in evaluation_procedure, not applied ad hoc."
+    }
+  ]
+}

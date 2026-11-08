@@ -1,0 +1,190 @@
+{
+  "dataset_id": "ganjave2022.reference_experiments",
+  "version": "1.0.0",
+  "source": {
+    "source_id": "ganjave2022",
+    "citation": "S. D. Ganjave, V. A. J. E. S. Waghmare, P. P. Wangikar, 'High cell density cultivation of E. coli in shake flasks for the production of recombinant proteins', Biotechnology Reports 33 (2022) e00694.",
+    "doi": "10.1016/j.btre.2021.e00694"
+  },
+  "note": "Reference records only. Nothing here is produced by the simulator, and no test may pass by returning one of these numbers as a computed result.",
+  "operating_conditions": [
+    {
+      "id": "flask_geometry",
+      "label": "shake flask",
+      "value": "500 mL PreSens baffled flask, 5 cm pitch, fill ratio 1:5",
+      "source": {"section": "2.3 Fed-batch fermentation in shake flask", "locator": "text, p. 2", "printed_page": 2, "quote": "PreSens baffled flask of 500 mL size"}
+    },
+    {
+      "id": "working_volume",
+      "label": "initial medium volume",
+      "value": "100 mL",
+      "source": {"section": "2.3 Fed-batch fermentation in shake flask", "locator": "text, p. 2", "printed_page": 2, "quote": "These flasks were filled with 100 mL medium"}
+    },
+    {
+      "id": "temperature",
+      "label": "culture temperature",
+      "value": "32 degrees C",
+      "source": {"section": "2.3 Fed-batch fermentation in shake flask", "locator": "text, p. 2", "printed_page": 2, "quote": "the chamber temperature maintained at 32 ?C"}
+    },
+    {
+      "id": "shaking_speed",
+      "label": "shaking speed",
+      "value": "200 rpm",
+      "source": {"section": "3.1 Initial media composition and operating parameters", "locator": "text, p. 3", "printed_page": 3, "quote": "The cultures were shaken at 200 rpm, the highest speed that produced negligible foaming."}
+    },
+    {
+      "id": "initial_od600",
+      "label": "initial optical density",
+      "value": "OD600 0.05",
+      "note": "Optical density, not a dry cell weight. The paper prints no OD600-to-DCW calibration, so the initial biomass in g/L is not derivable from it.",
+      "source": {"section": "2.2 Batch fermentation", "locator": "text, p. 2", "printed_page": 2, "quote": "with an initial culture optical density (OD600) of 0.05"}
+    },
+    {
+      "id": "initial_glycerol",
+      "label": "initial glycerol concentration",
+      "value": "2.76 g/L",
+      "source": {"section": "2.2 Batch fermentation", "locator": "text, p. 2", "printed_page": 2, "quote": "The initial production medium was supplemented with 2.76 g/L glycerol"}
+    },
+    {
+      "id": "online_do_measurement",
+      "label": "online dissolved oxygen measurement",
+      "value": "PreSens sensor spots, recorded every 10 s",
+      "source": {"section": "2.3 Fed-batch fermentation in shake flask", "locator": "text, p. 2", "printed_page": 2, "quote": "Online measurements of pH and DO were recorded every 10 s by shake flask reader (SFR) software."}
+    },
+    {
+      "id": "feeding_start",
+      "label": "feeding start",
+      "value": "6 h, at the dissolved-oxygen minimum",
+      "note": "The DO landmark at glycerol depletion is what defines the start, not a fixed clock time in general.",
+      "source": {"section": "3.1 Initial media composition and operating parameters", "locator": "text, p. 3", "printed_page": 3, "quote": "A continuous decrease in DO was observed for the first 6 h, followed by a sharp rise concomitant with the depletion of glycerol. This landmark in the DO profile was considered as the starting point for feeding"}
+    },
+    {
+      "id": "feeding_device",
+      "label": "feeding device",
+      "value": "external 6-channel programmable syringe pump",
+      "source": {"section": "2.3 Fed-batch fermentation in shake flask", "locator": "text, p. 2", "printed_page": 2, "quote": "fed at a constant flow rate using an external 6 channel programmable syringe pump"}
+    }
+  ],
+  "feed_experiments": [
+    {"id": "exp_1", "protein": "eYFP", "glycerol_percent_wv": 25.0, "yeast_extract_percent_wv": 50.0, "yeast_extract_over_glycerol": 2.0, "flow_mL_per_h": 0.6, "role": "fitting", "figure": "S3"},
+    {"id": "exp_2", "protein": "PDGF", "glycerol_percent_wv": 25.0, "yeast_extract_percent_wv": 35.0, "yeast_extract_over_glycerol": 1.4, "flow_mL_per_h": 0.5, "role": "fitting", "figure": "S4"},
+    {"id": "exp_3", "protein": "PDGF", "glycerol_percent_wv": 30.0, "yeast_extract_percent_wv": 40.0, "yeast_extract_over_glycerol": 1.33, "flow_mL_per_h": 0.52, "role": "fitting", "figure": "2"},
+    {"id": "exp_4", "protein": "PDGF", "glycerol_percent_wv": 20.0, "yeast_extract_percent_wv": 32.0, "yeast_extract_over_glycerol": 1.6, "flow_mL_per_h": 0.78, "role": "fitting", "figure": "S7"},
+    {"id": "exp_5", "protein": "PDGF", "glycerol_percent_wv": null, "yeast_extract_percent_wv": null, "yeast_extract_over_glycerol": null, "flow_mL_per_h": 0.72, "role": "fitting", "figure": "S5", "note": "Row is printed without a feed composition in Table 1; the composition is not recoverable from the main paper."},
+    {"id": "exp_6", "protein": "PDGF", "glycerol_percent_wv": null, "yeast_extract_percent_wv": null, "yeast_extract_over_glycerol": null, "flow_mL_per_h": 0.75, "role": "fitting", "figure": "S6", "note": "Row is printed without a feed composition in Table 1."},
+    {"id": "exp_7", "protein": "eYFP", "glycerol_percent_wv": 25.0, "yeast_extract_percent_wv": 50.0, "yeast_extract_over_glycerol": 2.0, "flow_mL_per_h": 0.5, "role": "validation", "figure": "S8"},
+    {"id": "exp_8", "protein": "PDGF", "glycerol_percent_wv": 20.0, "yeast_extract_percent_wv": 30.0, "yeast_extract_over_glycerol": 1.5, "flow_mL_per_h": 0.78, "role": "validation", "figure": "3"}
+  ],
+  "observations": [
+    {
+      "observation_id": "abstract.optimised_process_biomass",
+      "label": "biomass of the optimised fed-batch process",
+      "kind": "mass_concentration",
+      "unit": "g/L",
+      "provenance": "reported",
+      "value": 20.7,
+      "basis": "observed_reference",
+      "note": "An experimental outcome. Dry cell weight per litre after 24 h in the abstract.",
+      "source": {"section": "Abstract", "locator": "text, p. 1", "printed_page": 1, "quote": "The optimized process yielded 20.7 g dry cell weight/L, in agreement with the model prediction."}
+    },
+    {
+      "observation_id": "results.optimised_process_biomass_range",
+      "label": "biomass across the fed-batch trials",
+      "kind": "mass_concentration",
+      "unit": "g/L",
+      "provenance": "reported",
+      "value": null,
+      "value_range": [19.9, 21.5],
+      "basis": "observed_reference",
+      "note": "An experimental range across the tested proteins. Not collapsed to a point value.",
+      "source": {"section": "3.3 Optimized feeding strategy", "locator": "text, p. 7", "printed_page": 7, "quote": "The biomass concentrations achieved in 24 h were 19.9?21.5 g DCW/L"}
+    },
+    {
+      "observation_id": "results.model_predicted_biomass",
+      "label": "model-predicted biomass for the selected optimised recipe",
+      "kind": "mass_concentration",
+      "unit": "g/L",
+      "provenance": "reported",
+      "value": 19.44,
+      "basis": "observed_reference",
+      "note": "A MODEL PREDICTION reported by the authors -- not a measurement, and not an output this package may return. Stored so a reproduction attempt can be compared against it, with its nature preserved.",
+      "source": {"section": "3.3 Optimized feeding strategy", "locator": "text, p. 7", "printed_page": 7, "quote": "in agreement with the model predicted value of 19.44 g DCW/L"}
+    },
+    {
+      "observation_id": "optimisation.selected_recipe",
+      "label": "selected optimised feeding recipe",
+      "kind": "feed_percent_weight_volume",
+      "unit": "% w/v",
+      "provenance": "reported",
+      "value": 17.5,
+      "basis": "observed_reference",
+      "note": "Glycerol in the feed. Chosen from the Pareto front (eq. 19-24), with 24.5 % w/v yeast extract and 0.72 mL/h. The optimisation itself is out of scope for this package.",
+      "source": {"section": "3.3 Optimized feeding strategy", "locator": "text, p. 7", "printed_page": 7, "quote": "we chose an optimal solution corresponding to a feed composition of 17.5% glycerol, 24.5% yeast extract, and a feed rate of 0.72 mL/h"}
+    },
+    {
+      "observation_id": "optimisation.selected_recipe_yeast_extract",
+      "label": "yeast extract in the selected optimised recipe",
+      "kind": "feed_percent_weight_volume",
+      "unit": "% w/v",
+      "provenance": "reported",
+      "value": 24.5,
+      "basis": "observed_reference",
+      "note": "Yeast extract in the feed of the selected optimised recipe.",
+      "source": {"section": "3.3 Optimized feeding strategy", "locator": "text, p. 7", "printed_page": 7, "quote": "a feed composition of 17.5% glycerol, 24.5% yeast extract, and a feed rate of 0.72 mL/h"}
+    },
+    {
+      "observation_id": "optimisation.selected_recipe_flow",
+      "label": "feed flow rate of the selected optimised recipe",
+      "kind": "volume_flow",
+      "unit": "mL/h",
+      "provenance": "reported",
+      "value": 0.72,
+      "basis": "observed_reference",
+      "note": "Volumetric feed rate of the selected optimised recipe in the shake flask.",
+      "source": {"section": "3.3 Optimized feeding strategy", "locator": "text, p. 7", "printed_page": 7, "quote": "a feed rate of 0.72 mL/h"}
+    },
+    {
+      "observation_id": "scaleup.eyfp_specific_activity_improvement",
+      "label": "eYFP specific activity, 3 L bioreactor vs shake-flask fed-batch",
+      "kind": "fold",
+      "unit": "fold",
+      "provenance": "reported",
+      "value": 2.8,
+      "basis": "observed_reference",
+      "note": "A protein-expression outcome. This model does not predict protein expression; the record exists so the growth model is not mistaken for a model of it.",
+      "source": {"section": "3.4 Validation of the fed-batch recipe in a 3 L bioreactor", "locator": "text, p. 7", "printed_page": 7, "quote": "the specific activity of the eYFP in the bioreactor was 2.8-fold higher than that observed for the shake flask with fed-batch"}
+    }
+  ],
+  "unavailable_data": [
+    {
+      "item": "fed-batch time-course measurements",
+      "reason": "The time courses are in Figures 2, 3 and 5 and supplementary Figures S3-S8; the underlying numerical data are not part of the main paper.",
+      "consequence": "No trajectory in this package is validated against measured points. Validation level 3 (paper reproduction) is NOT met."
+    },
+    {
+      "item": "optimisation constraints and bounds (Table S3)",
+      "reason": "Supplementary; not in the main paper.",
+      "consequence": "Multi-objective optimisation is out of scope; only the selected optimum is recorded."
+    },
+    {
+      "item": "kLa at other geometries (Table S2, S4)",
+      "reason": "Supplementary; the main text gives only the 133 h^-1 value for this flask.",
+      "consequence": "kLa is a reported input for one geometry. Predicting it elsewhere is out of scope."
+    },
+    {
+      "item": "OD600 to dry-cell-weight calibration",
+      "reason": "The paper converts absorbance between instruments (factor 2.91) but prints no OD600-to-DCW relationship.",
+      "consequence": "Initial biomass in g/L cannot be derived from the reported initial OD600 of 0.05 and must be supplied by the caller."
+    },
+    {
+      "item": "initial dissolved oxygen and initial complex-substrate concentration as model inputs",
+      "reason": "Not stated in the main paper.",
+      "consequence": "Both are required inputs. No default is substituted."
+    },
+    {
+      "item": "feed compositions for experiments S5 and S6",
+      "reason": "Table 1 prints these rows without a composition.",
+      "consequence": "Recorded as null rather than guessed from the flow rate."
+    }
+  ]
+}

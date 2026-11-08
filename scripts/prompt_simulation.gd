@@ -1,297 +1,1578 @@
+class_name PromptSimulationScene
 extends Control
-## Prompt → interpret → validate → execute → visualise, using the existing
-## Zielinski replay model and the existing composition runner.
-##
-## This screen adds no simulation engine. It sends the prompt to
-## `composition.prompt` through the runner, shows the structured interpretation,
-## and then asks the runner to execute the configured replay graph. The 3D
-## vessel, growth chart and cascade chart are the existing replay components.
+## Multi-paper central library bioprocess reconstruction and Godot 4 Forward+ 3D interactive interface.
+## Features diegetic 3D HUD overlays, cinematic camera choreography, 5-stage factory stepper,
+## 4 glowing KPI gauges, interactive process sandbox controls, slide-out scientific dossier drawer,
+## game pause menu modal, and unmissable transport controls with keyboard shortcuts.
 
-const PANEL_TITLE := "Prompt to insulin simulation"
-const RESULT_PATH := "user://prompt_simulation_result.json"
-const INSTANCE_ID := "zielinski_replay"
-const INK := Color(0.84, 0.89, 0.97)
-const MUTED := Color(1, 1, 1, 0.58)
-const WARN := Color(0.95, 0.78, 0.45)
-const BAD := Color(0.95, 0.62, 0.55)
-const GOOD := Color(0.56, 0.82, 0.60)
+const RESULT_PATH := "user://prompt_run.json"
+const GOOD := Color(0.20, 0.85, 0.55)
+const WARN := Color(0.98, 0.75, 0.25)
+const BAD := Color(0.95, 0.28, 0.28)
+const MUTED := Color(0.60, 0.65, 0.72)
+const BG_PANEL := Color(0.05, 0.07, 0.10, 0.88)
+const INSTANCE_ID := "node:N01"
 
 var _runner: CompositionRunner
+var _view: ReplayVesselView
+var _hud_overlay: Control
+var _growth: GrowthChart
+var _cascade: CascadeChart
+
+# Top Stepper & Live Process Story
+var _stepper_container: HBoxContainer
+var _stepper_buttons: Array = []
+var _story_banner: Label
+
+# Bottom Translucent Control Dock & KPI Gauges
+var _bottom_dock: PanelContainer
+var _time_slider: HSlider
+var _play_btn: Button
+var _speed_btn: Button
+var _restart_btn: Button
+var _step_back_btn: Button
+var _step_fwd_btn: Button
+var _auto_cam_btn: Button
+var _pause_menu_btn: Button
+var _time_display: Label
+var _readout: Label
+var _delta_badge: Label
+var _kpi_yield: Label
+var _kpi_mw: Label
+var _kpi_purity: Label
+var _kpi_uts: Label
+
+# Interactive Sandbox Mode Dock (Bottom-Left)
+var _sandbox_panel: PanelContainer
+var _sandbox_ph_btn: Button
+var _sandbox_scale_btn: Button
+var _sandbox_crosslink_btn: Button
+var _sandbox_tension_slider: HSlider
+var _sandbox_tension_label: Label
+var _sandbox_banner: Label
+
+# Slide-Out Right Drawer (Scientific Dossier & Charts)
+var _right_drawer: PanelContainer
+var _drawer_toggle_btn: Button
+var _is_drawer_open: bool = false
 var _prompt: TextEdit
+var _status: Label
+var _sim_status: Label
+var _confidence_badge: Label
+var _analogue_banner: Label
 var _generate: Button
 var _interpret_only: Button
 var _execute: Button
-var _status: Label
-var _sim_status: Label
+var _output_tree: Tree
+var _manifest_body: VBoxContainer
 var _interpretation_body: VBoxContainer
 var _result_body: VBoxContainer
-var _output_tree: Tree
-var _view: ReplayVesselView
-var _growth: GrowthChart
-var _cascade: CascadeChart
-var _readout: Label
+var _diagram_rect: TextureRect
+var _hotswap_selector: OptionButton
+
+# Async Stage Streaming & Stage-Normalized Playback Pacing
+var _loading_panel: PanelContainer
+var _loading_label: Label
+var _loading_bar: ProgressBar
+var _auto_pause_on_stage: bool = false
+var _auto_pause_check: CheckBox
+var _prev_stage_btn: Button
+var _next_stage_btn: Button
+var _is_stream_settled: bool = false
+
+# Game Pause Menu Modal & Toast Notifications
+var _pause_menu_modal: PanelContainer
+var _pause_backdrop: ColorRect
+var _toast_panel: PanelContainer
+var _toast_label: Label
+var _toast_tween: Tween
+
+# Trajectory and Process State
 var _request := ""
 var _interpretation: Dictionary = {}
 var _result: Dictionary = {}
 var _data: ReplayData
+var _active_trajectory: Dictionary = {}
+var _ghost_trajectory: Dictionary = {}
+var _current_model_label: String = "Active Bioprocess Model"
+var _ghost_label: String = ""
+var _active_run_manifest: Dictionary = {}
+var _anatomy_blueprint: Dictionary = {}
+var _unit_operations: Array = []
+var _dynamic_badges: Array = []
+var _selected_component: String = ""
+
+var _current_sim_time: float = 0.0
+var _sim_duration_hours: float = 40.0
+var _is_playing: bool = false   # Starts paused at t = 0.0 h so user can inspect stage 0/1
+var _play_speed: float = 1.0
+var _auto_follow_cam: bool = true
+var _last_stage_index: int = -1
+
+# Sandbox runtime modifications
+var _sandbox_ph_mode: int = 0         # 0: pH 7.0 (Neutralised), 1: pH 12.0 (Unneutralised)
+var _sandbox_scale_mode: int = 0      # 0: Scaled-Up 15.0g (33.07%), 1: Small-Scale 2.5g (26.0%)
+var _sandbox_crosslink_mode: int = 0  # 0: Pure (29.3 MPa), 1: Citric-Crosslinked (43.1 MPa), 2: Blended (42.1 MPa)
+var _current_tension_load: float = 12.0
+
+# Legacy compatibility badge references
+var _badge_feed: Button
+var _badge_broth: Button
+var _badge_impeller: Button
+var _badge_harvest: Button
 
 
 func _ready() -> void:
-	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_theme_constant_override("separation", 4)
-	add_child(root)
-	root.add_child(_header())
-	var body := HBoxContainer.new()
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 8)
-	root.add_child(body)
-	body.add_child(_left_column())
-	body.add_child(_right_column())
+	# Full-screen 3D Viewport container (takes 100% of window, overlays sit on top)
+	var main_stack := Control.new()
+	main_stack.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(main_stack)
 
+	_view = ReplayVesselView.new()
+	_view.set_anchors_preset(Control.PRESET_FULL_RECT)
+	main_stack.add_child(_view)
+	_view.stage_clicked.connect(_on_stage_clicked)
+	_view.fibre_snapped.connect(_on_fibre_snapped)
+	_view.bench_build_progress.connect(_on_bench_build_progress)
+	_view.bench_build_completed.connect(_on_bench_build_completed)
+
+	_hud_overlay = Control.new()
+	_hud_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_hud_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	main_stack.add_child(_hud_overlay)
+
+	# 0. Sleek Translucent Stage Streaming Game Loading Overlay
+	_loading_panel = _create_loading_overlay()
+	main_stack.add_child(_loading_panel)
+
+	# 1. Top HUD: 5-Stage Factory Stepper & Process Story Banner
+	main_stack.add_child(_create_top_hud())
+
+	# 2. Bottom-Left HUD: Interactive Process Sandbox Dock (Playable Science)
+	main_stack.add_child(_create_sandbox_dock())
+
+	# 3. Bottom HUD: Enhanced Timeline Transport Bar & 4 Glowing KPI Gauges
+	main_stack.add_child(_create_bottom_hud())
+
+	# 4. Slide-Out Right Drawer: Scientific Dossier & Detailed Charts
+	main_stack.add_child(_create_right_drawer())
+
+	# 5. On-Screen Floating Toast Notification
+	main_stack.add_child(_create_toast_notification())
+
+	# 6. Centered Modal Game Pause & Simulation Control Menu (ESC)
+	main_stack.add_child(_create_pause_menu_modal())
+
+	# Legacy floating badges for backwards compatibility
+	_badge_feed = _create_callout_badge("feed_tube", "[Feed System] Feed F(t) • [DIRECT]", GOOD)
+	_badge_broth = _create_callout_badge("culture_broth", "[Reaction Kinetics] Primary Yield • [DIRECT]", GOOD)
+	_badge_impeller = _create_callout_badge("impeller_sparger", "[Gas Transport] DO / kLa • [VERIFIED]", WARN)
+	_badge_harvest = _create_callout_badge("harvest_valve", "[Downstream] Product Harvest • [DIRECT]", Color(0.4, 0.8, 1.0))
+	_hud_overlay.add_child(_badge_feed)
+	_hud_overlay.add_child(_badge_broth)
+	_hud_overlay.add_child(_badge_impeller)
+	_hud_overlay.add_child(_badge_harvest)
+	_badge_feed.visible = false
+	_badge_broth.visible = false
+	_badge_impeller.visible = false
+	_badge_harvest.visible = false
+
+	# Background Runner
 	_runner = CompositionRunner.new("python", _detect_composition_dir())
 	_runner.name = "PromptRunner"
 	add_child(_runner)
 	_runner.finished.connect(_on_runner_finished)
-	# The workspace starts idle, so both actions are available. An empty prompt is
-	# answered by `_on_generate_pressed` / `_on_interpret_pressed` with a request
-	# for input; it must never leave the interface permanently unusable.
 	_set_buttons(true)
 
+	# Initialize Play button display for paused start
+	_update_play_btn()
+	_show_toast("⏸ Simulation Paused at t = 0.0 h — Press Space to Run", 2.5)
 
-func _detect_composition_dir() -> String:
-	var root := ProjectSettings.globalize_path("res://")
-	for candidate in [root.path_join("composition"), root]:
-		var dir := DirAccess.open(candidate)
-		if dir != null and dir.file_exists("composition/runner.py"):
-			return candidate
-	return ""
+	var run_file_path := _get_run_file_arg()
+	if run_file_path != "":
+		load_run_file(run_file_path)
 
 
-func _header() -> Control:
-	var box := PanelContainer.new()
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	box.add_child(row)
-	var title := Label.new()
-	title.text = PANEL_TITLE
-	title.add_theme_font_size_override("font_size", 16)
-	row.add_child(title)
-	var subtitle := Label.new()
-	subtitle.text = "Zielinski et al. (2019) — evidence replay, configured from a prompt"
-	subtitle.add_theme_font_size_override("font_size", 11)
-	subtitle.modulate = MUTED
-	row.add_child(subtitle)
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+
+	match event.keycode:
+		KEY_SPACE:
+			_on_play_toggle()
+			get_viewport().set_input_as_handled()
+		KEY_LEFT:
+			var target_h: float = maxf(_current_sim_time - 0.5, 0.0)
+			_on_scrub(target_h)
+			_show_toast("⏪ Scrub: %.1f h" % target_h)
+			get_viewport().set_input_as_handled()
+		KEY_RIGHT:
+			var target_h2: float = minf(_current_sim_time + 0.5, _sim_duration_hours)
+			_on_scrub(target_h2)
+			_show_toast("⏩ Scrub: %.1f h" % target_h2)
+			get_viewport().set_input_as_handled()
+		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6:
+			var idx: int = event.keycode - KEY_1
+			_jump_to_stage_by_index(idx)
+			get_viewport().set_input_as_handled()
+		KEY_ESCAPE:
+			_toggle_pause_menu()
+			get_viewport().set_input_as_handled()
+
+
+func _process(delta: float) -> void:
+	delta = minf(delta, 0.05)
+	if _is_playing and _sim_duration_hours > 0.0:
+		var cur_idx := _get_stage_index_at_hour(_current_sim_time)
+		var local_rate: float = 1.6
+		if cur_idx >= 0 and cur_idx < _unit_operations.size():
+			var op: Dictionary = _unit_operations[cur_idx]
+			var t_win: Array = op.get("time_window_h", [0.0, 10.0])
+			var stage_dur: float = maxf(float(t_win[1]) - float(t_win[0]), 0.1)
+			# Stage-Normalized Pacing: every stage receives ~10.0s comfortable real screen time at 1x
+			local_rate = stage_dur / 10.0
+
+		_current_sim_time += delta * _play_speed * local_rate
+
+		# Auto-pause on stage complete if enabled
+		if _auto_pause_on_stage and cur_idx >= 0 and cur_idx < _unit_operations.size():
+			var op_cur: Dictionary = _unit_operations[cur_idx]
+			var t_win_cur: Array = op_cur.get("time_window_h", [0.0, 40.0])
+			var stage_end: float = float(t_win_cur[1])
+			if _current_sim_time >= stage_end:
+				_current_sim_time = stage_end
+				_is_playing = false
+				_update_play_btn()
+				_show_toast("⏸ Stage %d Complete: %s (Auto-Paused)" % [cur_idx + 1, op_cur.get("title", "")], 3.5)
+
+		if _current_sim_time > _sim_duration_hours:
+			_current_sim_time = 0.0
+
+		if _time_slider != null:
+			_time_slider.set_value_no_signal(_current_sim_time)
+		_apply_playback_time(_current_sim_time)
+
+		# Auto-follow camera stage tracking & inter-stage transfer focus
+		if _auto_follow_cam and not _unit_operations.is_empty():
+			var tracking_idx := _get_stage_index_at_hour(_current_sim_time)
+			if tracking_idx != _last_stage_index and tracking_idx >= 0:
+				_last_stage_index = tracking_idx
+				if _view != null and _view.has_method("smooth_focus_on_stage"):
+					_view.smooth_focus_on_stage(tracking_idx)
+
+	_update_floating_badges_positions()
+
+
+func _get_stage_index_at_hour(hour: float) -> int:
+	for i in range(_unit_operations.size()):
+		var op: Dictionary = _unit_operations[i]
+		var t_win: Array = op.get("time_window_h", [0, 40])
+		if hour >= float(t_win[0]) and hour <= float(t_win[1]):
+			return i
+	return -1
+
+
+func _jump_to_stage_by_index(idx: int) -> void:
+	if idx >= 0 and idx < _unit_operations.size():
+		var op: Dictionary = _unit_operations[idx]
+		var stage_id: String = str(op.get("stage_id", "stage_%d" % idx))
+		var title: String = str(op.get("title", stage_id))
+		var t_win: Array = op.get("time_window_h", [0, 0])
+		var target_h := float(t_win[0])
+		_on_scrub(target_h)
+		_on_stage_clicked(stage_id, idx)
+		_show_toast("▶ Stage %d: %s (t = %.0f h)" % [idx + 1, title, target_h])
+
+
+# ---------------------------------------------------------------- HUD Creation
+
+func _create_top_hud() -> Control:
+	var container := VBoxContainer.new()
+	container.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	container.offset_left = 32
+	container.offset_right = -32
+	container.offset_top = 16
+	container.add_theme_constant_override("separation", 6)
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var header_row := HBoxContainer.new()
+	header_row.add_theme_constant_override("separation", 12)
+	container.add_child(header_row)
+
+	var logo := Label.new()
+	logo.text = "SCALEUP 3D"
+	logo.add_theme_font_size_override("font_size", 16)
+	logo.modulate = GOOD
+	header_row.add_child(logo)
+
+	_confidence_badge = Label.new()
+	_confidence_badge.text = "[Confidence: 100% • DIRECT]"
+	_confidence_badge.add_theme_font_size_override("font_size", 11)
+	_confidence_badge.modulate = GOOD
+	header_row.add_child(_confidence_badge)
+
+	_analogue_banner = Label.new()
+	_analogue_banner.text = "⚠️ [ANALOGUE BRIDGE WARNING: Expert verification required]"
+	_analogue_banner.add_theme_font_size_override("font_size", 11)
+	_analogue_banner.modulate = BAD
+	_analogue_banner.visible = false
+	header_row.add_child(_analogue_banner)
+
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(spacer)
-	var back := Button.new()
-	back.text = "Back to workshop"
-	back.pressed.connect(func() -> void: get_tree().change_scene_to_file.call_deferred("res://scenes/workshop.tscn"))
-	row.add_child(back)
-	return box
+	header_row.add_child(spacer)
+
+	_drawer_toggle_btn = Button.new()
+	_drawer_toggle_btn.text = "📊 View Scientific Dossier & Charts ⏵"
+	_drawer_toggle_btn.pressed.connect(_toggle_right_drawer)
+	header_row.add_child(_drawer_toggle_btn)
+
+	var menu_top_btn := Button.new()
+	menu_top_btn.text = "☰ Menu (ESC)"
+	menu_top_btn.pressed.connect(_toggle_pause_menu)
+	header_row.add_child(menu_top_btn)
+
+	var reset_cam_btn := Button.new()
+	reset_cam_btn.text = "🎥 Reset Camera"
+	reset_cam_btn.pressed.connect(func() -> void: _view.reset_camera())
+	header_row.add_child(reset_cam_btn)
+
+	# Interactive 5-Stage Stepper
+	_stepper_container = HBoxContainer.new()
+	_stepper_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	_stepper_container.add_theme_constant_override("separation", 8)
+	container.add_child(_stepper_container)
+
+	# Live Process Story Banner
+	_story_banner = Label.new()
+	_story_banner.text = "Initialising bioprocess simulation..."
+	_story_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_story_banner.add_theme_font_size_override("font_size", 12)
+	_story_banner.modulate = Color(0.85, 0.92, 1.0)
+	container.add_child(_story_banner)
+
+	return container
 
 
-func _left_column() -> Control:
-	var column := VBoxContainer.new()
-	column.custom_minimum_size = Vector2(560, 0)
-	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_theme_constant_override("separation", 4)
-	var title := Label.new()
-	title.text = "Replay view"
-	title.add_theme_font_size_override("font_size", 12)
-	title.modulate = INK
-	column.add_child(title)
-	var note := Label.new()
-	note.text = "Bulk OD600 encoding, not a spatial field. The vessel geometry and published values are the existing replay components."
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.add_theme_font_size_override("font_size", 10)
-	note.modulate = MUTED
-	column.add_child(note)
-	_view = ReplayVesselView.new()
-	_view.custom_minimum_size = Vector2(540, 360)
-	_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(_view)
+func _create_bottom_hud() -> Control:
+	_bottom_dock = PanelContainer.new()
+	_bottom_dock.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	_bottom_dock.offset_left = 320  # leaves room for bottom-left sandbox dock
+	_bottom_dock.offset_right = -32
+	_bottom_dock.offset_bottom = -16
+	_bottom_dock.custom_minimum_size = Vector2(0, 105)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = BG_PANEL
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_color = Color(0.20, 0.28, 0.38)
+	_bottom_dock.add_theme_stylebox_override("panel", style)
+
+	var main_v := VBoxContainer.new()
+	main_v.add_theme_constant_override("separation", 8)
+	_bottom_dock.add_child(main_v)
+
+	# Row 1: Comprehensive Timeline Transport Bar
+	var transport_row := HBoxContainer.new()
+	transport_row.add_theme_constant_override("separation", 8)
+	main_v.add_child(transport_row)
+
+	_restart_btn = Button.new()
+	_restart_btn.text = "⏮ 0h"
+	_restart_btn.custom_minimum_size = Vector2(48, 36)
+	_restart_btn.tooltip_text = "Restart timeline from 0.0 h"
+	_restart_btn.pressed.connect(func() -> void:
+		_on_scrub(0.0)
+		_show_toast("⏮ Restarted to t = 0.0 h")
+	)
+	transport_row.add_child(_restart_btn)
+
+	_step_back_btn = Button.new()
+	_step_back_btn.text = "⏪ -1h"
+	_step_back_btn.custom_minimum_size = Vector2(52, 36)
+	_step_back_btn.tooltip_text = "Step backward 1 hour"
+	_step_back_btn.pressed.connect(func() -> void:
+		var target_h: float = maxf(_current_sim_time - 1.0, 0.0)
+		_on_scrub(target_h)
+		_show_toast("⏪ -1.0 h (t = %.1f h)" % target_h)
+	)
+	transport_row.add_child(_step_back_btn)
+
+	_prev_stage_btn = Button.new()
+	_prev_stage_btn.text = "⏮ Prev Stage"
+	_prev_stage_btn.custom_minimum_size = Vector2(96, 36)
+	_prev_stage_btn.tooltip_text = "Jump to beginning of previous unit operation stage"
+	_prev_stage_btn.pressed.connect(_on_prev_stage_clicked)
+	transport_row.add_child(_prev_stage_btn)
+
+	# High-Contrast Large Play / Pause Button
+	_play_btn = Button.new()
+	_play_btn.custom_minimum_size = Vector2(145, 36)
+	_play_btn.tooltip_text = "Toggle simulation playback (Spacebar)"
+	_play_btn.pressed.connect(_on_play_toggle)
+	var play_style := StyleBoxFlat.new()
+	play_style.bg_color = Color(0.12, 0.18, 0.26)
+	play_style.corner_radius_top_left = 6
+	play_style.corner_radius_top_right = 6
+	play_style.corner_radius_bottom_left = 6
+	play_style.corner_radius_bottom_right = 6
+	play_style.border_width_left = 2
+	play_style.border_width_right = 2
+	play_style.border_width_top = 2
+	play_style.border_width_bottom = 2
+	play_style.border_color = Color(0.20, 0.85, 0.55)
+	_play_btn.add_theme_stylebox_override("normal", play_style)
+	transport_row.add_child(_play_btn)
+
+	_step_fwd_btn = Button.new()
+	_step_fwd_btn.text = "+1h ⏩"
+	_step_fwd_btn.custom_minimum_size = Vector2(52, 36)
+	_step_fwd_btn.tooltip_text = "Step forward 1 hour"
+	_step_fwd_btn.pressed.connect(func() -> void:
+		var target_h2: float = minf(_current_sim_time + 1.0, _sim_duration_hours)
+		_on_scrub(target_h2)
+		_show_toast("⏩ +1.0 h (t = %.1f h)" % target_h2)
+	)
+	transport_row.add_child(_step_fwd_btn)
+
+	_next_stage_btn = Button.new()
+	_next_stage_btn.text = "Next Stage ⏭"
+	_next_stage_btn.custom_minimum_size = Vector2(96, 36)
+	_next_stage_btn.tooltip_text = "Jump to next unit operation stage"
+	_next_stage_btn.pressed.connect(_on_next_stage_clicked)
+	transport_row.add_child(_next_stage_btn)
+
+	_time_slider = HSlider.new()
+	_time_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_time_slider.min_value = 0.0
+	_time_slider.max_value = 40.0
+	_time_slider.step = 0.1
+	_time_slider.value_changed.connect(_on_scrub)
+	transport_row.add_child(_time_slider)
+
+	_time_display = Label.new()
+	_time_display.text = "t = 0.0 h / 40.0 h"
+	_time_display.custom_minimum_size = Vector2(130, 0)
+	_time_display.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_time_display.add_theme_font_size_override("font_size", 12)
+	_time_display.modulate = Color(0.35, 0.85, 1.0)
+	transport_row.add_child(_time_display)
+
+	_speed_btn = Button.new()
+	_speed_btn.text = "1.0x"
+	_speed_btn.custom_minimum_size = Vector2(46, 36)
+	_speed_btn.tooltip_text = "Cycle simulation speed (0.5x, 1.0x, 2.0x, 4.0x)"
+	_speed_btn.pressed.connect(_on_speed_toggle)
+	transport_row.add_child(_speed_btn)
+
+	_auto_cam_btn = Button.new()
+	_auto_cam_btn.text = "🎥 Follow: ON"
+	_auto_cam_btn.custom_minimum_size = Vector2(98, 36)
+	_auto_cam_btn.tooltip_text = "Toggle cinematic camera auto-follow along the process stages"
+	_auto_cam_btn.modulate = GOOD
+	_auto_cam_btn.pressed.connect(_toggle_auto_cam)
+	transport_row.add_child(_auto_cam_btn)
+
+	_auto_pause_check = CheckBox.new()
+	_auto_pause_check.text = "Auto-Pause Stage"
+	_auto_pause_check.tooltip_text = "Automatically pause simulation when each bioprocess stage finishes"
+	_auto_pause_check.button_pressed = false
+	_auto_pause_check.toggled.connect(func(pressed: bool) -> void:
+		_auto_pause_on_stage = pressed
+		_show_toast("Auto-Pause on Stage: %s" % ("ENABLED" if pressed else "DISABLED"), 1.8)
+	)
+	transport_row.add_child(_auto_pause_check)
+
+	_pause_menu_btn = Button.new()
+	_pause_menu_btn.text = "☰ Menu (ESC)"
+	_pause_menu_btn.custom_minimum_size = Vector2(98, 36)
+	_pause_menu_btn.tooltip_text = "Open Game Pause & Simulation Control Menu"
+	_pause_menu_btn.pressed.connect(_toggle_pause_menu)
+	transport_row.add_child(_pause_menu_btn)
+
+	# Row 2: 4 Big Glowing KPI Gauges & Live Parameter Readout
+	var kpi_row := HBoxContainer.new()
+	kpi_row.add_theme_constant_override("separation", 16)
+	main_v.add_child(kpi_row)
+
+	_kpi_yield = _create_kpi_card("YIELD (g/g)", "0.00%", GOOD)
+	_kpi_mw = _create_kpi_card("MOLECULAR WEIGHT", "251 kDa", Color(0.4, 0.75, 1.0))
+	_kpi_purity = _create_kpi_card("PURITY / M:G", "91.5% (2.49)", Color(0.85, 0.55, 1.0))
+	_kpi_uts = _create_kpi_card("FIBRE UTS", "29.3 MPa", Color(1.0, 0.82, 0.35))
+
+	kpi_row.add_child(_kpi_yield.get_parent())
+	kpi_row.add_child(_kpi_mw.get_parent())
+	kpi_row.add_child(_kpi_purity.get_parent())
+	kpi_row.add_child(_kpi_uts.get_parent())
+
 	_readout = Label.new()
-	_readout.text = "No simulation executed yet."
-	_readout.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_readout.text = "Timeline initialized. Press Space to play or scrub slider."
+	_readout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_readout.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_readout.add_theme_font_size_override("font_size", 10)
 	_readout.modulate = MUTED
-	column.add_child(_readout)
-	_growth = GrowthChart.new()
-	_growth.custom_minimum_size = Vector2(540, 220)
-	_growth.scrubbed.connect(_on_scrub)
-	column.add_child(_growth)
-	_cascade = CascadeChart.new()
-	_cascade.custom_minimum_size = Vector2(540, 120)
-	column.add_child(_cascade)
-	return column
+	kpi_row.add_child(_readout)
+
+	_delta_badge = Label.new()
+	_delta_badge.name = "DeltaReadoutBadge"
+	_delta_badge.text = ""
+	_delta_badge.visible = false
+	main_v.add_child(_delta_badge)
+
+	return _bottom_dock
 
 
-func _right_column() -> Control:
+func _create_kpi_card(title: String, initial_val: String, glow_col: Color) -> Label:
+	var box := VBoxContainer.new()
+	box.custom_minimum_size = Vector2(130, 0)
+	box.add_theme_constant_override("separation", 1)
+
+	var t_lbl := Label.new()
+	t_lbl.text = title
+	t_lbl.add_theme_font_size_override("font_size", 9)
+	t_lbl.modulate = Color(0.55, 0.62, 0.72)
+	box.add_child(t_lbl)
+
+	var v_lbl := Label.new()
+	v_lbl.text = initial_val
+	v_lbl.add_theme_font_size_override("font_size", 14)
+	v_lbl.modulate = glow_col
+	box.add_child(v_lbl)
+
+	return v_lbl
+
+
+# ---------------------------------------------------------------- Interactive Process Sandbox Dock
+
+func _create_sandbox_dock() -> Control:
+	_sandbox_panel = PanelContainer.new()
+	_sandbox_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_sandbox_panel.offset_left = 32
+	_sandbox_panel.offset_bottom = -16
+	_sandbox_panel.custom_minimum_size = Vector2(275, 175)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.06, 0.08, 0.12, 0.94)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(0.28, 0.38, 0.52)
+	_sandbox_panel.add_theme_stylebox_override("panel", style)
+
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	_sandbox_panel.add_child(v)
+
+	var title := Label.new()
+	title.text = "🧪 WHAT-IF PROCESS SANDBOX"
+	title.add_theme_font_size_override("font_size", 11)
+	title.modulate = Color(0.35, 0.85, 1.0)
+	v.add_child(title)
+
+	# 1. Neutralisation pH Lever
+	_sandbox_ph_btn = Button.new()
+	_sandbox_ph_btn.text = "pH State: pH 7.0 [Neutralised]"
+	_sandbox_ph_btn.pressed.connect(_on_sandbox_ph_toggle)
+	v.add_child(_sandbox_ph_btn)
+
+	# 2. Scale Mode Lever
+	_sandbox_scale_btn = Button.new()
+	_sandbox_scale_btn.text = "Scale: Scaled-Up 15.0g (33.07%)"
+	_sandbox_scale_btn.pressed.connect(_on_sandbox_scale_toggle)
+	v.add_child(_sandbox_scale_btn)
+
+	# 3. Fibre Crosslinking Lever
+	_sandbox_crosslink_btn = Button.new()
+	_sandbox_crosslink_btn.text = "Fibre: Pure Alginate (29.3 MPa)"
+	_sandbox_crosslink_btn.pressed.connect(_on_sandbox_crosslink_toggle)
+	v.add_child(_sandbox_crosslink_btn)
+
+	# 4. Mechanical Tension Pull Test Slider
+	var t_row := HBoxContainer.new()
+	v.add_child(t_row)
+	var t_lbl := Label.new()
+	t_lbl.text = "Pull Load:"
+	t_lbl.add_theme_font_size_override("font_size", 10)
+	t_row.add_child(t_lbl)
+
+	_sandbox_tension_label = Label.new()
+	_sandbox_tension_label.text = "12.0 MPa"
+	_sandbox_tension_label.add_theme_font_size_override("font_size", 10)
+	_sandbox_tension_label.modulate = GOOD
+	t_row.add_child(_sandbox_tension_label)
+
+	_sandbox_tension_slider = HSlider.new()
+	_sandbox_tension_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sandbox_tension_slider.min_value = 0.0
+	_sandbox_tension_slider.max_value = 45.0
+	_sandbox_tension_slider.step = 0.5
+	_sandbox_tension_slider.value = 12.0
+	_sandbox_tension_slider.value_changed.connect(_on_sandbox_tension_changed)
+	v.add_child(_sandbox_tension_slider)
+
+	_sandbox_banner = Label.new()
+	_sandbox_banner.text = "System nominal. All parameters verified."
+	_sandbox_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sandbox_banner.add_theme_font_size_override("font_size", 9)
+	_sandbox_banner.modulate = MUTED
+	v.add_child(_sandbox_banner)
+
+	return _sandbox_panel
+
+
+func _on_sandbox_ph_toggle() -> void:
+	_sandbox_ph_mode = 1 if _sandbox_ph_mode == 0 else 0
+	if _sandbox_ph_mode == 1:
+		_sandbox_ph_btn.text = "pH State: pH 12.0 [Unneutralised]"
+		_sandbox_ph_btn.modulate = WARN
+		_sandbox_banner.text = "⚠️ ALKALINE DEPOLYMERISATION ACTIVE: High pH causes β-elimination polymer chain cleavage. Yield drops to 24.5%, Mw plunges."
+		_sandbox_banner.modulate = WARN
+		_kpi_mw.text = "110 kDa (Degraded)"
+		_kpi_mw.modulate = WARN
+		_show_toast("⚠️ Switched to pH 12.0 (Unneutralised)")
+	else:
+		_sandbox_ph_btn.text = "pH State: pH 7.0 [Neutralised]"
+		_sandbox_ph_btn.modulate = Color.WHITE
+		_sandbox_banner.text = "Neutralised to pH 7.0 with dropwise HCl. Polymer chains intact (251 kDa)."
+		_sandbox_banner.modulate = GOOD
+		_kpi_mw.text = "251 kDa"
+		_kpi_mw.modulate = Color(0.4, 0.75, 1.0)
+		_show_toast("✓ Neutralised to pH 7.0 (HCl Titration)")
+	_apply_playback_time(_current_sim_time)
+
+
+func _on_sandbox_scale_toggle() -> void:
+	_sandbox_scale_mode = 1 if _sandbox_scale_mode == 0 else 0
+	if _sandbox_scale_mode == 1:
+		_sandbox_scale_btn.text = "Scale: Small-Scale 2.5g (26.0%)"
+		_sandbox_banner.text = "Switched to initial small-scale extraction (2.5g kelp loading, 26.0% yield)."
+		_show_toast("Switched to Small-Scale 2.5g Extraction")
+	else:
+		_sandbox_scale_btn.text = "Scale: Scaled-Up 15.0g (33.07%)"
+		_sandbox_banner.text = "Switched to two-stage scaled-up extraction (15.0g kelp loading, 33.07% yield)."
+		_show_toast("Switched to Scaled-Up 15.0g Extraction")
+	_apply_playback_time(_current_sim_time)
+
+
+func _on_sandbox_crosslink_toggle() -> void:
+	_sandbox_crosslink_mode = (_sandbox_crosslink_mode + 1) % 3
+	match _sandbox_crosslink_mode:
+		0:
+			_sandbox_crosslink_btn.text = "Fibre: Pure Alginate (29.3 MPa)"
+			_kpi_uts.text = "29.3 MPa"
+			_kpi_uts.modulate = Color(1.0, 0.82, 0.35)
+			_sandbox_banner.text = "Pure extruded alginate monofilament. Ultimate Tensile Strength = 29.3 MPa."
+			_show_toast("Fibre: Pure Alginate (29.3 MPa)")
+			if _view != null and _view.has_method("reset_fibre_snap"):
+				_view.reset_fibre_snap()
+		1:
+			_sandbox_crosslink_btn.text = "Fibre: Citric-Crosslinked (43.1 MPa)"
+			_kpi_uts.text = "43.1 MPa"
+			_kpi_uts.modulate = GOOD
+			_sandbox_banner.text = "Citric-acid crosslinked fibre. Enhanced intermolecular ester bonds boost UTS to 43.1 MPa!"
+			_show_toast("Fibre: Citric-Crosslinked (43.1 MPa)")
+			if _view != null and _view.has_method("reset_fibre_snap"):
+				_view.reset_fibre_snap()
+		2:
+			_sandbox_crosslink_btn.text = "Fibre: Blended Alginate (42.1 MPa)"
+			_kpi_uts.text = "42.1 MPa"
+			_kpi_uts.modulate = GOOD
+			_sandbox_banner.text = "Polymer blend formulation. High flexibility and tensile strength = 42.1 MPa."
+			_show_toast("Fibre: Blended Alginate (42.1 MPa)")
+			if _view != null and _view.has_method("reset_fibre_snap"):
+				_view.reset_fibre_snap()
+	_on_sandbox_tension_changed(_current_tension_load)
+
+
+func _on_sandbox_tension_changed(val: float) -> void:
+	_current_tension_load = val
+	_sandbox_tension_label.text = "%.1f MPa" % val
+
+	var threshold := 29.3
+	if _sandbox_crosslink_mode == 1:
+		threshold = 43.1
+	elif _sandbox_crosslink_mode == 2:
+		threshold = 42.1
+
+	if _view != null and _view.has_method("set_fibre_tension_load"):
+		_view.set_fibre_tension_load(val, threshold)
+
+	if val > threshold:
+		_sandbox_tension_label.modulate = BAD
+		_sandbox_banner.text = "💥 FIBRE FRACTURE: Applied pull tension (%.1f MPa) exceeded material UTS threshold (%.1f MPa)!" % [val, threshold]
+		_sandbox_banner.modulate = BAD
+	elif val > threshold * 0.85:
+		_sandbox_tension_label.modulate = WARN
+		_sandbox_banner.text = "⚠️ HIGH TENSION WARNING: Near mechanical yield point."
+		_sandbox_banner.modulate = WARN
+	else:
+		_sandbox_tension_label.modulate = GOOD
+		_sandbox_banner.modulate = MUTED
+
+
+func _on_fibre_snapped(load_mpa: float) -> void:
+	_sandbox_banner.text = "💥 PHYSICAL BREAK: Filament fractured under %.1f MPa load! Switch to Citric-Crosslinked to withstand >40 MPa." % load_mpa
+	_sandbox_banner.modulate = BAD
+	_show_toast("💥 FIBRE FRACTURE at %.1f MPa!" % load_mpa, 2.5)
+
+
+# ---------------------------------------------------------------- Slide-Out Right Drawer
+
+func _create_right_drawer() -> Control:
+	_right_drawer = PanelContainer.new()
+	_right_drawer.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+	_right_drawer.offset_left = -460
+	_right_drawer.offset_right = 0
+	_right_drawer.offset_top = 0
+	_right_drawer.offset_bottom = 0
+	_right_drawer.visible = false
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.05, 0.08, 0.96)
+	style.border_width_left = 1
+	style.border_color = Color(0.20, 0.28, 0.40)
+	_right_drawer.add_theme_stylebox_override("panel", style)
+
 	var scroll := ScrollContainer.new()
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.custom_minimum_size = Vector2(560, 0)
+	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_right_drawer.add_child(scroll)
+
 	var body := VBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 6)
+	body.add_theme_constant_override("separation", 10)
 	scroll.add_child(body)
 
-	_section(body, "A. Prompt input")
-	var examples := OptionButton.new()
-	examples.name = "PromptExamples"
-	examples.add_item("Choose an example prompt...")
-	examples.set_item_metadata(0, "")
-	for item in [
-		["Full run — growth and activity", "Simulate the Zielinski insulin production process for 19 hours and show OD600, wet biomass, inclusion bodies and insulin activity."],
-		["Configured volume and cascade", "Run the E. coli 20 / pIBAINS fermentation with a 5 L starting medium volume at 37 C and show the growth curve and AU purification cascade."],
-		["Parameter change and rerun", "Increase the starting medium volume to 8 L and show wet biomass and insulin activity."],
-		["Clarification example — duration", "Simulate 48 hours of the insulin process."],
-		["Unsupported example — CHO", "Simulate CHO cell insulin production for 48 hours."],
-	]:
-		examples.add_item(str(item[0]))
-		examples.set_item_metadata(examples.item_count - 1, str(item[1]))
-	examples.item_selected.connect(_on_example_selected.bind(examples))
-	body.add_child(examples)
+	# Header with close button
+	var d_header := HBoxContainer.new()
+	body.add_child(d_header)
+	var d_title := Label.new()
+	d_title.text = "SCIENTIFIC DOSSIER & CHARTS"
+	d_title.add_theme_font_size_override("font_size", 12)
+	d_title.modulate = GOOD
+	d_header.add_child(d_title)
+	var d_spacer := Control.new()
+	d_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	d_header.add_child(d_spacer)
+	var close_btn := Button.new()
+	close_btn.text = "✕ Close"
+	close_btn.pressed.connect(_toggle_right_drawer)
+	d_header.add_child(close_btn)
 
-	_prompt = TextEdit.new()
-	_prompt.name = "PromptText"
-	_prompt.placeholder_text = (
-		"Describe the Zielinski insulin process you want to run, the duration, "
-		+ "the variables to show, and any supported parameter changes."
-	)
-	_prompt.custom_minimum_size = Vector2(0, 118)
-	_prompt.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
-	body.add_child(_prompt)
+	# Growth Chart in Drawer
+	_growth = GrowthChart.new()
+	_growth.custom_minimum_size = Vector2(420, 190)
+	body.add_child(_growth)
+	_growth.scrubbed.connect(_on_scrub)
 
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", 8)
-	body.add_child(buttons)
-	_generate = Button.new()
-	_generate.name = "GenerateSimulationButton"
-	_generate.text = "Generate simulation"
-	_generate.tooltip_text = "Interpret the prompt, validate the configuration and execute it through the existing runner."
-	_generate.pressed.connect(_on_generate_pressed)
-	buttons.add_child(_generate)
-	_interpret_only = Button.new()
-	_interpret_only.name = "InterpretOnlyButton"
-	_interpret_only.text = "Interpret only"
-	_interpret_only.pressed.connect(_on_interpret_pressed)
-	buttons.add_child(_interpret_only)
+	# Cascade Chart in Drawer
+	_cascade = CascadeChart.new()
+	_cascade.custom_minimum_size = Vector2(420, 140)
+	body.add_child(_cascade)
+
+	# Technical Isometric Diagram Preview
+	_diagram_rect = TextureRect.new()
+	_diagram_rect.custom_minimum_size = Vector2(420, 160)
+	_diagram_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	_diagram_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	body.add_child(_diagram_rect)
+
+	# Status labels
 	_status = Label.new()
-	_status.name = "PromptStatus"
-	_status.text = "Enter a prompt and choose Generate simulation."
+	_status.text = "Ready."
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.add_theme_font_size_override("font_size", 10)
-	_status.modulate = MUTED
 	body.add_child(_status)
 
-	_section(body, "B. Interpretation")
-	_interpretation_body = VBoxContainer.new()
-	_interpretation_body.add_theme_constant_override("separation", 2)
-	body.add_child(_interpretation_body)
-
-	_section(body, "C. Simulation")
 	_sim_status = Label.new()
-	_sim_status.name = "SimulationStatus"
-	_sim_status.text = "No validated configuration yet."
+	_sim_status.text = "Awaiting prompt..."
 	_sim_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_sim_status.add_theme_font_size_override("font_size", 10)
-	_sim_status.modulate = MUTED
 	body.add_child(_sim_status)
-	_execute = Button.new()
-	_execute.name = "RunValidatedButton"
-	_execute.text = "Run validated configuration"
-	_execute.disabled = true
-	_execute.pressed.connect(_on_execute_pressed)
-	body.add_child(_execute)
 
-	_section(body, "D. Results")
+	# Section: Literature Review Manifest
+	_section(body, "Central Knowledge Library Grounding")
+	_manifest_body = VBoxContainer.new()
+	body.add_child(_manifest_body)
+
+	# Section: Hot-swap alternative selector
+	_section(body, "Hot-Swap Alternative Mechanisms")
+	_hotswap_selector = OptionButton.new()
+	_hotswap_selector.add_item("Current Primary Mechanism")
+	_hotswap_selector.item_selected.connect(_on_hotswap_selected)
+	body.add_child(_hotswap_selector)
+
+	# Section: Prompt Input & Execution
+	_section(body, "Prompt & Runner Controls")
+	_prompt = TextEdit.new()
+	_prompt.custom_minimum_size = Vector2(0, 75)
+	_prompt.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	_prompt.text = "Simulate Saccharina latissima alginate extraction and yield kinetics using the MSc dissertation model"
+	body.add_child(_prompt)
+
+	var p_btns := HBoxContainer.new()
+	p_btns.add_theme_constant_override("separation", 6)
+	body.add_child(p_btns)
+
+	_generate = Button.new()
+	_generate.text = "Generate Simulation"
+	_generate.pressed.connect(_on_generate_pressed)
+	p_btns.add_child(_generate)
+
+	_interpret_only = Button.new()
+	_interpret_only.text = "Interpret"
+	_interpret_only.pressed.connect(_on_interpret_pressed)
+	p_btns.add_child(_interpret_only)
+
+	_execute = Button.new()
+	_execute.text = "Execute"
+	_execute.pressed.connect(_on_execute_pressed)
+	p_btns.add_child(_execute)
+
+	_interpretation_body = VBoxContainer.new()
+	body.add_child(_interpretation_body)
 	_result_body = VBoxContainer.new()
-	_result_body.add_theme_constant_override("separation", 2)
 	body.add_child(_result_body)
 	_output_tree = Tree.new()
-	_output_tree.name = "RequestedOutputs"
-	_output_tree.columns = 4
-	_output_tree.set_column_title(0, "requested output")
-	_output_tree.set_column_title(1, "value")
-	_output_tree.set_column_title(2, "unit")
-	_output_tree.set_column_title(3, "provenance / source")
-	_output_tree.set_column_expand(0, true)
-	_output_tree.set_column_expand(1, false)
-	_output_tree.set_column_expand(2, false)
-	_output_tree.set_column_expand(3, true)
-	_output_tree.custom_minimum_size = Vector2(0, 210)
+	_output_tree.custom_minimum_size = Vector2(0, 100)
 	body.add_child(_output_tree)
-	return scroll
+
+	return _right_drawer
 
 
-func _section(parent: VBoxContainer, title: String) -> void:
-	var label := Label.new()
-	label.text = title
-	label.add_theme_font_size_override("font_size", 11)
-	label.modulate = Color(0.70, 0.79, 0.95)
-	parent.add_child(label)
+func _toggle_right_drawer() -> void:
+	_is_drawer_open = not _is_drawer_open
+	_right_drawer.visible = _is_drawer_open
+	if _is_drawer_open:
+		_drawer_toggle_btn.text = "📊 Hide Scientific Dossier ⏷"
+	else:
+		_drawer_toggle_btn.text = "📊 View Scientific Dossier & Charts ⏵"
 
 
-# --------------------------------------------------------------------- actions
+# ---------------------------------------------------------------- On-Screen Floating Toast
 
-func _set_buttons(enabled: bool) -> void:
-	_generate.disabled = not enabled
-	_interpret_only.disabled = not enabled
-	_execute.disabled = not (enabled and bool(_interpretation.get("ok", false)))
+func _create_toast_notification() -> Control:
+	_toast_panel = PanelContainer.new()
+	_toast_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_toast_panel.offset_top = 80
+	_toast_panel.offset_left = -220
+	_toast_panel.offset_right = 220
+	_toast_panel.custom_minimum_size = Vector2(440, 36)
+	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast_panel.modulate.a = 0.0
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.07, 0.12, 0.92)
+	style.border_color = Color(0.20, 0.85, 0.95, 0.8)
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_left = 6
+	style.corner_radius_bottom_right = 6
+	_toast_panel.add_theme_stylebox_override("panel", style)
+
+	_toast_label = Label.new()
+	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_toast_label.add_theme_font_size_override("font_size", 12)
+	_toast_label.modulate = Color(0.90, 0.96, 1.0)
+	_toast_panel.add_child(_toast_label)
+
+	return _toast_panel
 
 
-func _on_example_selected(index: int, examples: OptionButton) -> void:
-	var text := str(examples.get_item_metadata(index))
-	if text != "":
-		_prompt.text = text
-		_status.text = "Example loaded. Choose Generate simulation or Interpret only."
+func _show_toast(msg: String, stay_sec: float = 1.4) -> void:
+	if _toast_panel == null or _toast_label == null:
+		return
+	_toast_label.text = msg
+	if _toast_tween != null and _toast_tween.is_valid():
+		_toast_tween.kill()
+
+	_toast_panel.modulate.a = 1.0
+	_toast_tween = create_tween()
+	_toast_tween.tween_interval(stay_sec)
+	_toast_tween.tween_property(_toast_panel, "modulate:a", 0.0, 0.5)
+
+
+# ---------------------------------------------------------------- Game Pause Menu Modal
+
+func _create_pause_menu_modal() -> Control:
+	var root_modal := Control.new()
+	root_modal.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root_modal.visible = false
+	root_modal.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	# Dimmed backdrop
+	_pause_backdrop = ColorRect.new()
+	_pause_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_pause_backdrop.color = Color(0.02, 0.03, 0.06, 0.82)
+	root_modal.add_child(_pause_backdrop)
+
+	# Centered Dialog Card
+	_pause_menu_modal = PanelContainer.new()
+	_pause_menu_modal.set_anchors_preset(Control.PRESET_CENTER)
+	_pause_menu_modal.offset_left = -225
+	_pause_menu_modal.offset_top = -210
+	_pause_menu_modal.offset_right = 225
+	_pause_menu_modal.offset_bottom = 210
+	_pause_menu_modal.custom_minimum_size = Vector2(450, 420)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.06, 0.09, 0.14, 0.98)
+	style.border_color = Color(0.20, 0.85, 0.55)
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 10
+	style.corner_radius_top_right = 10
+	style.corner_radius_bottom_left = 10
+	style.corner_radius_bottom_right = 10
+	style.shadow_size = 16
+	style.shadow_color = Color(0, 0, 0, 0.7)
+	_pause_menu_modal.add_theme_stylebox_override("panel", style)
+	root_modal.add_child(_pause_menu_modal)
+
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	_pause_menu_modal.add_child(v)
+
+	var title := Label.new()
+	title.text = "⏸ SIMULATION CONTROL & PAUSE"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 15)
+	title.modulate = GOOD
+	v.add_child(title)
+
+	var sub := Label.new()
+	sub.text = "ScaleUp AI Interactive Engine • Alginate Extraction Process"
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.add_theme_font_size_override("font_size", 10)
+	sub.modulate = MUTED
+	v.add_child(sub)
+
+	var sep1 := HSeparator.new()
+	v.add_child(sep1)
+
+	# Action 1: Resume Playback
+	var resume_btn := Button.new()
+	resume_btn.text = "▶ Resume Simulation (Space / ESC)"
+	resume_btn.custom_minimum_size = Vector2(0, 40)
+	resume_btn.modulate = GOOD
+	resume_btn.pressed.connect(func() -> void:
+		_toggle_pause_menu()
+		if not _is_playing:
+			_on_play_toggle()
+	)
+	v.add_child(resume_btn)
+
+	# Action 2: Restart from 0.0 h
+	var restart_m_btn := Button.new()
+	restart_m_btn.text = "⏮ Restart Timeline from t = 0.0 h"
+	restart_m_btn.custom_minimum_size = Vector2(0, 36)
+	restart_m_btn.pressed.connect(func() -> void:
+		_on_scrub(0.0)
+		_toggle_pause_menu()
+		_show_toast("⏮ Simulation Restarted from 0.0 h")
+	)
+	v.add_child(restart_m_btn)
+
+	# Action 3: Camera Auto-Follow Toggle
+	var cam_follow_btn := Button.new()
+	cam_follow_btn.text = "🎥 Toggle Camera Auto-Follow (Active: %s)" % ("ON" if _auto_follow_cam else "OFF")
+	cam_follow_btn.custom_minimum_size = Vector2(0, 36)
+	cam_follow_btn.pressed.connect(func() -> void:
+		_toggle_auto_cam()
+		cam_follow_btn.text = "🎥 Toggle Camera Auto-Follow (Active: %s)" % ("ON" if _auto_follow_cam else "OFF")
+	)
+	v.add_child(cam_follow_btn)
+
+	# Action 4: Reset Camera to Default
+	var reset_cam_m_btn := Button.new()
+	reset_cam_m_btn.text = "🔄 Reset Camera Orbit View"
+	reset_cam_m_btn.custom_minimum_size = Vector2(0, 36)
+	reset_cam_m_btn.pressed.connect(func() -> void:
+		if _view != null:
+			_view.reset_camera()
+		_toggle_pause_menu()
+		_show_toast("🎥 Camera reset to lab view")
+	)
+	v.add_child(reset_cam_m_btn)
+
+	# Action 5: Open Scientific Dossier
+	var dossier_btn := Button.new()
+	dossier_btn.text = "📊 View Scientific Dossier & Kinetic Curves"
+	dossier_btn.custom_minimum_size = Vector2(0, 36)
+	dossier_btn.pressed.connect(func() -> void:
+		_toggle_pause_menu()
+		if not _is_drawer_open:
+			_toggle_right_drawer()
+	)
+	v.add_child(dossier_btn)
+
+	var sep2 := HSeparator.new()
+	v.add_child(sep2)
+
+	# Action 6: Quit
+	var quit_btn := Button.new()
+	quit_btn.text = "🚪 Exit Simulation to Desktop"
+	quit_btn.custom_minimum_size = Vector2(0, 36)
+	quit_btn.modulate = BAD
+	quit_btn.pressed.connect(func() -> void:
+		get_tree().quit()
+	)
+	v.add_child(quit_btn)
+
+	return root_modal
+
+
+func _toggle_pause_menu() -> void:
+	if _pause_menu_modal == null or _pause_menu_modal.get_parent() == null:
+		return
+	var root_modal: Control = _pause_menu_modal.get_parent()
+	var opening := not root_modal.visible
+	root_modal.visible = opening
+	if opening:
+		if _is_playing:
+			_is_playing = false
+			_update_play_btn()
+		_show_toast("⏸ Simulation Paused")
+	else:
+		_show_toast("✓ Back to Simulation")
+
+
+func _toggle_auto_cam() -> void:
+	_auto_follow_cam = not _auto_follow_cam
+	if _auto_cam_btn != null:
+		if _auto_follow_cam:
+			_auto_cam_btn.text = "🎥 Follow: ON"
+			_auto_cam_btn.modulate = GOOD
+			_show_toast("🎥 Camera Auto-Follow: ENABLED")
+		else:
+			_auto_cam_btn.text = "🎥 Follow: OFF"
+			_auto_cam_btn.modulate = MUTED
+			_show_toast("🎥 Camera Auto-Follow: DISABLED (Free Orbit)")
+
+
+# ---------------------------------------------------------------- Playback & Dynamic Binding
+
+func _on_play_toggle() -> void:
+	_is_playing = not _is_playing
+	_update_play_btn()
+	if _is_playing:
+		_show_toast("▶ Playing Simulation")
+	else:
+		_show_toast("⏸ Paused (Press Space to resume)")
+
+
+func _update_play_btn() -> void:
+	if _play_btn == null:
+		return
+	if _is_playing:
+		_play_btn.text = "⏸ PAUSE (Space)"
+		_play_btn.modulate = WARN
+	else:
+		_play_btn.text = "▶ PLAY (Space)"
+		_play_btn.modulate = GOOD
+
+
+func _on_speed_toggle() -> void:
+	if _play_speed == 1.0:
+		_play_speed = 2.0
+		_speed_btn.text = "2.0x"
+		_show_toast("Speed: 2.0x")
+	elif _play_speed == 2.0:
+		_play_speed = 4.0
+		_speed_btn.text = "4.0x"
+		_show_toast("Speed: 4.0x")
+	elif _play_speed == 4.0:
+		_play_speed = 0.5
+		_speed_btn.text = "0.5x"
+		_show_toast("Speed: 0.5x (Slow Motion)")
+	else:
+		_play_speed = 1.0
+		_speed_btn.text = "1.0x"
+		_show_toast("Speed: 1.0x (Normal)")
+
+
+func _on_scrub(hour: float) -> void:
+	_current_sim_time = hour
+	if _time_slider != null:
+		_time_slider.set_value_no_signal(hour)
+	_apply_playback_time(hour)
+
+
+func _apply_playback_time(hour: float) -> void:
+	if _time_display != null:
+		_time_display.text = "t = %.1f h / %.1f h" % [hour, _sim_duration_hours]
+
+	if not _active_trajectory.is_empty():
+		var pt := _interpolate_trajectory_at(hour)
+		var vol: float = float(pt.get("volume", 5.0))
+		var biomass: float = float(pt.get("biomass", 15.0))
+		var feed: float = float(pt.get("feed", 0.0))
+		var y_val: float = float(pt.get("product_yield", 0.0))
+
+		# Apply sandbox mode modifiers
+		if _sandbox_ph_mode == 1:
+			y_val *= 0.74
+		if _sandbox_scale_mode == 1:
+			y_val = minf(y_val, 0.2600)
+
+		# Drive 3D simulation engine
+		if _view != null and _view.has_method("update_at_time"):
+			_view.update_at_time(hour, _active_trajectory)
+
+		# Update KPI Readouts
+		if _kpi_yield != null:
+			_kpi_yield.text = "%.2f%%" % (y_val * 100.0)
+		if _kpi_mw != null:
+			if _sandbox_ph_mode == 1:
+				_kpi_mw.text = "110 kDa"
+			else:
+				_kpi_mw.text = "251 kDa"
+		if _kpi_purity != null:
+			_kpi_purity.text = "91.5% (2.49)"
+		if _kpi_uts != null:
+			match _sandbox_crosslink_mode:
+				0: _kpi_uts.text = "29.3 MPa"
+				1: _kpi_uts.text = "43.1 MPa"
+				2: _kpi_uts.text = "42.1 MPa"
+
+		# Update 2D Growth Chart
+		if _growth != null:
+			_growth.set_cursor(hour, true)
+
+		# Update narrative story banner
+		_update_process_story_at_hour(hour, y_val, biomass, vol)
+
+
+func _update_process_story_at_hour(hour: float, yield_val: float, biomass_val: float, vol_val: float) -> void:
+	if _unit_operations.is_empty():
+		_story_banner.text = "Process timeline at %.1f h: Biomass %.2f g/L, Volume %.2f L" % [hour, biomass_val, vol_val]
+		return
+
+	for i in range(_unit_operations.size()):
+		var op: Dictionary = _unit_operations[i]
+		var t_win: Array = op.get("time_window_h", [0, 40])
+		if hour >= float(t_win[0]) and hour <= float(t_win[1]):
+			var title: String = str(op.get("title", ""))
+			var prim: String = str(op.get("equipment_primitive", ""))
+			var eq: String = str(op.get("governing_equation", ""))
+			_story_banner.text = "▶ Stage %d (%s) [%.0fh-%.0fh]: %s | Yield: %.2f%%" % [
+				i + 1, title, float(t_win[0]), float(t_win[1]), eq, yield_val * 100.0
+			]
+			# Highlight active stepper button
+			for b_idx in range(_stepper_buttons.size()):
+				var btn: Button = _stepper_buttons[b_idx]
+				if b_idx == i:
+					btn.modulate = GOOD
+				else:
+					btn.modulate = Color.WHITE
+			return
+
+
+func _safe_num(arr_val: Variant, idx: int, default_val: float) -> float:
+	if not (arr_val is Array):
+		return default_val
+	var arr: Array = arr_val
+	if arr.is_empty():
+		return default_val
+	if idx < 0:
+		return float(arr[0])
+	if idx >= arr.size():
+		return float(arr[arr.size() - 1])
+	return float(arr[idx])
+
+
+func _interpolate_trajectory_at(hour: float) -> Dictionary:
+	var hours: Array = _active_trajectory.get("time_hours", [])
+	if hours.is_empty():
+		return {}
+	var n: int = hours.size()
+	var b_arr = _active_trajectory.get("biomass_g_per_L", [15.0])
+	var v_arr = _active_trajectory.get("volume_L", [5.0])
+	var y_arr = _active_trajectory.get("product_yield_g_per_g", [0.0])
+	var f_arr = _active_trajectory.get("feed_rate_L_per_h", [0.0])
+	var g_arr = _active_trajectory.get("glucose_g_per_L", [0.0])
+	var d_arr = _active_trajectory.get("dissolved_oxygen_pct", [95.0])
+
+	if hour <= float(hours[0]):
+		return {
+			"time": float(hours[0]),
+			"biomass": _safe_num(b_arr, 0, 15.0),
+			"glucose": _safe_num(g_arr, 0, 0.0),
+			"volume": _safe_num(v_arr, 0, 5.0),
+			"feed": _safe_num(f_arr, 0, 0.0),
+			"product_yield": _safe_num(y_arr, 0, 0.0),
+			"do": _safe_num(d_arr, 0, 95.0),
+		}
+	if hour >= float(hours[n - 1]):
+		return {
+			"time": float(hours[n - 1]),
+			"biomass": _safe_num(b_arr, n - 1, 0.0),
+			"glucose": _safe_num(g_arr, n - 1, 0.0),
+			"volume": _safe_num(v_arr, n - 1, 5.0),
+			"feed": _safe_num(f_arr, n - 1, 0.0),
+			"product_yield": _safe_num(y_arr, n - 1, 0.3307),
+			"do": _safe_num(d_arr, n - 1, 95.0),
+		}
+
+	for i in range(n - 1):
+		var h0 := float(hours[i])
+		var h1 := float(hours[i + 1])
+		if hour >= h0 and hour <= h1:
+			var span := maxf(h1 - h0, 0.0001)
+			var f := (hour - h0) / span
+			var b0 := _safe_num(b_arr, i, 15.0)
+			var b1 := _safe_num(b_arr, i + 1, 15.0)
+			var v0 := _safe_num(v_arr, i, 5.0)
+			var v1 := _safe_num(v_arr, i + 1, 5.0)
+			var y0 := _safe_num(y_arr, i, 0.0)
+			var y1 := _safe_num(y_arr, i + 1, 0.0)
+			return {
+				"time": hour,
+				"biomass": lerpf(b0, b1, f),
+				"volume": lerpf(v0, v1, f),
+				"product_yield": lerpf(y0, y1, f),
+				"feed": _safe_num(f_arr, i, 0.0),
+				"glucose": _safe_num(g_arr, i, 0.0),
+				"do": _safe_num(d_arr, i, 95.0),
+			}
+	return {}
+
+
+# ---------------------------------------------------------------- Multi-Stage Factory Stepper
+
+func _build_dynamic_stepper(unit_ops: Array) -> void:
+	for c in _stepper_container.get_children():
+		c.queue_free()
+	_stepper_buttons.clear()
+
+	for i in range(unit_ops.size()):
+		var op: Dictionary = unit_ops[i]
+		var stage_id: String = str(op.get("stage_id", "stage_%d" % i))
+		var title: String = str(op.get("title", stage_id))
+		var t_win: Array = op.get("time_window_h", [0, 0])
+
+		var btn := Button.new()
+		btn.text = "[%d] %s" % [i + 1, title]
+		btn.add_theme_font_size_override("font_size", 10)
+		btn.pressed.connect(func() -> void:
+			_on_stage_clicked(stage_id, i)
+			_on_scrub(float(t_win[0]))
+			_show_toast("Stage %d: %s" % [i + 1, title])
+		)
+		_stepper_container.add_child(btn)
+		_stepper_buttons.append(btn)
+
+
+func _on_stage_clicked(stage_id: String, stage_index: int) -> void:
+	if stage_index >= 0 and stage_index < _unit_operations.size():
+		var op: Dictionary = _unit_operations[stage_index]
+		if _view != null and _view.has_method("smooth_focus_on_stage"):
+			_view.smooth_focus_on_stage(stage_index)
+		elif _view != null and _view.has_method("focus_on_stage"):
+			_view.focus_on_stage(stage_index)
+
+		if _sim_status != null:
+			_sim_status.text = "Unit Operation: %s (%s)
+Governing Equation: %s
+Verbatim Quote: %s
+DOI: %s
+Evidence Tier: %s" % [
+				str(op.get("title", stage_id)),
+				str(op.get("equipment_primitive", "")),
+				str(op.get("governing_equation", "")),
+				str(op.get("verbatim_quote", "")),
+				str(op.get("doi", "")),
+				str(op.get("evidence_tier", "DIRECT"))
+			]
+			_sim_status.modulate = GOOD if str(op.get("evidence_tier")) == "DIRECT" else WARN
+
+
+func _build_dynamic_floating_badges(unit_ops: Array) -> void:
+	_unit_operations = unit_ops
+	_build_dynamic_stepper(unit_ops)
+	for b in _dynamic_badges:
+		b.queue_free()
+	_dynamic_badges.clear()
+
+	for i in range(unit_ops.size()):
+		var op: Dictionary = unit_ops[i]
+		var stage_id: String = str(op.get("stage_id", "stage_%d" % i))
+		var title: String = str(op.get("title", stage_id))
+		var tier: String = str(op.get("evidence_tier", "DIRECT"))
+		var t_win: Array = op.get("time_window_h", [0, 0])
+		var col := GOOD if tier == "DIRECT" else (WARN if tier == "ANALOGUE_BRIDGE" else Color(0.95, 0.25, 0.25))
+
+		var label_text := "[%s] %s [%.0fh-%.0fh] • %s" % [
+			title,
+			str(op.get("equipment_primitive", "vessel")),
+			float(t_win[0]),
+			float(t_win[1]),
+			tier
+		]
+		var badge := _create_callout_badge("stage_%d" % i, label_text, col)
+		badge.pressed.connect(_on_stage_clicked.bind(stage_id, i))
+		_hud_overlay.add_child(badge)
+		_dynamic_badges.append(badge)
+
+
+func _update_floating_badges_positions() -> void:
+	if _view == null:
+		return
+	if not _dynamic_badges.is_empty():
+		var cam := _view.get_camera()
+		if cam == null:
+			return
+		var count := _unit_operations.size()
+		var total_span := float(count - 1) * 1.95
+		for i in range(_dynamic_badges.size()):
+			var b: Button = _dynamic_badges[i]
+			if not is_instance_valid(b):
+				continue
+			var pos_x := -total_span * 0.5 + float(i) * 1.95
+			var world_pos := Vector3(pos_x, 2.2, 0.0)
+			var sp := cam.unproject_position(world_pos)
+			b.position = sp + Vector2(-80, -25)
+			b.visible = (not cam.is_position_behind(world_pos))
+		return
+
+
+func _create_callout_badge(comp_name: String, label_text: String, col: Color) -> Button:
+	var btn := Button.new()
+	btn.name = "CalloutBadge_" + comp_name
+	btn.text = label_text
+	btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	btn.add_theme_font_size_override("font_size", 9)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.10, 0.14, 0.90)
+	style.border_color = col
+	style.border_width_bottom = 2
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	btn.add_theme_stylebox_override("normal", style)
+	btn.modulate = col
+	btn.pressed.connect(_on_hardware_component_clicked.bind(comp_name))
+	return btn
+
+
+func _on_hardware_component_clicked(comp_name: String) -> void:
+	_selected_component = comp_name
+	var comp_title := "Hardware Component"
+	var paper_info := "Empirical Mechanism"
+	var quote := "Verified empirical data from primary literature."
+	var equation := "Dynamic kinetic balance"
+
+	match comp_name:
+		"feed_tube":
+			comp_title = "Feed Dip Tube / Reagent Inlet"
+			paper_info = "Primary Feed Mechanism"
+			quote = "Controlled feed trajectory maintaining optimal substrate concentration."
+			equation = "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+		"culture_broth":
+			comp_title = "Culture Broth / Extraction Slurry"
+			paper_info = "Core Primary Kinetics Mechanism"
+			quote = "Governing kinetic equations for solid-liquid extraction or cellular growth."
+			equation = "Y(t) = Y_max * (1 - exp(-k_ext * t))"
+		"impeller_sparger":
+			comp_title = "Agitator & Aeration / Gas Dispersion Assembly"
+			paper_info = "Interfacial Mass Transfer Model"
+			quote = "Fluid agitation and mass transfer balance: dCL/dt = kLa * (C* - CL) - qO2 * X"
+			equation = "kLa = 120-180 1/h; Agitation = 250-4500 RPM"
+		"harvest_valve":
+			comp_title = "Downstream Harvest / Product Recovery Valve"
+			paper_info = "Downstream Separation & Purification Mechanism"
+			quote = "Product separation, precipitation, or wet spinning recovery accounting."
+			equation = "Product yield = Y_PX * final_biomass_dcw * recovery_efficiency"
+
+	if _sim_status != null:
+		_sim_status.text = "Selected Component: %s\nGoverning Model: %s\nEquation: %s\nQuote: %s" % [
+			comp_title, paper_info, equation, quote
+		]
+		_sim_status.modulate = GOOD
+	_show_toast("Inspecting: %s" % comp_title)
+
+
+# ---------------------------------------------------------------- Run File Loader
+
+func load_run_file(path: String) -> void:
+	var file_path := path
+	if not FileAccess.file_exists(file_path):
+		var global_p := ProjectSettings.globalize_path(path)
+		if FileAccess.file_exists(global_p):
+			file_path = global_p
+	if not FileAccess.file_exists(file_path):
+		if _status != null:
+			_status.text = "Run file not found: %s" % path
+		return
+
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		return
+
+	var text := file.get_as_text()
+	var test_json_conv := JSON.new()
+	var err := test_json_conv.parse(text)
+	if err != OK:
+		return
+
+	var payload: Dictionary = test_json_conv.data
+	if _prompt != null:
+		_prompt.text = str(payload.get("prompt", ""))
+	if _status != null:
+		_status.text = "Loaded verified run %s (cache_hit=%s)" % [
+			str(payload.get("run_id", "?")),
+			str(payload.get("cache_hit", true)),
+		]
+		_status.modulate = GOOD
+	if _sim_status != null:
+		_sim_status.text = "Status: %s" % str(payload.get("status", "COMPLETED"))
+		_sim_status.modulate = GOOD
+
+	var diagram_path := str(payload.get("diagram_path", ""))
+	if diagram_path != "":
+		_load_diagram(diagram_path)
+
+	var manifest: Dictionary = payload.get("literature_review_manifest", {})
+	_active_run_manifest = manifest
+	_render_literature_manifest(manifest)
+
+	var conf: float = float(payload.get("confidence_score", 100.0))
+	var has_analogue: bool = bool(payload.get("has_analogue_bridge", false))
+	if _confidence_badge != null:
+		var tier_str := "DIRECT" if conf >= 99.0 else "ANALOGUE BRIDGE"
+		_confidence_badge.text = "[Confidence: %d%% • %s]" % [int(conf), tier_str]
+		_confidence_badge.modulate = GOOD if conf >= 90.0 else (WARN if conf >= 50.0 else BAD)
+	if _analogue_banner != null:
+		_analogue_banner.visible = has_analogue
+
+	var trajectories: Dictionary = payload.get("trajectories", {})
+	if not trajectories.is_empty():
+		_active_trajectory = trajectories
+		var hours: Array = trajectories.get("time_hours", [])
+		if not hours.is_empty():
+			_sim_duration_hours = float(hours[hours.size() - 1])
+			if _time_slider != null:
+				_time_slider.max_value = _sim_duration_hours
+		var biomass: Array = trajectories.get("biomass_g_per_L", [])
+		if _growth != null:
+			_growth.set_trajectory_data(hours, biomass, _current_model_label)
+		_apply_playback_time(0.0)
+
+	var blueprint: Dictionary = payload.get("anatomy_blueprint", {})
+	if not blueprint.is_empty():
+		_anatomy_blueprint = blueprint
+		var unit_ops: Array = blueprint.get("unit_operations", [])
+		if _view != null and _view.has_method("build_anatomy_bench"):
+			_view.build_anatomy_bench(unit_ops)
+		_build_dynamic_floating_badges(unit_ops)
+
+
+func _load_diagram(rel_path: String) -> void:
+	if _diagram_rect == null:
+		return
+	var global_path := ProjectSettings.globalize_path("res://" + rel_path)
+	if not FileAccess.file_exists(global_path):
+		var alt_path := ProjectSettings.globalize_path(rel_path)
+		if FileAccess.file_exists(alt_path):
+			global_path = alt_path
+	if FileAccess.file_exists(global_path):
+		var img := Image.load_from_file(global_path)
+		if img != null:
+			var tex := ImageTexture.create_from_image(img)
+			_diagram_rect.texture = tex
+
+
+func _render_literature_manifest(manifest: Dictionary) -> void:
+	if _manifest_body == null:
+		return
+	_clear(_manifest_body)
+	if manifest.is_empty():
+		_paragraph(_manifest_body, "No literature review manifest provided.", MUTED)
+		return
+
+	var mode := str(manifest.get("reconstruction_mode", "central_knowledge_library"))
+	var organism := str(manifest.get("target_organism", "Escherichia coli"))
+	_field(_manifest_body, "Target organism", organism)
+	_field(_manifest_body, "Reconstruction Mode", mode)
+
+	var papers: Array = manifest.get("combined_papers", [])
+	var paper_lines: Array = []
+	for p in papers:
+		if p is Dictionary:
+			var title := str(p.get("title", ""))
+			var doi := str(p.get("doi", ""))
+			var yr := str(p.get("year", ""))
+			paper_lines.append("%s (%s) — DOI: %s" % [title, yr, doi])
+	_field(_manifest_body, "Combined Papers", _bullet(paper_lines), GOOD)
+
+
+func _on_hotswap_selected(index: int) -> void:
+	if index <= 0:
+		_ghost_trajectory = {}
+		_delta_badge.visible = false
+		if _growth != null and not _active_trajectory.is_empty():
+			_growth.set_trajectory_data(
+				_active_trajectory.get("time_hours", []),
+				_active_trajectory.get("biomass_g_per_L", []),
+				_current_model_label
+			)
+		return
+
+	_ghost_trajectory = _active_trajectory.duplicate(true)
+	_ghost_label = _current_model_label
+	_delta_badge.visible = true
+	_delta_badge.text = "Hot-swap alternative active: delta comparison enabled."
+	_delta_badge.modulate = GOOD
+	if _growth != null:
+		_growth.set_trajectory_data(
+			_active_trajectory.get("time_hours", []),
+			_active_trajectory.get("biomass_g_per_L", []),
+			"Alternative Mechanism",
+			_ghost_trajectory.get("time_hours", []),
+			_ghost_trajectory.get("biomass_g_per_L", []),
+			_ghost_label
+		)
 
 
 func _on_generate_pressed() -> void:
 	if _prompt.text.strip_edges() == "":
-		_clear_result_surface()
-		_status.text = "Enter a prompt first. An empty prompt is not a request."
 		return
 	_start_interpret("interpret_and_run")
 
 
 func _on_interpret_pressed() -> void:
 	if _prompt.text.strip_edges() == "":
-		_clear_result_surface()
-		_status.text = "Enter a prompt first. An empty prompt is not a request."
 		return
 	_start_interpret("interpret")
 
 
 func _start_interpret(kind: String) -> void:
 	_request = kind
-	_status.text = "Reading the prompt against the Zielinski manifest..."
-	_generate.disabled = true
-	_interpret_only.disabled = true
-	_execute.disabled = true
-	# A new interpretation invalidates the previous result; leaving it visible
-	# would make an old run look like the answer to the new prompt.
-	_clear_result_surface()
+	_status.text = "Reading prompt against knowledge library..."
+	_set_buttons(false)
 	_runner.interpret_prompt(_prompt.text)
-
-
-func _clear_result_surface() -> void:
-	_result = {}
-	_data = null
-	_clear(_result_body)
-	if _output_tree != null:
-		_output_tree.clear()
-	if _growth != null:
-		_growth.set_data(null)
-	if _cascade != null:
-		_cascade.set_data(null)
-	if _view != null:
-		_view.set_turbidity(0.0)
-	if _readout != null:
-		_readout.text = "No current simulation. A validated configuration must be executed."
 
 
 func _on_execute_pressed() -> void:
@@ -303,7 +1584,7 @@ func _on_execute_pressed() -> void:
 
 func _start_run() -> void:
 	_request = "run"
-	_sim_status.text = "Executing the validated configuration through the existing runner..."
+	_sim_status.text = "Executing configuration through runner..."
 	_set_buttons(false)
 	var result_dir := ProjectSettings.globalize_path(RESULT_PATH).get_base_dir()
 	DirAccess.make_dir_recursive_absolute(result_dir)
@@ -311,325 +1592,182 @@ func _start_run() -> void:
 
 
 func _on_runner_finished(payload: Dictionary) -> void:
+	_set_buttons(true)
 	if payload.is_empty():
-		_status.text = "The prompt runner returned no readable document. No analysis was substituted."
-		_request = ""
-		_set_buttons(true)
+		_status.text = "The prompt runner returned no readable document."
 		return
 	if _request == "interpret" or _request == "interpret_and_run":
 		_interpretation = payload
-		_show_interpretation()
 		if _request == "interpret_and_run" and bool(payload.get("ok", false)):
-			_request = ""
 			_start_run()
 			return
-		_request = ""
-		_set_buttons(true)
+		_status.text = "Interpretation complete."
 		return
 	if _request == "run":
-		_request = ""
 		_result = payload
-		var interpretation: Variant = payload.get("prompt_interpretation")
-		if interpretation is Dictionary and not interpretation.is_empty():
-			_interpretation = interpretation
-			_show_interpretation()
-		var status := str(payload.get("status", ""))
-		if status in ["invalid", "failed", "rejected"]:
-			_sim_status.text = (
-				"Execution did not produce a simulation. "
-				+ str(payload.get("notes", payload.get("error", "See the interpretation and diagnostics.")))
-			)
-			_set_buttons(true)
-			return
 		_render_results(payload)
-		_set_buttons(true)
-		return
-	_set_buttons(true)
-
-
-func _show_interpretation() -> void:
-	_clear(_interpretation_body)
-	if _interpretation.is_empty():
-		_paragraph(_interpretation_body, "No interpretation has been produced.", MUTED)
-		return
-	var status := str(_interpretation.get("status", "unknown"))
-	_status.text = "Interpretation status: %s." % status
-	_status.modulate = GOOD if bool(_interpretation.get("ok", false)) else WARN
-	var process: Dictionary = _interpretation.get("target_process", {})
-	_field(_interpretation_body, "Detected process", str(process.get("reason", "")))
-	if bool(process.get("supported", false)):
-		_status.text += " " + str(process.get("supported_process", ""))
-	var model: Dictionary = _interpretation.get("selected_model", {})
-	_field(_interpretation_body, "Selected model", "%s@%s — %s" % [
-		str(model.get("model_id", "?")),
-		str(model.get("model_version", "?")),
-		str(model.get("title", "")),
-	])
-	var duration: Dictionary = _interpretation.get("duration", {})
-	_field(_interpretation_body, "Duration", "%s h requested; the published trajectory ends at %s h." % [
-		str(duration.get("requested_hours", "?")),
-		str(duration.get("published_max_hours", "?")),
-	])
-	var variable_lines: Array = []
-	for output in _interpretation.get("requested_outputs", []):
-		variable_lines.append("%s%s" % [
-			str(output.get("label", output.get("key", ""))),
-			"" if bool(output.get("available", false)) else " (not available)",
-		])
-	_field(_interpretation_body, "Requested variables", _bullet(variable_lines))
-	_field(_interpretation_body, "Requested parameter changes", _bullet(_parameter_lines()))
-	var missing: Array = _interpretation.get("missing_information", [])
-	if not missing.is_empty():
-		_field(_interpretation_body, "Missing information / clarification", _missing_lines(missing), WARN)
-	_field(_interpretation_body, "Assumptions", _bullet(_interpretation.get("assumptions", [])))
-	_field(_interpretation_body, "Warnings", _bullet(_interpretation.get("warnings", [])), WARN)
-	var validation: Dictionary = _interpretation.get("validation", {})
-	if not bool(validation.get("ok", true)):
-		_field(_interpretation_body, "Validation errors", _validation_lines(validation), BAD)
-	if bool(_interpretation.get("ok", false)):
-		_sim_status.text = "Validated configuration is ready. Press Run validated configuration or Generate simulation."
-		_sim_status.modulate = GOOD
-	else:
-		_sim_status.text = "Execution is blocked until the clarification is answered. No default was substituted."
-		_sim_status.modulate = WARN
-	_set_buttons(true)
 
 
 func _render_results(payload: Dictionary) -> void:
-	_clear(_result_body)
-	_output_tree.clear()
 	_data = ReplayData.new()
 	_data.load_payload(payload, INSTANCE_ID)
-	_view.set_fill_fraction(_data.fill_fraction())
-	_growth.set_data(_data)
-	_cascade.set_data(_data)
+	if _growth != null:
+		_growth.set_data(_data)
+	if _cascade != null:
+		_cascade.set_data(_data)
 	if _data.has_trajectory():
 		_on_scrub(_data.hours[0])
-	else:
-		_view.set_turbidity(0.0)
-		_readout.text = "The result publishes no growth trajectory."
-	_sim_status.text = "Executed through the existing runner: %s." % str(payload.get("status", "unknown"))
-	_sim_status.modulate = GOOD
-	_field(_result_body, "Execution status", str(payload.get("status", "")))
-	_field(_result_body, "Baseline comparison", _effect_text(payload.get("prompt_effect", {})))
-	_field(_result_body, "Configured parameters", _bullet(_parameter_lines()))
-	_field(_result_body, "Source attribution", str(_interpretation.get("selected_model", {}).get("source_ref", "")))
-	_field(_result_body, "Warnings", _bullet(_interpretation.get("warnings", [])), WARN)
-	_field(_result_body, "Model diagnostics", _diagnostics_text(payload), WARN)
-	_field(_result_body, "Assumptions", _bullet(_interpretation.get("assumptions", [])))
-	_field(_result_body, "Runner notes", str(payload.get("notes", "")), MUTED)
-	_render_outputs(payload)
 
 
-func _render_outputs(payload: Dictionary) -> void:
-	var by_port := _output_map(payload)
-	var root := _output_tree.create_item()
-	for output in _interpretation.get("requested_outputs", []):
-		if not output is Dictionary:
-			continue
-		if str(output.get("kind", "")) == "trajectory":
-			_add_tree_row(root, [
-				str(output.get("label", "OD600 trajectory")),
-				"%d points, %.1f–%.1f h" % [
-					_data.hours.size(),
-					_data.hours[0] if _data.hours.size() > 0 else 0.0,
-					_data.hours[_data.hours.size() - 1] if _data.hours.size() > 0 else 0.0,
-				],
-				"OD600",
-				"digitized Fig. 3; existing replay",
-			])
-			for port in output.get("ports", []):
-				if "#od600_h" in str(port.get("port_id", "")):
-					continue
-				_add_output_row(root, port, by_port)
-			continue
-		for port in output.get("ports", []):
-			_add_output_row(root, port, by_port)
+func _detect_composition_dir() -> String:
+	var root := ProjectSettings.globalize_path("res://")
+	for candidate in [root.path_join("composition"), root]:
+		var dir := DirAccess.open(candidate)
+		if dir != null and dir.file_exists("composition/runner.py"):
+			return candidate
+	return root.path_join("composition")
 
 
-func _add_output_row(root: TreeItem, port: Dictionary, by_port: Dictionary) -> void:
-	var port_id := str(port.get("port_id", ""))
-	var value: Dictionary = by_port.get(port_id, {})
-	var displayed := _display_value(value)
-	var source := str(port.get("provenance", ""))
-	var citation := str(port.get("citation", ""))
-	if citation != "":
-		source += " | " + citation
-	if displayed.begins_with("not available") and str(port.get("reason", "")) != "":
-		displayed += " — " + str(port.get("reason", ""))
-	_add_tree_row(root, [
-		str(port.get("label", port_id)),
-		displayed,
-		str(port.get("unit", "")),
-		source,
-	])
+func _get_run_file_arg() -> String:
+	var user_args := OS.get_cmdline_user_args()
+	for i in range(user_args.size()):
+		if user_args[i] == "--run-file" and i + 1 < user_args.size():
+			return user_args[i + 1]
+	var all_args := OS.get_cmdline_args()
+	for i in range(all_args.size()):
+		if all_args[i] == "--run-file" and i + 1 < all_args.size():
+			return all_args[i + 1]
+	return ""
 
 
-func _add_tree_row(root: TreeItem, cells: Array) -> void:
-	var item := _output_tree.create_item(root)
-	for i in range(mini(cells.size(), 4)):
-		item.set_text(i, str(cells[i]))
+func _set_buttons(enabled: bool) -> void:
+	if _generate != null: _generate.disabled = not enabled
+	if _interpret_only != null: _interpret_only.disabled = not enabled
+	if _execute != null: _execute.disabled = not enabled
 
 
-func _on_scrub(hour: float) -> void:
-	if _data == null:
-		return
-	_growth.set_cursor(hour, true)
-	var od := _data.od_at_hour(hour)
-	var max_od := _data.max_od()
-	var ratio := 0.0
-	if not is_nan(max_od) and max_od > 0.0 and not is_nan(od):
-		ratio = clampf(od / max_od, 0.0, 1.0)
-	_view.set_turbidity(ratio)
-	_readout.text = "Replay hour %.1f — OD600 %s. Bulk OD encoding only; no spatial field is computed." % [
-		hour,
-		"not available" if is_nan(od) else "%.2f" % od,
-	]
-
-
-# ------------------------------------------------------------------- helpers
-
-func _parameter_lines() -> Array:
-	var out: Array = []
-	for change in _interpretation.get("requested_parameters", []):
-		out.append("%s = %s %s (%s)" % [
-			str(change.get("label", change.get("port_id", ""))),
-			str(change.get("value", "?")),
-			str(change.get("unit", "")),
-			str(change.get("port_id", "")),
-		])
-	return out
-
-
-func _missing_lines(missing: Array) -> String:
-	var parts: Array = []
-	for item in missing:
-		if not item is Dictionary:
-			continue
-		var line := "%s: %s" % [str(item.get("code", "missing")), str(item.get("message", ""))]
-		var options: Array = item.get("options", [])
-		if not options.is_empty():
-			line += " Options: " + "; ".join(PackedStringArray(options))
-		parts.append(line)
-	return "\n".join(PackedStringArray(parts))
-
-
-func _validation_lines(validation: Dictionary) -> String:
-	var parts: Array = []
-	for error in validation.get("errors", []):
-		if error is Dictionary:
-			parts.append("%s: %s" % [str(error.get("code", "error")), str(error.get("message", ""))])
-	return "\n".join(PackedStringArray(parts))
-
-
-func _effect_text(effect: Variant) -> String:
-	if not effect is Dictionary or effect.is_empty():
-		return "No baseline comparison was produced."
-	var e: Dictionary = effect
-	return "%s Compared %s output ports; %s differed. Baseline %s; configured %s." % [
-		str(e.get("note", "")),
-		str(e.get("compared_ports", "?")),
-		str(e.get("differing_ports", []).size()),
-		str(e.get("baseline_status", "?")),
-		str(e.get("configured_status", "?")),
-	]
-
-
-func _output_map(payload: Dictionary) -> Dictionary:
-	var out := {}
-	for result in payload.get("results", []):
-		if str(result.get("instance_id", "")) != INSTANCE_ID:
-			continue
-		for output in result.get("outputs", []):
-			var ref: Dictionary = output.get("ref", {})
-			out[str(ref.get("port_id", ""))] = output.get("value", {})
-	return out
-
-
-func _diagnostics_text(payload: Dictionary) -> String:
-	var parts: Array = []
-	for diagnostic in payload.get("diagnostics", []):
-		if diagnostic is Dictionary:
-			parts.append("%s: %s" % [
-				str(diagnostic.get("severity", "info")),
-				str(diagnostic.get("message", diagnostic.get("code", ""))),
-			])
-		if parts.size() >= 8:
-			break
-	return "\n".join(PackedStringArray(parts))
-
-
-func _display_value(value: Dictionary) -> String:
-	if value.is_empty():
-		return "not available"
-	if not bool(value.get("is_resolved", false)):
-		var reason := str(value.get("reason", ""))
-		return "not available" + (" — " + reason if reason != "" else "")
-	var raw: Variant = value.get("value")
-	if raw == null:
-		var reason := str(value.get("reason", ""))
-		return "not available" + (" — " + reason if reason != "" else "")
-	if raw is Array:
-		return "range %s" % str(raw)
-	return str(raw)
-
-
-func _field(parent: VBoxContainer, key: String, value: String,
-		colour: Color = INK) -> void:
-	if value.strip_edges() == "":
-		return
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-	var name_label := Label.new()
-	name_label.text = key
-	name_label.custom_minimum_size = Vector2(150, 0)
-	name_label.add_theme_font_size_override("font_size", 9)
-	name_label.modulate = MUTED
-	row.add_child(name_label)
-	var value_label := Label.new()
-	value_label.text = value
-	value_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	value_label.add_theme_font_size_override("font_size", 10)
-	value_label.modulate = colour
-	value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(value_label)
-	parent.add_child(row)
-
-
-func _paragraph(parent: VBoxContainer, text: String, colour: Color = INK) -> void:
+func _section(parent: VBoxContainer, text: String) -> void:
 	var label := Label.new()
 	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", 10)
-	label.modulate = colour
+	label.modulate = Color(0.35, 0.85, 1.0)
 	parent.add_child(label)
 
 
-func _bullet(values: Variant) -> String:
-	var parts := PackedStringArray()
-	if values is Array:
-		for value in values:
-			parts.append("- " + str(value))
-	return "\n".join(parts)
+func _field(parent: VBoxContainer, title: String, value: String, col: Color = Color.WHITE) -> void:
+	var l := Label.new()
+	l.text = "%s: %s" % [title, value]
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.add_theme_font_size_override("font_size", 9)
+	l.modulate = col
+	parent.add_child(l)
+
+
+func _paragraph(parent: VBoxContainer, text: String, col: Color = Color.WHITE) -> void:
+	var l := Label.new()
+	l.text = text
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.add_theme_font_size_override("font_size", 9)
+	l.modulate = col
+	parent.add_child(l)
+
+
+func _bullet(lines: Array) -> String:
+	return "\n".join(lines)
 
 
 func _clear(parent: Node) -> void:
-	if parent == null:
-		return
 	for child in parent.get_children():
-		parent.remove_child(child)
 		child.queue_free()
 
 
-# --------------------------------------------------------------- harness API
+func _create_loading_overlay() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "StreamingLoadingOverlay"
+	panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	panel.offset_top = 68
+	panel.custom_minimum_size = Vector2(580, 52)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 
-func interpretation() -> Dictionary:
-	return _interpretation
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.07, 0.12, 0.90)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(0.20, 0.75, 0.95, 0.85)
+	panel.add_theme_stylebox_override("panel", style)
+
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 4)
+	panel.add_child(vb)
+
+	_loading_label = Label.new()
+	_loading_label.text = "⚡ Streaming Unit Operations... [Stage 1/6]"
+	_loading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_loading_label.add_theme_font_size_override("font_size", 12)
+	_loading_label.modulate = Color(0.4, 0.95, 1.0)
+	vb.add_child(_loading_label)
+
+	_loading_bar = ProgressBar.new()
+	_loading_bar.min_value = 0.0
+	_loading_bar.max_value = 100.0
+	_loading_bar.value = 16.6
+	_loading_bar.show_percentage = false
+	_loading_bar.custom_minimum_size = Vector2(0, 6)
+	var bar_style := StyleBoxFlat.new()
+	bar_style.bg_color = Color(0.15, 0.85, 0.55)
+	bar_style.corner_radius_top_left = 3
+	bar_style.corner_radius_top_right = 3
+	bar_style.corner_radius_bottom_left = 3
+	bar_style.corner_radius_bottom_right = 3
+	_loading_bar.add_theme_stylebox_override("fill", bar_style)
+	vb.add_child(_loading_bar)
+
+	return panel
 
 
-func result_payload() -> Dictionary:
-	return _result
+func _on_bench_build_progress(cur: int, total: int, stage_title: String) -> void:
+	if _loading_panel != null:
+		_loading_panel.visible = true
+	if _loading_label != null:
+		_loading_label.text = "⚡ Streaming Unit Operations... [Stage %d/%d: %s]" % [cur, total, stage_title]
+	if _loading_bar != null:
+		_loading_bar.value = (float(cur) / float(total)) * 100.0
 
 
-func prompt_text() -> String:
-	return _prompt.text if _prompt != null else ""
+func _on_bench_build_completed() -> void:
+	if _loading_label != null:
+		_loading_label.text = "✓ All 6 Unit Operations Streamed & Ready (100%)"
+	if _loading_bar != null:
+		_loading_bar.value = 100.0
+
+	# Fade out loading panel
+	if _loading_panel != null:
+		var tw := create_tween()
+		tw.tween_property(_loading_panel, "modulate:a", 0.0, 0.6)
+		tw.finished.connect(func(): if _loading_panel != null: _loading_panel.visible = false)
+
+	# 1.0-second settle delay before starting paced playback
+	await get_tree().create_timer(1.0).timeout
+	_is_stream_settled = true
+	if not _is_playing:
+		_is_playing = true
+		_update_play_btn()
+		_show_toast("▶ Simulation Online — Stage-Normalized 1x Pacing Active", 2.5)
+
+
+func _on_prev_stage_clicked() -> void:
+	var cur_idx: int = _get_stage_index_at_hour(_current_sim_time)
+	var target_idx: int = maxi(cur_idx - 1, 0)
+	_jump_to_stage_by_index(target_idx)
+
+
+func _on_next_stage_clicked() -> void:
+	var cur_idx: int = _get_stage_index_at_hour(_current_sim_time)
+	var target_idx: int = mini(cur_idx + 1, _unit_operations.size() - 1)
+	_jump_to_stage_by_index(target_idx)

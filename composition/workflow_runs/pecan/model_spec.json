@@ -1,0 +1,2978 @@
+{
+  "model_id": "pecan_rna_evidence_audit",
+  "model_version": "0.1.0",
+  "title": "Pecan embryo total-RNA extraction: evidence-constrained protocol audit",
+  "model_kind": "evidence_constrained_protocol_audit",
+  "problem": {
+    "problem_id": "problem-464f67b019af",
+    "question": "Extract high-quality total RNA from pecan (Carya illinoinensis) embryos for small RNA and transcriptome sequencing. Pecan embryos are oil-rich and polyphenol-rich, and the tissue is recalcitrant to standard extraction.",
+    "organism": {
+      "value": "Carya illinoinensis",
+      "state": "reported",
+      "unit": "",
+      "basis": "declared in the problem document",
+      "source_refs": [
+        "problem_statement"
+      ]
+    },
+    "tissue": {
+      "value": "embryo",
+      "state": "reported",
+      "unit": "",
+      "basis": "declared in the problem document",
+      "source_refs": [
+        "problem_statement"
+      ]
+    },
+    "molecule": {
+      "value": "total RNA",
+      "state": "reported",
+      "unit": "",
+      "basis": "declared in the problem document",
+      "source_refs": [
+        "problem_statement"
+      ]
+    },
+    "downstream": [
+      "small RNA sequencing",
+      "transcriptome sequencing"
+    ],
+    "constraints": [
+      "recalcitrant tissue",
+      "polyphenol-rich",
+      "high quality"
+    ],
+    "requested_outputs": [
+      "protocol_steps",
+      "evidence_status",
+      "unknowns",
+      "readiness"
+    ],
+    "source_text": "Extract high-quality total RNA from pecan (Carya illinoinensis) embryos for small RNA and transcriptome sequencing. Pecan embryos are oil-rich and polyphenol-rich, and the tissue is recalcitrant to standard extraction.",
+    "extraction_method": "local_rules",
+    "unknowns": [],
+    "blocked": false
+  },
+  "steps": [
+    {
+      "step_id": "pecan_sample_handling",
+      "order": 1,
+      "label": "Collect and preserve pecan embryos",
+      "action": "Remove the pericarp and seed coat, freeze the embryos in liquid nitrogen, and store them at −80 °C until extraction.",
+      "evidence_status": "direct_target_evidence",
+      "claim_ids": [
+        "pecan-embryo-handling"
+      ],
+      "source_ids": [
+        "pecan_miRNome"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pecan-embryo-handling.storage_temperature",
+          "name": "storage_temperature",
+          "value": -80.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pecan methods",
+          "source_refs": [
+            "pecan-embryo-handling"
+          ]
+        },
+        {
+          "parameter_id": "pecan-embryo-handling.storage_duration",
+          "name": "storage_duration",
+          "value": null,
+          "unit": "h",
+          "state": "unknown",
+          "basis": "the pecan methods do not state how long the embryos were stored before extraction",
+          "source_refs": [
+            "pecan-embryo-handling"
+          ]
+        }
+      ],
+      "unknowns": [
+        "time between harvest and freezing"
+      ],
+      "notes": "The stage series is DAF120 to DAF180, but the RNA protocol itself does not state how long the embryos were stored.",
+      "hypothesis": false
+    },
+    {
+      "step_id": "pecan_trizol_extraction",
+      "order": 2,
+      "label": "Extract total RNA with a TRIzol kit",
+      "action": "Extract total RNA from pecan embryos with the Invitrogen TRIzol kit according to the manufacturer’s protocol.",
+      "evidence_status": "direct_target_evidence",
+      "claim_ids": [
+        "pecan-trizol-kit"
+      ],
+      "source_ids": [
+        "pecan_miRNome"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pecan-trizol-kit.trizol_volume",
+          "name": "trizol_volume",
+          "value": null,
+          "unit": "mL",
+          "state": "unknown",
+          "basis": "the pecan methods defer to the manufacturer's protocol and print no volume",
+          "source_refs": [
+            "pecan-trizol-kit"
+          ]
+        },
+        {
+          "parameter_id": "pecan-trizol-kit.homogenisation_time",
+          "name": "homogenisation_time",
+          "value": null,
+          "unit": "min",
+          "state": "unknown",
+          "basis": "the pecan methods print no homogenisation time",
+          "source_refs": [
+            "pecan-trizol-kit"
+          ]
+        },
+        {
+          "parameter_id": "pecan-trizol-kit.phase_separation_speed",
+          "name": "phase_separation_speed",
+          "value": null,
+          "unit": "rpm",
+          "state": "unknown",
+          "basis": "the pecan methods print no centrifugation speed",
+          "source_refs": [
+            "pecan-trizol-kit"
+          ]
+        },
+        {
+          "parameter_id": "pecan-trizol-kit.precipitation_temperature",
+          "name": "precipitation_temperature",
+          "value": null,
+          "unit": "°C",
+          "state": "unknown",
+          "basis": "the pecan methods print no precipitation temperature",
+          "source_refs": [
+            "pecan-trizol-kit"
+          ]
+        },
+        {
+          "parameter_id": "pecan-trizol-kit.elution_volume",
+          "name": "elution_volume",
+          "value": null,
+          "unit": "μL",
+          "state": "unknown",
+          "basis": "the pecan methods print no elution volume",
+          "source_refs": [
+            "pecan-trizol-kit"
+          ]
+        }
+      ],
+      "unknowns": [
+        "whether the manufacturer's protocol was followed without modification"
+      ],
+      "notes": "The pecan paper names the kit and defers the parameters to the manufacturer; none of those parameters is printed in the paper.",
+      "hypothesis": false
+    },
+    {
+      "step_id": "pecan_dnase_treatment",
+      "order": 3,
+      "label": "Remove genomic DNA with RNase-free DNase I",
+      "action": "Treat the extracted RNA with RNase-free DNase I to remove genomic DNA.",
+      "evidence_status": "direct_target_evidence",
+      "claim_ids": [
+        "pecan-dnase"
+      ],
+      "source_ids": [
+        "pecan_miRNome"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pecan-dnase.dnase_amount",
+          "name": "dnase_amount",
+          "value": null,
+          "unit": "units",
+          "state": "unknown",
+          "basis": "the pecan methods name the enzyme but not the amount",
+          "source_refs": [
+            "pecan-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pecan-dnase.dnase_temperature",
+          "name": "dnase_temperature",
+          "value": null,
+          "unit": "°C",
+          "state": "unknown",
+          "basis": "the pecan methods print no digestion temperature",
+          "source_refs": [
+            "pecan-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pecan-dnase.dnase_time",
+          "name": "dnase_time",
+          "value": null,
+          "unit": "min",
+          "state": "unknown",
+          "basis": "the pecan methods print no digestion time",
+          "source_refs": [
+            "pecan-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pecan-dnase.inactivation_temperature",
+          "name": "inactivation_temperature",
+          "value": null,
+          "unit": "°C",
+          "state": "unknown",
+          "basis": "the pecan methods print no inactivation temperature",
+          "source_refs": [
+            "pecan-dnase"
+          ]
+        }
+      ],
+      "unknowns": [
+        "DNase inactivation duration"
+      ],
+      "notes": "Only the enzyme supplier is named; the digestion parameters are not reported.",
+      "hypothesis": false
+    },
+    {
+      "step_id": "pecan_quality_assessment",
+      "order": 4,
+      "label": "Assess RNA quality and concentration",
+      "action": "Check RNA integrity by agarose gel electrophoresis and measure concentration and absorbance ratios on a NanoDrop 2000.",
+      "evidence_status": "direct_target_evidence",
+      "claim_ids": [
+        "pecan-quality-assessment"
+      ],
+      "source_ids": [
+        "pecan_miRNome"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pecan-quality-assessment.rna_yield",
+          "name": "rna_yield",
+          "value": null,
+          "unit": "μg",
+          "state": "unknown",
+          "basis": "the pecan text names the assay but reports no yield value",
+          "source_refs": [
+            "pecan-quality-assessment"
+          ]
+        },
+        {
+          "parameter_id": "pecan-quality-assessment.a260_a280",
+          "name": "a260_a280",
+          "value": null,
+          "unit": "ratio",
+          "state": "unknown",
+          "basis": "the pecan text reports no A260/A280 value",
+          "source_refs": [
+            "pecan-quality-assessment"
+          ]
+        },
+        {
+          "parameter_id": "pecan-quality-assessment.a260_a230",
+          "name": "a260_a230",
+          "value": null,
+          "unit": "ratio",
+          "state": "unknown",
+          "basis": "the pecan text reports no A260/A230 value",
+          "source_refs": [
+            "pecan-quality-assessment"
+          ]
+        },
+        {
+          "parameter_id": "pecan-quality-assessment.rin",
+          "name": "rin",
+          "value": null,
+          "unit": "ratio",
+          "state": "unknown",
+          "basis": "the pecan text reports no RIN value",
+          "source_refs": [
+            "pecan-quality-assessment"
+          ]
+        }
+      ],
+      "unknowns": [
+        "which samples were measured and whether any measurement failed"
+      ],
+      "notes": "The assay is named, but no pecan measurement is reported in the paper text; the values remain unknown.",
+      "hypothesis": false
+    },
+    {
+      "step_id": "pecan_small_rna_enrichment",
+      "order": 5,
+      "label": "Enrich 18–30 nt small RNA by PAGE",
+      "action": "Enrich small RNA in the 18–30 nucleotide size range by polyacrylamide gel electrophoresis before library construction.",
+      "evidence_status": "direct_target_evidence",
+      "claim_ids": [
+        "pecan-small-rna-enrichment"
+      ],
+      "source_ids": [
+        "pecan_miRNome"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pecan-small-rna-enrichment.size_min",
+          "name": "size_min",
+          "value": 18.0,
+          "unit": "nt",
+          "state": "reported",
+          "basis": "stated in the pecan methods",
+          "source_refs": [
+            "pecan-small-rna-enrichment"
+          ]
+        },
+        {
+          "parameter_id": "pecan-small-rna-enrichment.size_max",
+          "name": "size_max",
+          "value": 30.0,
+          "unit": "nt",
+          "state": "reported",
+          "basis": "stated in the pecan methods",
+          "source_refs": [
+            "pecan-small-rna-enrichment"
+          ]
+        },
+        {
+          "parameter_id": "pecan-small-rna-enrichment.page_gel_percentage",
+          "name": "page_gel_percentage",
+          "value": null,
+          "unit": "%",
+          "state": "unknown",
+          "basis": "the pecan methods print no gel percentage",
+          "source_refs": [
+            "pecan-small-rna-enrichment"
+          ]
+        },
+        {
+          "parameter_id": "pecan-small-rna-enrichment.rna_loaded",
+          "name": "rna_loaded",
+          "value": null,
+          "unit": "μg",
+          "state": "unknown",
+          "basis": "the pecan methods print no amount loaded",
+          "source_refs": [
+            "pecan-small-rna-enrichment"
+          ]
+        }
+      ],
+      "unknowns": [
+        "elution or recovery method after gel excision"
+      ],
+      "notes": "The size window is stated; the PAGE conditions are not.",
+      "hypothesis": false
+    },
+    {
+      "step_id": "pecan_cdna_synthesis",
+      "order": 6,
+      "label": "Reverse transcribe 1 μg RNA to cDNA",
+      "action": "Use 1 μg of total RNA per sample for reverse transcription and cDNA library construction.",
+      "evidence_status": "direct_target_evidence",
+      "claim_ids": [
+        "pecan-cdna-synthesis"
+      ],
+      "source_ids": [
+        "pecan_miRNome"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pecan-cdna-synthesis.input_rna",
+          "name": "input_rna",
+          "value": 1.0,
+          "unit": "μg",
+          "state": "reported",
+          "basis": "stated in the pecan methods",
+          "source_refs": [
+            "pecan-cdna-synthesis"
+          ]
+        },
+        {
+          "parameter_id": "pecan-cdna-synthesis.reaction_volume",
+          "name": "reaction_volume",
+          "value": null,
+          "unit": "μL",
+          "state": "unknown",
+          "basis": "the pecan methods print no reaction volume",
+          "source_refs": [
+            "pecan-cdna-synthesis"
+          ]
+        },
+        {
+          "parameter_id": "pecan-cdna-synthesis.incubation_temperature",
+          "name": "incubation_temperature",
+          "value": null,
+          "unit": "°C",
+          "state": "unknown",
+          "basis": "the pecan methods print no thermal programme",
+          "source_refs": [
+            "pecan-cdna-synthesis"
+          ]
+        }
+      ],
+      "unknowns": [
+        "reverse-transcriptase enzyme and supplier"
+      ],
+      "notes": "The input mass is stated; the enzyme and thermal programme are not.",
+      "hypothesis": false
+    },
+    {
+      "step_id": "analogue_spruce_ctab_extraction",
+      "order": 7,
+      "label": "Modified CTAB extraction — Norway spruce (analogue)",
+      "action": "Prepare the modified CTAB buffer reported for Norway spruce and extract total RNA from ground tissue.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "spruce-ctab-buffer",
+        "spruce-ctab-incubation",
+        "spruce-proteinase-k"
+      ],
+      "source_ids": [
+        "spruce_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "spruce-ctab-buffer.ctab",
+          "name": "ctab",
+          "value": 2.0,
+          "unit": "% (w/v)",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-buffer"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-buffer.pvp_40",
+          "name": "pvp_40",
+          "value": 2.0,
+          "unit": "% (w/v)",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-buffer"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-buffer.nacl",
+          "name": "nacl",
+          "value": 2.0,
+          "unit": "M",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-buffer"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-buffer.tris_hcl",
+          "name": "tris_hcl",
+          "value": 100.0,
+          "unit": "mM",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-buffer"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-buffer.edta",
+          "name": "edta",
+          "value": 25.0,
+          "unit": "mM",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-buffer"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-buffer.bme",
+          "name": "bme",
+          "value": 2.0,
+          "unit": "% (w/v)",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-buffer"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-incubation.tissue_mass",
+          "name": "tissue_mass",
+          "value": 100.0,
+          "unit": "mg",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-incubation"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-incubation.buffer_volume",
+          "name": "buffer_volume",
+          "value": 1.0,
+          "unit": "mL",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-incubation"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-incubation.incubation_temperature",
+          "name": "incubation_temperature",
+          "value": 65.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-incubation"
+          ]
+        },
+        {
+          "parameter_id": "spruce-ctab-incubation.incubation_time",
+          "name": "incubation_time",
+          "value": 30.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-ctab-incubation"
+          ]
+        },
+        {
+          "parameter_id": "spruce-proteinase-k.proteinase_k",
+          "name": "proteinase_k",
+          "value": 80.0,
+          "unit": "μg/mL",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-proteinase-k"
+          ]
+        }
+      ],
+      "unknowns": [
+        "whether this buffer is suitable for pecan embryos",
+        "pH adjustment procedure for the buffer",
+        "whether 100 mg pecan embryo behaves like 100 mg spruce tissue",
+        "whether Proteinase K is needed for pecan embryos"
+      ],
+      "notes": "This is a protocol for Norway spruce. Its appearance here is a hypothesis for pecan, not a pecan measurement.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_spruce_phase_separation",
+      "order": 8,
+      "label": "Chloroform:isoamyl alcohol phase separation — Norway spruce (analogue)",
+      "action": "Separate the aqueous phase with chloroform:isoamyl alcohol and centrifuge; repeat once.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "spruce-chloroform-phase"
+      ],
+      "source_ids": [
+        "spruce_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "spruce-chloroform-phase.centrifuge_speed",
+          "name": "centrifuge_speed",
+          "value": 12000.0,
+          "unit": "rpm",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-chloroform-phase"
+          ]
+        },
+        {
+          "parameter_id": "spruce-chloroform-phase.centrifuge_time",
+          "name": "centrifuge_time",
+          "value": 10.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-chloroform-phase"
+          ]
+        },
+        {
+          "parameter_id": "spruce-chloroform-phase.centrifuge_temperature",
+          "name": "centrifuge_temperature",
+          "value": 4.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-chloroform-phase"
+          ]
+        }
+      ],
+      "unknowns": [
+        "number of repeat extractions needed for pecan"
+      ],
+      "notes": "The spruce method repeats this step once.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_spruce_licl_precipitation",
+      "order": 9,
+      "label": "LiCl precipitation — Norway spruce (analogue)",
+      "action": "Precipitate RNA with 0.5 volume of 5 M LiCl at −20 °C, then centrifuge and wash the pellet.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "spruce-licl-precipitation"
+      ],
+      "source_ids": [
+        "spruce_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "spruce-licl-precipitation.licl_volume_ratio",
+          "name": "licl_volume_ratio",
+          "value": 0.5,
+          "unit": "volume",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-licl-precipitation"
+          ]
+        },
+        {
+          "parameter_id": "spruce-licl-precipitation.licl_concentration",
+          "name": "licl_concentration",
+          "value": 5.0,
+          "unit": "M",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-licl-precipitation"
+          ]
+        },
+        {
+          "parameter_id": "spruce-licl-precipitation.precipitation_temperature",
+          "name": "precipitation_temperature",
+          "value": -20.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-licl-precipitation"
+          ]
+        },
+        {
+          "parameter_id": "spruce-licl-precipitation.precipitation_time",
+          "name": "precipitation_time",
+          "value": 1.0,
+          "unit": "h",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-licl-precipitation"
+          ]
+        }
+      ],
+      "unknowns": [
+        "whether pecan RNA precipitates completely under these conditions"
+      ],
+      "notes": "The precipitation time is 1 h in the spruce method.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_spruce_elution",
+      "order": 10,
+      "label": "Wash, dry and elute RNA — Norway spruce (analogue)",
+      "action": "Wash the RNA pellet twice with 70% ethanol, air dry it and elute in approximately 50 µL of RNase-free water.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "spruce-wash-elution"
+      ],
+      "source_ids": [
+        "spruce_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "spruce-wash-elution.ethanol",
+          "name": "ethanol",
+          "value": 70.0,
+          "unit": "%",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "spruce-wash-elution.wash_count",
+          "name": "wash_count",
+          "value": 2.0,
+          "unit": "washes",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "spruce-wash-elution.elution_volume",
+          "name": "elution_volume",
+          "value": 50.0,
+          "unit": "µL",
+          "state": "reported",
+          "basis": "stated in the Norway spruce modified CTAB method",
+          "source_refs": [
+            "spruce-wash-elution"
+          ]
+        }
+      ],
+      "unknowns": [
+        "the exact elution volume for a pecan embryo preparation"
+      ],
+      "notes": "The elution volume is approximate in the source.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_spruce_dnase",
+      "order": 11,
+      "label": "DNase treatment — Norway spruce (analogue)",
+      "action": "Treat the RNA with TURBO DNase and incubate at 37 °C for 30 min.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "spruce-dnase"
+      ],
+      "source_ids": [
+        "spruce_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "spruce-dnase.dnase_units",
+          "name": "dnase_units",
+          "value": 2.0,
+          "unit": "units",
+          "state": "reported",
+          "basis": "stated in the Norway spruce DNase treatment",
+          "source_refs": [
+            "spruce-dnase"
+          ]
+        },
+        {
+          "parameter_id": "spruce-dnase.dnase_temperature",
+          "name": "dnase_temperature",
+          "value": 37.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the Norway spruce DNase treatment",
+          "source_refs": [
+            "spruce-dnase"
+          ]
+        },
+        {
+          "parameter_id": "spruce-dnase.dnase_time",
+          "name": "dnase_time",
+          "value": 30.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the Norway spruce DNase treatment",
+          "source_refs": [
+            "spruce-dnase"
+          ]
+        }
+      ],
+      "unknowns": [
+        "whether the pecan DNase step used the same units or time"
+      ],
+      "notes": "The pecan paper names RNase-free DNase I but gives no digestion parameters.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_spruce_trizol_finding",
+      "order": 12,
+      "label": "TRIzol performance in Norway spruce (analogue result)",
+      "action": "Record that TRIzol gave compromised purity and integrity for Norway spruce, so a TRIzol kit name alone does not establish pecan performance.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "spruce-trizol-result"
+      ],
+      "source_ids": [
+        "spruce_rna"
+      ],
+      "parameters": [],
+      "unknowns": [
+        "whether pecan TRIzol extraction performed as well as the pecan paper implies"
+      ],
+      "notes": "This is evidence about Norway spruce, not a measurement of pecan RNA.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_pigeonpea_ctab_extraction",
+      "order": 13,
+      "label": "Modified CTAB extraction — pigeonpea (analogue)",
+      "action": "Grind 100 mg of tissue with PVP and extract it in 1 mL of pre-warmed CTAB buffer.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "pigeonpea-tissue-buffer",
+        "pigeonpea-incubation"
+      ],
+      "source_ids": [
+        "pigeonpea_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pigeonpea-tissue-buffer.tissue_mass",
+          "name": "tissue_mass",
+          "value": 100.0,
+          "unit": "mg",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-tissue-buffer"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-tissue-buffer.buffer_volume",
+          "name": "buffer_volume",
+          "value": 1.0,
+          "unit": "mL",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-tissue-buffer"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-incubation.incubation_temperature",
+          "name": "incubation_temperature",
+          "value": 65.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-incubation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-incubation.incubation_time",
+          "name": "incubation_time",
+          "value": 25.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-incubation"
+          ]
+        }
+      ],
+      "unknowns": [
+        "whether 100 mg pecan embryo has the same extraction behaviour",
+        "whether pecan embryos need a longer incubation"
+      ],
+      "notes": "PVP is added during grinding in this protocol.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_pigeonpea_phase_separation",
+      "order": 14,
+      "label": "Phenol:chloroform phase separation — pigeonpea (analogue)",
+      "action": "Separate the aqueous phase with phenol:chloroform:isoamyl alcohol and centrifuge at 8,000 rpm and 4 °C.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "pigeonpea-phase-separation"
+      ],
+      "source_ids": [
+        "pigeonpea_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pigeonpea-phase-separation.centrifuge_speed",
+          "name": "centrifuge_speed",
+          "value": 8000.0,
+          "unit": "rpm",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-phase-separation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-phase-separation.centrifuge_time",
+          "name": "centrifuge_time",
+          "value": 20.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-phase-separation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-phase-separation.centrifuge_temperature",
+          "name": "centrifuge_temperature",
+          "value": 4.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-phase-separation"
+          ]
+        }
+      ],
+      "unknowns": [
+        "the number of repeat extractions needed for pecan"
+      ],
+      "notes": "The protocol repeats this step twice more.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_pigeonpea_precipitation",
+      "order": 15,
+      "label": "Isopropanol precipitation and elution — pigeonpea (analogue)",
+      "action": "Precipitate RNA with chilled isopropanol at −20 °C, wash with 70% ethanol and dissolve the pellet in DEPC-treated water.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "pigeonpea-isopropanol",
+        "pigeonpea-precipitation-centrifugation",
+        "pigeonpea-wash-elution"
+      ],
+      "source_ids": [
+        "pigeonpea_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pigeonpea-isopropanol.isopropanol_volume",
+          "name": "isopropanol_volume",
+          "value": 800.0,
+          "unit": "μL",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-isopropanol"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-precipitation-centrifugation.precipitation_temperature",
+          "name": "precipitation_temperature",
+          "value": -20.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-precipitation-centrifugation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-precipitation-centrifugation.precipitation_time",
+          "name": "precipitation_time",
+          "value": 1.0,
+          "unit": "h",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-precipitation-centrifugation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-precipitation-centrifugation.centrifuge_speed",
+          "name": "centrifuge_speed",
+          "value": 8500.0,
+          "unit": "rpm",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-precipitation-centrifugation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-precipitation-centrifugation.centrifuge_time",
+          "name": "centrifuge_time",
+          "value": 30.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-precipitation-centrifugation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-precipitation-centrifugation.centrifuge_temperature",
+          "name": "centrifuge_temperature",
+          "value": 4.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-precipitation-centrifugation"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.ethanol_volume",
+          "name": "ethanol_volume",
+          "value": 1.0,
+          "unit": "mL",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.ethanol",
+          "name": "ethanol",
+          "value": 70.0,
+          "unit": "%",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.centrifuge_speed",
+          "name": "centrifuge_speed",
+          "value": 10000.0,
+          "unit": "rpm",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.centrifuge_time",
+          "name": "centrifuge_time",
+          "value": 5.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.centrifuge_temperature",
+          "name": "centrifuge_temperature",
+          "value": 4.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.wash_count",
+          "name": "wash_count",
+          "value": 2.0,
+          "unit": "washes",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.drying_time",
+          "name": "drying_time",
+          "value": 10.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-wash-elution.elution_volume",
+          "name": "elution_volume",
+          "value": 20.0,
+          "unit": "μL",
+          "state": "reported",
+          "basis": "stated in the pigeonpea modified CTAB protocol",
+          "source_refs": [
+            "pigeonpea-wash-elution"
+          ]
+        }
+      ],
+      "unknowns": [
+        "whether a pecan extract needs the same isopropanol volume",
+        "whether pecan RNA pellets as efficiently at this speed",
+        "whether 20 μL is enough to redissolve a pecan RNA pellet"
+      ],
+      "notes": "",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_pigeonpea_dnase",
+      "order": 16,
+      "label": "DNase I treatment — pigeonpea (analogue)",
+      "action": "Treat 1 μg RNA with 1 μL DNase I at 37 °C for 30 min, then inactivate at 65 °C for 10 min with EDTA.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "pigeonpea-dnase"
+      ],
+      "source_ids": [
+        "pigeonpea_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pigeonpea-dnase.dnase_volume",
+          "name": "dnase_volume",
+          "value": 1.0,
+          "unit": "μL",
+          "state": "reported",
+          "basis": "stated in the pigeonpea DNase treatment",
+          "source_refs": [
+            "pigeonpea-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-dnase.dnase_concentration",
+          "name": "dnase_concentration",
+          "value": 2.0,
+          "unit": "U/μL",
+          "state": "reported",
+          "basis": "stated in the pigeonpea DNase treatment",
+          "source_refs": [
+            "pigeonpea-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-dnase.input_rna",
+          "name": "input_rna",
+          "value": 1.0,
+          "unit": "μg",
+          "state": "reported",
+          "basis": "stated in the pigeonpea DNase treatment",
+          "source_refs": [
+            "pigeonpea-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-dnase.dnase_temperature",
+          "name": "dnase_temperature",
+          "value": 37.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pigeonpea DNase treatment",
+          "source_refs": [
+            "pigeonpea-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-dnase.dnase_time",
+          "name": "dnase_time",
+          "value": 30.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the pigeonpea DNase treatment",
+          "source_refs": [
+            "pigeonpea-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-dnase.inactivation_temperature",
+          "name": "inactivation_temperature",
+          "value": 65.0,
+          "unit": "°C",
+          "state": "reported",
+          "basis": "stated in the pigeonpea DNase treatment",
+          "source_refs": [
+            "pigeonpea-dnase"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-dnase.inactivation_time",
+          "name": "inactivation_time",
+          "value": 10.0,
+          "unit": "min",
+          "state": "reported",
+          "basis": "stated in the pigeonpea DNase treatment",
+          "source_refs": [
+            "pigeonpea-dnase"
+          ]
+        }
+      ],
+      "unknowns": [
+        "whether pecan RNA requires the same DNase amount"
+      ],
+      "notes": "",
+      "hypothesis": true
+    },
+    {
+      "step_id": "analogue_pigeonpea_quality",
+      "order": 17,
+      "label": "Analogous yield and purity results — pigeonpea",
+      "action": "Record the yield and absorbance ratios reported for pigeonpea; they are not pecan values.",
+      "evidence_status": "analogous_species_hypothesis",
+      "claim_ids": [
+        "pigeonpea-yield-result",
+        "pigeonpea-purity-result"
+      ],
+      "source_ids": [
+        "pigeonpea_rna"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "pigeonpea-yield-result.yield_min",
+          "name": "yield_min",
+          "value": 289.0,
+          "unit": "μg/g tissue",
+          "state": "reported",
+          "basis": "stated in the pigeonpea results",
+          "source_refs": [
+            "pigeonpea-yield-result"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-yield-result.yield_max",
+          "name": "yield_max",
+          "value": 422.0,
+          "unit": "μg/g tissue",
+          "state": "reported",
+          "basis": "stated in the pigeonpea results",
+          "source_refs": [
+            "pigeonpea-yield-result"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-purity-result.a260_a280_min",
+          "name": "a260_a280_min",
+          "value": 1.83,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the pigeonpea results",
+          "source_refs": [
+            "pigeonpea-purity-result"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-purity-result.a260_a280_max",
+          "name": "a260_a280_max",
+          "value": 1.98,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the pigeonpea results",
+          "source_refs": [
+            "pigeonpea-purity-result"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-purity-result.a260_a230_min",
+          "name": "a260_a230_min",
+          "value": 2.03,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the pigeonpea results",
+          "source_refs": [
+            "pigeonpea-purity-result"
+          ]
+        },
+        {
+          "parameter_id": "pigeonpea-purity-result.a260_a230_max",
+          "name": "a260_a230_max",
+          "value": 2.23,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the pigeonpea results",
+          "source_refs": [
+            "pigeonpea-purity-result"
+          ]
+        }
+      ],
+      "unknowns": [
+        "the yield of the pecan protocol",
+        "the absorbance ratios of the pecan protocol"
+      ],
+      "notes": "The source prints '289to 422' without a space; the quote preserves that exactly.",
+      "hypothesis": true
+    },
+    {
+      "step_id": "method_review_caveat",
+      "order": 18,
+      "label": "Method-review caveat: no universal RNA protocol",
+      "action": "Treat any cross-species protocol as species-specific until it is validated on the target organism.",
+      "evidence_status": "method_review_only",
+      "claim_ids": [
+        "difficult-species-no-universal-protocol",
+        "modified-ctab-method-result"
+      ],
+      "source_ids": [
+        "difficult_species",
+        "modified_ctab"
+      ],
+      "parameters": [
+        {
+          "parameter_id": "modified-ctab-method-result.a260_a280_min",
+          "name": "a260_a280_min",
+          "value": 1.77,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the modified CTAB results",
+          "source_refs": [
+            "modified-ctab-method-result"
+          ]
+        },
+        {
+          "parameter_id": "modified-ctab-method-result.a260_a280_max",
+          "name": "a260_a280_max",
+          "value": 2.13,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the modified CTAB results",
+          "source_refs": [
+            "modified-ctab-method-result"
+          ]
+        },
+        {
+          "parameter_id": "modified-ctab-method-result.a260_a230_min",
+          "name": "a260_a230_min",
+          "value": 1.81,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the modified CTAB results",
+          "source_refs": [
+            "modified-ctab-method-result"
+          ]
+        },
+        {
+          "parameter_id": "modified-ctab-method-result.a260_a230_max",
+          "name": "a260_a230_max",
+          "value": 2.22,
+          "unit": "ratio",
+          "state": "reported",
+          "basis": "stated in the modified CTAB results",
+          "source_refs": [
+            "modified-ctab-method-result"
+          ]
+        }
+      ],
+      "unknowns": [
+        "which protocol is actually suitable for pecan embryos",
+        "whether this method was tested on pecan"
+      ],
+      "notes": "This is a method-review statement, not a measurement.",
+      "hypothesis": true
+    }
+  ],
+  "parameters": [
+    {
+      "parameter_id": "pecan-embryo-handling.storage_temperature",
+      "name": "storage_temperature",
+      "value": -80.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pecan methods",
+      "source_refs": [
+        "pecan-embryo-handling"
+      ]
+    },
+    {
+      "parameter_id": "pecan-embryo-handling.storage_duration",
+      "name": "storage_duration",
+      "value": null,
+      "unit": "h",
+      "state": "unknown",
+      "basis": "the pecan methods do not state how long the embryos were stored before extraction",
+      "source_refs": [
+        "pecan-embryo-handling"
+      ]
+    },
+    {
+      "parameter_id": "pecan-trizol-kit.trizol_volume",
+      "name": "trizol_volume",
+      "value": null,
+      "unit": "mL",
+      "state": "unknown",
+      "basis": "the pecan methods defer to the manufacturer's protocol and print no volume",
+      "source_refs": [
+        "pecan-trizol-kit"
+      ]
+    },
+    {
+      "parameter_id": "pecan-trizol-kit.homogenisation_time",
+      "name": "homogenisation_time",
+      "value": null,
+      "unit": "min",
+      "state": "unknown",
+      "basis": "the pecan methods print no homogenisation time",
+      "source_refs": [
+        "pecan-trizol-kit"
+      ]
+    },
+    {
+      "parameter_id": "pecan-trizol-kit.phase_separation_speed",
+      "name": "phase_separation_speed",
+      "value": null,
+      "unit": "rpm",
+      "state": "unknown",
+      "basis": "the pecan methods print no centrifugation speed",
+      "source_refs": [
+        "pecan-trizol-kit"
+      ]
+    },
+    {
+      "parameter_id": "pecan-trizol-kit.precipitation_temperature",
+      "name": "precipitation_temperature",
+      "value": null,
+      "unit": "°C",
+      "state": "unknown",
+      "basis": "the pecan methods print no precipitation temperature",
+      "source_refs": [
+        "pecan-trizol-kit"
+      ]
+    },
+    {
+      "parameter_id": "pecan-trizol-kit.elution_volume",
+      "name": "elution_volume",
+      "value": null,
+      "unit": "μL",
+      "state": "unknown",
+      "basis": "the pecan methods print no elution volume",
+      "source_refs": [
+        "pecan-trizol-kit"
+      ]
+    },
+    {
+      "parameter_id": "pecan-dnase.dnase_amount",
+      "name": "dnase_amount",
+      "value": null,
+      "unit": "units",
+      "state": "unknown",
+      "basis": "the pecan methods name the enzyme but not the amount",
+      "source_refs": [
+        "pecan-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pecan-dnase.dnase_temperature",
+      "name": "dnase_temperature",
+      "value": null,
+      "unit": "°C",
+      "state": "unknown",
+      "basis": "the pecan methods print no digestion temperature",
+      "source_refs": [
+        "pecan-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pecan-dnase.dnase_time",
+      "name": "dnase_time",
+      "value": null,
+      "unit": "min",
+      "state": "unknown",
+      "basis": "the pecan methods print no digestion time",
+      "source_refs": [
+        "pecan-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pecan-dnase.inactivation_temperature",
+      "name": "inactivation_temperature",
+      "value": null,
+      "unit": "°C",
+      "state": "unknown",
+      "basis": "the pecan methods print no inactivation temperature",
+      "source_refs": [
+        "pecan-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pecan-quality-assessment.rna_yield",
+      "name": "rna_yield",
+      "value": null,
+      "unit": "μg",
+      "state": "unknown",
+      "basis": "the pecan text names the assay but reports no yield value",
+      "source_refs": [
+        "pecan-quality-assessment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-quality-assessment.a260_a280",
+      "name": "a260_a280",
+      "value": null,
+      "unit": "ratio",
+      "state": "unknown",
+      "basis": "the pecan text reports no A260/A280 value",
+      "source_refs": [
+        "pecan-quality-assessment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-quality-assessment.a260_a230",
+      "name": "a260_a230",
+      "value": null,
+      "unit": "ratio",
+      "state": "unknown",
+      "basis": "the pecan text reports no A260/A230 value",
+      "source_refs": [
+        "pecan-quality-assessment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-quality-assessment.rin",
+      "name": "rin",
+      "value": null,
+      "unit": "ratio",
+      "state": "unknown",
+      "basis": "the pecan text reports no RIN value",
+      "source_refs": [
+        "pecan-quality-assessment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-small-rna-enrichment.size_min",
+      "name": "size_min",
+      "value": 18.0,
+      "unit": "nt",
+      "state": "reported",
+      "basis": "stated in the pecan methods",
+      "source_refs": [
+        "pecan-small-rna-enrichment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-small-rna-enrichment.size_max",
+      "name": "size_max",
+      "value": 30.0,
+      "unit": "nt",
+      "state": "reported",
+      "basis": "stated in the pecan methods",
+      "source_refs": [
+        "pecan-small-rna-enrichment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-small-rna-enrichment.page_gel_percentage",
+      "name": "page_gel_percentage",
+      "value": null,
+      "unit": "%",
+      "state": "unknown",
+      "basis": "the pecan methods print no gel percentage",
+      "source_refs": [
+        "pecan-small-rna-enrichment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-small-rna-enrichment.rna_loaded",
+      "name": "rna_loaded",
+      "value": null,
+      "unit": "μg",
+      "state": "unknown",
+      "basis": "the pecan methods print no amount loaded",
+      "source_refs": [
+        "pecan-small-rna-enrichment"
+      ]
+    },
+    {
+      "parameter_id": "pecan-cdna-synthesis.input_rna",
+      "name": "input_rna",
+      "value": 1.0,
+      "unit": "μg",
+      "state": "reported",
+      "basis": "stated in the pecan methods",
+      "source_refs": [
+        "pecan-cdna-synthesis"
+      ]
+    },
+    {
+      "parameter_id": "pecan-cdna-synthesis.reaction_volume",
+      "name": "reaction_volume",
+      "value": null,
+      "unit": "μL",
+      "state": "unknown",
+      "basis": "the pecan methods print no reaction volume",
+      "source_refs": [
+        "pecan-cdna-synthesis"
+      ]
+    },
+    {
+      "parameter_id": "pecan-cdna-synthesis.incubation_temperature",
+      "name": "incubation_temperature",
+      "value": null,
+      "unit": "°C",
+      "state": "unknown",
+      "basis": "the pecan methods print no thermal programme",
+      "source_refs": [
+        "pecan-cdna-synthesis"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-buffer.ctab",
+      "name": "ctab",
+      "value": 2.0,
+      "unit": "% (w/v)",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-buffer"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-buffer.pvp_40",
+      "name": "pvp_40",
+      "value": 2.0,
+      "unit": "% (w/v)",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-buffer"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-buffer.nacl",
+      "name": "nacl",
+      "value": 2.0,
+      "unit": "M",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-buffer"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-buffer.tris_hcl",
+      "name": "tris_hcl",
+      "value": 100.0,
+      "unit": "mM",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-buffer"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-buffer.edta",
+      "name": "edta",
+      "value": 25.0,
+      "unit": "mM",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-buffer"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-buffer.bme",
+      "name": "bme",
+      "value": 2.0,
+      "unit": "% (w/v)",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-buffer"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-incubation.tissue_mass",
+      "name": "tissue_mass",
+      "value": 100.0,
+      "unit": "mg",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-incubation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-incubation.buffer_volume",
+      "name": "buffer_volume",
+      "value": 1.0,
+      "unit": "mL",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-incubation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-incubation.incubation_temperature",
+      "name": "incubation_temperature",
+      "value": 65.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-incubation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-ctab-incubation.incubation_time",
+      "name": "incubation_time",
+      "value": 30.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-ctab-incubation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-proteinase-k.proteinase_k",
+      "name": "proteinase_k",
+      "value": 80.0,
+      "unit": "μg/mL",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-proteinase-k"
+      ]
+    },
+    {
+      "parameter_id": "spruce-chloroform-phase.centrifuge_speed",
+      "name": "centrifuge_speed",
+      "value": 12000.0,
+      "unit": "rpm",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-chloroform-phase"
+      ]
+    },
+    {
+      "parameter_id": "spruce-chloroform-phase.centrifuge_time",
+      "name": "centrifuge_time",
+      "value": 10.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-chloroform-phase"
+      ]
+    },
+    {
+      "parameter_id": "spruce-chloroform-phase.centrifuge_temperature",
+      "name": "centrifuge_temperature",
+      "value": 4.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-chloroform-phase"
+      ]
+    },
+    {
+      "parameter_id": "spruce-licl-precipitation.licl_volume_ratio",
+      "name": "licl_volume_ratio",
+      "value": 0.5,
+      "unit": "volume",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-licl-precipitation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-licl-precipitation.licl_concentration",
+      "name": "licl_concentration",
+      "value": 5.0,
+      "unit": "M",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-licl-precipitation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-licl-precipitation.precipitation_temperature",
+      "name": "precipitation_temperature",
+      "value": -20.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-licl-precipitation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-licl-precipitation.precipitation_time",
+      "name": "precipitation_time",
+      "value": 1.0,
+      "unit": "h",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-licl-precipitation"
+      ]
+    },
+    {
+      "parameter_id": "spruce-wash-elution.ethanol",
+      "name": "ethanol",
+      "value": 70.0,
+      "unit": "%",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "spruce-wash-elution.wash_count",
+      "name": "wash_count",
+      "value": 2.0,
+      "unit": "washes",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "spruce-wash-elution.elution_volume",
+      "name": "elution_volume",
+      "value": 50.0,
+      "unit": "µL",
+      "state": "reported",
+      "basis": "stated in the Norway spruce modified CTAB method",
+      "source_refs": [
+        "spruce-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "spruce-dnase.dnase_units",
+      "name": "dnase_units",
+      "value": 2.0,
+      "unit": "units",
+      "state": "reported",
+      "basis": "stated in the Norway spruce DNase treatment",
+      "source_refs": [
+        "spruce-dnase"
+      ]
+    },
+    {
+      "parameter_id": "spruce-dnase.dnase_temperature",
+      "name": "dnase_temperature",
+      "value": 37.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the Norway spruce DNase treatment",
+      "source_refs": [
+        "spruce-dnase"
+      ]
+    },
+    {
+      "parameter_id": "spruce-dnase.dnase_time",
+      "name": "dnase_time",
+      "value": 30.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the Norway spruce DNase treatment",
+      "source_refs": [
+        "spruce-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-tissue-buffer.tissue_mass",
+      "name": "tissue_mass",
+      "value": 100.0,
+      "unit": "mg",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-tissue-buffer"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-tissue-buffer.buffer_volume",
+      "name": "buffer_volume",
+      "value": 1.0,
+      "unit": "mL",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-tissue-buffer"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-incubation.incubation_temperature",
+      "name": "incubation_temperature",
+      "value": 65.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-incubation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-incubation.incubation_time",
+      "name": "incubation_time",
+      "value": 25.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-incubation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-phase-separation.centrifuge_speed",
+      "name": "centrifuge_speed",
+      "value": 8000.0,
+      "unit": "rpm",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-phase-separation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-phase-separation.centrifuge_time",
+      "name": "centrifuge_time",
+      "value": 20.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-phase-separation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-phase-separation.centrifuge_temperature",
+      "name": "centrifuge_temperature",
+      "value": 4.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-phase-separation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-isopropanol.isopropanol_volume",
+      "name": "isopropanol_volume",
+      "value": 800.0,
+      "unit": "μL",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-isopropanol"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-precipitation-centrifugation.precipitation_temperature",
+      "name": "precipitation_temperature",
+      "value": -20.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-precipitation-centrifugation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-precipitation-centrifugation.precipitation_time",
+      "name": "precipitation_time",
+      "value": 1.0,
+      "unit": "h",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-precipitation-centrifugation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-precipitation-centrifugation.centrifuge_speed",
+      "name": "centrifuge_speed",
+      "value": 8500.0,
+      "unit": "rpm",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-precipitation-centrifugation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-precipitation-centrifugation.centrifuge_time",
+      "name": "centrifuge_time",
+      "value": 30.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-precipitation-centrifugation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-precipitation-centrifugation.centrifuge_temperature",
+      "name": "centrifuge_temperature",
+      "value": 4.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-precipitation-centrifugation"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.ethanol_volume",
+      "name": "ethanol_volume",
+      "value": 1.0,
+      "unit": "mL",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.ethanol",
+      "name": "ethanol",
+      "value": 70.0,
+      "unit": "%",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.centrifuge_speed",
+      "name": "centrifuge_speed",
+      "value": 10000.0,
+      "unit": "rpm",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.centrifuge_time",
+      "name": "centrifuge_time",
+      "value": 5.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.centrifuge_temperature",
+      "name": "centrifuge_temperature",
+      "value": 4.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.wash_count",
+      "name": "wash_count",
+      "value": 2.0,
+      "unit": "washes",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.drying_time",
+      "name": "drying_time",
+      "value": 10.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-wash-elution.elution_volume",
+      "name": "elution_volume",
+      "value": 20.0,
+      "unit": "μL",
+      "state": "reported",
+      "basis": "stated in the pigeonpea modified CTAB protocol",
+      "source_refs": [
+        "pigeonpea-wash-elution"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-dnase.dnase_volume",
+      "name": "dnase_volume",
+      "value": 1.0,
+      "unit": "μL",
+      "state": "reported",
+      "basis": "stated in the pigeonpea DNase treatment",
+      "source_refs": [
+        "pigeonpea-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-dnase.dnase_concentration",
+      "name": "dnase_concentration",
+      "value": 2.0,
+      "unit": "U/μL",
+      "state": "reported",
+      "basis": "stated in the pigeonpea DNase treatment",
+      "source_refs": [
+        "pigeonpea-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-dnase.input_rna",
+      "name": "input_rna",
+      "value": 1.0,
+      "unit": "μg",
+      "state": "reported",
+      "basis": "stated in the pigeonpea DNase treatment",
+      "source_refs": [
+        "pigeonpea-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-dnase.dnase_temperature",
+      "name": "dnase_temperature",
+      "value": 37.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pigeonpea DNase treatment",
+      "source_refs": [
+        "pigeonpea-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-dnase.dnase_time",
+      "name": "dnase_time",
+      "value": 30.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the pigeonpea DNase treatment",
+      "source_refs": [
+        "pigeonpea-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-dnase.inactivation_temperature",
+      "name": "inactivation_temperature",
+      "value": 65.0,
+      "unit": "°C",
+      "state": "reported",
+      "basis": "stated in the pigeonpea DNase treatment",
+      "source_refs": [
+        "pigeonpea-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-dnase.inactivation_time",
+      "name": "inactivation_time",
+      "value": 10.0,
+      "unit": "min",
+      "state": "reported",
+      "basis": "stated in the pigeonpea DNase treatment",
+      "source_refs": [
+        "pigeonpea-dnase"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-yield-result.yield_min",
+      "name": "yield_min",
+      "value": 289.0,
+      "unit": "μg/g tissue",
+      "state": "reported",
+      "basis": "stated in the pigeonpea results",
+      "source_refs": [
+        "pigeonpea-yield-result"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-yield-result.yield_max",
+      "name": "yield_max",
+      "value": 422.0,
+      "unit": "μg/g tissue",
+      "state": "reported",
+      "basis": "stated in the pigeonpea results",
+      "source_refs": [
+        "pigeonpea-yield-result"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-purity-result.a260_a280_min",
+      "name": "a260_a280_min",
+      "value": 1.83,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the pigeonpea results",
+      "source_refs": [
+        "pigeonpea-purity-result"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-purity-result.a260_a280_max",
+      "name": "a260_a280_max",
+      "value": 1.98,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the pigeonpea results",
+      "source_refs": [
+        "pigeonpea-purity-result"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-purity-result.a260_a230_min",
+      "name": "a260_a230_min",
+      "value": 2.03,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the pigeonpea results",
+      "source_refs": [
+        "pigeonpea-purity-result"
+      ]
+    },
+    {
+      "parameter_id": "pigeonpea-purity-result.a260_a230_max",
+      "name": "a260_a230_max",
+      "value": 2.23,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the pigeonpea results",
+      "source_refs": [
+        "pigeonpea-purity-result"
+      ]
+    },
+    {
+      "parameter_id": "modified-ctab-method-result.a260_a280_min",
+      "name": "a260_a280_min",
+      "value": 1.77,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the modified CTAB results",
+      "source_refs": [
+        "modified-ctab-method-result"
+      ]
+    },
+    {
+      "parameter_id": "modified-ctab-method-result.a260_a280_max",
+      "name": "a260_a280_max",
+      "value": 2.13,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the modified CTAB results",
+      "source_refs": [
+        "modified-ctab-method-result"
+      ]
+    },
+    {
+      "parameter_id": "modified-ctab-method-result.a260_a230_min",
+      "name": "a260_a230_min",
+      "value": 1.81,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the modified CTAB results",
+      "source_refs": [
+        "modified-ctab-method-result"
+      ]
+    },
+    {
+      "parameter_id": "modified-ctab-method-result.a260_a230_max",
+      "name": "a260_a230_max",
+      "value": 2.22,
+      "unit": "ratio",
+      "state": "reported",
+      "basis": "stated in the modified CTAB results",
+      "source_refs": [
+        "modified-ctab-method-result"
+      ]
+    }
+  ],
+  "unknowns": [
+    "pecan_sample_handling: time between harvest and freezing",
+    "pecan_trizol_extraction: whether the manufacturer's protocol was followed without modification",
+    "pecan_dnase_treatment: DNase inactivation duration",
+    "pecan_quality_assessment: which samples were measured and whether any measurement failed",
+    "pecan_small_rna_enrichment: elution or recovery method after gel excision",
+    "pecan_cdna_synthesis: reverse-transcriptase enzyme and supplier",
+    "analogue_spruce_ctab_extraction: whether this buffer is suitable for pecan embryos",
+    "analogue_spruce_ctab_extraction: pH adjustment procedure for the buffer",
+    "analogue_spruce_ctab_extraction: whether 100 mg pecan embryo behaves like 100 mg spruce tissue",
+    "analogue_spruce_ctab_extraction: whether Proteinase K is needed for pecan embryos",
+    "analogue_spruce_phase_separation: number of repeat extractions needed for pecan",
+    "analogue_spruce_licl_precipitation: whether pecan RNA precipitates completely under these conditions",
+    "analogue_spruce_elution: the exact elution volume for a pecan embryo preparation",
+    "analogue_spruce_dnase: whether the pecan DNase step used the same units or time",
+    "analogue_spruce_trizol_finding: whether pecan TRIzol extraction performed as well as the pecan paper implies",
+    "analogue_pigeonpea_ctab_extraction: whether 100 mg pecan embryo has the same extraction behaviour",
+    "analogue_pigeonpea_ctab_extraction: whether pecan embryos need a longer incubation",
+    "analogue_pigeonpea_phase_separation: the number of repeat extractions needed for pecan",
+    "analogue_pigeonpea_precipitation: whether a pecan extract needs the same isopropanol volume",
+    "analogue_pigeonpea_precipitation: whether pecan RNA pellets as efficiently at this speed",
+    "analogue_pigeonpea_precipitation: whether 20 μL is enough to redissolve a pecan RNA pellet",
+    "analogue_pigeonpea_dnase: whether pecan RNA requires the same DNase amount",
+    "analogue_pigeonpea_quality: the yield of the pecan protocol",
+    "analogue_pigeonpea_quality: the absorbance ratios of the pecan protocol",
+    "method_review_caveat: which protocol is actually suitable for pecan embryos",
+    "method_review_caveat: whether this method was tested on pecan",
+    "pecan-embryo-handling.storage_duration: storage_duration is not stated",
+    "pecan-trizol-kit.trizol_volume: trizol_volume is not stated",
+    "pecan-trizol-kit.homogenisation_time: homogenisation_time is not stated",
+    "pecan-trizol-kit.phase_separation_speed: phase_separation_speed is not stated",
+    "pecan-trizol-kit.precipitation_temperature: precipitation_temperature is not stated",
+    "pecan-trizol-kit.elution_volume: elution_volume is not stated",
+    "pecan-dnase.dnase_amount: dnase_amount is not stated",
+    "pecan-dnase.dnase_temperature: dnase_temperature is not stated",
+    "pecan-dnase.dnase_time: dnase_time is not stated",
+    "pecan-dnase.inactivation_temperature: inactivation_temperature is not stated",
+    "pecan-quality-assessment.rna_yield: rna_yield is not stated",
+    "pecan-quality-assessment.a260_a280: a260_a280 is not stated",
+    "pecan-quality-assessment.a260_a230: a260_a230 is not stated",
+    "pecan-quality-assessment.rin: rin is not stated",
+    "pecan-small-rna-enrichment.page_gel_percentage: page_gel_percentage is not stated",
+    "pecan-small-rna-enrichment.rna_loaded: rna_loaded is not stated",
+    "pecan-cdna-synthesis.reaction_volume: reaction_volume is not stated",
+    "pecan-cdna-synthesis.incubation_temperature: incubation_temperature is not stated",
+    "no target-organism RNA yield, RIN or degradation measurement is reported by the acquired pecan source"
+  ],
+  "hypotheses": [
+    "analogue_spruce_ctab_extraction: Modified CTAB extraction — Norway spruce (analogue) is transferred from spruce_rna; it has not been validated on the target organism.",
+    "analogue_spruce_phase_separation: Chloroform:isoamyl alcohol phase separation — Norway spruce (analogue) is transferred from spruce_rna; it has not been validated on the target organism.",
+    "analogue_spruce_licl_precipitation: LiCl precipitation — Norway spruce (analogue) is transferred from spruce_rna; it has not been validated on the target organism.",
+    "analogue_spruce_elution: Wash, dry and elute RNA — Norway spruce (analogue) is transferred from spruce_rna; it has not been validated on the target organism.",
+    "analogue_spruce_dnase: DNase treatment — Norway spruce (analogue) is transferred from spruce_rna; it has not been validated on the target organism.",
+    "analogue_spruce_trizol_finding: TRIzol performance in Norway spruce (analogue result) is transferred from spruce_rna; it has not been validated on the target organism.",
+    "analogue_pigeonpea_ctab_extraction: Modified CTAB extraction — pigeonpea (analogue) is transferred from pigeonpea_rna; it has not been validated on the target organism.",
+    "analogue_pigeonpea_phase_separation: Phenol:chloroform phase separation — pigeonpea (analogue) is transferred from pigeonpea_rna; it has not been validated on the target organism.",
+    "analogue_pigeonpea_precipitation: Isopropanol precipitation and elution — pigeonpea (analogue) is transferred from pigeonpea_rna; it has not been validated on the target organism.",
+    "analogue_pigeonpea_dnase: DNase I treatment — pigeonpea (analogue) is transferred from pigeonpea_rna; it has not been validated on the target organism.",
+    "analogue_pigeonpea_quality: Analogous yield and purity results — pigeonpea is transferred from pigeonpea_rna; it has not been validated on the target organism."
+  ],
+  "assumptions": [
+    "A protocol reported for a different species is a hypothesis, not a measurement on the requested organism.",
+    "A parameter absent from the acquired text stays unknown; it is never imputed, defaulted or placed at zero.",
+    "The model audits evidence coverage and protocol readiness. It does not predict RNA yield, integrity or degradation.",
+    "Only quotes that were found verbatim in an acquired source are allowed to support a step."
+  ],
+  "readiness": {
+    "protocol_complete_for_target": false,
+    "quantitative_yield_available_for_target": false,
+    "analogue_protocol_available": true,
+    "direct_target_claim_count": 6,
+    "analogue_claim_count": 17,
+    "method_review_claim_count": 2,
+    "direct_target_step_count": 6,
+    "analogue_step_count": 11,
+    "method_review_step_count": 1,
+    "reported_parameter_count": 66,
+    "unresolved_parameter_count": 18,
+    "evidence_coverage_ratio": 0.24,
+    "statement": "This audits what the literature establishes. A complete protocol for the target organism, a quantitative yield, and an analogue protocol are three different findings; this block keeps them apart."
+  },
+  "sources": [
+    {
+      "source_id": "pecan_miRNome",
+      "title": "The Integrated Analysis of miRNome and Degradome Sequencing Reveals the Regulatory Mechanisms of Seed Development and Oil Biosynthesis in Pecan (Carya illinoinensis)",
+      "year": "2024",
+      "doi": "10.3390/foods13182934",
+      "journal": "Foods",
+      "role": "target_organism",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.3390/foods13182934",
+      "content_sha256": "00534c5dde8fe0b64f6eee84b6f71d95a8f6a71882f4ed61d02c9e9c7742ede3",
+      "extraction_method": "jats_xml_stdlib"
+    },
+    {
+      "source_id": "spruce_rna",
+      "title": "An Optimized and Cost-Effective RNA Extraction Method for Secondary Metabolite-Enriched Tissues of Norway Spruce (Picea abies)",
+      "year": "2024",
+      "doi": "10.3390/plants13030389",
+      "journal": "Plants",
+      "role": "analogous_protocol",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.3390/plants13030389",
+      "content_sha256": "5c2988bd0f804aa52e77218aa8e39d046c169004a68dbd55e2b88aed2e303dd9",
+      "extraction_method": "jats_xml_stdlib"
+    },
+    {
+      "source_id": "pigeonpea_rna",
+      "title": "Development of modified CTAB and Trizol protocols to isolate high molecular weight (HMW) RNA from polyphenol and polysaccharides rich pigeonpea (Cajanuscajan (L.) Millsp",
+      "year": "2023",
+      "doi": "10.1371/journal.pone.0291949",
+      "journal": "PLOS ONE",
+      "role": "analogous_protocol",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.1371/journal.pone.0291949",
+      "content_sha256": "63cdc6f4f23194bb94c9f6aef12e77b8818508d64a887ad0e98f23f8e9b806a5",
+      "extraction_method": "jats_xml_stdlib"
+    },
+    {
+      "source_id": "modified_ctab",
+      "title": "A modified CTAB method for the extraction of high-quality RNA from mono-and dicotyledonous plants rich in secondary metabolites",
+      "year": "2024",
+      "doi": "10.1186/s13007-024-01198-z",
+      "journal": "Plant Methods",
+      "role": "method_review",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.1186/s13007-024-01198-z",
+      "content_sha256": "b6aff08ddb35b90d9d6acabba8114faeaedc7a4ff5a64836db23849a7bb9ddb9",
+      "extraction_method": "jats_xml_stdlib"
+    },
+    {
+      "source_id": "difficult_species",
+      "title": "DNA-free high-quality RNA extraction from 39 difficult-to-extract plant species (representing seasonal tissues and tissue types) of 32 families, and its validation for downstream molecular applications",
+      "year": "2023",
+      "doi": "10.1186/s13007-023-01063-5",
+      "journal": "Plant Methods",
+      "role": "method_review",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.1186/s13007-023-01063-5",
+      "content_sha256": "52ceb55d5629a4c647cc8fe87f69bab8a1183122bb511df1e6941a8b82db0f65",
+      "extraction_method": "jats_xml_stdlib"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "pecan-embryo-handling",
+      "source_id": "pecan_miRNome",
+      "quote": "Following the removal of the pericarp and seed coat, the embryos were rapidly frozen in liquid nitrogen and stored at −80 °C for future experiments.",
+      "section": "2. Materials and Methods > 2.1. Plant Materials and Sample Collection",
+      "locator": {
+        "start": 4617,
+        "end": 4765
+      },
+      "claim_type": "protocol_step",
+      "subject": "pecan embryos",
+      "relation": "preserved_by",
+      "object": "liquid-nitrogen freezing and −80 °C storage",
+      "organism": "Carya illinoinensis",
+      "tissue": "embryo",
+      "specificity": "target_organism",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "pecan_sample_handling",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pecan-trizol-kit",
+      "source_id": "pecan_miRNome",
+      "quote": "The total RNA was extracted via a TRIzol kit (Invitrogen, Carlsbad, CA, USA) following the manufacturer’s protocol",
+      "section": "2. Materials and Methods > 2.3. Small RNA Library Construction and Sequencing",
+      "locator": {
+        "start": 6251,
+        "end": 6365
+      },
+      "claim_type": "protocol_step",
+      "subject": "total RNA",
+      "relation": "extracted_with",
+      "object": "TRIzol kit (Invitrogen)",
+      "organism": "Carya illinoinensis",
+      "tissue": "embryo",
+      "specificity": "target_organism",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "pecan_trizol_extraction",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pecan-dnase",
+      "source_id": "pecan_miRNome",
+      "quote": "genomic DNA contamination was eliminated using RNase-free DNase I (Qiagen, Hilden, Germany).",
+      "section": "2. Materials and Methods > 2.5. RNA Isolation and Transcriptome Sequencing",
+      "locator": {
+        "start": 7371,
+        "end": 7463
+      },
+      "claim_type": "protocol_step",
+      "subject": "genomic DNA contamination",
+      "relation": "removed_by",
+      "object": "RNase-free DNase I (Qiagen)",
+      "organism": "Carya illinoinensis",
+      "tissue": "embryo",
+      "specificity": "target_organism",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "pecan_dnase_treatment",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pecan-quality-assessment",
+      "source_id": "pecan_miRNome",
+      "quote": "The RNA quality and concentration were assessed via agarose gel electrophoresis and the NanoDrop 2000 (Thermo Fisher Scientific, Wilmington, NC, USA).",
+      "section": "2. Materials and Methods > 2.5. RNA Isolation and Transcriptome Sequencing",
+      "locator": {
+        "start": 7464,
+        "end": 7614
+      },
+      "claim_type": "protocol_step",
+      "subject": "RNA quality and concentration",
+      "relation": "assessed_by",
+      "object": "agarose gel electrophoresis and NanoDrop 2000",
+      "organism": "Carya illinoinensis",
+      "tissue": "embryo",
+      "specificity": "target_organism",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "pecan_quality_assessment",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pecan-small-rna-enrichment",
+      "source_id": "pecan_miRNome",
+      "quote": "RNA molecules ranging from 18 to 30 nucleotides (nt) in size were enriched by polyacrylamide gel electrophoresis (PAGE).",
+      "section": "2. Materials and Methods > 2.3. Small RNA Library Construction and Sequencing",
+      "locator": {
+        "start": 6371,
+        "end": 6491
+      },
+      "claim_type": "protocol_step",
+      "subject": "small RNA",
+      "relation": "size_selected_by",
+      "object": "PAGE, 18–30 nt",
+      "organism": "Carya illinoinensis",
+      "tissue": "embryo",
+      "specificity": "target_organism",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "pecan_small_rna_enrichment",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pecan-cdna-synthesis",
+      "source_id": "pecan_miRNome",
+      "quote": "For each sample, 1 μg of RNA was reverse transcribed to cDNA",
+      "section": "2. Materials and Methods > 2.5. RNA Isolation and Transcriptome Sequencing",
+      "locator": {
+        "start": 7615,
+        "end": 7675
+      },
+      "claim_type": "protocol_step",
+      "subject": "total RNA",
+      "relation": "reverse_transcribed_to",
+      "object": "cDNA",
+      "organism": "Carya illinoinensis",
+      "tissue": "embryo",
+      "specificity": "target_organism",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "pecan_cdna_synthesis",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-ctab-buffer",
+      "source_id": "spruce_rna",
+      "quote": "The extraction buffer was composed of 2.0% (w/v) CTAB (Sigma-Aldrich, St. Louis, MO, USA), 2.0% (w/v) polyvinylpyrrolidone (PVP 40; Sigma-Aldrich, St. Louis, MO, USA), 2M sodium chloride (NaCl, Sigma-Aldrich, St. Louis, MO, USA), 100 mM Tris-HCl (pH 8.0; Sigma-Aldrich, St. Louis, MO, USA), 25 mM ethylenediaminetetraacetic acid (EDTA; Sigma-Aldrich, St. Louis, MO, USA), and 2.0% (w/v) β-mercaptoethanol (BME, Sigma-Aldrich, St. Louis, MO, USA) in RNase-free water.",
+      "section": "3. Material and Methods > 3.2. Total RNA Extraction > 3.2.5. Modified CTAB Method",
+      "locator": {
+        "start": 20831,
+        "end": 21297
+      },
+      "claim_type": "protocol_step",
+      "subject": "modified CTAB extraction buffer",
+      "relation": "composed_of",
+      "object": "CTAB, PVP-40, NaCl, Tris-HCl, EDTA and BME",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_ctab_extraction",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-ctab-incubation",
+      "source_id": "spruce_rna",
+      "quote": "The homogenized tissue samples (100 mg) were transferred into 1 mL of extraction buffer and were incubated at 65 °C for 30 min",
+      "section": "3. Material and Methods > 3.2. Total RNA Extraction > 3.2.5. Modified CTAB Method",
+      "locator": {
+        "start": 21525,
+        "end": 21651
+      },
+      "claim_type": "protocol_step",
+      "subject": "homogenized Norway spruce tissue",
+      "relation": "incubated_in",
+      "object": "modified CTAB extraction buffer",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_ctab_extraction",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-proteinase-k",
+      "source_id": "spruce_rna",
+      "quote": "Then, 2% BME and 80 μg/mL of Proteinase K were added before RNA extraction.",
+      "section": "3. Material and Methods > 3.2. Total RNA Extraction > 3.2.5. Modified CTAB Method",
+      "locator": {
+        "start": 21449,
+        "end": 21524
+      },
+      "claim_type": "protocol_step",
+      "subject": "Proteinase K",
+      "relation": "added_at",
+      "object": "80 μg/mL before extraction",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_ctab_extraction",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-chloroform-phase",
+      "source_id": "spruce_rna",
+      "quote": "An equal volume of chloroform:Isoamyl alcohol (24:1) was added into the mixture, mixed, and centrifuged at 12,000 rpm for 10 min at 4 °C.",
+      "section": "3. Material and Methods > 3.2. Total RNA Extraction > 3.2.5. Modified CTAB Method",
+      "locator": {
+        "start": 21700,
+        "end": 21837
+      },
+      "claim_type": "protocol_step",
+      "subject": "aqueous phase",
+      "relation": "separated_by",
+      "object": "chloroform:isoamyl alcohol (24:1)",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_phase_separation",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-licl-precipitation",
+      "source_id": "spruce_rna",
+      "quote": "Then, 0.5 volume of 5M lithium chloride (LiCl) was added, mixed, and incubated at −20 °C for 1 h.",
+      "section": "3. Material and Methods > 3.2. Total RNA Extraction > 3.2.5. Modified CTAB Method",
+      "locator": {
+        "start": 21978,
+        "end": 22075
+      },
+      "claim_type": "protocol_step",
+      "subject": "RNA",
+      "relation": "precipitated_by",
+      "object": "5 M LiCl at −20 °C",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_licl_precipitation",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-wash-elution",
+      "source_id": "spruce_rna",
+      "quote": "The supernatant from the tube was discarded, and the pellet was washed twice with 70% ethanol. The pellet was air dried and eluted with an appropriate amount of RNase-free water (~50 µL)",
+      "section": "3. Material and Methods > 3.2. Total RNA Extraction > 3.2.5. Modified CTAB Method",
+      "locator": {
+        "start": 22138,
+        "end": 22324
+      },
+      "claim_type": "protocol_step",
+      "subject": "RNA pellet",
+      "relation": "washed_and_eluted_with",
+      "object": "70% ethanol and ~50 µL RNase-free water",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_elution",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-dnase",
+      "source_id": "spruce_rna",
+      "quote": "Briefly, TURBO DNase buffer (1×) and 2 units of TURBO DNase enzyme were added to the sample and incubated at 37 °C for 30 min.",
+      "section": "3. Material and Methods > 3.3. DNase Treatment and RNA Analysis",
+      "locator": {
+        "start": 22738,
+        "end": 22864
+      },
+      "claim_type": "protocol_step",
+      "subject": "RNA",
+      "relation": "treated_with",
+      "object": "TURBO DNase",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_dnase",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "spruce-trizol-result",
+      "source_id": "spruce_rna",
+      "quote": "Although the TRIzol reagent solution appeared to work with certain tissues based on nanodrop readings, the RNA purity and integrity were highly compromised.",
+      "section": "4. Conclusions",
+      "locator": {
+        "start": 24382,
+        "end": 24538
+      },
+      "claim_type": "result",
+      "subject": "TRIzol-extracted RNA",
+      "relation": "had",
+      "object": "compromised purity and integrity",
+      "organism": "Picea abies",
+      "tissue": "needle, phloem and root",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_spruce_trizol_finding",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-tissue-buffer",
+      "source_id": "pigeonpea_rna",
+      "quote": "Different samples- leaf, flower and developing pods (100mg each) were ground to a fine powder in liquid nitrogen along with PVP using chilled mortar and pestle. The powder was transferred to 2ml micro centrifuge tubes containing 1ml pre warmed CTAB extraction buffer.",
+      "section": "Materials and methods > The modified CTAB method > Protocol-1",
+      "locator": {
+        "start": 3253,
+        "end": 3520
+      },
+      "claim_type": "protocol_step",
+      "subject": "pigeonpea tissue",
+      "relation": "extracted_in",
+      "object": "modified CTAB buffer",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_ctab_extraction",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-incubation",
+      "source_id": "pigeonpea_rna",
+      "quote": "The samples were mixed properly in the buffer by inverting the tubes and incubated in water bath at 65°C for 25 minutes.",
+      "section": "Materials and methods > The modified CTAB method > Protocol-1",
+      "locator": {
+        "start": 3521,
+        "end": 3641
+      },
+      "claim_type": "protocol_step",
+      "subject": "pigeonpea lysate",
+      "relation": "incubated_at",
+      "object": "65 °C for 25 min",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_ctab_extraction",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-phase-separation",
+      "source_id": "pigeonpea_rna",
+      "quote": "After completion of incubation, equal volume of Phenol: Chloroform: Isoamyl alcohol (25:24:1) was added and mixed vigorously by inverting the tubes for 6–8 times. The samples were centrifuged at 8000 rpm for 20 minutes at 4°C.",
+      "section": "Materials and methods > The modified CTAB method > Protocol-1",
+      "locator": {
+        "start": 3688,
+        "end": 3914
+      },
+      "claim_type": "protocol_step",
+      "subject": "aqueous phase",
+      "relation": "separated_by",
+      "object": "phenol:chloroform:isoamyl alcohol (25:24:1)",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_phase_separation",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-isopropanol",
+      "source_id": "pigeonpea_rna",
+      "quote": "800μl of chilled isopropanol was added to the transferred aqueous phase and mixed by inverting the tubes 6–8 times.",
+      "section": "Materials and methods > The modified CTAB method > Protocol-1",
+      "locator": {
+        "start": 4061,
+        "end": 4176
+      },
+      "claim_type": "protocol_step",
+      "subject": "aqueous phase",
+      "relation": "precipitated_with",
+      "object": "800 μL chilled isopropanol",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_precipitation",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-precipitation-centrifugation",
+      "source_id": "pigeonpea_rna",
+      "quote": "The tubes were kept at -20°C for 1 hour for the RNA precipitation and centrifuged at 8,500 rpm for 30 minutes at 4°C.",
+      "section": "Materials and methods > The modified CTAB method > Protocol-1",
+      "locator": {
+        "start": 4177,
+        "end": 4294
+      },
+      "claim_type": "protocol_step",
+      "subject": "RNA",
+      "relation": "precipitated_at",
+      "object": "−20 °C for 1 h",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_precipitation",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-wash-elution",
+      "source_id": "pigeonpea_rna",
+      "quote": "The supernatant was discarded and 1ml of ice-cold 70% ethanol was added to the pellet for washing. The tubes were centrifuged at 10,000 rpm for 5 minutes at 4°C. The washing step was repeated twice. The pellet was air dried for 10 minutes and dissolved in 20μl of autoclaved DEPC treated water.",
+      "section": "Materials and methods > The modified CTAB method > Protocol-1",
+      "locator": {
+        "start": 4295,
+        "end": 4589
+      },
+      "claim_type": "protocol_step",
+      "subject": "RNA pellet",
+      "relation": "washed_and_dissolved_in",
+      "object": "70% ethanol and 20 μL DEPC-treated water",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_precipitation",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-dnase",
+      "source_id": "pigeonpea_rna",
+      "quote": "Prior to downstream application, 1μl of DNase I (2U/μl) (Thermo scientific) enzyme was added to 1μg of total RNA and incubated at 37°C for 30 min to remove genomic DNA contamination. After incubation the enzyme was inactivated by incubating at 65°C for 10 min in the presence of EDTA.",
+      "section": "Materials and methods > The modified Trizol method > DNase I treatment",
+      "locator": {
+        "start": 7260,
+        "end": 7544
+      },
+      "claim_type": "protocol_step",
+      "subject": "total RNA",
+      "relation": "treated_with",
+      "object": "DNase I",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_dnase",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-yield-result",
+      "source_id": "pigeonpea_rna",
+      "quote": "The modified CTAB and trizol protocols yield sufficient and good quality of total RNA from all the tissues used in the study (leaf, flower and developing pod) ranged from 289to 422μg per gram of tissue.",
+      "section": "Results and discussion",
+      "locator": {
+        "start": 12708,
+        "end": 12910
+      },
+      "claim_type": "result",
+      "subject": "total RNA yield",
+      "relation": "ranged_from_to",
+      "object": "289 to 422 μg per gram of tissue",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_quality",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "pigeonpea-purity-result",
+      "source_id": "pigeonpea_rna",
+      "quote": "The purity of RNA ranged from 1.83 to 1.98 for the absorbance ratio A260/A280 indicating that the RNA was free of protein contamination. The A260/A230 ratio ranged from 2.03 to 2.23 showing that the RNA was devoid of contaminants (Table 1).",
+      "section": "Results and discussion",
+      "locator": {
+        "start": 13788,
+        "end": 14028
+      },
+      "claim_type": "result",
+      "subject": "RNA purity ratios",
+      "relation": "ranged_from_to",
+      "object": "A260/A280 1.83–1.98 and A260/A230 2.03–2.23",
+      "organism": "Cajanus cajan",
+      "tissue": "leaf, flower and developing pod",
+      "specificity": "analogous_species",
+      "hypothesis": true,
+      "uncertainty": "",
+      "supports_step": "analogue_pigeonpea_quality",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "difficult-species-no-universal-protocol",
+      "source_id": "difficult_species",
+      "quote": "No universal protocol is available for isolating total RNA as the plants vary significantly in their structural and biochemical profile.",
+      "section": "Conclusion",
+      "locator": {
+        "start": 38064,
+        "end": 38200
+      },
+      "claim_type": "limitation",
+      "subject": "RNA extraction protocols",
+      "relation": "are_not",
+      "object": "universal across plant species",
+      "organism": "multiple plant species",
+      "tissue": "",
+      "specificity": "method_review",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "method_review_caveat",
+      "value": null,
+      "unit": ""
+    },
+    {
+      "claim_id": "modified-ctab-method-result",
+      "source_id": "modified_ctab",
+      "quote": "Our version of the so-called CTAB method proved to be efficient in extracting both woody and herbaceous total RNA, indicated by the A260:A280 and A260:A230 ratios measured from 1.77 to 2.13 and from 1.81 to 2.22",
+      "section": "Results and discussion",
+      "locator": {
+        "start": 9156,
+        "end": 9367
+      },
+      "claim_type": "result",
+      "subject": "modified CTAB method",
+      "relation": "produced",
+      "object": "RNA with A260:A280 1.77–2.13 and A260:A230 1.81–2.22",
+      "organism": "nineteen woody and herbaceous species",
+      "tissue": "mature leaf",
+      "specificity": "method_review",
+      "hypothesis": false,
+      "uncertainty": "",
+      "supports_step": "method_review_caveat",
+      "value": null,
+      "unit": ""
+    }
+  ]
+}

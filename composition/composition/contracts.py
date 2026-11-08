@@ -571,6 +571,7 @@ class ModelManifest:
     assumptions: tuple[Mapping[str, Any], ...] = ()
     missing_information: tuple[Mapping[str, Any], ...] = ()
     diagnostics: tuple[ModelDiagnostic, ...] = ()
+    evidence_tier: str = "DIRECT"  # DIRECT | ANALOGUE_BRIDGE | UNVERIFIED
 
     def __post_init__(self) -> None:
         if not self.model_id:

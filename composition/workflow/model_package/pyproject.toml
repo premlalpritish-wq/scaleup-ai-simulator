@@ -1,0 +1,5 @@
+[project]
+name = "scaleup-generated-rna-model"
+version = "0.1.0"
+description = "Marker package for the per-run RNA evidence-audit model"
+requires-python = ">=3.11"

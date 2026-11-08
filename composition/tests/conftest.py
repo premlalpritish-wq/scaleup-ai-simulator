@@ -17,6 +17,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+if sys.platform == "win32":
+    _orig_popen = subprocess.Popen
+
+    def _safe_popen(*args, **kwargs):
+        if "stdin" not in kwargs or kwargs["stdin"] is None:
+            kwargs["stdin"] = subprocess.DEVNULL
+        return _orig_popen(*args, **kwargs)
+
+    subprocess.Popen = _safe_popen  # type: ignore
+
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,8 +47,11 @@ EXAMPLE_EXPECTATIONS: dict[str, dict[str, object]] = {
     "brass_batch_chain.json": {"exit_code": 0, "min_errors": 0},
     "cycle_rejected.json": {"exit_code": 1, "min_errors": 1},
     "failure_propagation.json": {"exit_code": 2, "min_errors": 1},
+    "ganjave_fed_batch.json": {"exit_code": 0, "min_errors": 0},
+    "incomplete_required_input.json": {"exit_code": 2, "min_errors": 1},
     "rejected_au_to_mass.json": {"exit_code": 1, "min_errors": 1},
     "rejected_component_mapping.json": {"exit_code": 1, "min_errors": 1},
+    "rejected_cross_model_insulin.json": {"exit_code": 1, "min_errors": 1},
     "rejected_mass_as_flow.json": {"exit_code": 1, "min_errors": 1},
 }
 

@@ -660,6 +660,25 @@ def context_for(reference: str, base: Path | None = None
         })
 
     catalogue_focus = model_id == _catalogue_model_id()
+    store = get_central_library_store()
+    lib_edges: list[dict[str, Any]] = []
+    lib_alternatives: dict[str, Any] = {}
+    if store:
+        mechs = list(store.mechanisms.values())
+        for i in range(len(mechs)):
+            for j in range(len(mechs)):
+                if i != j:
+                    for out_p in mechs[i].output_ports:
+                        for in_p in mechs[j].input_ports:
+                            if out_p.port_id == in_p.port_id or (out_p.quantity_type == in_p.quantity_type and out_p.quantity_type != "unspecified"):
+                                edge = store.compute_compatibility_edge(mechs[i].mechanism_id, mechs[j].mechanism_id, out_p.port_id)
+                                lib_edges.append(edge.to_dict())
+        for p in focus_surface.get("ports", []):
+            pid = p.get("port_id", "")
+            alts = store.find_alternatives_for_port(pid, p.get("quantity", ""))
+            if alts:
+                lib_alternatives[pid] = alts
+
     payload.update({
         "resolved": True,
         "focus_model": model_id,
@@ -679,6 +698,12 @@ def context_for(reference: str, base: Path | None = None
         },
         "related_models": related,
         "connections": connections,
+        "central_library": {
+            "indexed_papers": len(store.papers) if store else 0,
+            "indexed_mechanisms": len(store.mechanisms) if store else 0,
+            "cross_paper_edges": lib_edges[:25],
+            "alternatives_by_port": lib_alternatives,
+        },
         "examined_papers": _examined_papers() if catalogue_focus else [],
         "examined_papers_scope": (
             "candidate evidence assessed against this model's declared gaps; "
@@ -731,6 +756,42 @@ def _replay_scope(base: Path | None) -> dict[str, Any]:
             "scientific context, read from the project's own records."
         ),
     }
+
+
+def get_central_library_store():
+    try:
+        from .evidence.library_store import get_library_store
+        return get_library_store()
+    except Exception:
+        return None
+
+
+def query_library_mechanisms(organism: str = "", mode: str = "", phenomenon: str = "") -> list[dict[str, Any]]:
+    store = get_central_library_store()
+    if not store:
+        return []
+    mechs = store.find_mechanisms_for_context(organism=organism, mode=mode, phenomenon=phenomenon)
+    return [m.to_dict() for m in mechs]
+
+
+def compute_cross_paper_edge(source_mech_id: str, target_mech_id: str, shared_port: str) -> dict[str, Any]:
+    store = get_central_library_store()
+    if not store:
+        return {
+            "source_mechanism_id": source_mech_id,
+            "target_mechanism_id": target_mech_id,
+            "port_id": shared_port,
+            "tier": "INCOMPATIBLE_CONSTRAINTS",
+            "reason": "Central library store unavailable",
+        }
+    return store.compute_compatibility_edge(source_mech_id, target_mech_id, shared_port).to_dict()
+
+
+def find_port_alternatives(port_id: str, quantity_type: str = "", exclude_mechanism_id: str = "") -> list[dict[str, Any]]:
+    store = get_central_library_store()
+    if not store:
+        return []
+    return store.find_alternatives_for_port(port_id, quantity_type, exclude_mechanism_id)
 
 
 # --------------------------------------------------------------------------- #

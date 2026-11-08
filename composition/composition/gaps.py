@@ -1926,6 +1926,84 @@ def problems(payload: dict[str, Any] | None = None) -> list[str]:
     return failures
 
 
+def evaluate_central_library_gaps(
+    requested_phenomenon: str = "",
+    organism: str = "Escherichia coli",
+    domain: str = "",
+) -> list[dict[str, Any]]:
+    """Query central library to determine which bioprocess knowledge gaps are addressed or require new literature."""
+    try:
+        from .evidence.library_store import get_library_store
+        store = get_library_store()
+    except Exception:
+        store = None
+
+    if not store:
+        return []
+
+    gaps: list[dict[str, Any]] = []
+    lower_phenom = requested_phenomenon.lower()
+    is_extraction = domain == "SOLID_LIQUID_EXTRACTION" or any(k in lower_phenom for k in ("extraction", "extract", "solid-liquid", "seaweed", "alginate", "kelp", "maceration", "leaching"))
+
+    if is_extraction:
+        org_ext_mechs = [
+            m for m in store.mechanisms.values()
+            if any(
+                organism.lower() in str(ctx.get("organism", "")).lower()
+                and ("extraction" in str(ctx.get("phenomenon", "")).lower() or "extraction" in str(ctx.get("mode", "")).lower() or "extraction" in m.name.lower())
+                for ctx in m.compatible_contexts
+            )
+        ]
+        if not org_ext_mechs:
+            gaps.append({
+                "gap_id": "GAP-EXTRACTION-KINETICS-ABSENT",
+                "category": "mathematical_relationships",
+                "domain": "SOLID_LIQUID_EXTRACTION",
+                "organism": organism,
+                "description": f"No solid-liquid extraction rate law or yield model found for '{organism}' in central library.",
+                "requires_external_literature": True,
+                "search_query": f"{organism} solid-liquid extraction kinetics yield",
+                "missing_parameters": [
+                    {"param_id": "k_ext", "quantity_type": "rate_constant", "unit": "1/h", "description": "Solid-liquid extraction rate constant"},
+                    {"param_id": "Y_max", "quantity_type": "yield", "unit": "g/g", "description": "Maximum extraction yield"},
+                ],
+            })
+        return gaps
+
+    growth_mechs = store.find_mechanisms_for_context(organism=organism, phenomenon="growth")
+    if not growth_mechs:
+        gaps.append({
+            "gap_id": "GAP-KINETICS-ABSENT",
+            "category": "mathematical_relationships",
+            "domain": "MICROBIAL_FERMENTATION",
+            "organism": organism,
+            "description": f"No growth rate or kinetic model found for organism '{organism}' in central library.",
+            "requires_external_literature": True,
+            "search_query": f"{organism} specific growth rate kinetics fed-batch",
+            "missing_parameters": [
+                {"param_id": "mu_max", "quantity_type": "specific_rate", "unit": "1/h", "description": "Maximum specific growth rate"},
+                {"param_id": "Ks", "quantity_type": "mass_concentration", "unit": "g/L", "description": "Substrate affinity constant"},
+                {"param_id": "Y_xs", "quantity_type": "yield", "unit": "g/g", "description": "Biomass yield on substrate"},
+            ],
+        })
+
+    feed_mechs = store.find_mechanisms_for_context(organism=organism, phenomenon="feed")
+    if not feed_mechs and any(k in lower_phenom for k in ("fed-batch", "fed batch", "feed")):
+        gaps.append({
+            "gap_id": "GAP-FEED-CONTROL-ABSENT",
+            "category": "process_conditions",
+            "domain": "MICROBIAL_FERMENTATION",
+            "organism": organism,
+            "description": f"No feed-rate control law or glucose feeding profile found for '{organism}'.",
+            "requires_external_literature": True,
+            "search_query": f"{organism} fed-batch feeding strategy exponential",
+            "missing_parameters": [
+                {"param_id": "feed_rate", "quantity_type": "volume_flow", "unit": "L/h", "description": "Volumetric feeding rate"}
+            ],
+        })
+    return gaps
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m composition.gaps",

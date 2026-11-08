@@ -1,0 +1,23 @@
+[project]
+name = "baez2014-oxygen-induced"
+version = "0.1.0"
+description = "Reported observations and the printed exponential fed-batch feed equation of Baez et al. (2014), Microbial Cell Factories 13:50"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["baez2014"]
+
+[tool.setuptools.package-data]
+baez2014 = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

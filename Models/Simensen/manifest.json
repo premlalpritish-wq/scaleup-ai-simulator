@@ -1,0 +1,1444 @@
+{
+  "artefact_id": "simensen2022-biomass-composition",
+  "derived": {
+    "amino_acid_sum": {
+      "beck_et_al": 0.35120000000000007,
+      "neidhardt": 0.5560000000000002,
+      "this_work": 0.5360000000000001
+    },
+    "composition": {
+      "beck_et_al": {
+        "Carbohydrate": 0.042,
+        "DNA": 0.01,
+        "Lipid": 0.067,
+        "Protein": 0.35,
+        "RNA": 0.172
+      },
+      "neidhardt": {
+        "Carbohydrate": 0.057,
+        "DNA": 0.031,
+        "Lipid": 0.091,
+        "Others": 0.066,
+        "Protein": 0.55,
+        "RNA": 0.205
+      },
+      "this_work": {
+        "Carbohydrate": 0.0312,
+        "DNA": 0.013,
+        "Lipid": 0.061,
+        "Protein": 0.54,
+        "RNA": 0.19
+      }
+    },
+    "computed_macromolecule_sum": {
+      "beck_et_al": 0.641,
+      "neidhardt": 1.0,
+      "this_work": 0.8351999999999999
+    },
+    "printed_sum": {
+      "beck_et_al": 0.643,
+      "neidhardt": 1.0,
+      "this_work": 0.835
+    }
+  },
+  "disclaimer": "A passing test verifies that this implementation matches the printed table it was built from. It does not establish scientific validity, and it certifies no composition for any other strain, medium, scale or growth condition: the paper states that biomass composition is condition-dependent.",
+  "experimental_context": [
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1,
+        "quote": "Escherichia coli biomass composition",
+        "section": "Title",
+        "source_id": "simensen2022"
+      },
+      "key": "organism",
+      "label": "organism",
+      "value": "Escherichia coli"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "K-12 MG1655",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "strain",
+      "label": "strain",
+      "value": "E. coli K-12 MG1655 (700926, ATCC)"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "glycerol stock solutions",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "construct",
+      "label": "construct",
+      "value": "none: a wild-type K-12 strain was used, not a recombinant one"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "using 1 L of a modified minimal M9 medium containing 2% (w/v) glucose",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "medium",
+      "label": "fermentation medium",
+      "value": "modified minimal M9 with 2% (w/v) glucose, 3 mM MgSO4, 93.5 mM NH4Cl, 8.5 mM NaCl, 11.5 mM KH2PO4 and 0.2% (v/v) trace minerals"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "using a batch fermentor setup",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "reactor",
+      "label": "reactor",
+      "value": "a 3 L Eppendorf New Brunswick BioFlo 115 bioreactor, batch setup"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "using 1 L of a modified minimal M9",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "scale",
+      "label": "working volume",
+      "value": "1 L in a 3 L bioreactor"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "with shaking (37",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "temperature",
+      "label": "temperature",
+      "value": "37 degC"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "ensuring DO",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "dissolved_oxygen",
+      "label": "dissolved oxygen",
+      "value": "held at or above 40%"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "allowing for biomass sampling in the exponential growth",
+        "section": "Strain, media and culture conditions",
+        "source_id": "simensen2022"
+      },
+      "key": "growth_phase",
+      "label": "sampling condition",
+      "value": "balanced exponential growth, fermentation parameters monitored throughout"
+    }
+  ],
+  "missing_models": [
+    {
+      "label": "The flux-variability comparison (Eq 1 and Table 2)",
+      "model_id": "fva.iML1515a_comparison",
+      "why_not_implemented": "Eq 1's fractional flux-range overlap xi is a function of two constraint-based solutions of the genome-scale model iML1515a. The model file and the computed flux ranges are not part of this paper, and neither is supplied here, so implementing xi would mean inventing the flux distribution."
+    },
+    {
+      "label": "Table 2's reaction flux shifts",
+      "model_id": "dataset.table_2_flux_shifts",
+      "why_not_implemented": "Table 2 lists examples of reactions whose feasible flux range shifts between the two biomass objective functions. It is a selection, not a complete table, and it is computed from the model above; the package does not invent the missing rows."
+    },
+    {
+      "label": "Coupling to the composition layer",
+      "model_id": "coupling.other_models",
+      "why_not_implemented": "This is a standalone dataset of Simensen et al.'s own measurement. It declares no ports, transfers no value into another model, adds no adapter registration and makes no compatibility claim."
+    }
+  ],
+  "printed_numeric_markers": {
+    "AMP": [
+      "NA"
+    ],
+    "CMP": [
+      "NA"
+    ],
+    "Cysteine": [
+      "NA"
+    ],
+    "GMP": [
+      "NA"
+    ],
+    "Galactose": [
+      "-"
+    ],
+    "Glucosamine": [
+      "-"
+    ],
+    "Glucose": [
+      "-"
+    ],
+    "Heptose": [
+      "-"
+    ],
+    "KDO": [
+      "-"
+    ],
+    "Methionine": [
+      "NA"
+    ],
+    "N-acetylglucosamine": [
+      "-",
+      "n.d."
+    ],
+    "N-acetylmuramic acid": [
+      "-"
+    ],
+    "Others": [
+      "-"
+    ],
+    "Proline": [
+      "NA"
+    ],
+    "Rhamnose": [
+      "-",
+      "n.d."
+    ],
+    "Tryptophan": [
+      "NA"
+    ],
+    "UMP": [
+      "NA"
+    ],
+    "dAMP": [
+      "NA"
+    ],
+    "dCMP": [
+      "NA"
+    ],
+    "dGMP": [
+      "NA"
+    ],
+    "dTMP": [
+      "NA"
+    ]
+  },
+  "registration": {
+    "reason": "no adapter registration was added. This paper's process is not the composition layer's target process, no model id or version was agreed with that layer, and none is guessed",
+    "registered_in_composition_registry": false
+  },
+  "reported_statements": [
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1,
+        "quote": "quantifying 91.6% of the biomass",
+        "section": "Abstract",
+        "source_id": "simensen2022"
+      },
+      "label": "overall biomass mass coverage quantified",
+      "statement_id": "coverage.overall",
+      "unit": "%",
+      "value": 91.6
+    },
+    {
+      "evidence": {
+        "pdf_page": 9,
+        "printed_page": 9,
+        "quote": "0.835",
+        "section": "Table 1, Sum row",
+        "source_id": "simensen2022"
+      },
+      "label": "Table 1 Sum row, This work",
+      "statement_id": "sum.this_work",
+      "unit": "g/g",
+      "value": 0.835
+    },
+    {
+      "evidence": {
+        "pdf_page": 9,
+        "printed_page": 9,
+        "quote": "1.000",
+        "section": "Table 1, Sum row",
+        "source_id": "simensen2022"
+      },
+      "label": "Table 1 Sum row, Neidhardt",
+      "statement_id": "sum.neidhardt",
+      "unit": "g/g",
+      "value": 1.0
+    },
+    {
+      "evidence": {
+        "pdf_page": 9,
+        "printed_page": 9,
+        "quote": "0.643",
+        "section": "Table 1, Sum row",
+        "source_id": "simensen2022"
+      },
+      "label": "Table 1 Sum row, Beck et al.",
+      "statement_id": "sum.beck",
+      "unit": "g/g",
+      "value": 0.643
+    },
+    {
+      "evidence": {
+        "pdf_page": 12,
+        "printed_page": 12,
+        "quote": "we measured 5.1% ribose",
+        "section": "Discussion",
+        "source_id": "simensen2022"
+      },
+      "label": "ribose measured in addition to the listed carbohydrates",
+      "statement_id": "ribose",
+      "unit": "%",
+      "value": 5.1
+    }
+  ],
+  "scope": "Table 1 of Simensen et al. (2022), PLOS ONE 17(1):e0262450: the measured macromolecular biomass composition of E. coli K-12 MG1655 in glucose-minimal batch culture, in g gCDW-1, with the two published compositions the paper compares against.",
+  "source": {
+    "article_number": "e0262450",
+    "authors": [
+      "Vetle Simensen",
+      "Christian Schulz",
+      "Emil Karlsen",
+      "Signe Bratelund",
+      "Idun Burgos",
+      "Lilja Brekke Thorfinnsdottir",
+      "Laura Garcia-Calvo",
+      "Per Bruheim",
+      "Eivind Almaas"
+    ],
+    "citation": "V. Simensen, C. Schulz, E. Karlsen, S. Bratelund, I. Burgos, L. B. Thorfinnsdottir, L. Garcia-Calvo, P. Bruheim, E. Almaas, 'Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling', PLOS ONE 17(1):e0262450, 2022.",
+    "doi": "10.1371/journal.pone.0262450",
+    "issue": "1",
+    "journal": "PLOS ONE",
+    "page_numbering_evidence": "the article is paginated 1-17 and each page carries a footer of the form 'N / 17'",
+    "pages": "1-17",
+    "printed_page_equals_pdf_page": true,
+    "printed_pages": [
+      1,
+      17
+    ],
+    "source_id": "simensen2022",
+    "title": "Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+    "volume": "17",
+    "year": 2022
+  },
+  "table": {
+    "columns": [
+      {
+        "key": "this_work",
+        "label": "This work"
+      },
+      {
+        "key": "neidhardt",
+        "label": "Neidhardt"
+      },
+      {
+        "key": "beck_et_al",
+        "label": "Beck et al."
+      }
+    ],
+    "printed_page": 9,
+    "rows": [
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.01,
+            "sd_note": "",
+            "value": 0.35
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.55
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.02,
+            "sd_note": "",
+            "value": 0.54
+          }
+        },
+        "group": "macromolecule",
+        "name": "Protein",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.025
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.039
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.004,
+            "sd_note": "",
+            "value": 0.046
+          }
+        },
+        "group": "amino_acid",
+        "name": "Alanine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.024
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.044
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.006,
+            "sd_note": "",
+            "value": 0.052
+          }
+        },
+        "group": "amino_acid",
+        "name": "Arginine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.035
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.052
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.009,
+            "sd_note": "",
+            "value": 0.052
+          }
+        },
+        "group": "amino_acid",
+        "name": "Asparagine/Aspartate",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.004
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.009
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.01
+          }
+        },
+        "group": "amino_acid",
+        "name": "Cysteine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.049
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.068
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.007,
+            "sd_note": "",
+            "value": 0.049
+          }
+        },
+        "group": "amino_acid",
+        "name": "Glutamine/Glutamate",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.023
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.033
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.003,
+            "sd_note": "",
+            "value": 0.025
+          }
+        },
+        "group": "amino_acid",
+        "name": "Glycine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.0003,
+            "sd_note": "",
+            "value": 0.007
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.012
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.003,
+            "sd_note": "",
+            "value": 0.012
+          }
+        },
+        "group": "amino_acid",
+        "name": "Histidine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.017
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.031
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.026
+          }
+        },
+        "group": "amino_acid",
+        "name": "Isoleucine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.026
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.048
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.007,
+            "sd_note": "",
+            "value": 0.05
+          }
+        },
+        "group": "amino_acid",
+        "name": "Leucine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.024
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.042
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.036
+          }
+        },
+        "group": "amino_acid",
+        "name": "Lysine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.011
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.019
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.018
+          }
+        },
+        "group": "amino_acid",
+        "name": "Methionine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.018
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.026
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.028
+          }
+        },
+        "group": "amino_acid",
+        "name": "Phenylalanine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.013
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.02
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.022
+          }
+        },
+        "group": "amino_acid",
+        "name": "Proline",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.014
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.018
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.004,
+            "sd_note": "",
+            "value": 0.021
+          }
+        },
+        "group": "amino_acid",
+        "name": "Serine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.0004,
+            "sd_note": "",
+            "value": 0.0172
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.024
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.028
+          }
+        },
+        "group": "amino_acid",
+        "name": "Threonine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.008
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.01
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.012
+          }
+        },
+        "group": "amino_acid",
+        "name": "Tryptophan",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.003,
+            "sd_note": "",
+            "value": 0.014
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.021
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.003,
+            "sd_note": "",
+            "value": 0.016
+          }
+        },
+        "group": "amino_acid",
+        "name": "Tyrosine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.022
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.04
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.003,
+            "sd_note": "",
+            "value": 0.033
+          }
+        },
+        "group": "amino_acid",
+        "name": "Valine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.005,
+            "sd_note": "",
+            "value": 0.172
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.205
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.004,
+            "sd_note": "",
+            "value": 0.19
+          }
+        },
+        "group": "macromolecule",
+        "name": "RNA",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.045
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.054
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.05
+          }
+        },
+        "group": "nucleotide",
+        "name": "AMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.058
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.07
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.064
+          }
+        },
+        "group": "nucleotide",
+        "name": "GMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.036
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.038
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.04
+          }
+        },
+        "group": "nucleotide",
+        "name": "CMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.033
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.042
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.037
+          }
+        },
+        "group": "nucleotide",
+        "name": "UMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.001,
+            "sd_note": "",
+            "value": 0.01
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.031
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.003,
+            "sd_note": "",
+            "value": 0.013
+          }
+        },
+        "group": "macromolecule",
+        "name": "DNA",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.002
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.008
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.003
+          }
+        },
+        "group": "nucleotide",
+        "name": "dAMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.003
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.008
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.004
+          }
+        },
+        "group": "nucleotide",
+        "name": "dGMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.002
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.007
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.003
+          }
+        },
+        "group": "nucleotide",
+        "name": "dCMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.002
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.007
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "NA",
+            "value": 0.003
+          }
+        },
+        "group": "nucleotide",
+        "name": "dTMP",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.042
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.057
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.0005,
+            "sd_note": "",
+            "value": 0.0312
+          }
+        },
+        "group": "macromolecule",
+        "name": "Carbohydrate",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.028
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.0002,
+            "sd_note": "",
+            "value": 0.0224
+          }
+        },
+        "group": "carbohydrate",
+        "name": "Glucose",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.003
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.0002,
+            "sd_note": "",
+            "value": 0.0053
+          }
+        },
+        "group": "carbohydrate",
+        "name": "Glucosamine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.0004,
+            "sd_note": "",
+            "value": 0.0036
+          }
+        },
+        "group": "carbohydrate",
+        "name": "Galactose",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.001
+          },
+          "this_work": {
+            "note": "n.d.",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          }
+        },
+        "group": "carbohydrate",
+        "name": "Rhamnose",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.005
+          },
+          "this_work": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          }
+        },
+        "group": "carbohydrate",
+        "name": "Heptose",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.006
+          },
+          "this_work": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          }
+        },
+        "group": "carbohydrate",
+        "name": "KDO",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.006
+          },
+          "this_work": {
+            "note": "n.d.",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          }
+        },
+        "group": "carbohydrate",
+        "name": "N-acetylglucosamine",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.008
+          },
+          "this_work": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          }
+        },
+        "group": "carbohydrate",
+        "name": "N-acetylmuramic acid",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": 0.006,
+            "sd_note": "",
+            "value": 0.067
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.091
+          },
+          "this_work": {
+            "note": "",
+            "sd": 0.002,
+            "sd_note": "",
+            "value": 0.061
+          }
+        },
+        "group": "macromolecule",
+        "name": "Lipid",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.066
+          },
+          "this_work": {
+            "note": "-",
+            "sd": null,
+            "sd_note": "",
+            "value": null
+          }
+        },
+        "group": "macromolecule",
+        "name": "Others",
+        "printed_page": 9
+      },
+      {
+        "cells": {
+          "beck_et_al": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.643
+          },
+          "neidhardt": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 1.0
+          },
+          "this_work": {
+            "note": "",
+            "sd": null,
+            "sd_note": "",
+            "value": 0.835
+          }
+        },
+        "group": "total",
+        "name": "Sum",
+        "printed_page": 9
+      }
+    ],
+    "unit_as_printed": "g gCDW-1"
+  },
+  "target_process_note": "The composition layer's target process is Zielinski et al. (2019), E. coli 20 IBA 1 / pIBAINS in GMS medium, 4 L in a 7.5 L Bioflo Celligen 310 with pH-stat glucose feeding at 30 degC. Simensen et al. measure a wild-type MG1655 in M9 with 2% glucose, 1 L in a 3 L BioFlo 115, in batch exponential growth at 37 degC, and state that biomass composition is condition-dependent. This dataset is that measurement; it is not transferred to the insulin process.",
+  "units": {
+    "%": {
+      "dimension": "percent",
+      "note": "used for both '% (w/v)' and '% (v/v)' as the paper prints them",
+      "to_base": 1.0
+    },
+    "L": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 1.0
+    },
+    "degC": {
+      "dimension": "temperature",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g": {
+      "dimension": "mass",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/L": {
+      "dimension": "mass_concentration",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/g": {
+      "dimension": "mass_fraction",
+      "note": "printed as 'g gCDW-1'",
+      "to_base": 1.0
+    },
+    "h": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 1.0
+    },
+    "mL": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 0.001
+    },
+    "mM": {
+      "dimension": "amount_concentration",
+      "note": "",
+      "to_base": 1.0
+    },
+    "min": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 0.016666666666666666
+    },
+    "s": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 0.0002777777777777778
+    }
+  },
+  "version": "0.1.0"
+}

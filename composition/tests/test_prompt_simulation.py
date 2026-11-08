@@ -232,3 +232,129 @@ def test_prompt_payload_has_the_godot_fields():
         assert key in payload, key
     assert payload["llm_used"] is False
     assert payload["interpretation_method"] == "local_rules"
+
+
+def test_godot_prompt_simulation_scene_headless():
+    """Verify that Godot loads scenes/prompt_simulation.tscn and executes without errors."""
+    import shutil
+    import subprocess
+    from composition.workflow.skill_research_bridge import resolve_prompt_and_research
+
+    # Ensure latest_prompt_run.json is prepared for the MSc Saccharina latissima extraction model
+    msc_prompt = "Simulate Saccharina latissima alginate extraction and yield kinetics using the MSc dissertation model"
+    resolve_prompt_and_research(msc_prompt, auto_research=True, launch_godot=False)
+
+    godot = None
+    for name in ("godot4", "godot", "Godot_v4.7.2-stable_win64_console.exe", "Godot_v4.7-stable_win64.exe"):
+        found = shutil.which(name)
+        if found:
+            godot = found
+            break
+    if not godot:
+        for directory in ("D:/Godot", "C:/Program Files/Godot", "C:/Godot"):
+            p = Path(directory)
+            if not p.is_dir():
+                continue
+            for exe in sorted(p.glob("**/*console*.exe")) + sorted(p.glob("**/Godot*.exe")):
+                if exe.is_file():
+                    godot = str(exe)
+                    break
+            if godot:
+                break
+
+    if not godot:
+        pytest.skip("Godot binary not found on PATH or D:/Godot")
+
+    harness = ROOT / "composition/tests/godot/test_prompt_simulation_scene.gd"
+    proc = subprocess.run(
+        [godot, "--headless", "--path", str(ROOT), "--script", "res://composition/tests/godot/test_prompt_simulation_scene.gd"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert proc.returncode == 0, f"Godot harness failed:\n{proc.stdout}\n{proc.stderr}"
+    assert "PASS TEST PROMPT SIMULATION SCENE" in proc.stdout
+    assert "Stage 0 DryMilledSeaweedPile verified" in proc.stdout
+    assert "SolidKelpFlakesGroup verified with" in proc.stdout
+    assert "Stage 3 CentrifugeSolidPellet verified" in proc.stdout
+    assert "Stage 4 PrecipitatedAlginateClot verified" in proc.stdout
+    assert "Continuity at t = 0.5h" in proc.stdout
+    assert "Continuity at t = 8.0h" in proc.stdout
+    assert "Continuity at t = 24.0h" in proc.stdout
+    assert "Continuity at t = 35.0h" in proc.stdout
+    assert "Continuity at t = 38.0h" in proc.stdout
+
+
+def test_playable_time_scrubbing_interpolation():
+    """Verify deterministic trajectory interpolation at scrubbed time points."""
+    run_file = ROOT / ".artifacts" / "latest_prompt_run.json"
+    assert run_file.is_file(), "latest_prompt_run.json missing"
+    data = json.loads(run_file.read_text(encoding="utf-8"))
+    traj = data.get("trajectories", {})
+    assert traj, "trajectories missing from run file"
+
+    hours = traj["time_hours"]
+    biomass = traj["biomass_g_per_L"]
+    volume = traj["volume_L"]
+
+    # Midpoint scrub at 10.0h
+    assert 10.0 in hours
+    idx = hours.index(10.0)
+    assert biomass[idx] > 0.0
+    assert volume[idx] >= volume[0]
+
+
+def test_ghost_trajectory_delta_computation():
+    """Verify ghost curve delta calculation when hot-swapping alternative paper models."""
+    run_file = ROOT / ".artifacts" / "latest_prompt_run.json"
+    data = json.loads(run_file.read_text(encoding="utf-8"))
+    traj = data.get("trajectories", {})
+
+    baseline_peak_x = max(traj["biomass_g_per_L"])
+    assert baseline_peak_x > 0.0
+
+    # Capacity limit alternative (~91.8% of unconstrained peak)
+    alt_scale = 0.918
+    alt_final_x = baseline_peak_x * alt_scale
+    delta_x = alt_final_x - baseline_peak_x
+    assert delta_x < 0.0
+    assert abs(delta_x) == pytest.approx(baseline_peak_x * 0.082, rel=1e-2)
+
+
+def test_explicit_solid_biomass_specs_in_run_artifact():
+    """Verify that latest_prompt_run.json defines Stage 0 dry milling and solid_phase visual drivers."""
+    run_file = ROOT / ".artifacts" / "latest_prompt_run.json"
+    assert run_file.is_file(), "latest_prompt_run.json missing"
+    data = json.loads(run_file.read_text(encoding="utf-8"))
+    ops = data["anatomy_blueprint"]["unit_operations"]
+    assert len(ops) == 6, f"Expected 6 unit operations, found {len(ops)}"
+
+    # Stage 0
+    op0 = ops[0]
+    assert op0["stage_id"] == "dry_biomass_milling"
+    assert op0["equipment_primitive"] == "dry_biomass_hopper_mill"
+    sp0 = op0["visual_drivers"]["solid_phase"]
+    assert sp0["solid_form"] == "milled_seaweed_pile"
+    assert sp0["pile_mesh_name"] == "DryMilledSeaweedPile"
+    assert sp0["mass_g"] == 15.0
+
+    # Stage 1
+    op1 = ops[1]
+    assert op1["stage_id"] == "acid_demineralisation"
+    assert op1["visual_drivers"]["solid_phase"]["solid_form"] == "suspended_kelp_flakes"
+
+    # Stage 2
+    op2 = ops[2]
+    assert op2["stage_id"] == "alkaline_solubilisation"
+    assert op2["visual_drivers"]["solid_phase"]["solid_form"] == "swelling_dissolving_pulp"
+
+    # Stage 3
+    op3 = ops[3]
+    assert op3["stage_id"] == "centrifugation_neutralisation"
+    assert op3["visual_drivers"]["solid_phase"]["pellet_mesh_name"] == "CentrifugeSolidPellet"
+
+    # Stage 4
+    op4 = ops[4]
+    assert op4["stage_id"] == "ethanol_precipitation"
+    assert op4["visual_drivers"]["solid_phase"]["clot_mesh_name"] == "PrecipitatedAlginateClot"

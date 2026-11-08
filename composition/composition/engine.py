@@ -80,10 +80,37 @@ class ValidatedInstance:
 class CompositionEngine:
     """Builds, validates, orders and runs a :class:`CompositionGraph`."""
 
-    def __init__(self, base_path=None) -> None:
+    def __init__(self, base_path=None, adapters=None) -> None:
         self._base = base_path
+        #: Optional per-run adapters, keyed by model id. This is how a model
+        #: generated for one research run is executed without adding it to the
+        #: global ``REGISTRATIONS`` list. The default is empty: every ordinary
+        #: graph resolves exactly as before.
+        self._adapters: dict[str, Any] = dict(adapters or {})
+        self._adapter_cache: dict[str, tuple[Any, list[ModelDiagnostic]]] = {}
         self._manifest_cache: dict[str, tuple[ModelManifest | None,
                                               list[ModelDiagnostic]]] = {}
+
+    def _adapter_for(
+        self, model_id: str
+    ) -> tuple[Any, list[ModelDiagnostic]]:
+        """Resolve one model id, honouring a per-run injected adapter.
+
+        The engine resolves an adapter twice for an instance: once to read its
+        manifest and once to execute it.  Both calls must see the same injected
+        adapter, so the resolution is cached here.  Registered models keep their
+        existing resolution path and diagnostics.
+        """
+        if model_id in self._adapter_cache:
+            return self._adapter_cache[model_id]
+        injected = self._adapters.get(model_id)
+        if injected is not None:
+            adapter = injected() if callable(injected) else injected
+            resolved = (adapter, [])
+        else:
+            resolved = adapter_for(model_id, self._base)
+        self._adapter_cache[model_id] = resolved
+        return resolved
 
     # -- phase 1: load manifests --------------------------------------------
 
@@ -118,7 +145,7 @@ class CompositionEngine:
                 )
             )
 
-        adapter, load_diagnostics = adapter_for(instance.model_id, self._base)
+        adapter, load_diagnostics = self._adapter_for(instance.model_id)
         if adapter is None:
             return None, diagnostics + load_diagnostics
         key = f"{instance.model_id}|{_canonical(instance.parameters)}"
@@ -1176,7 +1203,7 @@ class CompositionEngine:
                 if model_input.ref.instance_id == instance_id:
                     instance_literals[key.split("/", 1)[1]] = model_input
 
-            adapter, _ = adapter_for(instance.model_id, self._base)
+            adapter, _ = self._adapter_for(instance.model_id)
             assert adapter is not None
             adapter_run = adapter.run(
                 instance_id, instance.parameters, connected_inputs, instance_literals

@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Test scratch (pytest basetemp, pinned by tests/conftest.py)
+.artifacts/

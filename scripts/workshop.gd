@@ -182,6 +182,14 @@ func _ready() -> void:
 			_is_replay_mode = true
 			_load_replay_data()
 			return
+		if scene_param == "pecan_replay":
+			# Direct entry to the pecan evidence-linked workflow replay, the same
+			# scene the workshop's "Pecan 3D replay" button opens.
+			get_tree().change_scene_to_file.call_deferred("res://scenes/pecan_replay.tscn")
+			return
+		if scene_param == "pecan_workflow":
+			get_tree().change_scene_to_file.call_deferred("res://scenes/pecan_workflow.tscn")
+			return
 
 	_is_replay_mode = false
 	_build_ui()
@@ -300,6 +308,39 @@ func _header() -> Control:
 		+ "against the Zielinski model, validates the configuration and executes it.")
 	prompt.pressed.connect(_on_prompt_pressed)
 	row.add_child(prompt)
+
+	# Research-to-simulation: the same runner, one stage earlier. It starts from a
+	# problem document, acquires literature from the local corpus, verifies every
+	# quote, builds an evidence-constrained model and executes it. Nothing about
+	# the existing models or graphs changes.
+	var research := Button.new()
+	research.name = "ResearchWorkflowButton"
+	research.text = "Research workflow"
+	research.tooltip_text = ("Start from a problem document: acquire literature, verify every "
+		+ "quote and number, build an evidence-constrained model and run it through "
+		+ "the composition runner. Shows direct versus analogous evidence and every "
+		+ "parameter the sources do not state.")
+	research.pressed.connect(_on_research_pressed)
+	row.add_child(research)
+
+	# Pecan evidence workflow: the interactive step graph over the compiled pecan
+	# research artifacts. It reuses the runner's documents; it computes nothing.
+	var pecan := Button.new()
+	pecan.name = "PecanWorkflowButton"
+	pecan.text = "Pecan evidence workflow"
+	pecan.tooltip_text = ("Open the pecan RNA evidence-audit workflow: click each protocol "
+		+ "step to read its verbatim evidence, source paper, classification and unknowns.")
+	pecan.pressed.connect(_on_pecan_pressed)
+	row.add_child(pecan)
+
+	# Pecan process replay: the 3D bench replay over the same artifacts.
+	var pecan_replay := Button.new()
+	pecan_replay.name = "PecanReplayButton"
+	pecan_replay.text = "Pecan 3D replay"
+	pecan_replay.tooltip_text = ("Play the pecan RNA extraction workflow on a schematic 3D bench "
+		+ "and read each stage's evidence, source and unknowns.")
+	pecan_replay.pressed.connect(_on_pecan_replay_pressed)
+	row.add_child(pecan_replay)
 
 	var run := Button.new()
 	run.text = "Run simulation"
@@ -923,6 +964,18 @@ func _on_replay_pressed() -> void:
 
 func _on_prompt_pressed() -> void:
 	get_tree().change_scene_to_file.call_deferred("res://scenes/prompt_simulation.tscn")
+
+
+func _on_research_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred("res://scenes/research_workflow.tscn")
+
+
+func _on_pecan_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred("res://scenes/pecan_workflow.tscn")
+
+
+func _on_pecan_replay_pressed() -> void:
+	get_tree().change_scene_to_file.call_deferred("res://scenes/pecan_replay.tscn")
 
 
 func _refresh_gaps() -> void:

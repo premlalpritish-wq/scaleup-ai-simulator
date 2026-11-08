@@ -13,6 +13,10 @@ It has three parts:
 | **3D evidence replay** | `scenes/replay3d.tscn` | An orbitable schematic of the fermentation vessel plus the model's published growth and purification data. |
 | **Scientific Gap Discovery** | section 8 of the replay | What scientific models and experimental evidence the insulin simulation is missing, which existing papers touch each gap, and what to look for next. |
 | **Prompt to simulation** | `scenes/prompt_simulation.tscn` | Describe the Zielinski insulin run in words; the local interpreter maps it to real model ports, validates the configuration and executes the existing replay. |
+| **Research to simulation** | `scenes/research_workflow.tscn` | Start from a problem document instead of a model: acquire literature from a local corpus, verify every quote and number, build an evidence-constrained model, and execute it through the same composition runner. |
+| **Pecan evidence workflow** | `scenes/pecan_workflow.tscn` | The compiled pecan case as a clickable step graph: green nodes are direct pecan evidence, amber nodes are analogue hypotheses, grey is method review. Clicking a step shows its action, verbatim passage, source DOI, classification and unknowns. An evidence audit, not a simulator. Opened from the workshop header. |
+| **Pecan 3D process replay** | `scenes/pecan_replay.tscn` | An animated physical simulation of the TRIzol extraction bench: the tissue clump is carried into the tube, TRIzol is dispensed with a visible stream and rising level, the tube is shaken with rising bubbles, the tube is moved into the rotor and spun, two phases separate, and the upper phase is aspirated and dispensed into a second tube. Play/pause/scrub, orbit and click objects for their evidence. Every motion is illustrative: the paper reports no volumes, speeds or durations, and none is displayed. |
+| **Research explorer (browser)** | `web/research/` | The same pecan case in a browser, for a researcher with nothing installed: evidence with provenance and hypothesis status, research gaps, a protocol form that runs the real workflow, and Markdown/PDF export. Served at `/research/` by `python -m api.app`. |
 
 `python -m composition.gaps --check` verifies the Scientific Gap Discovery
 analysis against the model, compatibility records and paper library. The full
@@ -23,6 +27,26 @@ write-up, example payload and test results are in
 deterministic interpreter rather than a cloud LLM, and validates every mapped
 parameter against the Zielinski manifest before executing. See
 [`reports/PROMPT_TO_SIMULATION.md`](reports/PROMPT_TO_SIMULATION.md).
+
+**Research to simulation** is the stage before a model exists. It takes a problem
+document, discovers and acquires papers from a local corpus (no network client),
+verifies that every encoded claim is a verbatim quote from the acquired text and
+that every number appears in its own quote, builds an **evidence-constrained
+protocol audit**, and runs that model through the existing composition runner.
+Direct target-organism evidence and analogous-species evidence are kept separate;
+the spruce and pigeonpea protocols enter only as hypotheses, and the parameters
+the pecan paper never prints stay unknown. The model reports no RNA yield, RIN or
+degradation rate, because the sources do not state one. The workflow, the pecan
+artifacts and the verified results are documented in
+[`reports/RESEARCH_TO_SIMULATION_ARCHITECTURE.md`](reports/RESEARCH_TO_SIMULATION_ARCHITECTURE.md).
+
+**Research explorer (browser)** puts that worked example in front of a researcher
+who has nothing installed. `python -m api.app` serves the page at `/research/` and
+the small API behind it: the case overview, an evidence explorer that keeps direct
+and analogous claims apart, the research gaps, a protocol form that runs the same
+workflow, and Markdown/PDF export with a feedback form. It needs no API key and
+sends nothing to a third party. Deployment, privacy notice and verification are in
+[`reports/RESEARCH_EXPLORER.md`](reports/RESEARCH_EXPLORER.md).
 
 The two scientific models live under `Models/` and are untouched by the
 composition layer:
@@ -324,23 +348,42 @@ reported as **provisional** rather than definitive.
 
 ## Running the tests
 
-Three independent suites. Run each from its own package directory — each
+Four independent suites. Run each from its own package directory — each
 `tests/conftest.py` puts the package on `sys.path` for you, so no `PYTHONPATH`
 is required.
 
 ```bash
-# composition layer
-cd composition && python -m pytest tests          # 242 (128 pre-existing + 62 evidence + 52 registry)
+# composition layer (includes the research-to-simulation workflow tests)
+cd composition && python -m pytest tests          # 790
 
 # Morris 2011 material balance
 cd Models/Morris    && python -m pytest tests     # 186
 
 # Zielinski 2019 insulin process
 cd Models/Zielinski && python -m pytest tests     # 223
+
+# Ganjave 2022 fed-batch culture
+cd Models/Ganjave   && python -m pytest tests     # 331
 ```
 
-**Total: 651 tests** (409 existing model tests, unchanged, plus 242 in the
-composition layer).
+**Total: 1,530 tests.** The three model suites and the pre-existing composition
+tests are unchanged; 20 of the composition tests are the research workflow
+(exercised against the shipped pecan corpus, offline).
+
+On Windows, pytest's default temporary directory may not be writable. Pinning it
+inside the repository avoids five environment-only setup errors:
+
+```bash
+cd composition && python -m pytest tests --basetemp .artifacts/pytest-basetemp
+```
+
+The Godot half of the research-to-simulation boundary is a separate harness; it
+launches the real scene and the real Python workflow:
+
+```bash
+godot --headless --path . --script res://composition/tests/godot/research_workflow_scene.gd   # 75 checks
+godot --headless --path . --script res://composition/tests/godot/research_workflow_entry.gd   # 15 checks
+```
 
 To regenerate the Zieliński reference artifacts (optional; they are not tracked):
 
@@ -357,6 +400,8 @@ project.godot            Godot project file; main scene is the graph editor
 scenes/
   composition.tscn       graph editor
   replay3d.tscn          3D evidence replay
+  prompt_simulation.tscn prompt -> model configuration -> execution
+  research_workflow.tscn problem -> literature -> verified model -> execution
 scripts/                 all GDScript (UI and the GDScript -> Python boundary)
 composition/
   composition/           the composition layer
@@ -365,12 +410,18 @@ composition/
       conflicts.py       conflict detection and the records examined
       target_source.json Zielinski 2019 passages, with printed-page references
     registry/            deterministic model registry (id, version, digests)
-  examples/              six example graphs with pinned exit codes
-  tests/                 242 tests
+    workflow/            problem parsing, literature, extraction, encoding,
+                         model construction and orchestration
+      fixtures/pecan/    five real open-access sources, exact passages, problem
+    adapters/            morris, zielinski, ganjave and the generated rna model
+  examples/              example graphs with pinned exit codes
+  tests/                 790 tests
   replay/                the standalone graph the 3D scene executes
+  workflow_runs/pecan/   the shipped pecan run: every stage's artifact
 Models/
   Morris/                material-balance model + 186 tests
   Zielinski/             insulin process model + 223 tests
+  Ganjave/               fed-batch culture model + 331 tests
 ```
 
 `scripts/runner.gd` is the only place where GDScript talks to the scientific
@@ -395,6 +446,31 @@ and the quantities differ.
   top-level `models` package that cannot coexist in one process.
 * An under-determined system returns a representative value for its pivot
   variables, labelled as such.
+
+**Of the research-to-simulation workflow:**
+
+* Discovery reads a **local corpus** (`sources.json` plus the files it names). There
+  is no Europe PMC/PubMed/Crossref client, no download queue and no live search;
+  a search result would still not be evidence.
+* PDF text is read only when `pypdf` happens to be importable. JATS XML and plain
+  text use the standard library. A missing PDF reader is reported as an
+  acquisition failure, not worked around.
+* Passage *selection* is curated: `passages.json` supplies the exact quotes and
+  their step mapping. The workflow verifies each quote and number against the
+  acquired text, and it enforces that a source's declared role caps the
+  specificity a claim may claim, so an analogue paper cannot be relabelled as
+  direct target evidence. It does not search arbitrary text for arbitrary claims.
+* The generated model is **not** added to the global registry: it exists for one
+  research run and is injected into `run_graph` for that run only. No registered
+  model or example graph changes.
+* The model is an evidence-constrained protocol audit. It publishes counts and
+  ratios; it does not predict RNA yield, RIN, purity or degradation, and the
+  spruce/pigeonpea protocols remain unvalidated transfer hypotheses.
+* The workflow scene requires the desktop build: it invokes the Python runner in
+  a subprocess, which the Web export cannot do. The scene says so instead of
+  showing an empty result.
+* The workflow builds its graph and runs its model in Python. GDScript only passes
+  a problem path and renders the returned document.
 
 **Of the editor:**
 

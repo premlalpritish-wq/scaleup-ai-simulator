@@ -1,0 +1,340 @@
+{
+  "answer_units": {
+    "biomass_yield": "gdw/mol",
+    "mu": "1/h",
+    "qglc": "mmol/(gdw h)"
+  },
+  "artefact_id": "nanchen2006-pirt-chemostat",
+  "comparison_table_note": "Table 1 also tabulates eight published strains (B/r, C(PC-1000), NTC9001, ML30, PS, TG1, W3110 and one unnamed) beside this paper's own row. They are not transcribed: the linearised page text loses the column alignment of their blank yield cells and 'Unknown' temperatures, so encoding them would mean guessing which printed number is which. Only the row this model's parameters come from is encoded.",
+  "disclaimer": "A passing test verifies that this implementation matches the printed relation and the printed parameter row it was built from. It does not establish scientific validity. It reproduces no figure: the fit's data points are plotted in Fig. 4 and are not tabulated.",
+  "experimental_context": [
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "Cultures of Escherichia coli",
+        "section": "Title",
+        "source_id": "nanchen2006"
+      },
+      "key": "organism",
+      "label": "organism",
+      "value": "Escherichia coli"
+    },
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "E. coli MG1655",
+        "section": "Strains and growth conditions",
+        "source_id": "nanchen2006"
+      },
+      "key": "strain",
+      "label": "strain",
+      "value": "E. coli MG1655 (F- rph-1)"
+    },
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "was used for all",
+        "section": "Strains and growth conditions",
+        "source_id": "nanchen2006"
+      },
+      "key": "construct",
+      "label": "construct",
+      "value": "none: a wild-type K-12 strain was used, not a recombinant one"
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 1165,
+        "quote": "The chemostat feed medium was M9 minimal medium",
+        "section": "Bioreactors",
+        "source_id": "nanchen2006"
+      },
+      "key": "medium",
+      "label": "medium",
+      "value": "M9 minimal medium, 1 g/L glucose as the limiting substrate, pH 7.0"
+    },
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "The cultivation vessel of the continuous-culture system was a",
+        "section": "Bioreactors",
+        "source_id": "nanchen2006"
+      },
+      "key": "reactor",
+      "label": "reactor",
+      "value": "a 17-mL Hungate tube (Bellco Glass) with a butyl rubber septum, placed in a water bath"
+    },
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "with a working volume of 10 ml",
+        "section": "Bioreactors",
+        "source_id": "nanchen2006"
+      },
+      "key": "scale",
+      "label": "working volume",
+      "value": "10 mL"
+    },
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "temperature was maintained at 37",
+        "section": "Bioreactors",
+        "source_id": "nanchen2006"
+      },
+      "key": "temperature",
+      "label": "temperature",
+      "value": "37 degC"
+    },
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "the volumetric aeration rate was 20 ml/min",
+        "section": "Bioreactors",
+        "source_id": "nanchen2006"
+      },
+      "key": "aeration",
+      "label": "aeration",
+      "value": "20 mL/min, about 2 volumes per volume per minute, by negative pressure"
+    },
+    {
+      "evidence": {
+        "pdf_page": 1,
+        "printed_page": 1164,
+        "quote": "The parallel operation of eight such mini-scale chemostats",
+        "section": "Abstract",
+        "source_id": "nanchen2006"
+      },
+      "key": "parallelism",
+      "label": "parallel operation",
+      "value": "eight mini-scale chemostats operated in parallel"
+    },
+    {
+      "evidence": {
+        "pdf_page": 4,
+        "printed_page": 1167,
+        "quote": "solved oxygen concentrations above 70% at all tested dilution",
+        "section": "Results",
+        "source_id": "nanchen2006"
+      },
+      "key": "dissolved_oxygen",
+      "label": "dissolved oxygen",
+      "value": "above 70% at all tested dilution rates with 1 g/L glucose"
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 1165,
+        "quote": "0.41 g [dry weight]",
+        "section": "Analytical procedures and physiological parameters",
+        "source_id": "nanchen2006"
+      },
+      "key": "od_dry_weight",
+      "label": "OD600 to dry-weight factor",
+      "value": "0.41 g (dry weight)/OD600, used to compute specific yields and rates"
+    }
+  ],
+  "fitted_parameters": {
+    "Yglc_max": 76.0,
+    "Yglc_max_confidence_interval": 3.0,
+    "Yglc_max_unit": "gdw/mol",
+    "mglc": 0.37,
+    "mglc_confidence_interval": 0.09,
+    "mglc_unit": "mmol/(gdw h)",
+    "printed_page": 1167,
+    "reference_as_printed": "This study",
+    "strain": "MG1655",
+    "temperature_C": 37.0
+  },
+  "missing_models": [
+    {
+      "label": "The 13C metabolic-flux-ratio equations (1) and (2)",
+      "model_id": "flux_ratios.oaa_pep",
+      "why_not_implemented": "These equations relate the mass distributions of proteinogenic amino-acid fragments (PEP, pyruvate, OAA, 2-oxoglutarate) to the fractions f1, f2 and the labelled-CO2 fraction. The paper does not tabulate those mass-distribution vectors, and states that it solved the system by an iterative process started from random values. With no tabulated input, an implementation would have to invent the data."
+    },
+    {
+      "label": "The eleven determined flux ratios",
+      "model_id": "dataset.metabolic_flux_ratios",
+      "why_not_implemented": "The ratios are plotted in Fig. 5 and tabulated in Table S1 of the supplement, neither of which has been supplied as a dataset, so there is nothing to encode."
+    },
+    {
+      "label": "An oxygen-transfer or kLa model",
+      "model_id": "transfer.oxygen_transfer",
+      "why_not_implemented": "The paper reports dissolved-oxygen concentrations above 70% and an aeration rate of 2 vvm; it prints no oxygen-transfer correlation and models no oxygen limitation. None is invented here."
+    },
+    {
+      "label": "Coupling to the composition layer",
+      "model_id": "coupling.other_models",
+      "why_not_implemented": "This is a standalone model of Nanchen et al.'s own chemostat. It declares no ports, transfers no parameter, adds no adapter registration and makes no compatibility claim."
+    }
+  ],
+  "mol_per_mmol": 1000.0,
+  "printed_equations": [
+    {
+      "id": "eq.3",
+      "implemented": true,
+      "printed_page": 1167,
+      "statement": "qglc = mu / Yglc_max + mglc"
+    },
+    {
+      "id": "eq.1",
+      "implemented": false,
+      "printed_page": 1165,
+      "statement": "OAA1-4 = f1 (PEP1-3 + CO2) + f2 (Pyr2-3 + 0.5 (OAA1-2 + OAA3-4)) + (1 - f1 - f2) OGA2-5"
+    },
+    {
+      "id": "eq.2",
+      "implemented": false,
+      "printed_page": 1166,
+      "statement": "the expanded OAA1-4 mass-distribution equation solved for f1, f2"
+    }
+  ],
+  "registration": {
+    "reason": "no adapter registration was added. This paper's process is not the composition layer's target process, no model id or version was agreed with that layer, and none is guessed",
+    "registered_in_composition_registry": false
+  },
+  "reported_readings": [
+    {
+      "evidence": {
+        "pdf_page": 4,
+        "printed_page": 1167,
+        "quote": "Acetate formation did not occur at dilution rates below 0.4",
+        "section": "Results",
+        "source_id": "nanchen2006"
+      },
+      "label": "dilution rate below which no acetate formed",
+      "reading_id": "acetate.threshold",
+      "unit": "1/h",
+      "value": 0.4
+    },
+    {
+      "evidence": {
+        "pdf_page": 4,
+        "printed_page": 1167,
+        "quote": "Above a di- lution rate of 0.7",
+        "section": "Results",
+        "source_id": "nanchen2006"
+      },
+      "label": "dilution rate above which washout occurred",
+      "reading_id": "washout.threshold",
+      "unit": "1/h",
+      "value": 0.7
+    },
+    {
+      "evidence": {
+        "pdf_page": 2,
+        "printed_page": 1165,
+        "quote": "0.41 g [dry weight]",
+        "section": "Analytical procedures and physiological parameters",
+        "source_id": "nanchen2006"
+      },
+      "label": "OD600 to dry-weight correlation factor",
+      "reading_id": "od.dry_weight",
+      "unit": "g/OD",
+      "value": 0.41
+    }
+  ],
+  "scope": "Pirt's chemostat relation, printed as equation (3) of Nanchen, Schicker & Sauer (2006), Applied and Environmental Microbiology 72(2):1164-1172, together with the paper's own fitted maintenance parameters (Table 1).",
+  "source": {
+    "authors": [
+      "Annik Nanchen",
+      "Alexander Schicker",
+      "Uwe Sauer"
+    ],
+    "citation": "A. Nanchen, A. Schicker, U. Sauer, 'Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli', Applied and Environmental Microbiology 72(2):1164-1172, 2006.",
+    "doi": "10.1128/AEM.72.2.1164-1172.2006",
+    "issue": "2",
+    "journal": "Applied and Environmental Microbiology",
+    "page_numbering_evidence": "the article is paginated 1164-1172 and each page prints its own number at the head or foot of the column, so pdf_page = printed_page - 1163",
+    "pages": "1164-1172",
+    "printed_pages": [
+      1164,
+      1172
+    ],
+    "source_id": "nanchen2006",
+    "title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+    "volume": "72",
+    "year": 2006
+  },
+  "target_process_note": "The composition layer's target process is Zielinski et al. (2019), E. coli 20 IBA 1 / pIBAINS in GMS medium, 4 L in a 7.5 L Bioflo Celligen 310 with pH-stat glucose feeding at 30 degC. Nanchen et al. use a non-recombinant MG1655 in a 10-mL mini-scale chemostat at 37 degC. The maintenance coefficient and maximal molar yield here are values for that chemostat and that medium; they are not transferred to the insulin process.",
+  "units": {
+    "%": {
+      "dimension": "percent",
+      "note": "dissolved-oxygen concentration",
+      "to_base": 1.0
+    },
+    "1/h": {
+      "dimension": "per_hour",
+      "note": "growth rate = dilution rate, as printed",
+      "to_base": 1.0
+    },
+    "L": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 1.0
+    },
+    "L/h": {
+      "dimension": "volume_rate",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g": {
+      "dimension": "mass",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/L": {
+      "dimension": "mass_concentration",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/L glucose": {
+      "dimension": "mass_concentration",
+      "note": "the limiting substrate is printed in g per liter",
+      "to_base": 1.0
+    },
+    "g/OD": {
+      "dimension": "mass_per_od",
+      "note": "printed as 'g [dry weight] [gdw]/OD'",
+      "to_base": 1.0
+    },
+    "gdw/mol": {
+      "dimension": "mass_per_amount",
+      "note": "printed as 'gdw mol-1'",
+      "to_base": 1.0
+    },
+    "h": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 1.0
+    },
+    "mL": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 0.001
+    },
+    "mL/min": {
+      "dimension": "volume_rate",
+      "note": "",
+      "to_base": 0.06
+    },
+    "min": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 0.016666666666666666
+    },
+    "mmol/(gdw h)": {
+      "dimension": "amount_per_mass_time",
+      "note": "printed as 'mmol gdw-1 h-1'",
+      "to_base": 1.0
+    }
+  },
+  "version": "0.1.0"
+}

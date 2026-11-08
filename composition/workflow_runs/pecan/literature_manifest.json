@@ -1,0 +1,337 @@
+{
+  "problem_id": "problem-464f67b019af",
+  "corpus": "D:/Godot/Scaleup AI/pilot/composition/composition/workflow/fixtures/pecan/sources.json",
+  "discovery": [
+    {
+      "source_id": "pecan_miRNome",
+      "title": "The Integrated Analysis of miRNome and Degradome Sequencing Reveals the Regulatory Mechanisms of Seed Development and Oil Biosynthesis in Pecan (Carya illinoinensis)",
+      "year": "2024",
+      "doi": "10.3390/foods13182934",
+      "role": "target_organism",
+      "score": 116,
+      "selected": true,
+      "reasons": [
+        "declared role: target_organism",
+        "names the target organism (Carya illinoinensis)",
+        "mentions the target tissue (embryo)",
+        "mentions the target molecule (total RNA)",
+        "mentions small rna sequencing"
+      ]
+    },
+    {
+      "source_id": "spruce_rna",
+      "title": "An Optimized and Cost-Effective RNA Extraction Method for Secondary Metabolite-Enriched Tissues of Norway Spruce (Picea abies)",
+      "year": "2024",
+      "doi": "10.3390/plants13030389",
+      "role": "analogous_protocol",
+      "score": 20,
+      "selected": true,
+      "reasons": [
+        "declared role: analogous_protocol"
+      ]
+    },
+    {
+      "source_id": "pigeonpea_rna",
+      "title": "Development of modified CTAB and Trizol protocols to isolate high molecular weight (HMW) RNA from polyphenol and polysaccharides rich pigeonpea (Cajanuscajan (L.) Millsp",
+      "year": "2023",
+      "doi": "10.1371/journal.pone.0291949",
+      "role": "analogous_protocol",
+      "score": 20,
+      "selected": true,
+      "reasons": [
+        "declared role: analogous_protocol"
+      ]
+    },
+    {
+      "source_id": "modified_ctab",
+      "title": "A modified CTAB method for the extraction of high-quality RNA from mono-and dicotyledonous plants rich in secondary metabolites",
+      "year": "2024",
+      "doi": "10.1186/s13007-024-01198-z",
+      "role": "method_review",
+      "score": 10,
+      "selected": true,
+      "reasons": [
+        "declared role: method_review"
+      ]
+    },
+    {
+      "source_id": "difficult_species",
+      "title": "DNA-free high-quality RNA extraction from 39 difficult-to-extract plant species (representing seasonal tissues and tissue types) of 32 families, and its validation for downstream molecular applications",
+      "year": "2023",
+      "doi": "10.1186/s13007-023-01063-5",
+      "role": "method_review",
+      "score": 10,
+      "selected": true,
+      "reasons": [
+        "declared role: method_review"
+      ]
+    }
+  ],
+  "selected_source_ids": [
+    "pecan_miRNome",
+    "spruce_rna",
+    "pigeonpea_rna",
+    "modified_ctab",
+    "difficult_species"
+  ],
+  "target_source_ids": [
+    "pecan_miRNome"
+  ],
+  "acquisition": [
+    {
+      "source_id": "pecan_miRNome",
+      "status": "acquired",
+      "content_sha256": "00534c5dde8fe0b64f6eee84b6f71d95a8f6a71882f4ed61d02c9e9c7742ede3",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/pecan_miRNome.txt",
+      "section_count": 25,
+      "extraction_method": "jats_xml_stdlib",
+      "diagnostics": []
+    },
+    {
+      "source_id": "spruce_rna",
+      "status": "acquired",
+      "content_sha256": "5c2988bd0f804aa52e77218aa8e39d046c169004a68dbd55e2b88aed2e303dd9",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/spruce_rna.txt",
+      "section_count": 20,
+      "extraction_method": "jats_xml_stdlib",
+      "diagnostics": []
+    },
+    {
+      "source_id": "pigeonpea_rna",
+      "status": "acquired",
+      "content_sha256": "63cdc6f4f23194bb94c9f6aef12e77b8818508d64a887ad0e98f23f8e9b806a5",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/pigeonpea_rna.txt",
+      "section_count": 15,
+      "extraction_method": "jats_xml_stdlib",
+      "diagnostics": []
+    },
+    {
+      "source_id": "modified_ctab",
+      "status": "acquired",
+      "content_sha256": "b6aff08ddb35b90d9d6acabba8114faeaedc7a4ff5a64836db23849a7bb9ddb9",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/modified_ctab.txt",
+      "section_count": 16,
+      "extraction_method": "jats_xml_stdlib",
+      "diagnostics": []
+    },
+    {
+      "source_id": "difficult_species",
+      "status": "acquired",
+      "content_sha256": "52ceb55d5629a4c647cc8fe87f69bab8a1183122bb511df1e6941a8b82db0f65",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/difficult_species.txt",
+      "section_count": 21,
+      "extraction_method": "jats_xml_stdlib",
+      "diagnostics": []
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "pecan_miRNome",
+      "title": "The Integrated Analysis of miRNome and Degradome Sequencing Reveals the Regulatory Mechanisms of Seed Development and Oil Biosynthesis in Pecan (Carya illinoinensis)",
+      "authors": [
+        "Zhu Kaikai",
+        "Wei Lu",
+        "Ma Wenjuan",
+        "Zhao Juan",
+        "Chen Mengyun",
+        "Wei Guo",
+        "Liu Hui",
+        "Tan Pengpeng",
+        "Peng Fangren",
+        "Rahimmalek Mehdi"
+      ],
+      "year": "2024",
+      "doi": "10.3390/foods13182934",
+      "journal": "Foods",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.3390/foods13182934",
+      "file": "sources/pecan_miRNome.xml",
+      "role": "target_organism",
+      "relevance_terms": [
+        "pecan",
+        "Carya illinoinensis",
+        "embryo",
+        "seed development",
+        "total RNA",
+        "TRIzol",
+        "small RNA sequencing",
+        "miRNome",
+        "degradome"
+      ],
+      "retrieved_via": "Europe PMC open-access JATS XML (PMC11430883)",
+      "abstract": "",
+      "pmcid": "PMC11430883",
+      "pmid": "39335863",
+      "content_sha256": "00534c5dde8fe0b64f6eee84b6f71d95a8f6a71882f4ed61d02c9e9c7742ede3",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/pecan_miRNome.txt",
+      "section_count": 25,
+      "extraction_method": "jats_xml_stdlib",
+      "acquisition_status": "acquired",
+      "diagnostics": []
+    },
+    {
+      "source_id": "spruce_rna",
+      "title": "An Optimized and Cost-Effective RNA Extraction Method for Secondary Metabolite-Enriched Tissues of Norway Spruce (Picea abies)",
+      "authors": [
+        "Singh Vivek Vikram",
+        "Naseer Aisha",
+        "Sellamuthu Gothandapani",
+        "Jakuš Rastislav",
+        "Albreht Alen",
+        "Križman Mitja"
+      ],
+      "year": "2024",
+      "doi": "10.3390/plants13030389",
+      "journal": "Plants",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.3390/plants13030389",
+      "file": "sources/spruce_rna.xml",
+      "role": "analogous_protocol",
+      "relevance_terms": [
+        "Norway spruce",
+        "Picea abies",
+        "secondary metabolites",
+        "modified CTAB",
+        "TRIzol",
+        "DNase",
+        "RNA extraction"
+      ],
+      "retrieved_via": "Europe PMC open-access JATS XML (PMC10857598)",
+      "abstract": "",
+      "pmcid": "PMC10857598",
+      "pmid": "38337922",
+      "content_sha256": "5c2988bd0f804aa52e77218aa8e39d046c169004a68dbd55e2b88aed2e303dd9",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/spruce_rna.txt",
+      "section_count": 20,
+      "extraction_method": "jats_xml_stdlib",
+      "acquisition_status": "acquired",
+      "diagnostics": []
+    },
+    {
+      "source_id": "pigeonpea_rna",
+      "title": "Development of modified CTAB and Trizol protocols to isolate high molecular weight (HMW) RNA from polyphenol and polysaccharides rich pigeonpea (Cajanuscajan (L.) Millsp",
+      "authors": [
+        "Mainkar Pawan",
+        "Jayaswal Deepanshu",
+        "Kumar Deepesh",
+        "Jayaswall Kuldip",
+        "Jaiswal Sandeep",
+        "Singh Arvind Nath",
+        "Kumar Sanjay",
+        "Kansal Rekha",
+        "Srinivasan Ramachandran",
+        "Srinivasan Ramachandran",
+        "Srinivasan Ramachandran",
+        "Srinivasan Ramachandran"
+      ],
+      "year": "2023",
+      "doi": "10.1371/journal.pone.0291949",
+      "journal": "PLOS ONE",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.1371/journal.pone.0291949",
+      "file": "sources/pigeonpea_rna.xml",
+      "role": "analogous_protocol",
+      "relevance_terms": [
+        "pigeonpea",
+        "Cajanus cajan",
+        "polyphenol",
+        "polysaccharide",
+        "modified CTAB",
+        "TRIzol",
+        "high molecular weight RNA"
+      ],
+      "retrieved_via": "Europe PMC open-access JATS XML (PMC10707625)",
+      "abstract": "",
+      "pmcid": "PMC10707625",
+      "pmid": "38064473",
+      "content_sha256": "63cdc6f4f23194bb94c9f6aef12e77b8818508d64a887ad0e98f23f8e9b806a5",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/pigeonpea_rna.txt",
+      "section_count": 15,
+      "extraction_method": "jats_xml_stdlib",
+      "acquisition_status": "acquired",
+      "diagnostics": []
+    },
+    {
+      "source_id": "modified_ctab",
+      "title": "A modified CTAB method for the extraction of high-quality RNA from mono-and dicotyledonous plants rich in secondary metabolites",
+      "authors": [
+        "Kiss Tibor",
+        "Karácsony Zoltán",
+        "Gomba-Tóth Adrienn",
+        "Szabadi Kriszta Lilla",
+        "Spitzmüller Zsolt",
+        "Hegyi-Kaló Júlia",
+        "Cels Thomas",
+        "Otto Margot",
+        "Golen Richárd",
+        "Hegyi Ádám István",
+        "Geml József",
+        "Váczy Kálmán Zoltán"
+      ],
+      "year": "2024",
+      "doi": "10.1186/s13007-024-01198-z",
+      "journal": "Plant Methods",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.1186/s13007-024-01198-z",
+      "file": "sources/modified_ctab.xml",
+      "role": "method_review",
+      "relevance_terms": [
+        "modified CTAB",
+        "woody plants",
+        "secondary metabolites",
+        "RNA isolation",
+        "DNase"
+      ],
+      "retrieved_via": "Europe PMC open-access JATS XML (PMC11069240)",
+      "abstract": "",
+      "pmcid": "PMC11069240",
+      "pmid": "38704591",
+      "content_sha256": "b6aff08ddb35b90d9d6acabba8114faeaedc7a4ff5a64836db23849a7bb9ddb9",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/modified_ctab.txt",
+      "section_count": 16,
+      "extraction_method": "jats_xml_stdlib",
+      "acquisition_status": "acquired",
+      "diagnostics": []
+    },
+    {
+      "source_id": "difficult_species",
+      "title": "DNA-free high-quality RNA extraction from 39 difficult-to-extract plant species (representing seasonal tissues and tissue types) of 32 families, and its validation for downstream molecular applications",
+      "authors": [
+        "Sasi Shina",
+        "Krishnan Saranya",
+        "Kodackattumannil Preshobha",
+        "Shamisi Aysha AL",
+        "Aldarmaki Maitha",
+        "Lekshmi Geetha",
+        "Kottackal Martin",
+        "Amiri Khaled M. A."
+      ],
+      "year": "2023",
+      "doi": "10.1186/s13007-023-01063-5",
+      "journal": "Plant Methods",
+      "license": "CC BY 4.0",
+      "url": "https://doi.org/10.1186/s13007-023-01063-5",
+      "file": "sources/difficult_species.xml",
+      "role": "method_review",
+      "relevance_terms": [
+        "difficult-to-extract",
+        "plant species",
+        "polyphenol",
+        "polysaccharide",
+        "RNA extraction",
+        "no universal protocol"
+      ],
+      "retrieved_via": "Europe PMC open-access JATS XML (PMC10416385)",
+      "abstract": "",
+      "pmcid": "PMC10416385",
+      "pmid": "37568159",
+      "content_sha256": "52ceb55d5629a4c647cc8fe87f69bab8a1183122bb511df1e6941a8b82db0f65",
+      "text_path": "D:/Godot/Scaleup AI/pilot/composition/workflow_runs/pecan/source_texts/difficult_species.txt",
+      "section_count": 21,
+      "extraction_method": "jats_xml_stdlib",
+      "acquisition_status": "acquired",
+      "diagnostics": []
+    }
+  ],
+  "statement": "Discovery ranks candidates; acquisition reads and hashes the selected files. A search result is not evidence until its text is acquired and its quotes are verified."
+}

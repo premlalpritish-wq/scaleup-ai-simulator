@@ -1,0 +1,891 @@
+{
+  "artefact_id": "baez2014-oxygen-induced",
+  "disclaimer": "A passing test verifies that this implementation matches the supplied specification. It does not establish scientific validity, and the package contains no predictive capability beyond evaluating one printed equation at the caller's own inputs.",
+  "equations": [
+    {
+      "equation_id": "source_formula.exponential_feed_rate",
+      "inputs": [
+        {
+          "dimension": "specific_rate",
+          "key": "mu_set",
+          "label": "specific growth rate set by the feed",
+          "origin": "reported_parameter",
+          "unit": "1/h"
+        },
+        {
+          "dimension": "mass_ratio",
+          "key": "Y_XS",
+          "label": "biomass yield on glucose",
+          "origin": "reported_parameter",
+          "unit": "g/g"
+        },
+        {
+          "dimension": "specific_rate",
+          "key": "m",
+          "label": "maintenance coefficient",
+          "origin": "reported_parameter",
+          "unit": "g/(g h)"
+        },
+        {
+          "dimension": "mass_concentration",
+          "key": "X_F",
+          "label": "biomass concentration at fed-batch onset",
+          "origin": "required_run_input",
+          "unit": "g/L"
+        },
+        {
+          "dimension": "volume",
+          "key": "V_F",
+          "label": "volume at fed-batch onset",
+          "origin": "required_run_input",
+          "unit": "L"
+        },
+        {
+          "dimension": "mass_concentration",
+          "key": "S_F",
+          "label": "glucose concentration in the feed solution",
+          "origin": "reported_parameter",
+          "unit": "g/L"
+        },
+        {
+          "dimension": "time",
+          "key": "t_F",
+          "label": "fed-batch start time",
+          "origin": "required_run_input",
+          "unit": "h"
+        },
+        {
+          "dimension": "time",
+          "key": "t",
+          "label": "evaluation time",
+          "origin": "required_run_input",
+          "unit": "h"
+        }
+      ],
+      "label": "Exponential fed-batch feed rate",
+      "notes": "Reproduced as printed on p. 6. The pre-exponential factor (mu_set/Y_XS + m) * (X_F*V_F/S_F) has units of L/h: the uptake term is 1/h and the demand term is L, so the output is a volume rate in the printed unit with no conversion factor applied. X_F, V_F and t_F are required inputs because the paper prints no value for them; it defines them, and it prints 4 L as the initial *batch* volume, which is not the volume at fed-batch onset.",
+      "output_key": "feed_rate",
+      "output_unit": "L/h",
+      "printed_expression": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * e^(mu_set*(t - t_F))",
+      "printed_page": 6,
+      "reported_parameters": [
+        "mu_set",
+        "Y_XS",
+        "m",
+        "S_F"
+      ],
+      "required_run_inputs": [
+        "X_F",
+        "V_F",
+        "t_F",
+        "t"
+      ],
+      "source_reference": "Baez et al. 2014, p. 6, Methods: fed-batch culture",
+      "statement": "F(t) = (mu_set/Y_XS + m) * (X_F*V_F/S_F) * exp(mu_set*(t - t_F))"
+    }
+  ],
+  "exclusions": [
+    "a Monod or any other growth equation",
+    "a dissolved-oxygen differential equation",
+    "an oxygen-transfer or oxygen-uptake model",
+    "a kinetic model of GFP expression",
+    "a conversion between fluorescence (FU) and GFP mass (mg/L)",
+    "a digitised time series, absent a separately supplied dataset that defines the coordinates and the digitisation provenance",
+    "any automatic coupling to the Morris or Zielinski models"
+  ],
+  "experimental_conditions": [
+    {
+      "evidence": {
+        "pdf_page": 5,
+        "printed_page": 5,
+        "quote": "Batch growth was performed in a 5 L B. Braun bioreac-",
+        "reference": "Baez et al. 2014, p. 5, Methods: bioreactor culture conditions",
+        "section": "Methods: bioreactor culture conditions",
+        "source_id": "baez2014"
+      },
+      "label": "bioreactor (batch growth)",
+      "value": "5 L B. Braun bioreactor"
+    },
+    {
+      "evidence": {
+        "pdf_page": 5,
+        "printed_page": 5,
+        "quote": "Temperature was kept at 37°C and pH was maintained at 7.0",
+        "reference": "Baez et al. 2014, p. 5, Methods: bioreactor culture conditions",
+        "section": "Methods: bioreactor culture conditions",
+        "source_id": "baez2014"
+      },
+      "label": "temperature",
+      "value": "37 degrees C"
+    },
+    {
+      "evidence": {
+        "pdf_page": 5,
+        "printed_page": 5,
+        "quote": "Temperature was kept at 37°C and pH was maintained at 7.0",
+        "reference": "Baez et al. 2014, p. 5, Methods: bioreactor culture conditions",
+        "section": "Methods: bioreactor culture conditions",
+        "source_id": "baez2014"
+      },
+      "label": "pH",
+      "value": "7.0"
+    },
+    {
+      "evidence": {
+        "pdf_page": 5,
+        "printed_page": 5,
+        "quote": "controlled at 30% air saturation",
+        "reference": "Baez et al. 2014, p. 5, Methods: bioreactor culture conditions",
+        "section": "Methods: bioreactor culture conditions",
+        "source_id": "baez2014"
+      },
+      "label": "batch dissolved oxygen set point",
+      "value": "30% air saturation"
+    },
+    {
+      "evidence": {
+        "pdf_page": 5,
+        "printed_page": 5,
+        "quote": "The bioreactor was inoculated at OD600 of 0.2-0.3",
+        "reference": "Baez et al. 2014, p. 5, Methods: bioreactor culture conditions",
+        "section": "Methods: bioreactor culture conditions",
+        "source_id": "baez2014"
+      },
+      "label": "inoculation density",
+      "value": "OD600 of 0.2-0.3"
+    },
+    {
+      "evidence": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "quote": "bubbling air at 0.075 vvm and agitation of 100 rpm",
+        "reference": "Baez et al. 2014, p. 6, Methods: bioreactor culture conditions",
+        "section": "Methods: bioreactor culture conditions",
+        "source_id": "baez2014"
+      },
+      "label": "aeration and agitation",
+      "value": "air at 0.075 vvm, agitation 100 rpm"
+    },
+    {
+      "evidence": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "quote": "by increasing the dO 2 to 300% air saturation to the culture with the soxS promoter",
+        "reference": "Baez et al. 2014, p. 6, Methods: bioreactor culture conditions",
+        "section": "Methods: bioreactor culture conditions",
+        "source_id": "baez2014"
+      },
+      "label": "induction (soxS promoter)",
+      "value": "increasing dO 2 to 300% air saturation, one hour after inoculation"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "After five hours growth, the exponential feeding was initiated to maintain a specific growth rate of 0.35/h",
+        "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+        "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+        "source_id": "baez2014"
+      },
+      "label": "fed-batch onset",
+      "value": "exponential feeding after five hours of growth"
+    },
+    {
+      "evidence": {
+        "pdf_page": 3,
+        "printed_page": 3,
+        "quote": "GFP expression was induced by increasing the dO 2 concentration from 30% to 300% air saturation",
+        "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+        "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+        "source_id": "baez2014"
+      },
+      "label": "fed-batch induction",
+      "value": "dO 2 raised from 30% to 300% air saturation one hour after feeding started"
+    },
+    {
+      "evidence": {
+        "pdf_page": 6,
+        "printed_page": 6,
+        "quote": "the growth started at batch mode with initial volume of 4 L",
+        "reference": "Baez et al. 2014, p. 6, Methods: fed-batch culture",
+        "section": "Methods: fed-batch culture",
+        "source_id": "baez2014"
+      },
+      "label": "fed-batch initial volume",
+      "value": "4 L (batch volume before feeding begins, not V_F)"
+    }
+  ],
+  "missing_models": [
+    {
+      "label": "Growth rate as a function of dissolved oxygen",
+      "missing_inputs": [
+        "a functional form relating dO2 to growth",
+        "more than two dissolved-oxygen levels with growth rates",
+        "half-saturation or oxygen-limitation constant"
+      ],
+      "model_id": "kinetics.growth_law",
+      "why_needed": "To predict growth at any dissolved oxygen other than the two the paper reports, or between them.",
+      "why_not_implemented": "The paper reports two batch points, 1.08/h at 30% and 1.00/h at 300% air saturation (p. 2), and states that the difference is not significant (p = 0.05). Two points do not define a function, and a Monod form is not printed. Both observations are stored as observations; nothing is fitted to them."
+    },
+    {
+      "label": "Dissolved-oxygen differential equation",
+      "missing_inputs": [
+        "gas-liquid interfacial area",
+        "oxygen solubility",
+        "gas composition",
+        "inlet and outlet gas flow",
+        "initial dissolved oxygen"
+      ],
+      "model_id": "kinetics.dissolved_oxygen_balance",
+      "why_needed": "To predict the dissolved-oxygen trajectory that a feed rate would have to satisfy.",
+      "why_not_implemented": "The paper prints a feed equation, not a gas-balance. No dissolved-oxygen differential equation appears anywhere in it, so one would be invented rather than transcribed."
+    },
+    {
+      "label": "Oxygen-transfer / oxygen-uptake correlation",
+      "missing_inputs": [
+        "kLa",
+        "OUR or OTR",
+        "agitation or gas-flow regime as a function"
+      ],
+      "model_id": "transfer.oxygen_uptake",
+      "why_needed": "To relate the dissolved-oxygen set point to an oxygen demand and to say whether the culture was oxygen limited.",
+      "why_not_implemented": "The paper prints the gas rate and agitation speed (0.075 vvm, 100 rpm, p. 6) but no transfer coefficient and no uptake rate. A correlation fitted to two growth points would be a fitted model, not a sourced one."
+    },
+    {
+      "label": "Kinetic model of GFP expression",
+      "missing_inputs": [
+        "transcription and translation rate constants",
+        "mRNA and protein degradation rates",
+        "induction delay"
+      ],
+      "model_id": "expression.gfp_kinetics",
+      "why_needed": "To predict GFP concentration or fluorescence at a time other than the reported endpoints.",
+      "why_not_implemented": "The paper reports endpoint readings and says the system is 'dynamically responsive' (p. 4), with no rate constant printed."
+    },
+    {
+      "label": "Conversion between fluorescence and GFP mass",
+      "missing_inputs": [
+        "instrument and plate format",
+        "dilution basis",
+        "a specific activity valid for these cultures"
+      ],
+      "model_id": "calibration.fluorescence_to_gfp_mass",
+      "why_needed": "To turn a fluorescence reading into a GFP concentration, or the reverse.",
+      "why_not_implemented": "The paper prints both readings side by side (109000 FU and 494 mg/L on p. 3) and also prints specific activities for other experiments, but it states no conversion for this fed-batch endpoint. Both values are stored separately, in their own units, with no factor between them. FU has its own dimension in `units.py` and cannot be converted to a mass."
+    },
+    {
+      "label": "Digitised time series",
+      "missing_inputs": [
+        "digitised coordinates",
+        "the axes they were read from",
+        "the read-off uncertainty"
+      ],
+      "model_id": "data.digitised_trajectory",
+      "why_needed": "To evaluate the process over time rather than at the reported endpoints.",
+      "why_not_implemented": "No dataset defining coordinates and digitisation provenance has been supplied. Figures 1B and 4A/4B are referenced by the paper but are not transcribed here, so there is nothing to digitise."
+    },
+    {
+      "label": "Coupling to the Morris or Zielinski models",
+      "missing_inputs": [
+        "a model id and version agreed with the composition layer",
+        "a shared component identity",
+        "a declared port set"
+      ],
+      "model_id": "coupling.other_models",
+      "why_needed": "To run this package inside the composition layer alongside the other models in this repository.",
+      "why_not_implemented": "Coupling is out of scope for this package, and nothing in the paper supplies the bridge: there is no shared component vocabulary, and the register, feed and product quantities here have no counterpart in either model. No identifier is guessed and no adapter is registered."
+    }
+  ],
+  "observations": [
+    {
+      "conditions": [
+        {
+          "evidence": {
+            "pdf_page": 2,
+            "printed_page": 2,
+            "quote": "concentration of 30% air saturation",
+            "reference": "Baez et al. 2014, p. 2, Results",
+            "section": "Results",
+            "source_id": "baez2014"
+          },
+          "label": "dissolved oxygen",
+          "value": "30% air saturation"
+        },
+        {
+          "evidence": {
+            "pdf_page": 2,
+            "printed_page": 2,
+            "quote": "was grown initially at a dissolved oxy-",
+            "reference": "Baez et al. 2014, p. 2, Results",
+            "section": "Results",
+            "source_id": "baez2014"
+          },
+          "label": "culture mode",
+          "value": "batch"
+        }
+      ],
+      "observation_id": "batch.specific_growth_rate.do_30",
+      "quantity": {
+        "basis": "observed_reference",
+        "evidence": [
+          {
+            "pdf_page": 2,
+            "printed_page": 2,
+            "quote": "concentration of 30% air saturation",
+            "reference": "Baez et al. 2014, p. 2, Results",
+            "section": "Results",
+            "source_id": "baez2014"
+          }
+        ],
+        "inputs": [],
+        "label": "specific growth rate at 30% dissolved oxygen",
+        "method": null,
+        "notes": "Reported observation, not a prediction. The paper states that the difference from the 300% reading is not significant (p = 0.05) and reads both values off Figure 1B.",
+        "original_text": "the specific growth rate of the culture at 30% (1.08/h) and 300% (1.00/h)",
+        "original_unit": "1/h",
+        "provenance": "reported",
+        "quantity_id": "observation.batch.specific_growth_rate.do_30",
+        "unit": "1/h",
+        "value": 1.08
+      }
+    },
+    {
+      "conditions": [
+        {
+          "evidence": {
+            "pdf_page": 2,
+            "printed_page": 2,
+            "quote": "and 300% (1.00/h) of dO 2",
+            "reference": "Baez et al. 2014, p. 2, Results",
+            "section": "Results",
+            "source_id": "baez2014"
+          },
+          "label": "dissolved oxygen",
+          "value": "300% air saturation"
+        },
+        {
+          "evidence": {
+            "pdf_page": 2,
+            "printed_page": 2,
+            "quote": "was grown initially at a dissolved oxy-",
+            "reference": "Baez et al. 2014, p. 2, Results",
+            "section": "Results",
+            "source_id": "baez2014"
+          },
+          "label": "culture mode",
+          "value": "batch"
+        }
+      ],
+      "observation_id": "batch.specific_growth_rate.do_300",
+      "quantity": {
+        "basis": "observed_reference",
+        "evidence": [
+          {
+            "pdf_page": 2,
+            "printed_page": 2,
+            "quote": "and 300% (1.00/h) of dO 2",
+            "reference": "Baez et al. 2014, p. 2, Results",
+            "section": "Results",
+            "source_id": "baez2014"
+          }
+        ],
+        "inputs": [],
+        "label": "specific growth rate at 300% dissolved oxygen",
+        "method": null,
+        "notes": "Reported observation, not a prediction. Same sentence as the 30% reading, and the paper reports no significant difference between the two.",
+        "original_text": "(1.00/h)",
+        "original_unit": "1/h",
+        "provenance": "reported",
+        "quantity_id": "observation.batch.specific_growth_rate.do_300",
+        "unit": "1/h",
+        "value": 1.0
+      }
+    },
+    {
+      "conditions": [
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "dissolved oxygen",
+          "value": "300% air saturation"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "time at that dissolved oxygen",
+          "value": "3 hours"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "high density fed-batch culture of E. coli AB1157 bearing pAB49",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "culture mode",
+          "value": "fed-batch, E. coli AB1157 bearing pAB49"
+        }
+      ],
+      "observation_id": "fedbatch.endpoint.biomass_concentration",
+      "quantity": {
+        "basis": "observed_reference",
+        "evidence": [
+          {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "the cell concentration reached 29.1 g/L (DW)",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          }
+        ],
+        "inputs": [],
+        "label": "cell (biomass) concentration",
+        "method": null,
+        "notes": "Dry-weight basis as printed. DW is a measurement basis, not a unit, so it is kept in the printed text rather than turned into a separate registered unit. Reported observation, not a prediction of the fed-batch run.",
+        "original_text": "the cell concentration reached 29.1 g/L (DW)",
+        "original_unit": "g/L (DW)",
+        "provenance": "reported",
+        "quantity_id": "observation.fedbatch.endpoint.biomass_concentration",
+        "unit": "g/L",
+        "value": 29.1
+      }
+    },
+    {
+      "conditions": [
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "dissolved oxygen",
+          "value": "300% air saturation"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "time at that dissolved oxygen",
+          "value": "3 hours"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "high density fed-batch culture of E. coli AB1157 bearing pAB49",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "culture mode",
+          "value": "fed-batch, E. coli AB1157 bearing pAB49"
+        }
+      ],
+      "observation_id": "fedbatch.endpoint.gfp_concentration",
+      "quantity": {
+        "basis": "observed_reference",
+        "evidence": [
+          {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "109000 FU (494 mg/L)",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          }
+        ],
+        "inputs": [],
+        "label": "GFP concentration",
+        "method": null,
+        "notes": "Reported observation. The paper prints it in the same parenthesis as the fluorescence reading but states no conversion between the two for this culture; see equations.MISSING_MODELS['calibration.fluorescence_to_gfp_mass'].",
+        "original_text": "109000 FU (494 mg/L)",
+        "original_unit": "mg/L",
+        "provenance": "reported",
+        "quantity_id": "observation.fedbatch.endpoint.gfp_concentration",
+        "unit": "mg/L",
+        "value": 494.0
+      }
+    },
+    {
+      "conditions": [
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "dissolved oxygen",
+          "value": "300% air saturation"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "time at that dissolved oxygen",
+          "value": "3 hours"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "high density fed-batch culture of E. coli AB1157 bearing pAB49",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "culture mode",
+          "value": "fed-batch, E. coli AB1157 bearing pAB49"
+        }
+      ],
+      "observation_id": "fedbatch.endpoint.fluorescence",
+      "quantity": {
+        "basis": "observed_reference",
+        "evidence": [
+          {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "GFP fluorescence reached 109000 FU (494 mg/L)",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          }
+        ],
+        "inputs": [],
+        "label": "fluorescence",
+        "method": null,
+        "notes": "Instrument reading in fluorescence units. FU has its own dimension in `units.py` and is not convertible to a mass.",
+        "original_text": "GFP fluorescence reached 109000 FU (494 mg/L)",
+        "original_unit": "FU",
+        "provenance": "reported",
+        "quantity_id": "observation.fedbatch.endpoint.fluorescence",
+        "unit": "FU",
+        "value": 109000.0
+      }
+    },
+    {
+      "conditions": [
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "dissolved oxygen",
+          "value": "300% air saturation"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "After 3 hours at 300% air saturation",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "time at that dissolved oxygen",
+          "value": "3 hours"
+        },
+        {
+          "evidence": {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "high density fed-batch culture of E. coli AB1157 bearing pAB49",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          },
+          "label": "culture mode",
+          "value": "fed-batch, E. coli AB1157 bearing pAB49"
+        }
+      ],
+      "observation_id": "fedbatch.endpoint.acetate_concentration",
+      "quantity": {
+        "basis": "observed_reference",
+        "evidence": [
+          {
+            "pdf_page": 3,
+            "printed_page": 3,
+            "quote": "acetate accumulation reached 7.1 g/L (Figure 4B)",
+            "reference": "Baez et al. 2014, p. 3, Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "section": "Results: production of GFP by oxygen-induced promoter in fed-batch growth",
+            "source_id": "baez2014"
+          }
+        ],
+        "inputs": [],
+        "label": "acetate concentration",
+        "method": null,
+        "notes": "Reported observation. The paper notes that 'the cell growth did not stop after induction' in the same passage; no acetate uptake or overflow model is offered here.",
+        "original_text": "7.1 g/L (Figure 4B)",
+        "original_unit": "g/L",
+        "provenance": "reported",
+        "quantity_id": "observation.fedbatch.endpoint.acetate_concentration",
+        "unit": "g/L",
+        "value": 7.1
+      }
+    }
+  ],
+  "registration": {
+    "reason": "no adapter registration was added, so the composition registry neither lists nor validates this package; a model id and version agreed with the composition layer were not supplied and are not guessed",
+    "registered_in_composition_registry": false
+  },
+  "reported_parameters": {
+    "S_F": {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 6,
+          "printed_page": 6,
+          "quote": "(141 g/L)",
+          "reference": "Baez et al. 2014, p. 6",
+          "section": null,
+          "source_id": "baez2014"
+        }
+      ],
+      "inputs": [],
+      "label": "glucose concentration in the feed solution",
+      "method": null,
+      "notes": "Printed on p. 6. The feed solution composition on p. 5 lists '282 g/L yeast extract, 141 g/L glucose'.",
+      "original_text": null,
+      "original_unit": "g/L",
+      "provenance": "reported",
+      "quantity_id": "parameter.S_F",
+      "unit": "g/L",
+      "value": 141.0
+    },
+    "Y_XS": {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 6,
+          "printed_page": 6,
+          "quote": "(1.28 g/g)",
+          "reference": "Baez et al. 2014, p. 6",
+          "section": null,
+          "source_id": "baez2014"
+        }
+      ],
+      "inputs": [],
+      "label": "biomass yield on glucose",
+      "method": null,
+      "notes": "Printed on p. 6 as the biomass yield on glucose, estimated from the exponential growth phase in batch cultures. The paper does not give the estimation procedure in detail.",
+      "original_text": null,
+      "original_unit": "g/g",
+      "provenance": "reported",
+      "quantity_id": "parameter.Y_XS",
+      "unit": "g/g",
+      "value": 1.28
+    },
+    "m": {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 6,
+          "printed_page": 6,
+          "quote": "(0.12 g/g h)",
+          "reference": "Baez et al. 2014, p. 6",
+          "section": null,
+          "source_id": "baez2014"
+        }
+      ],
+      "inputs": [],
+      "label": "maintenance coefficient",
+      "method": null,
+      "notes": "Printed on p. 6 as '0.12 g/g h'; the unit is retained as printed.",
+      "original_text": null,
+      "original_unit": "g/g h",
+      "provenance": "reported",
+      "quantity_id": "parameter.m",
+      "unit": "g/(g h)",
+      "value": 0.12
+    },
+    "mu_set": {
+      "basis": "observed_reference",
+      "evidence": [
+        {
+          "pdf_page": 6,
+          "printed_page": 6,
+          "quote": "(0.35 1/h)",
+          "reference": "Baez et al. 2014, p. 6",
+          "section": null,
+          "source_id": "baez2014"
+        }
+      ],
+      "inputs": [],
+      "label": "specific growth rate set by the feed",
+      "method": null,
+      "notes": "Printed on p. 6 as the specific growth rate. p. 3 states the same value as 0.35/h: 'the exponential feeding was initiated to maintain a specific growth rate of 0.35/h'. This is the feed's target growth rate, not a prediction for any culture.",
+      "original_text": null,
+      "original_unit": "1/h",
+      "provenance": "reported",
+      "quantity_id": "parameter.mu_set",
+      "unit": "1/h",
+      "value": 0.35
+    }
+  },
+  "required_run_inputs": [
+    {
+      "defaulted": false,
+      "definition_as_printed": "p. 6: 'the V_F and X_F are the volume and biomass concentration in the bioreactor at the onset of fed-batch procedure'. No number is printed for X_F.",
+      "name": "X_F",
+      "unit": "g/L"
+    },
+    {
+      "defaulted": false,
+      "definition_as_printed": "p. 6: 'the V_F and X_F are the volume and biomass concentration in the bioreactor at the onset of fed-batch procedure'. No number is printed for V_F. The 4 L on p. 6 is the initial *batch* volume, before fed-batch begins, and is not V_F.",
+      "name": "V_F",
+      "unit": "L"
+    },
+    {
+      "defaulted": false,
+      "definition_as_printed": "p. 3 reports when feeding started relative to the culture ('After five hours growth, the exponential feeding was initiated'), but no time value enters the printed equation, so t_F is supplied per run.",
+      "name": "t_F",
+      "unit": "h"
+    },
+    {
+      "defaulted": false,
+      "definition_as_printed": "the time at which F(t) is evaluated. p. 6 prints F(t) as a function of t and prints no value of it, so t is supplied per run.",
+      "name": "t",
+      "unit": "h"
+    }
+  ],
+  "scope": "The reported observations and the printed exponential fed-batch feed equation of Baez et al. (2014), Microbial Cell Factories 13:50.",
+  "source": {
+    "article_number": "50",
+    "authors": [
+      "Antonino Baez",
+      "Nadim Majdalani",
+      "Joseph Shiloach"
+    ],
+    "citation": "A. Baez, N. Majdalani, J. Shiloach, 'Production of recombinant protein by a novel oxygen-induced system in Escherichia coli', Microbial Cell Factories 2014, 13:50.",
+    "doi": "10.1186/1475-2859-13-50",
+    "journal": "Microbial Cell Factories",
+    "page_numbering_evidence": "pages 2-7 carry the running footer 'Page 2 of 7', each stating its own printed page number; page 1 carries the journal line and no page footer",
+    "pages": "1-7",
+    "printed_page_equals_pdf_page": true,
+    "printed_pages": [
+      1,
+      7
+    ],
+    "source_id": "baez2014",
+    "title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+    "volume": "13",
+    "year": 2014
+  },
+  "units": {
+    "1/h": {
+      "dimension": "specific_rate",
+      "note": "specific growth rate",
+      "to_base": 1.0
+    },
+    "1/min": {
+      "dimension": "specific_rate",
+      "note": "",
+      "to_base": 60.0
+    },
+    "FU": {
+      "dimension": "fluorescence",
+      "note": "instrument reading; the paper prints no conversion to GFP mass",
+      "to_base": 1.0
+    },
+    "L": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 1.0
+    },
+    "L/h": {
+      "dimension": "volume_rate",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g": {
+      "dimension": "mass",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/(g h)": {
+      "dimension": "specific_rate",
+      "note": "maintenance coefficient, printed on p. 6 as '0.12 g/g h'; retained as printed",
+      "to_base": 1.0
+    },
+    "g/L": {
+      "dimension": "mass_concentration",
+      "note": "",
+      "to_base": 1.0
+    },
+    "g/g": {
+      "dimension": "mass_ratio",
+      "note": "",
+      "to_base": 1.0
+    },
+    "h": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 1.0
+    },
+    "mL": {
+      "dimension": "volume",
+      "note": "",
+      "to_base": 0.001
+    },
+    "mL/h": {
+      "dimension": "volume_rate",
+      "note": "",
+      "to_base": 0.001
+    },
+    "mL/min": {
+      "dimension": "volume_rate",
+      "note": "",
+      "to_base": 0.016666666666666666
+    },
+    "mg": {
+      "dimension": "mass",
+      "note": "",
+      "to_base": 0.001
+    },
+    "mg/L": {
+      "dimension": "mass_concentration",
+      "note": "",
+      "to_base": 0.001
+    },
+    "min": {
+      "dimension": "time",
+      "note": "",
+      "to_base": 0.016666666666666666
+    }
+  },
+  "version": "0.1.0"
+}

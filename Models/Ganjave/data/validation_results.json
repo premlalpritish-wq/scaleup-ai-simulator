@@ -1,0 +1,688 @@
+{
+  "fixture_id": "ganjave2022.fig5.selected_optimum",
+  "fixture_version": "1.0.0",
+  "model": {
+    "model_id": "ganjave2022.cybernetic-growth",
+    "equations_version": "1.1.0",
+    "parameter_set_id": "ganjave2022.table2",
+    "parameter_set_version": "1.0.0",
+    "parameter_set_provenance": "Table 2 as printed, p. 4, loaded as a fitted set; nothing here is refit",
+    "solver": {
+      "rtol": 1e-06,
+      "atol": 1e-09,
+      "h_max": 0.01,
+      "h_max_reason": "chosen from the reported kLa = 133 h^-1 so h*kLa = 1.33 stays inside the explicit RK4 stability limit"
+    }
+  },
+  "criteria_definitions": [
+    {
+      "criterion_id": "A_limiting_regime",
+      "statement": "The culture becomes oxygen-limited after feeding starts: min DO over 6 <= t <= 24 h is below 10 %.",
+      "threshold": {
+        "min_DO_percent_over_6_to_24h": "< 10"
+      },
+      "justification": "The paper states it, not the implementation: printed p. 9, 'Based on the results of the DO profile, it is seen that the growth is limited by oxygen availability beyond 6 h.' The paper's own Fig. 3a and Fig. 5a model curves fall to about 1-6 %. Ten per cent is a generous bound that still separates oxygen limitation from substrate limitation: the S2-limited reading reaches a minimum DO of about 60 %, so the criterion discriminates between the two regimes rather than between two close values.",
+      "kind": "paper_stated_behaviour"
+    },
+    {
+      "criterion_id": "B_reported_endpoint",
+      "statement": "Final biomass lies inside the paper's own reported experimental range for the 24 h fed-batch trials.",
+      "threshold": {
+        "biomass_24h_g_per_L": "within [19.9, 21.5]"
+      },
+      "justification": "This is the paper's reported measurement, quoted on p. 7 as the range across the tested proteins and in the abstract as 20.7 g/L. Using the reported range rather than a point value respects the run-to-run spread the paper itself reports, and avoids testing against a single number the paper never isolates. The threshold is a paper quantity; nothing in it was chosen to fit any output.",
+      "kind": "paper_reported_measurement"
+    },
+    {
+      "criterion_id": "C_model_curve_shape",
+      "statement": "The biomass trajectory agrees with the authors' own plotted model prediction over the readable span.",
+      "threshold": {
+        "relative_rmse_percent": "<= 25"
+      },
+      "justification": "Two independent figures set the bar. The paper's own model sits about 1 g/L RMS from its own held-out validation data on a trajectory reaching 20 g/L (about 5 %, from the nine digitized Fig. 3b points), so a transcription that computes the same model must land well inside that. The digitization uncertainty on the reference curve is about 0.5 g/L, so 25 % is thirty times the reading noise. A threshold that loose can only fail on a genuine difference between the implemented equations and the printed ones, not on raster noise or solver tolerance.",
+      "comparison_interval": "0.25 h grid over the span where the paper's curve is readable, t = 0..24 h",
+      "kind": "paper_plotted_model_prediction"
+    },
+    {
+      "criterion_id": "D_determinism",
+      "statement": "Two runs of the same configuration agree.",
+      "threshold": {
+        "relative_difference": "<= 1e-9"
+      },
+      "justification": "The solver is deterministic given identical inputs and parameters. Any divergence above floating-point round-off indicates hidden state or a race, which would invalidate every other comparison. This is a property of the implementation, not of the paper.",
+      "kind": "implementation_property"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "primary",
+      "initial_conditions": {
+        "X0_g_per_L": 0.05,
+        "S2_0_g_per_L": 25.0,
+        "DO0_percent": 100.0
+      },
+      "final_biomass_g_per_L": 18.29926542740329,
+      "min_DO_percent_after_feed": 0.8688961253612256,
+      "biomass_vs_model_prediction": {
+        "relative_rmse_percent": 10.955,
+        "points_compared": 79,
+        "first": {
+          "t_h": 0.0,
+          "reference": -0.1071,
+          "ours": 0.05
+        },
+        "last": {
+          "t_h": 24.0,
+          "reference": 19.5813,
+          "ours": 18.29927
+        }
+      },
+      "dissolved_oxygen_vs_model_prediction": {
+        "relative_rmse_percent": 119.065,
+        "points_compared": 63
+      },
+      "glycerol_vs_model_prediction": {
+        "relative_rmse_percent": 191.675,
+        "points_compared": 51
+      },
+      "biomass_vs_measured_points": {
+        "note": "the paper's MEASUREMENTS from the held-out validation experiment, reported separately and never used as a target",
+        "points": [
+          {
+            "t_h": 3.964,
+            "measured_g_per_L": 1.2651,
+            "ours_g_per_L": 1.44672,
+            "difference_g_per_L": 0.18162,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 5.977,
+            "measured_g_per_L": 3.2082,
+            "ours_g_per_L": 3.4791,
+            "difference_g_per_L": 0.2709,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 12.006,
+            "measured_g_per_L": 6.7356,
+            "ours_g_per_L": 9.39412,
+            "difference_g_per_L": 2.65852,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 16.026,
+            "measured_g_per_L": 13.0815,
+            "ours_g_per_L": 13.25843,
+            "difference_g_per_L": 0.17693,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 18.036,
+            "measured_g_per_L": 15.1854,
+            "ours_g_per_L": 15.17033,
+            "difference_g_per_L": -0.01507,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 20.046,
+            "measured_g_per_L": 15.6357,
+            "ours_g_per_L": 17.09205,
+            "difference_g_per_L": 1.45635,
+            "combined_uncertainty_g_per_L": 0.7125
+          }
+        ]
+      },
+      "criteria": {
+        "A_limiting_regime": {
+          "pass": true,
+          "observed_min_DO_percent": 0.8688961253612256,
+          "threshold": "< 10 %"
+        },
+        "B_reported_endpoint": {
+          "pass": false,
+          "observed_final_biomass_g_per_L": 18.29926542740329,
+          "threshold": "within [19.9, 21.5] g/L"
+        },
+        "C_model_curve_shape": {
+          "pass": true,
+          "observed_relative_rmse_percent": 10.955,
+          "threshold": "<= 25 %"
+        }
+      },
+      "input_digest": "cbd48e1dd85639fc488246a54c497236bc41ab1f89d29b1572cd51b784b7706e"
+    },
+    {
+      "case_id": "s2_yeast_extract_only",
+      "initial_conditions": {
+        "X0_g_per_L": 0.05,
+        "S2_0_g_per_L": 5.0,
+        "DO0_percent": 100.0
+      },
+      "final_biomass_g_per_L": 8.355078881945182,
+      "min_DO_percent_after_feed": 59.5771097884646,
+      "biomass_vs_model_prediction": {
+        "relative_rmse_percent": 70.7,
+        "points_compared": 79,
+        "first": {
+          "t_h": 0.0,
+          "reference": -0.1071,
+          "ours": 0.05
+        },
+        "last": {
+          "t_h": 24.0,
+          "reference": 19.5813,
+          "ours": 8.35508
+        }
+      },
+      "dissolved_oxygen_vs_model_prediction": {
+        "relative_rmse_percent": 268.985,
+        "points_compared": 63
+      },
+      "glycerol_vs_model_prediction": {
+        "relative_rmse_percent": 1933.978,
+        "points_compared": 51
+      },
+      "biomass_vs_measured_points": {
+        "note": "the paper's MEASUREMENTS from the held-out validation experiment, reported separately and never used as a target",
+        "points": [
+          {
+            "t_h": 3.964,
+            "measured_g_per_L": 1.2651,
+            "ours_g_per_L": 0.5703,
+            "difference_g_per_L": -0.6948,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 5.977,
+            "measured_g_per_L": 3.2082,
+            "ours_g_per_L": 1.29719,
+            "difference_g_per_L": -1.91101,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 12.006,
+            "measured_g_per_L": 6.7356,
+            "ours_g_per_L": 3.84375,
+            "difference_g_per_L": -2.89185,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 16.026,
+            "measured_g_per_L": 13.0815,
+            "ours_g_per_L": 5.44401,
+            "difference_g_per_L": -7.63749,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 18.036,
+            "measured_g_per_L": 15.1854,
+            "ours_g_per_L": 6.20824,
+            "difference_g_per_L": -8.97716,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 20.046,
+            "measured_g_per_L": 15.6357,
+            "ours_g_per_L": 6.95117,
+            "difference_g_per_L": -8.68453,
+            "combined_uncertainty_g_per_L": 0.7125
+          }
+        ]
+      },
+      "criteria": {
+        "A_limiting_regime": {
+          "pass": false,
+          "observed_min_DO_percent": 59.5771097884646,
+          "threshold": "< 10 %"
+        },
+        "B_reported_endpoint": {
+          "pass": false,
+          "observed_final_biomass_g_per_L": 8.355078881945182,
+          "threshold": "within [19.9, 21.5] g/L"
+        },
+        "C_model_curve_shape": {
+          "pass": false,
+          "observed_relative_rmse_percent": 70.7,
+          "threshold": "<= 25 %"
+        }
+      },
+      "input_digest": "7e2607151c9b4e06fcdc718dcc2b888757bff215712ce877df9da4a126f09a50"
+    },
+    {
+      "case_id": "s2_double",
+      "initial_conditions": {
+        "X0_g_per_L": 0.05,
+        "S2_0_g_per_L": 50.0,
+        "DO0_percent": 100.0
+      },
+      "final_biomass_g_per_L": 21.23287288772072,
+      "min_DO_percent_after_feed": 0.5205774811322798,
+      "biomass_vs_model_prediction": {
+        "relative_rmse_percent": 17.056,
+        "points_compared": 79,
+        "first": {
+          "t_h": 0.0,
+          "reference": -0.1071,
+          "ours": 0.05
+        },
+        "last": {
+          "t_h": 24.0,
+          "reference": 19.5813,
+          "ours": 21.23287
+        }
+      },
+      "dissolved_oxygen_vs_model_prediction": {
+        "relative_rmse_percent": 89.723,
+        "points_compared": 63
+      },
+      "glycerol_vs_model_prediction": {
+        "relative_rmse_percent": 89.03,
+        "points_compared": 51
+      },
+      "biomass_vs_measured_points": {
+        "note": "the paper's MEASUREMENTS from the held-out validation experiment, reported separately and never used as a target",
+        "points": [
+          {
+            "t_h": 3.964,
+            "measured_g_per_L": 1.2651,
+            "ours_g_per_L": 1.93256,
+            "difference_g_per_L": 0.66746,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 5.977,
+            "measured_g_per_L": 3.2082,
+            "ours_g_per_L": 4.01991,
+            "difference_g_per_L": 0.81171,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 12.006,
+            "measured_g_per_L": 6.7356,
+            "ours_g_per_L": 9.93069,
+            "difference_g_per_L": 3.19509,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 16.026,
+            "measured_g_per_L": 13.0815,
+            "ours_g_per_L": 13.78461,
+            "difference_g_per_L": 0.70311,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 18.036,
+            "measured_g_per_L": 15.1854,
+            "ours_g_per_L": 15.6863,
+            "difference_g_per_L": 0.5009,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 20.046,
+            "measured_g_per_L": 15.6357,
+            "ours_g_per_L": 17.57143,
+            "difference_g_per_L": 1.93573,
+            "combined_uncertainty_g_per_L": 0.7125
+          }
+        ]
+      },
+      "criteria": {
+        "A_limiting_regime": {
+          "pass": true,
+          "observed_min_DO_percent": 0.5205774811322798,
+          "threshold": "< 10 %"
+        },
+        "B_reported_endpoint": {
+          "pass": true,
+          "observed_final_biomass_g_per_L": 21.23287288772072,
+          "threshold": "within [19.9, 21.5] g/L"
+        },
+        "C_model_curve_shape": {
+          "pass": true,
+          "observed_relative_rmse_percent": 17.056,
+          "threshold": "<= 25 %"
+        }
+      },
+      "input_digest": "66dbae59a5aaffef7f23388050f9d7e964aaeb01a84087bd4b6beac22390d8a3"
+    },
+    {
+      "case_id": "x0_fourfold",
+      "initial_conditions": {
+        "X0_g_per_L": 0.2,
+        "S2_0_g_per_L": 25.0,
+        "DO0_percent": 100.0
+      },
+      "final_biomass_g_per_L": 16.14085588244636,
+      "min_DO_percent_after_feed": 0.9993309930235592,
+      "biomass_vs_model_prediction": {
+        "relative_rmse_percent": 27.022,
+        "points_compared": 79,
+        "first": {
+          "t_h": 0.0,
+          "reference": -0.1071,
+          "ours": 0.2
+        },
+        "last": {
+          "t_h": 24.0,
+          "reference": 19.5813,
+          "ours": 16.14086
+        }
+      },
+      "dissolved_oxygen_vs_model_prediction": {
+        "relative_rmse_percent": 218.59,
+        "points_compared": 63
+      },
+      "glycerol_vs_model_prediction": {
+        "relative_rmse_percent": 785.983,
+        "points_compared": 51
+      },
+      "biomass_vs_measured_points": {
+        "note": "the paper's MEASUREMENTS from the held-out validation experiment, reported separately and never used as a target",
+        "points": [
+          {
+            "t_h": 3.964,
+            "measured_g_per_L": 1.2651,
+            "ours_g_per_L": 2.91887,
+            "difference_g_per_L": 1.65377,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 5.977,
+            "measured_g_per_L": 3.2082,
+            "ours_g_per_L": 5.18131,
+            "difference_g_per_L": 1.97311,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 12.006,
+            "measured_g_per_L": 6.7356,
+            "ours_g_per_L": 11.10329,
+            "difference_g_per_L": 4.36769,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 16.026,
+            "measured_g_per_L": 13.0815,
+            "ours_g_per_L": 13.5692,
+            "difference_g_per_L": 0.4877,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 18.036,
+            "measured_g_per_L": 15.1854,
+            "ours_g_per_L": 14.24505,
+            "difference_g_per_L": -0.94035,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 20.046,
+            "measured_g_per_L": 15.6357,
+            "ours_g_per_L": 14.90169,
+            "difference_g_per_L": -0.73401,
+            "combined_uncertainty_g_per_L": 0.7125
+          }
+        ]
+      },
+      "criteria": {
+        "A_limiting_regime": {
+          "pass": true,
+          "observed_min_DO_percent": 0.9993309930235592,
+          "threshold": "< 10 %"
+        },
+        "B_reported_endpoint": {
+          "pass": false,
+          "observed_final_biomass_g_per_L": 16.14085588244636,
+          "threshold": "within [19.9, 21.5] g/L"
+        },
+        "C_model_curve_shape": {
+          "pass": false,
+          "observed_relative_rmse_percent": 27.022,
+          "threshold": "<= 25 %"
+        }
+      },
+      "input_digest": "f3c6ee15e605f689872c802ffe70822f84b9b0d7f73590a3f73ac8378f4c8b6e"
+    },
+    {
+      "case_id": "x0_tenfold",
+      "initial_conditions": {
+        "X0_g_per_L": 0.5,
+        "S2_0_g_per_L": 25.0,
+        "DO0_percent": 100.0
+      },
+      "final_biomass_g_per_L": 14.34409252821817,
+      "min_DO_percent_after_feed": 2.24579078770756,
+      "biomass_vs_model_prediction": {
+        "relative_rmse_percent": 36.867,
+        "points_compared": 79,
+        "first": {
+          "t_h": 0.0,
+          "reference": -0.1071,
+          "ours": 0.5
+        },
+        "last": {
+          "t_h": 24.0,
+          "reference": 19.5813,
+          "ours": 14.34409
+        }
+      },
+      "dissolved_oxygen_vs_model_prediction": {
+        "relative_rmse_percent": 273.175,
+        "points_compared": 63
+      },
+      "glycerol_vs_model_prediction": {
+        "relative_rmse_percent": 1502.283,
+        "points_compared": 51
+      },
+      "biomass_vs_measured_points": {
+        "note": "the paper's MEASUREMENTS from the held-out validation experiment, reported separately and never used as a target",
+        "points": [
+          {
+            "t_h": 3.964,
+            "measured_g_per_L": 1.2651,
+            "ours_g_per_L": 4.03087,
+            "difference_g_per_L": 2.76577,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 5.977,
+            "measured_g_per_L": 3.2082,
+            "ours_g_per_L": 6.36306,
+            "difference_g_per_L": 3.15486,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 12.006,
+            "measured_g_per_L": 6.7356,
+            "ours_g_per_L": 10.30123,
+            "difference_g_per_L": 3.56563,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 16.026,
+            "measured_g_per_L": 13.0815,
+            "ours_g_per_L": 11.73114,
+            "difference_g_per_L": -1.35036,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 18.036,
+            "measured_g_per_L": 15.1854,
+            "ours_g_per_L": 12.41655,
+            "difference_g_per_L": -2.76885,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 20.046,
+            "measured_g_per_L": 15.6357,
+            "ours_g_per_L": 13.08341,
+            "difference_g_per_L": -2.55229,
+            "combined_uncertainty_g_per_L": 0.7125
+          }
+        ]
+      },
+      "criteria": {
+        "A_limiting_regime": {
+          "pass": true,
+          "observed_min_DO_percent": 2.24579078770756,
+          "threshold": "< 10 %"
+        },
+        "B_reported_endpoint": {
+          "pass": false,
+          "observed_final_biomass_g_per_L": 14.34409252821817,
+          "threshold": "within [19.9, 21.5] g/L"
+        },
+        "C_model_curve_shape": {
+          "pass": false,
+          "observed_relative_rmse_percent": 36.867,
+          "threshold": "<= 25 %"
+        }
+      },
+      "input_digest": "d42849897a2e2935437b0f305fb1b7a4cb7eb0d770c06a26834da926f73bebd0"
+    },
+    {
+      "case_id": "do0_80",
+      "initial_conditions": {
+        "X0_g_per_L": 0.05,
+        "S2_0_g_per_L": 25.0,
+        "DO0_percent": 80.0
+      },
+      "final_biomass_g_per_L": 18.299408395233066,
+      "min_DO_percent_after_feed": 0.8688813248929445,
+      "biomass_vs_model_prediction": {
+        "relative_rmse_percent": 10.954,
+        "points_compared": 79,
+        "first": {
+          "t_h": 0.0,
+          "reference": -0.1071,
+          "ours": 0.05
+        },
+        "last": {
+          "t_h": 24.0,
+          "reference": 19.5813,
+          "ours": 18.29941
+        }
+      },
+      "dissolved_oxygen_vs_model_prediction": {
+        "relative_rmse_percent": 119.305,
+        "points_compared": 63
+      },
+      "glycerol_vs_model_prediction": {
+        "relative_rmse_percent": 191.646,
+        "points_compared": 51
+      },
+      "biomass_vs_measured_points": {
+        "note": "the paper's MEASUREMENTS from the held-out validation experiment, reported separately and never used as a target",
+        "points": [
+          {
+            "t_h": 3.964,
+            "measured_g_per_L": 1.2651,
+            "ours_g_per_L": 1.44662,
+            "difference_g_per_L": 0.18152,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 5.977,
+            "measured_g_per_L": 3.2082,
+            "ours_g_per_L": 3.47898,
+            "difference_g_per_L": 0.27078,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 12.006,
+            "measured_g_per_L": 6.7356,
+            "ours_g_per_L": 9.39401,
+            "difference_g_per_L": 2.65841,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 16.026,
+            "measured_g_per_L": 13.0815,
+            "ours_g_per_L": 13.25832,
+            "difference_g_per_L": 0.17682,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 18.036,
+            "measured_g_per_L": 15.1854,
+            "ours_g_per_L": 15.17021,
+            "difference_g_per_L": -0.01519,
+            "combined_uncertainty_g_per_L": 0.7125
+          },
+          {
+            "t_h": 20.046,
+            "measured_g_per_L": 15.6357,
+            "ours_g_per_L": 17.0921,
+            "difference_g_per_L": 1.4564,
+            "combined_uncertainty_g_per_L": 0.7125
+          }
+        ]
+      },
+      "criteria": {
+        "A_limiting_regime": {
+          "pass": true,
+          "observed_min_DO_percent": 0.8688813248929445,
+          "threshold": "< 10 %"
+        },
+        "B_reported_endpoint": {
+          "pass": false,
+          "observed_final_biomass_g_per_L": 18.299408395233066,
+          "threshold": "within [19.9, 21.5] g/L"
+        },
+        "C_model_curve_shape": {
+          "pass": true,
+          "observed_relative_rmse_percent": 10.954,
+          "threshold": "<= 25 %"
+        }
+      },
+      "input_digest": "a32bfbaa5ebba3cc4e28a3a2c0a4544fff4c7603928e60c255abab7ae5b939f8"
+    }
+  ],
+  "D_determinism": {
+    "pass": true,
+    "observed_worst_relative_difference": 0.0,
+    "threshold": "<= 1e-9",
+    "digests_equal": true
+  },
+  "tn02_what_if": [
+    {
+      "e_ratio2_0": 0.1,
+      "is_the_models_reading": false,
+      "final_biomass_g_per_L": 18.8672,
+      "relative_rmse_vs_paper_model_percent": 6.111,
+      "note": "what-if run only; the parameter is marked assumed in its provenance and this case is not the model"
+    },
+    {
+      "e_ratio2_0": 0.3,
+      "is_the_models_reading": false,
+      "final_biomass_g_per_L": 18.7012,
+      "relative_rmse_vs_paper_model_percent": 7.557,
+      "note": "what-if run only; the parameter is marked assumed in its provenance and this case is not the model"
+    },
+    {
+      "e_ratio2_0": 0.5,
+      "is_the_models_reading": false,
+      "final_biomass_g_per_L": 18.5502,
+      "relative_rmse_vs_paper_model_percent": 8.843,
+      "note": "what-if run only; the parameter is marked assumed in its provenance and this case is not the model"
+    },
+    {
+      "e_ratio2_0": 0.874,
+      "is_the_models_reading": true,
+      "final_biomass_g_per_L": 18.2993,
+      "relative_rmse_vs_paper_model_percent": 10.955,
+      "note": "what-if run only; the parameter is marked assumed in its provenance and this case is not the model"
+    },
+    {
+      "e_ratio2_0": 1.0,
+      "is_the_models_reading": false,
+      "final_biomass_g_per_L": 18.2222,
+      "relative_rmse_vs_paper_model_percent": 11.573,
+      "note": "what-if run only; the parameter is marked assumed in its provenance and this case is not the model"
+    }
+  ],
+  "status": {
+    "implementation": "implemented",
+    "reproduction": "not_yet_validated",
+    "note": "Fixed by this fixture's criteria and the report's conclusion, not by any test outcome. See reports/GANJAVE_SCIENTIFIC_VALIDATION.md."
+  }
+}

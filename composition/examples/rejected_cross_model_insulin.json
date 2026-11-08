@@ -1,0 +1,60 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "rejected-cross-model-insulin",
+  "title": "Refused: Ganjave (2022) feed into the Zielinski (2019) insulin process",
+  "description": "A deliberately illegal composition, kept as a negative control. Three connections are dimensionally legal -- g/L to g/L, L to L, h to h -- and every one of them is refused, because a dimensionally valid pair still has to mean the same thing in the same experiment. This file is what the compatibility policy exists to stop, and the composition layer is expected to refuse it before execution.",
+  "source_ref": "Ganjave et al. 2022, Biotechnology Reports 33:e00694; Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69",
+  "notes": "The biology: Ganjave's biomass is dry-cell weight in a glycerol fed-batch 3 L culture integrated over 24 h; Zielinski's wet biomass is a reported loading of a glucose/pH-stat culture with plasmid pIBAINS in a 4 L / 7.5 L reactor. The culture volume at the end of a 24 h feed is not a volume charged at t = 0, and a 24 h simulation time is not a growth duration for a different process. Nothing here may be connected, and the runner refuses all three.",
+  "instances": [
+    {
+      "instance_id": "ganjave_source",
+      "model_id": "ganjave",
+      "model_version": "0.1.0",
+      "label": "Ganjave et al. (2022)",
+      "role": "upstream (illegal)",
+      "position": { "x": 60, "y": 60 },
+      "parameters": {
+        "simulation": { "duration_h": 24.0, "step_h": 0.1 }
+      }
+    },
+    {
+      "instance_id": "insulin_target",
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "label": "Zielinski et al. (2019)",
+      "role": "target (illegal)",
+      "position": { "x": 400, "y": 60 },
+      "parameters": {
+        "execution": {
+          "mode": "evidence_replay",
+          "notes": "Evidence replay. Never reached: validation refuses the graph first."
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "dcw_to_wet_biomass",
+      "source": { "instance_id": "ganjave_source", "port_id": "biomass_concentration" },
+      "target": { "instance_id": "insulin_target", "port_id": "node:N01#wet_biomass_g_per_L_reported" },
+      "label": "dry-cell biomass -> wet biomass loading",
+      "notes": "g/L to g/L. Dry-cell weight is not wet biomass: the factor between them is printed by neither paper."
+    },
+    {
+      "connection_id": "fed_volume_to_starting_volume",
+      "source": { "instance_id": "ganjave_source", "port_id": "culture_volume" },
+      "target": { "instance_id": "insulin_target", "port_id": "node:N01#starting_medium_volume" },
+      "label": "24 h culture volume -> t = 0 medium charge",
+      "notes": "L to L. A volume after a day of feeding is not a volume charged at the start of another batch."
+    },
+    {
+      "connection_id": "simulation_time_to_growth_duration",
+      "source": { "instance_id": "ganjave_source", "port_id": "simulation_time" },
+      "target": { "instance_id": "insulin_target", "port_id": "node:N01#growth_duration" },
+      "label": "24 h integration time -> growth duration",
+      "notes": "h to h. The integration horizon of one model is not a process duration of another."
+    }
+  ],
+  "literal_inputs": {},
+  "defaults": {}
+}

@@ -1,0 +1,23 @@
+[project]
+name = "simensen2022-biomass-composition"
+version = "0.1.0"
+description = "Table 1 of Simensen et al. (2022), PLOS ONE 17(1):e0262450: the measured macromolecular biomass composition of E. coli K-12 MG1655 in glucose-minimal batch culture"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["simensen2022"]
+
+[tool.setuptools.package-data]
+simensen2022 = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

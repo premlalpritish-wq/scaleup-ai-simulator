@@ -1,0 +1,379 @@
+{
+  "contract_version": "0.1.0",
+  "graph_id": "incomplete_required_input",
+  "title": "An unsupplied input is identified, and blocks its dependent",
+  "description": "Three Morris control volumes in a legal, non-reacting batch chain. brass_charge is complete. brass_alloying is deliberately given an incomplete declaration: its zinc make-up charge is never supplied, so the model cannot determine stream E's zinc and publishes it UNRESOLVED with a reason. brass_finish declares that it needs that zinc, and connection c4 offers it to it. The composition layer refuses to inject an unresolved value, names the port and the reason, and fails brass_finish. Nothing is substituted for the missing zinc anywhere.",
+  "source_ref": "Morris et al. 2011, Chapter 4, non-reacting systems. The control volumes reuse the shipped brass_batch_chain declarations; no new process, equation or compatibility claim is introduced.",
+  "defaults": {
+    "note": "Morris ports are not marked required at model level because its port set is declared per instance. What makes an input required here is that the instance's own declaration names the variable as something it must be given, and nothing on the graph gives it."
+  },
+  "instances": [
+    {
+      "instance_id": "brass_charge",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Batch charge preparation (complete)",
+      "role": "upstream control volume (Example 4.2)",
+      "notes": "Three charges are mixed without reaction. D is determined by the copper balance, the zinc balance and sum(w) = 1 on C.",
+      "position": {
+        "x": 80,
+        "y": 80
+      },
+      "parameters": {
+        "system": {
+          "system_id": "example-4.2-brass-charge",
+          "label": "Batch charge preparation for a brass melting furnace",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Morris et al. 2011, sec. 4.5, Example 4.2, pp. 152-153",
+          "components": [
+            {
+              "component_id": "Cu",
+              "label": "copper",
+              "formula": "Cu",
+              "molar_mass_kg_per_mol": 0.063546
+            },
+            {
+              "component_id": "Zn",
+              "label": "zinc",
+              "formula": "Zn",
+              "molar_mass_kg_per_mol": 0.065388
+            }
+          ],
+          "streams": [
+            {
+              "stream_id": "A",
+              "label": "zinc charge",
+              "direction": "initial",
+              "absent_components": [
+                "Cu"
+              ],
+              "component_amounts": {
+                "Zn": {
+                  "quantity_id": "A:Zn",
+                  "value": 3600.0,
+                  "unit": "kg",
+                  "kind": "mass",
+                  "provenance": "reported",
+                  "source_ref": "Morris et al. 2011, Example 4.2"
+                }
+              }
+            },
+            {
+              "stream_id": "B",
+              "label": "copper charge",
+              "direction": "initial",
+              "absent_components": [
+                "Zn"
+              ],
+              "note": "The prose says 14000 kg but the flowsheet and the book's own 26600 kg total both require 14500 kg.",
+              "component_amounts": {
+                "Cu": {
+                  "quantity_id": "B:Cu",
+                  "value": 14500.0,
+                  "unit": "kg",
+                  "kind": "mass",
+                  "provenance": "reported",
+                  "source_ref": "Morris et al. 2011, Figure 4.11 and the 26600 kg total",
+                  "note": "The prose says 14000 kg but the flowsheet and the book's own 26600 kg total both require 14500 kg."
+                }
+              }
+            },
+            {
+              "stream_id": "C",
+              "label": "scrap brass",
+              "direction": "initial",
+              "amount": {
+                "quantity_id": "stream:C:total",
+                "value": 8500.0,
+                "unit": "kg",
+                "kind": "mass",
+                "provenance": "reported",
+                "source_ref": "Morris et al. 2011, Example 4.2"
+              },
+              "mass_fractions": {
+                "Cu": {
+                  "quantity_id": "C:w_Cu",
+                  "value": 0.79,
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "reported",
+                  "source_ref": "Morris et al. 2011, Example 4.2"
+                },
+                "Zn": {
+                  "variable_id": "stream:C:w:Zn",
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "unknown",
+                  "reason": "follows by difference from wCu"
+                }
+              }
+            },
+            {
+              "stream_id": "D",
+              "label": "mixed scrap to furnace",
+              "direction": "final",
+              "component_amounts": {
+                "Cu": {
+                  "variable_id": "stream:D:Cu",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the copper balance"
+                },
+                "Zn": {
+                  "variable_id": "stream:D:Zn",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the zinc balance"
+                }
+              }
+            }
+          ],
+          "assumptions": [
+            {
+              "assumption_id": "COMP-COMPOSITION-COMPLETE",
+              "statement": "Each charge carries only the components it declares; anything omitted is listed in absent_components.",
+              "rationale": "Chapter 4 generates sum(w) = 1 over exactly the declared components, so an omission would silently read as a zero fraction.",
+              "affects": [
+                "A",
+                "B"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "instance_id": "brass_alloying",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Alloying with NO make-up charge supplied",
+      "role": "downstream control volume",
+      "notes": "INCOMPLETE BY CONSTRUCTION. The zinc make-up charge that brass_batch_chain declares as a literal input is removed here and is not replaced by anything. The system is therefore under-determined and the model publishes out:E:Zn as UNRESOLVED, with its reason attached.",
+      "position": {
+        "x": 460,
+        "y": 260
+      },
+      "parameters": {
+        "system": {
+          "system_id": "brass-alloying",
+          "label": "Alloying of the mixed charge to specification",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Composition example built on Morris et al. 2011, Chapter 4",
+          "components": [
+            {
+              "component_id": "Cu",
+              "label": "copper",
+              "formula": "Cu",
+              "molar_mass_kg_per_mol": 0.063546
+            },
+            {
+              "component_id": "Zn",
+              "label": "zinc",
+              "formula": "Zn",
+              "molar_mass_kg_per_mol": 0.065388
+            }
+          ],
+          "streams": [
+            {
+              "stream_id": "A",
+              "label": "alloy from the mixing step",
+              "direction": "initial",
+              "note": "Supplied entirely by connection from brass_charge/out:D.",
+              "amount": {
+                "variable_id": "stream:A:total",
+                "kind": "mass",
+                "provenance": "unknown",
+                "reason": "supplied by connection c1 (brass_charge/out:D:total)"
+              },
+              "mass_fractions": {
+                "Cu": {
+                  "variable_id": "stream:A:w:Cu",
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "unknown",
+                  "reason": "supplied by connection c2 (brass_charge/out:D:w:Cu)"
+                },
+                "Zn": {
+                  "variable_id": "stream:A:w:Zn",
+                  "unit": "1",
+                  "kind": "mass_fraction",
+                  "provenance": "unknown",
+                  "reason": "supplied by connection c3 (brass_charge/out:D:w:Zn)"
+                }
+              }
+            },
+            {
+              "stream_id": "B",
+              "label": "zinc make-up charge (NOT SUPPLIED)",
+              "direction": "initial",
+              "absent_components": [
+                "Cu"
+              ],
+              "note": "Deliberately incomplete: this stream declares a variable and is given nothing.",
+              "component_amounts": {
+                "Zn": {
+                  "variable_id": "stream:B:Zn",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "NOT SUPPLIED by this graph. The 500 kg make-up of brass_batch_chain is deliberately absent and is not substituted from any other stream, instance or model."
+                }
+              }
+            },
+            {
+              "stream_id": "E",
+              "label": "final alloy",
+              "direction": "final",
+              "component_amounts": {
+                "Cu": {
+                  "variable_id": "stream:E:Cu",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the copper balance"
+                },
+                "Zn": {
+                  "variable_id": "stream:E:Zn",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the zinc balance"
+                }
+              }
+            }
+          ],
+          "assumptions": [
+            {
+              "assumption_id": "COMP-MAKEUP-500KG",
+              "statement": "NOT APPLIED IN THIS GRAPH. The make-up charge is deliberately left unsupplied so the downstream consequence is visible.",
+              "rationale": "This graph demonstrates what an unsupplied input does. It asserts nothing about the alloying operation.",
+              "affects": [
+                "B:Zn",
+                "stream:E:Zn",
+                "stream:E:total"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "instance_id": "brass_finish",
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "label": "Finishing step needing the unresolved zinc",
+      "role": "downstream",
+      "notes": "Declares that it needs brass_alloying's final-stream zinc. Connection c4 offers it. The value is unresolved, so nothing is injected and this instance fails rather than guessing.",
+      "position": {
+        "x": 900,
+        "y": 460
+      },
+      "parameters": {
+        "system": {
+          "system_id": "brass-finishing",
+          "label": "Finishing of the alloy",
+          "process_mode": "batch",
+          "basis": "mass",
+          "source_ref": "Composition example built on Morris et al. 2011, Chapter 4. It declares no process the source does not describe and asserts no compatibility beyond the non-reacting batch case.",
+          "components": [
+            {
+              "component_id": "Zn",
+              "label": "zinc",
+              "formula": "Zn",
+              "molar_mass_kg_per_mol": 0.065388
+            }
+          ],
+          "streams": [
+            {
+              "stream_id": "A",
+              "label": "alloy from the alloying step",
+              "direction": "initial",
+              "note": "Supplied entirely by connection c4 from brass_alloying/out:E:Zn.",
+              "component_amounts": {
+                "Zn": {
+                  "variable_id": "stream:A:Zn",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "supplied by connection c4 (brass_alloying/out:E:Zn)"
+                }
+              }
+            },
+            {
+              "stream_id": "Z",
+              "label": "finished product",
+              "direction": "final",
+              "component_amounts": {
+                "Zn": {
+                  "variable_id": "stream:Z:Zn",
+                  "kind": "mass",
+                  "provenance": "unknown",
+                  "reason": "determined by the zinc balance"
+                }
+              }
+            }
+          ],
+          "assumptions": []
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "c1",
+      "source": {
+        "instance_id": "brass_charge",
+        "port_id": "out:D:total"
+      },
+      "target": {
+        "instance_id": "brass_alloying",
+        "port_id": "in:A:total"
+      },
+      "transform": "identity",
+      "label": "",
+      "notes": ""
+    },
+    {
+      "connection_id": "c2",
+      "source": {
+        "instance_id": "brass_charge",
+        "port_id": "out:D:w:Cu"
+      },
+      "target": {
+        "instance_id": "brass_alloying",
+        "port_id": "in:A:w:Cu"
+      },
+      "transform": "identity",
+      "label": "",
+      "notes": ""
+    },
+    {
+      "connection_id": "c3",
+      "source": {
+        "instance_id": "brass_charge",
+        "port_id": "out:D:w:Zn"
+      },
+      "target": {
+        "instance_id": "brass_alloying",
+        "port_id": "in:A:w:Zn"
+      },
+      "transform": "identity",
+      "label": "",
+      "notes": ""
+    },
+    {
+      "connection_id": "c4",
+      "source": {
+        "instance_id": "brass_alloying",
+        "port_id": "out:E:Zn"
+      },
+      "target": {
+        "instance_id": "brass_finish",
+        "port_id": "in:A:Zn"
+      },
+      "transform": "identity",
+      "label": "",
+      "notes": "Offers an UNRESOLVED value. The composition layer checks the value's state, not just its quantity and unit: this connection is structurally legal and is still refused at execution time."
+    }
+  ],
+  "literal_inputs": {},
+  "notes": "Expected: the runner exits 2.\n  brass_charge      success                 (complete declaration)\n  brass_alloying    success_with_warnings   (under-determined; out:E:Zn is UNRESOLVED)\n  brass_finish      failed                  (connection.carries_unresolved)\n\nExactly one error is raised: connection.carries_unresolved, naming the port, the value's state and the reason the upstream could not determine it. No value crosses connection c4 and no zero is substituted for the missing zinc.\n\nRead brass_finish's outputs carefully. They are not all the same kind of claim:\n  out:Z:Zn    UNRESOLVED, provenance unknown, with the model's own reason.\n              This is the missing value, still missing.\n  out:A:Zn    ZERO, provenance derived. This is NOT 'the zinc was zero'.\n              It is the canonical member of a one-parameter family that the model names in its method string, and it is published as ZERO rather than NUMBER precisely so it cannot be quoted as a determined value.\n\nDemonstrates CG-07 and CG-11 together: a missing input stays missing, and it blocks the instance that required it rather than being filled in."
+}

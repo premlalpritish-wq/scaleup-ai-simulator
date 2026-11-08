@@ -1,0 +1,136 @@
+{
+  "configuration_id": "ganjave2022.frozen_evaluation",
+  "version": "1.0.0",
+  "frozen": true,
+  "frozen_before_any_prediction_was_produced": true,
+
+  "scope": {
+    "what_is_being_evaluated": "the Ganjave et al. (2022) cybernetic growth model, alone",
+    "what_is_NOT_being_evaluated": "any composed process",
+    "why": "reports/COMPOSED_PROCESS_VALIDATION_PLAN.md section 1: every cross-model boundary in this repository is refused, and both permitted boundaries are same-model and have no independent experimental counterpart. No composed-process validation is scientifically possible with what is registered. This configuration therefore evaluates a MODEL, and no result from it may be reported as evidence about composed processes.",
+    "graph_connections": [],
+    "graph_connection_note": "There are none, deliberately. The graph is a single Ganjave instance driven by declared literal inputs. Adding a second instance to manufacture a composition is excluded by the plan's section 1 finding."
+  },
+
+  "model": {
+    "model_id": "ganjave",
+    "model_version": "0.1.0",
+    "equations": "Ganjave et al. (2022) eq. (8)-(16), as printed",
+    "equations_version": "1.1.0",
+    "parameter_set_id": "ganjave2022.table2",
+    "parameter_set_version": "1.0.0",
+    "parameter_set_provenance": "Table 2 as printed, p. 4, loaded as a fitted set. Nothing is refitted, reloaded or adjusted by this evaluation.",
+    "parameter_file": "Models/Ganjave/data/reference_parameters.json",
+    "solver": {
+      "rtol": 1e-06,
+      "atol": 1e-09,
+      "h_max": 0.01,
+      "h_max_reason": "from the reported kLa = 133 h^-1, so h*kLa = 1.33 stays inside the explicit RK4 stability limit. Taken from Models/Ganjave/data/validation_fig5.json; not tuned here."
+    }
+  },
+
+  "scenarios": [
+    {
+      "scenario_id": "heldout_fig3",
+      "role": "primary",
+      "independence": "The paper's own designated validation experiment. Fig. 3's caption states the data 'was not used for estimation of model parameters'. Its feed recipe differs from the fitting experiment (Fig. 2) and from the model-selected optimum (Fig. 5), so it is a genuine out-of-sample test of the trajectory.",
+      "blinded": true,
+      "blinding_note": "This scenario had not been run when these criteria were written. Its result is a genuine pre-registered test.",
+      "paper_figure": 3,
+      "printed_page": 6,
+      "mode": "fed_batch",
+      "duration_h": 27.0,
+      "duration_reason": "The observed marks span t = -0.057 to 26.080 h. Simulating to 27 h admits every in-window observation, so no mark is dropped by hand. Extending the run is not a fit; it is the same equations over a longer interval.",
+      "initial_conditions": {
+        "X0": {"value": 0.05, "unit": "g/L", "classification": "assumed",
+               "source": "printed p. 2, sec. 2.2: initial culture optical density (OD600) of 0.05",
+               "why_assumed": "The paper prints an OD600 and no OD600-to-dry-cell-weight calibration, so no g/L value can be derived from it. Carried as a sensitivity case."},
+        "S2_0": {"value": 25.0, "unit": "g/L", "classification": "derived",
+                 "source": "printed p. 2, sec. 2.2: SOB medium contains tryptone 20 g/L and yeast extract 5 g/L",
+                 "why_derived": "The paper states the medium recipe but never the model's initial complex-substrate concentration. Both tryptone and yeast extract are complex nitrogen-rich substrates, so the whole complex fraction is 20 + 5 = 25 g/L. The narrower reading (yeast extract alone, 5 g/L) is a sensitivity case."},
+        "DO0": {"value": 100.0, "unit": "%", "classification": "assumed",
+                "source": "not stated in the paper",
+                "why_assumed": "A shake flask filled with medium and left standing is air-saturated. Declared rather than inferred. Sensitivity case do0_80 tests whether it matters; the culture's own demand, not the starting value, sets the profile."},
+        "S1_0": {"value": 2.76, "unit": "g/L", "classification": "reported",
+                 "source": "printed p. 2, sec. 2.2: 'The initial production medium was supplemented with 2.76 g/L glycerol'",
+                 "cross_check": "The digitised t=0 glycerol marks read 2.78 g/L, which cross-checks both the value and the digitisation."},
+        "V0": {"value": 0.1, "unit": "L", "classification": "reported",
+               "source": "printed p. 2, sec. 2.3: 'These flasks were filled with 100 mL medium'"}
+      },
+      "feed": {
+        "S10_g_per_L": {"value": 200.0, "classification": "reported",
+                        "source": "printed p. 6, Fig. 3 caption: 20% glycerol",
+                        "conversion": "1 % w/v = 10 g/L, the paper's own convention"},
+        "S20_g_per_L": {"value": 300.0, "classification": "reported",
+                        "source": "printed p. 6, Fig. 3 caption: 30% yeast extract",
+                        "conversion": "1 % w/v = 10 g/L"},
+        "flow_mL_per_h": {"value": 0.78, "classification": "reported",
+                          "source": "printed p. 6, Fig. 3 caption: 0.78 mL/h",
+                          "conversion": "1 mL/h = 1e-3 L/h, the paper's own convention"},
+        "feed_start_h": {"value": 6.0, "classification": "reported",
+                         "source": "printed p. 3, sec. 3.1: feeding begins at 6 h, the DO landmark"}
+      },
+      "observation_sets": ["ganjave2022.heldout_observations.fig3b",
+                           "ganjave2022.heldout_observations.fig3c"]
+    },
+    {
+      "scenario_id": "optimum_fig5",
+      "role": "secondary",
+      "independence": "Independent of parameter fitting, but the feed recipe was chosen by optimising the fitted model, so an endpoint match is partly self-fulfilling. Its value is the between-culture spread: five cultures of one process.",
+      "blinded": false,
+      "blinding_note": "DISCLOSED. The 24 h endpoint for this configuration (18.299 g DCW/L, with S2_0 = 25 g/L) was observed during an unrelated pipeline probe before this protocol was written. This scenario is therefore reported as a secondary, disclosed comparison and is not claimed as a pre-registered test. The primary scenario was not run and is unaffected.",
+      "paper_figure": 5,
+      "printed_page": 7,
+      "mode": "fed_batch",
+      "duration_h": 27.0,
+      "duration_reason": "The Fig. 5c marks span t = -0.1 to 24.1 h. 27 h admits them all.",
+      "initial_conditions": {
+        "X0": {"value": 0.05, "unit": "g/L", "classification": "assumed",
+               "source": "as heldout_fig3"},
+        "S2_0": {"value": 25.0, "unit": "g/L", "classification": "derived",
+                 "source": "as heldout_fig3"},
+        "DO0": {"value": 100.0, "unit": "%", "classification": "assumed",
+                "source": "as heldout_fig3"},
+        "S1_0": {"value": 2.76, "unit": "g/L", "classification": "reported",
+                 "source": "as heldout_fig3"},
+        "V0": {"value": 0.1, "unit": "L", "classification": "reported",
+               "source": "as heldout_fig3"}
+      },
+      "feed": {
+        "S10_g_per_L": {"value": 175.0, "classification": "reported",
+                        "source": "printed p. 7, sec. 3.3 and Fig. 5 caption: 17.5% glycerol",
+                        "conversion": "1 % w/v = 10 g/L"},
+        "S20_g_per_L": {"value": 245.0, "classification": "reported",
+                        "source": "printed p. 7, sec. 3.3 and Fig. 5 caption: 24.5% yeast extract",
+                        "conversion": "1 % w/v = 10 g/L"},
+        "flow_mL_per_h": {"value": 0.72, "classification": "reported",
+                          "source": "printed p. 7, sec. 3.3: 0.72 mL/h",
+                          "conversion": "1 mL/h = 1e-3 L/h"},
+        "feed_start_h": {"value": 6.0, "classification": "reported",
+                         "source": "printed p. 3, sec. 3.1"}
+      },
+      "observation_sets": ["ganjave2022.heldout_observations.fig5c"]
+    }
+  ],
+
+  "unit_conversions": [
+    {"from": "percent w/v", "to": "g/L", "factor": 10.0,
+     "authority": "the paper's own convention; 1 % w/v = 10 g/L"},
+    {"from": "mL/h", "to": "L/h", "factor": 0.001,
+     "authority": "exact SI prefix conversion, stated rather than inferred"}
+  ],
+
+  "not_modelled": [
+    {"quantity": "temperature", "value": "32 C", "source": "printed p. 2, sec. 2.3"},
+    {"quantity": "shaking speed", "value": "200 rpm, 5 cm pitch", "source": "printed p. 3, sec. 3.1"},
+    {"quantity": "pH", "value": "measured online, not controlled",
+     "source": "printed p. 2, sec. 2.3. Fig. 5b plots pH and draws no model curve: the model has no pH term."},
+    {"quantity": "protein expression", "value": "per construct",
+     "source": "printed p. 7, Fig. 6 (SDS-PAGE). Biomass is protein-independent in this model, which is why five constructs share one predicted trajectory."}
+  ],
+
+  "execution_path": {
+    "command": "python -m composition.runner --graph <graph.json> --result <out.json>",
+    "why": "The normal ScaleUp AI execution pipeline, not the model's private CLI, so the evaluation exercises the same path the application uses and produces a composition report, diagnostics and provenance alongside the numbers."
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "diagnostic_id": "ganjave2022.trajectory_shape_comparison",
+  "version": "1.0.0",
+  "question": "Is the difference between this implementation and the paper's own plotted model curve a change in the dynamics, or a constant scale difference?",
+  "scenarios": {
+    "heldout_fig3": {
+      "run": "heldout_fig3.result.json",
+      "dataset_key": "5",
+      "panel": "b",
+      "unit": "g/L",
+      "comparison_window_h": [
+        0.5,
+        24.5
+      ],
+      "n_points": 400,
+      "authors_axis_maximum_g_per_L": 20.0,
+      "difference_ours_minus_authors": {
+        "overall": {
+          "n": 400,
+          "mean_g_per_L": 0.8968,
+          "sd_g_per_L": 0.244,
+          "min_g_per_L": 0.1502,
+          "max_g_per_L": 1.1247
+        },
+        "before_12h": {
+          "n": 192,
+          "mean_g_per_L": 0.8558,
+          "sd_g_per_L": 0.3425,
+          "min_g_per_L": 0.1502,
+          "max_g_per_L": 1.1247
+        },
+        "after_12h": {
+          "n": 208,
+          "mean_g_per_L": 0.9347,
+          "sd_g_per_L": 0.0595,
+          "min_g_per_L": 0.8339,
+          "max_g_per_L": 1.0292
+        }
+      },
+      "linear_trend": {
+        "slope_g_per_L_per_h": 0.011831,
+        "intercept_g_per_L": 0.7489,
+        "r_squared": 0.113675
+      }
+    },
+    "optimum_fig5": {
+      "run": "optimum_fig5.result.json",
+      "dataset_key": "6",
+      "panel": "c",
+      "unit": "g/L",
+      "comparison_window_h": [
+        0.0,
+        25.0
+      ],
+      "n_points": 400,
+      "authors_axis_maximum_g_per_L": 25.0,
+      "difference_ours_minus_authors": {
+        "overall": {
+          "n": 400,
+          "mean_g_per_L": 0.643,
+          "sd_g_per_L": 0.7018,
+          "min_g_per_L": -1.2818,
+          "max_g_per_L": 1.1426
+        },
+        "before_12h": {
+          "n": 192,
+          "mean_g_per_L": 0.8463,
+          "sd_g_per_L": 0.3748,
+          "min_g_per_L": 0.1431,
+          "max_g_per_L": 1.1426
+        },
+        "after_12h": {
+          "n": 208,
+          "mean_g_per_L": 0.4553,
+          "sd_g_per_L": 0.8637,
+          "min_g_per_L": -1.2818,
+          "max_g_per_L": 1.0726
+        }
+      },
+      "linear_trend": {
+        "slope_g_per_L_per_h": -0.040316,
+        "intercept_g_per_L": 1.147,
+        "r_squared": 0.17318
+      }
+    }
+  },
+  "reading": {
+    "flat_difference": "A near-zero slope means the difference does not grow with time. That is the signature of a scale term rather than of the equations being transcribed differently: a wrong numerator, denominator, parenthesisation or rate law changes how the trajectory evolves, not where it sits.",
+    "different_offsets_across_scenarios": "If the offset has the same sign and size in both feed recipes it is a single scale term. If it changes with the recipe it is something the feed changes -- a substrate-specific yield, most likely -- and that is a different candidate explanation."
+  },
+  "interpretation_limit": "This locates the difference; it does not name its cause. A constant offset is consistent with a yield coefficient, an initial condition, or a systematic offset in how the authors' curve was digitised, and this diagnostic cannot separate those three."
+}

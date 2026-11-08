@@ -33,6 +33,23 @@ from composition.quantities import describe_registry  # noqa: E402
 from composition.runner import describe_model, run_graph  # noqa: E402
 from composition.adapters.base import clear_worker_cache  # noqa: E402
 
+if __package__:
+    from . import research as research_api  # noqa: E402
+else:  # imported as a bare module by the test suite
+    import research as research_api  # noqa: E402
+
+#: Static assets of the research explorer, served by this same service so one
+#: Python host is enough for a public URL. Paths are allow-listed; no request
+#: path is ever joined to the filesystem.
+RESEARCH_STATIC: dict[str, tuple[Path, str]] = {
+    "/research/": (ROOT / "web" / "research" / "index.html", "text/html; charset=utf-8"),
+    "/research/index.html": (ROOT / "web" / "research" / "index.html", "text/html; charset=utf-8"),
+    "/research/app.js": (ROOT / "web" / "research" / "app.js", "text/javascript; charset=utf-8"),
+    "/research/style.css": (ROOT / "web" / "research" / "style.css", "text/css; charset=utf-8"),
+    "/research/config.js": (ROOT / "web" / "research" / "config.js", "text/javascript; charset=utf-8"),
+}
+
+
 MAX_BODY_BYTES = int(os.environ.get("SCALEUP_MAX_BODY_BYTES", "262144"))
 MAX_INSTANCES = int(os.environ.get("SCALEUP_MAX_INSTANCES", "2"))
 MAX_CONNECTIONS = int(os.environ.get("SCALEUP_MAX_CONNECTIONS", "64"))
@@ -103,10 +120,10 @@ def _graph_from_request(body: Any) -> dict[str, Any]:
                     value = solver.get(key)
                     if isinstance(value, (int, float)) and not lower <= value <= upper:
                         raise ApiError(413, "solver_limit", f"Solver {key} must be between {lower:g} and {upper:g}.")
-                for key, upper in (("max_steps", 500000), ("max_range_rejections", 100)):
+                for key, lower, upper in (("max_steps", 1, 200000), ("max_range_rejections", 1, 60)):
                     value = solver.get(key)
-                    if isinstance(value, int) and value > upper:
-                        raise ApiError(413, "solver_limit", f"Solver {key} may not exceed {upper}.")
+                    if key in solver and (not isinstance(value, int) or not lower <= value <= upper):
+                        raise ApiError(413, "solver_limit", f"Solver {key} must be an integer between {lower} and {upper}.")
     if any(not isinstance(inst, dict) or not isinstance(inst.get("model_id"), str)
            for inst in graph.get("instances", [])):
         raise ApiError(400, "invalid_graph_shape", "Each graph instance must name a registered model id.")
@@ -244,6 +261,22 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _send_bytes(self, status: int, data: bytes, content_type: str, *, cache: str = "no-store") -> None:
+        self.send_response(status)
+        self._cors()
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", cache)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _send_research_error(self, exc: "research_api.ResearchError") -> None:
+        self._send(
+            exc.status,
+            {"error": {"code": exc.code, "message": exc.message, "details": exc.details}},
+        )
+
     def _body(self) -> Any:
         raw_length = self.headers.get("Content-Length", "0")
         try:
@@ -263,11 +296,87 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", "0")
         self.end_headers()
 
+    def _handle_research_get(self, path: str) -> bool:
+        """Serve the research explorer page and its read-only endpoints.
+
+        Returns True when the path belongs to the research surface, so the graph
+        routes are untouched. Every path is allow-listed; a request string is
+        never joined to the filesystem.
+        """
+
+        if path in RESEARCH_STATIC:
+            target, content_type = RESEARCH_STATIC[path]
+            if not target.is_file():
+                raise research_api.ResearchError(
+                    503,
+                    "explorer_unavailable",
+                    "The research explorer assets are not installed in this deployment.",
+                )
+            # Short-lived caching: a reload does not re-download the page on every
+            # visit, and a deployment change reaches visitors within a minute.
+            self._send_bytes(200, target.read_bytes(), content_type, cache="public, max-age=60")
+            return True
+        if path == "/api/research/case":
+            self._send(200, research_api.load_case())
+            return True
+        if path == "/api/research/case/report.md":
+            self._send_bytes(
+                200,
+                research_api.case_markdown().encode("utf-8"),
+                "text/markdown; charset=utf-8",
+            )
+            return True
+        if path.startswith("/api/research/case/artifacts/"):
+            name = unquote(path[len("/api/research/case/artifacts/") :])
+            self._send_bytes(
+                200,
+                research_api.case_artifact_path(name).read_bytes(),
+                "application/json; charset=utf-8",
+            )
+            return True
+        if path.startswith("/api/research/runs/"):
+            rest = path[len("/api/research/runs/") :].split("/")
+            run_id = unquote(rest[0])
+            if len(rest) == 1 and run_id:
+                self._send(200, research_api.get_analysis(run_id))
+                return True
+            if len(rest) == 2 and rest[1] == "report.md":
+                self._send_bytes(
+                    200,
+                    research_api.analysis_markdown(run_id).encode("utf-8"),
+                    "text/markdown; charset=utf-8",
+                )
+                return True
+            if len(rest) == 3 and rest[1] == "artifacts" and run_id:
+                name = unquote(rest[2])
+                self._send_bytes(
+                    200,
+                    research_api.run_artifact_path(run_id, name).read_bytes(),
+                    "application/json; charset=utf-8",
+                )
+                return True
+            raise research_api.ResearchError(
+                404, "not_found", "No research route matches this path."
+            )
+        return False
+
     def do_GET(self) -> None:
         try:
             if not _allow_rate(self._client_ip()):
                 raise ApiError(429, "rate_limit", "Too many requests. Try again in one minute.")
             path = urlsplit(self.path).path
+            if path in ("/", "/research"):
+                self.send_response(302)
+                self._cors()
+                self.send_header("Location", "/research/")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            try:
+                if self._handle_research_get(path):
+                    return
+            except research_api.ResearchError as exc:
+                return self._send_research_error(exc)
             if path == "/api/health":
                 return self._send(200, {"status": "ok", "service": "scaleup-execution-api", "runner_version": RUNNER_VERSION})
             if path == "/api/models":
@@ -307,9 +416,28 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if not _allow_rate(self._client_ip()):
                 raise ApiError(429, "rate_limit", "Too many requests. Try again in one minute.")
+            path = urlsplit(self.path).path
+            if path in ("/api/research/analysis", "/api/research/feedback"):
+                body = self._body()
+                try:
+                    if path == "/api/research/feedback":
+                        return self._send(200, research_api.record_feedback(body))
+                    if not _run_slots.acquire(blocking=False):
+                        raise ApiError(
+                            503,
+                            "execution_capacity",
+                            "All execution slots are busy. Retry shortly.",
+                        )
+                    try:
+                        payload, status = research_api.analyse(body)
+                    finally:
+                        clear_worker_cache()
+                        _run_slots.release()
+                    return self._send(status, payload)
+                except research_api.ResearchError as exc:
+                    return self._send_research_error(exc)
             body = self._body()
             graph = _graph_from_request(body)
-            path = urlsplit(self.path).path
             if path == "/api/validate":
                 try:
                     result, code = run_graph(graph, plan_only=True, base=ROOT)

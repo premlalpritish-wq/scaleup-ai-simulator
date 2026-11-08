@@ -1,0 +1,355 @@
+{
+  "document": "mmc1_supplementary.docx",
+  "n_paragraphs": 44,
+  "n_tables": 3,
+  "paragraphs": [
+    "Supplementary Information",
+    "High cell density cultivation of E. coli in shake flasks for the production of recombinant proteins",
+    "Snehal D Ganjavea, Hardik Dodiaa, Avinash Vellore Sundera, Swati Madhua,",
+    "Pramod P Wangikara,b,c,*",
+    "aDepartment of Chemical Engineering, Indian Institute of Technology Bombay, Powai, Mumbai 400076, India",
+    "bDBT-Pan IIT Center for Bioenergy, Indian Institute of Technology Bombay, Powai, Mumbai 400076, India",
+    "cWadhwani Research Center for Bioengineering, Indian Institute of Technology Bombay, Powai, Mumbai 400076, India",
+    "*Address correspondence to:",
+    "Pramod P. Wangikar,",
+    "Department of Chemical Engineering,",
+    "Indian Institute of Technology Bombay,",
+    "Powai, Mumbai – 400076, India",
+    "Email: wangikar@iitb.ac.in",
+    "Fax: 912225726895",
+    "Running title: High cell density cultivation in shake flask",
+    "Keywords: High cell density cultivation, E. coli, cybernetic model, genetic algorithm, multi-objective optimization",
+    "Supplementary Tables:",
+    "Table S1: Details of the model proteins used in the study",
+    "Table S2: The codon-optimized gene sequences of the model proteins used in the study",
+    "> eYFP",
+    "ATGGTGAGCAAAGGCGAAGAACTGTTTACCGGTGTGGTGCCGATCCTGGTGGAACTGGATGGTGATGTGAACGGCCACAAATTTAGCGTGAGTGGCGAAGGCGAAGGTGATGCCACCTACGGCAAACTGACCCTGAAATTTATCTGCACCACCGGCAAACTGCCCGTGCCCTGGCCCACCCTGGTGACCACCTTTGGCTACGGCCTGCAATGCTTTGCTCGCTACCCCGATCACATGAAACTGCACGATTTTTTCAAAAGCGCCATGCCCGAAGGCTACGTGCAAGAACGCACCATCTTTTTTAAGGATGATGGCAACTACAAAACCCGAGCTGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATCGAACTGAAAGGCATCGATTTTAAAGAAGATGGCAACATCCTGGGCCACAAACTGGAATACAACTACAACAGCCACAACGTGTACATCATGGCCGATAAACAGAAAAACGGCATCAAGGTGAACTTTAAAATCCGCCACAACATCGAAGATGGCAGCGTGCAGCTGGCCGATCACTACCAGCAGAACACCCCCATCGGTGATGGTCCCGTGCTGCTGCCCGATAACCACTACCTGAGCTACCAAAGCGCTCTGAGCAAAGATCCCAACGAAAAACGCGATCACATGGTGCTGCTGGAATTTGTGACCGCTGCTGGCATCACCCTGGGCATGGATGAACTGTACAAATAGTAG",
+    ">LkADH",
+    "ATGACCGACCGTCTGAAAGGTAAAGTTGCGATCGTTACCGGTGGTACTCTGGGCATCGGTCTGGCTATCGCGGACAAGTTTGTTGAAGAGGGCGCGAAAGTTGTTATCACTGGCCGTCATGCGGACGTGGGTGAAAAAGCGGCGAAATCTATCGGCGGTACTGACGTTATCCGTTCGTTCAGCACGACGCGAGCGACGAGGCGGGTTGGACCAAACTGTTCGACACCACCGAAGAAGCTTTCGGTCCGGTTACCACTGTTGTGAACAACGCGGGTATTGCGGTTTCTAAGTCTGTTGAGGACACTACTACCGAGGAATGGCGTAAACTGCTGTCTGTTAACCTGGACGGTGTTTTCTTTGGTACCCGTCTGGGTATCCAGCGTATGAAAAACAAAGGTCTGGGCGCGTCTATCATCAACATGTCTTCTATCGAAGGTTTTGTTGGTGACCCGACCCTGGGTGCTTATAACGCTTTAAAGGTGCAGTTCGTATTATGTCTAAGAGCGCGGCTCTGGACTGCGCTCTGAAGGACACGACGTTCGCGTTAACACTGTTCACCCGGGCTACATCAAAACCCCGCTGGTTGACGACCTGGAAGGTGCGGAAGAAATGATGTCTCAGCGTACCAAGACCCCGATGGGTCATATCGGTGAACCGAACGACATCGCGTGGATCTGCGTTTACCTGGCATCTGACGAATCTAAGTTCGCGACTGGCGCGGAATTCGTTGTTGACGGTGGTTACACCGCGCAGTAA",
+    "> GcADH",
+    "ATGGGTAAAGTTCCGGAGACCCACAAAGGTTACGTTTTCACTAGCGGTTCTAGCCGTCTGACTCTGAAAGACGTTCCGACCTACAAACCGGGTCCGGGCGAGGTTCTGCTGAAGCTGGAAGCGAGCGGTGTTTGCCACTCTGATCTGCACATTCTGCAGGGTAGCTTCCCGATCCCGTCTAACTCCGTGCTGGGTCACGAGATCACTGGCACCGTTGTTGCGTATGGTCTGGTGTTGACCCGAAAACCTACCCGGAAGGCCAGCTGTATGCTGCTCACGGTCCGAACCCGTGCGGCTCTTGCCGTGAATGCCGCTCTGGTAAAGATAACCTGTGCCATGCGGAAAACCGTACTAACTATGGCCTGGGTTATCCGGGTGGCTATCAGCAGTACACCCTGGCGAAAGTTCACAACCTGATCAAAGTGCCGGATGGTGTTGGTGCGGCGATTGCGGCGGTTACTACCGACGCAGTTCTGACCCCGTACCACGCGTTTAAGAAAGCGGACATTAACGGTCTGTCTAAAATTCTGATCATTGGTCTGGGCGGTCTGGGCATCAACGCTGTTCAGATTGCGAAAGCGATGGGTGCCATGTTACCGCGTACGATCTGAAGGAATCTTCTCGTCAGCTGGCACGCCAGTTCGGTGCGGACGTTGTTCTGGAAAGCCTGACCCTGGACGACGCATCTAAGGAATACGACTTCGTTGCAGACATCGTTTCTATCCAGTCTACCTTCGATCTGGCACTGAAGCAGGTGAAGTCCAACGGCCTGGTTATTCCGCTGGGCCTGGGCTCCCCGAAACTGACTTTCGACCAGAACGACCTGCTGGTTCGTGAGATCCGTATCCTGGGCAGCTTTTGGGGTACCTCTCTGGACCAGGCGGAAGTGTTCGACCTGGTGAAAAGCGGTGCGTTCAAACCGCAGGTTGAAACCGGCAAATTCAAAGACCTGAACGAAATCCTGGAGAAACTGGAAAAAGGTCAGATTAAGTCTCGTCTGGTGCTGACCGACTTT GACGACATCTAA",
+    "> CbFDH",
+    "ATGAAAATCGTTCTGGTTCTGTACGATGCGGGTAAGCACGCGGCAGATGAGGAAAAACTGTACGGTTGCACCGAGAACAAACTGGGTATCGCGAACTGGCTGAAGGACCAGGGTCACGAACTGATCACCACTTCTGACAAAGAGGGTGAAACCTCTGAACTGGATAAGCACATCCCGGACGCTGATATTATCATTACCACCCCGTTCCACCCGGCGTACATCACCAAGGAACGTCTGGACAAGGCGAAAAACCTGAAACTGGTGGTTGTTGCAGGTGTTGGCTCTGACCACATCGACCTGGACTACATTAACCAGACCGGCAAGAAGATTTCTGTGCTGGAGGTTACtGGTTCTAACGTGGTGAGCGTGGCGGAACACGTTGTTATGACCATGCTGGTGCTGGTTCGTAACTTCGTTCCGGCGCACGAACAGATCATAACCACGACTGGGAAGTTGCGGCTATCGCTAAAGACGCTTACGACATTGAAGGCAAAACCATCGCGACCATCGGTGCGGGTCGTATCGGCTACCGTGTTCTGGAGCGTCTGCTGCCGTTCAACCCGAAGGAACTGCTGTATTACGACTACCAGGCGCTGCCGAAAGAAGCGGAAGAAAAAGTTGGTGCACGTCGTGTTGAAAACATCGAAGAGCTGGTTGCGCAGGCGGACATCGTGACTGTGAACGCACCGCTGCACGCAGGCACCAAAGGTCTGATCAACAAGGAGCTGCTGTCTAAATTCAAAAAAGGCGCATGGCTGGTGAACACCGCGCGTGGTGCGATCTGCGTTGCTGAAGATGTGGCTGCTGCGCTGGAGTCCGGTCAGCTGCGTGGTTACGGCGGTGACGTTTGGTTCCCGCAGCCGGCACCGAAAGATCACCCGTGGCGTGACATGCGTAACAAATACGGTGCAGGCAACGCGATGACCCCGCACTACTCTGGTACTACCCTGGACGCGCAGACCCGTTATGCGGAAGGCACCAAAAACATTCTGGAATCCTTCTTCACTGGTAAATTTGATTACCGTCCGCAGGACATCATCCTGCTGAACGGTGAATACGTTACCAAGGCGTACGGCAAACACGATAAAAAGTAA",
+    ">PDGF",
+    "ATGAGCCTGGGTAGCCTGACCATTGCAGAACCGGCAATGATTGCAGAATGTAAAACCCGTACCGAAGTGTTTGAAATTAGCCGTCGTCTGATTGATCGTACCAATGCAAATTTTCTGGTTTGGCCTCCGTGTGTTGAAGTTCAGCGTTGTAGCGGTTGTTGCAATAATCGTAATGTTCAGTGTCGTCCGACACAGGTTCAGCTGCGTCCGGTTCAGGTTCGTAAAATTGAAATTGTGCGCAAAAAGCCGATCTTCAAAAAAGCAACCGTTACGCTGGAAGATCATCTGGCATGTAAATGTGAAACCGTTGCAGCAGCACGTCCGGTTACATGA",
+    "Table S3: Constraints applied on the multi-objective optimization algorithm",
+    "Table S4: Measurement of volumetric mass transfer coefficient (kLa) at different shaking speed, culture volume and (a) 2.5 cm pitch and (b) 5 cm pitch.",
+    "2.5 cm pitchb)  5 cm pitch",
+    "Supplementary Figures",
+    "Figure S1: OD600 correlation between UV-Visible spectrophotometer (UV-2600, Shimadzu, Singapore) and Tecan reader (TECAN, Infinite M200 PRO, Man̈nedorf, Switzerland). The points represent samples of different optical densities",
+    "Figure S2: Consumption of Dissolved oxygen and Glycerol during the batch phase by E. coli BL21(DE3) producing PDGF",
+    "Figure S3: Model fitting: Comparison of the model predicted values with the experimental data set with feeding composition of 25% glycerol and 50% yeast extract at 0.6 mL/h flow rate a) dissolved oxygen b) biomass c) glycerol concentration (‘’ – experimental values, ‘-’ – model predicted values) (Refer to Table 1 for additional details)",
+    "Figure S4: Model fitting: Comparison of the model predicted values with the experimental data set with feeding composition of 25% glycerol and 35% yeast extract at 0.5 mL/h flow rate a) dissolved oxygen b) biomass c) glycerol concentration (‘’ – experimental values, ‘-’ – model predicted values) (Refer to Table 1 for additional details)",
+    "Figure S5: Model fitting: Comparison of the model predicted values with the experimental data set with feeding composition of 20% glycerol and 32% yeast extract at 0.72 mL/h flow rate a) dissolved oxygen b) biomass c) glycerol concentration (‘’ – experimental values, ‘-’ – model predicted values) (Refer to Table 1 for additional details)",
+    "Figure S6: Model fitting: Comparison of the model predicted values with the experimental data set with feeding composition of 20% glycerol and 32% yeast extract at 0.75 mL/h flow rate a) dissolved oxygen b) biomass c) glycerol concentration (‘’ – experimental values, ‘-’ – model predicted values) (Refer to Table 1 for additional details)",
+    "Figure S7: Model fitting: Comparison of the model predicted values with the experimental data set with feeding composition of 20% glycerol and 32% yeast extract at 0.78 mL/h  flow rate a) dissolved oxygen b) biomass c) glycerol concentration (‘’ – experimental values, ‘-’ – model predicted values) (Refer to Table 1 for additional details)",
+    "Figure S8: Model validation: Goodness of fit of the model with the experimental data that was not used for estimation of model parameters. The figure represents data with feeding composition of 25% glycerol and 50% yeast extract at 0.5 mL/h flow rate a) dissolved oxygen b) biomass c) glycerol concentration (‘’ –experimental values, ‘-’ – model predicted values)",
+    "Figure S9: Representative results of the KLa determination for a 500 ml shake flask filled with 100 ml media",
+    "a)                                                                        b)",
+    "Figure S10 : Diagrammatic representation of proposed shake flask a) Current shake flask assembly b) Proposed shake flask assembly"
+  ],
+  "tables": [
+    {
+      "n_rows": 6,
+      "rows": [
+        [
+          "Recombinant protein",
+          "UniProt ID",
+          "Recombinant plasmid backbone"
+        ],
+        [
+          "eYFP",
+          "A0A059PIR9",
+          "pET21a"
+        ],
+        [
+          "LkADH",
+          "Q6WVP7",
+          ""
+        ],
+        [
+          "GcADH",
+          "M5A8V4",
+          ""
+        ],
+        [
+          "CbFDH",
+          "O13437",
+          ""
+        ],
+        [
+          "PDGF",
+          "P01127",
+          "pET39b"
+        ]
+      ]
+    },
+    {
+      "n_rows": 4,
+      "rows": [
+        [
+          "Variables",
+          "Unit",
+          "Minimum ()",
+          "Maximum()"
+        ],
+        [
+          "Glycerol concentration in the feed",
+          "g/L",
+          "15",
+          "30"
+        ],
+        [
+          "Complex nitrogen-rich substrate concentration in the feed",
+          "g/L",
+          "15",
+          "40"
+        ],
+        [
+          "Feed flow rate",
+          "mL/h",
+          "0.4",
+          "0.9"
+        ]
+      ]
+    },
+    {
+      "n_rows": 15,
+      "rows": [
+        [
+          "Medium Volume(ml)",
+          "RPM",
+          "kLa(h-1)",
+          "",
+          "Medium Volume(ml)",
+          "RPM",
+          "kLa(h-1)"
+        ],
+        [
+          "100",
+          "100",
+          "10.89",
+          "",
+          "100",
+          "50",
+          "3.29"
+        ],
+        [
+          "",
+          "150",
+          "30.81",
+          "",
+          "150",
+          "",
+          "2.33"
+        ],
+        [
+          "50",
+          "180",
+          "73.73",
+          "",
+          "100",
+          "100",
+          "19.48"
+        ],
+        [
+          "100",
+          "",
+          "50.60",
+          "",
+          "150",
+          "",
+          "13.28"
+        ],
+        [
+          "150",
+          "",
+          "43.96",
+          "",
+          "100",
+          "150",
+          "50.20"
+        ],
+        [
+          "100",
+          "200",
+          "99.32",
+          "",
+          "150",
+          "",
+          "46.40"
+        ],
+        [
+          "",
+          "225",
+          "135.44",
+          "",
+          "100",
+          "180",
+          "111.31"
+        ],
+        [
+          "50",
+          "250",
+          "144.49",
+          "",
+          "150",
+          "",
+          "86.63"
+        ],
+        [
+          "100",
+          "",
+          "157.38",
+          "",
+          "100",
+          "200",
+          "133"
+        ],
+        [
+          "150",
+          "",
+          "121.59",
+          "",
+          "150",
+          "",
+          "118.24"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "100",
+          "225",
+          "164.01"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "150",
+          "",
+          "146.30"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "100",
+          "250",
+          "188.55"
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          "150",
+          "",
+          "172.64"
+        ]
+      ]
+    }
+  ],
+  "images": [
+    {
+      "part": "word/media/image1.png",
+      "size_bytes": 81074,
+      "pixels": [
+        1437,
+        899
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image2.png",
+      "size_bytes": 124498,
+      "pixels": [
+        1256,
+        904
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image3.png",
+      "size_bytes": 170720,
+      "pixels": [
+        1378,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image4.png",
+      "size_bytes": 176037,
+      "pixels": [
+        1378,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image5.png",
+      "size_bytes": 169746,
+      "pixels": [
+        1378,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image6.png",
+      "size_bytes": 169580,
+      "pixels": [
+        1378,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image7.png",
+      "size_bytes": 169332,
+      "pixels": [
+        1379,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image8.png",
+      "size_bytes": 180865,
+      "pixels": [
+        1378,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/image9.png",
+      "size_bytes": 686372,
+      "pixels": [
+        671,
+        503
+      ],
+      "format": "PNG"
+    },
+    {
+      "part": "word/media/hdphoto1.wdp",
+      "size_bytes": 112222
+    },
+    {
+      "part": "word/media/image10.emf",
+      "size_bytes": 3333152
+    }
+  ],
+  "spreadsheet_or_data_parts": [],
+  "charts": [
+    "word/charts/chart2.xml",
+    "word/charts/_rels/chart2.xml.rels",
+    "word/charts/chart1.xml",
+    "word/charts/_rels/chart1.xml.rels"
+  ]
+}

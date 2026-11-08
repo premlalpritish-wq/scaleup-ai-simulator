@@ -1,0 +1,105 @@
+{
+  "search_log_id": "ganjave2022.source_data_search",
+  "version": "1.0.0",
+  "search_performed_on": "2026-10-19",
+  "retrieval": {
+    "date_obtained": "2026-10-19",
+    "access_method": "unauthenticated HTTPS GET",
+    "endpoint": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8718739/supplementaryFiles",
+    "files_retrieved": [
+      {"name": "PMC8718739_supplementary.zip", "sha256": "f50c75b00f2dbcfeb55290f2534c854aae9580917baac71ce11615d020374e57"},
+      {"name": "mmc1_supplementary.docx", "sha256": "2b24a4fd43bf4e94e7a8f30da4c59ae298fc3d512b3b919e51a9de2049b29ee1"},
+      {"name": "gr3_maintext_fig3.jpg", "sha256": "ff45d6279d75ea4ec7cf6dcdf030b31afdbedcfd7d9e4a4c85c2ff9040302ed8"}
+    ]
+  },
+  "target": {
+    "what": "numerical time courses underlying Figure 3a (dissolved oxygen) and Figure 3b (biomass) of Ganjave et al. (2022), Biotechnology Reports 33:e00694",
+    "experiment": "held-out model-validation experiment: PDGF, 20 % glycerol, 30 % yeast extract, 0.78 mL/h, Table 1 row 8",
+    "why": "open questions 1, 3 and 5 in reports/GANJAVE_FAILURE_INVESTIGATION.md"
+  },
+  "outcome": "NOT PUBLISHED — no numerical time course was obtained or fabricated",
+  "steps": [
+    {
+      "step": 1,
+      "action": "Search the article PDF text layer for a data-availability statement, repository names, or data links",
+      "source": "papers/Ganjave et al 2022.pdf, 10 pages, extracted with pypdf 6.20.1",
+      "terms": ["Data availability", "data availability", "zenodo", "figshare", "github", "Mendeley", "Dryad", "available at", "Declaration"],
+      "result": "No data-availability statement. No repository named anywhere. The only data-related text is: 'Supplementary material associated with this article can be found, in the online version, at doi:10.1016/j.btre.2021.e00694.'"
+    },
+    {
+      "step": 2,
+      "action": "Enumerate the publisher's supplementary files",
+      "source": "PMC article page for PMC8718739, 'Appendix. Supplementary materials' section",
+      "result": "Exactly one file: mmc1.docx (2.1 MB). No mmc2, no spreadsheet, no dataset."
+    },
+    {
+      "step": 3,
+      "action": "Retrieve mmc1.docx",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8718739/supplementaryFiles",
+      "access_method": "HTTP GET, returned a 3,071,054-byte ZIP",
+      "note": "The PMC direct link (https://pmc.ncbi.nlm.nih.gov/articles/instance/8718739/bin/mmc1.docx) serves a JavaScript interstitial ('Preparing to download...') gated by a secure cookie, and cannot be fetched non-interactively. Europe PMC's REST endpoint serves the same content directly.",
+      "result": "Retrieved. Contents: mmc1.docx plus the main-text figure images gr1-gr6 and the graphical abstract."
+    },
+    {
+      "step": 4,
+      "action": "Inspect every part of mmc1.docx for numerical data",
+      "source": "ZIP/OOXML structure inspection",
+      "result": "No .xlsx, .xls, .csv, .tsv, .txt or .dat part. 44 paragraphs, 3 Word tables, 11 embedded images, 2 native OOXML charts."
+    },
+    {
+      "step": 5,
+      "action": "Extract the two native OOXML charts and look for cached numeric values",
+      "source": "word/charts/chart1.xml, word/charts/chart2.xml",
+      "rationale": "A Word chart stores the plotted values in <c:numCache>. If the authors plotted time courses there, the numbers would be recoverable.",
+      "result": "Both charts are kLa determination plots ('ln(C*/C*-C)' against 'Time(h)' for a 500 mL flask). Both contain ZERO cached points. Neither is a cultivation time course."
+    },
+    {
+      "step": 6,
+      "action": "Dump every Word table in full",
+      "source": "word/document.xml",
+      "result": "S1 protein identities (UniProt, plasmid); S3 optimisation bounds (glycerol 15-30 g/L, complex substrate 15-40 g/L, flow 0.4-0.9 mL/h); S4 kLa measurements (14 rows, 24 values). S4 is the only numerical table and is not a time course."
+    },
+    {
+      "step": 7,
+      "action": "List supplementary figures and check whether Figure 3 is reproduced",
+      "source": "word/media/* in mmc1.docx, cross-referenced against the caption paragraphs in word/document.xml",
+      "result": "Figures S1-S10 as images. S3-S7 are the model-FITTING experiments; S8 is the second validation experiment. Figure 3, the held-out experiment under evaluation, is main-text only and is not repeated at higher resolution in the supplement."
+    },
+    {
+      "step": 8,
+      "action": "Compare the resolution of the publisher-hosted main-text Figure 3 against the image already used for digitisation",
+      "source": "gr3.jpg from the Europe PMC package (99,174 bytes, 750x512) versus the PDF-embedded images on PDF page index 5 (1400x990 and 1800x1230)",
+      "result": "The PMC copy is LOWER resolution than what the existing digitisation already used. No improvement is available from this source; re-digitising from gr3.jpg would be strictly worse."
+    },
+    {
+      "step": 9,
+      "action": "Query Europe PMC article metadata for dataset links",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:\"10.1016/j.btre.2021.e00694\"&resultType=core",
+      "result": "isOpenAccess=Y, inEPMC=Y, hasSuppl=Y. supplementaryLinks is EMPTY. No dataset URL of any kind."
+    },
+    {
+      "step": 10,
+      "action": "Attempt the publisher's own pages directly",
+      "source": "https://www.sciencedirect.com/science/article/pii/S2215017X21001107 and https://api.elsevier.com/content/article/pii/S2215017X21001107",
+      "result": "Connection closed by the remote host; Elsevier API returned HTTP 429 (rate limited, no API key held). Not retried beyond this. Recorded as an access limitation, not as evidence of absence — step 1 already established the absence from the article text itself."
+    },
+    {
+      "step": 11,
+      "action": "Search for a repository deposit by DOI and by author",
+      "source": "general web search, plus the authors' institutional publication listings",
+      "source_locations": [
+        "https://www.che.iitb.ac.in/wangikar/publications",
+        "https://www.wangikarlab-iitb.com/publications",
+        "https://dspace.library.iitb.ac.in/ (institutional repository)"
+      ],
+      "query": "Ganjave Wangikar IIT Bombay fed-batch cybernetic model dataset repository e00694 data available",
+      "result": "No Zenodo, figshare, GitHub, Mendeley Data or Dryad record for this DOI. The Wangikar Lab publication pages (che.iitb.ac.in/wangikar, wangikarlab-iitb.com) list the paper with a bare DOI and no data link. The IIT Bombay DSpace institutional repository was identified but returned no record for this paper's data."
+    }
+  ],
+  "conclusion": "The numerical time courses behind Figures 3a and 3b are not published in any form that is publicly retrievable. No spreadsheet, no cached chart data, no data-availability statement and no repository deposit exists. A data request to the authors is required.",
+  "explicitly_not_done": [
+    "No numerical dataset was fabricated from the existing figure.",
+    "The figure-digitised observations were not relabelled as source data.",
+    "The frozen evaluation dataset was not modified or extended."
+  ]
+}

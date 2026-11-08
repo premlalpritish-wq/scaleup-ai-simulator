@@ -1,0 +1,192 @@
+{
+  "snapshot_of": "data/ganjave2022/results/evaluation_results.json",
+  "snapshot_sha256": "7851ceb7e4a2009a462774d5265e450169ed453a9e4b95588124f013117dda30",
+  "purpose": "Immutable baseline for the failure investigation. Every diagnostic in reports/GANJAVE_FAILURE_INVESTIGATION.md is compared against this. This file must never be edited.",
+  "input_digests": {
+    "frozen_configuration.json": "23c585ee06579ab7fc5ada0cd1c6ddb5a8cad92b01b0dd2873ed4fef5d13c0b3",
+    "observations.json": "48141f2947428f3aee06ef0359802888dd020d8e3d12cb23e27cccf32de6a900",
+    "evaluation_protocol.json": "d528e214e48becd934500d85e35743d6ccbb970eafa7b85b2aff69311be4bdfc",
+    "figure_reference_data.json": "46eb120f9553bdd61fa13077cb7865b37bf10063f272a3e6da929803f3d11658",
+    "reference_parameters.json": "3f53c1fdc82449c2d386bf531aea254512fb07f0a002d125b2a0f674e0165961"
+  },
+  "scenarios": {
+    "heldout_fig3": {
+      "decision": {
+        "outcome": "fail",
+        "primary_criteria": [
+          "A clear majority of observations are rep",
+          "The culture becomes oxygen-limited after",
+          "The implementation predicts the paper's ",
+          "The implementation's trajectory error is"
+        ],
+        "failures": [
+          {
+            "criterion": "E_heldout_trajectory",
+            "observed": 2.52037,
+            "threshold": {
+              "rmse_g_per_L": "<= 1.5"
+            }
+          }
+        ],
+        "scope_of_a_pass": "A pass would establish only that this implementation reproduces these observations under these conditions. It is not a validation of any composed process, and not a claim of general predictive accuracy.",
+        "what_this_never_establishes": [
+          "validation of a composed process: no composition was evaluated",
+          "general predictive accuracy beyond paper Fig. 3's and Fig. 5's conditions",
+          "any statement about a second culture, a scale-up, or another strain"
+        ]
+      },
+      "criteria": {
+        "E_heldout_trajectory": {
+          "statement": "The implementation predicts the paper's held-out experimental biomass trajectory to within 1.5 g/L DCW RMS.",
+          "primary": true,
+          "threshold": {
+            "rmse_g_per_L": "<= 1.5"
+          },
+          "observed": 2.52037,
+          "pass": false,
+          "verdict": "fail",
+          "note": ""
+        },
+        "F_no_worse_than_authors_model": {
+          "statement": "The implementation's trajectory error is not materially worse than the authors' own plotted model curve over the same observations.",
+          "primary": true,
+          "threshold": {
+            "ratio": "<= 1.5"
+          },
+          "observed": 1.140127,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "G_oxygen_limiting_regime": {
+          "statement": "The culture becomes oxygen-limited after feeding starts.",
+          "primary": true,
+          "threshold": {
+            "min_DO_percent": "< 10"
+          },
+          "observed": 0.477894,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "H_agreement_with_reported_uncertainty": {
+          "statement": "A clear majority of observations are reproduced within twice the digitisation's own uncertainty.",
+          "primary": true,
+          "threshold": {
+            "fraction_at_2_sigma": ">= 0.6"
+          },
+          "observed": 0.75,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "J_determinism": {
+          "statement": "Two runs of the same configuration agree.",
+          "primary": false,
+          "threshold": {
+            "relative_difference": "<= 1e-9"
+          },
+          "observed": 0.0,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        }
+      },
+      "run": {
+        "status": "success_with_warnings",
+        "final_biomass_g_per_L": 20.015861,
+        "min_DO_percent_after_feed": 0.477894,
+        "determinism_relative_difference": 0.0
+      }
+    },
+    "optimum_fig5": {
+      "decision": {
+        "outcome": "fail",
+        "primary_criteria": [
+          "A clear majority of observations are rep",
+          "Final biomass lies inside the paper's ow",
+          "The culture becomes oxygen-limited after",
+          "The implementation's trajectory error is"
+        ],
+        "failures": [
+          {
+            "criterion": "I_reported_endpoint_range",
+            "observed": 18.299265,
+            "threshold": {
+              "range_g_per_L": "[19.9, 21.5]"
+            }
+          }
+        ],
+        "scope_of_a_pass": "A pass would establish only that this implementation reproduces these observations under these conditions. It is not a validation of any composed process, and not a claim of general predictive accuracy.",
+        "what_this_never_establishes": [
+          "validation of a composed process: no composition was evaluated",
+          "general predictive accuracy beyond paper Fig. 3's and Fig. 5's conditions",
+          "any statement about a second culture, a scale-up, or another strain"
+        ]
+      },
+      "criteria": {
+        "F_no_worse_than_authors_model": {
+          "statement": "The implementation's trajectory error is not materially worse than the authors' own plotted model curve over the same observations.",
+          "primary": true,
+          "threshold": {
+            "ratio": "<= 1.5"
+          },
+          "observed": 0.935706,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "G_oxygen_limiting_regime": {
+          "statement": "The culture becomes oxygen-limited after feeding starts.",
+          "primary": true,
+          "threshold": {
+            "min_DO_percent": "< 10"
+          },
+          "observed": 0.868854,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "H_agreement_with_reported_uncertainty": {
+          "statement": "A clear majority of observations are reproduced within twice the digitisation's own uncertainty.",
+          "primary": true,
+          "threshold": {
+            "fraction_at_2_sigma": ">= 0.6"
+          },
+          "observed": 0.794118,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        },
+        "I_reported_endpoint_range": {
+          "statement": "Final biomass lies inside the paper's own reported experimental range for the 24 h fed-batch trials.",
+          "primary": true,
+          "threshold": {
+            "range_g_per_L": "[19.9, 21.5]"
+          },
+          "observed": 18.299265,
+          "pass": false,
+          "verdict": "fail",
+          "note": ""
+        },
+        "J_determinism": {
+          "statement": "Two runs of the same configuration agree.",
+          "primary": false,
+          "threshold": {
+            "relative_difference": "<= 1e-9"
+          },
+          "observed": 0.0,
+          "pass": true,
+          "verdict": "pass",
+          "note": ""
+        }
+      },
+      "run": {
+        "status": "success_with_warnings",
+        "final_biomass_g_per_L": 18.299265,
+        "min_DO_percent_after_feed": 0.868854,
+        "determinism_relative_difference": 0.0
+      }
+    }
+  }
+}

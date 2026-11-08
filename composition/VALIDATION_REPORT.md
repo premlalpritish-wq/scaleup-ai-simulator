@@ -271,9 +271,12 @@ not fail the run, because the model ran to completion.
    place the insulin node underneath the process chain. This is presentation
    only — it does not affect validation, execution or results — and it is
    unfixed.
-3. **"Add model" is a stub.** `scripts/model_palette.gd` was removed during
-   earlier debugging and the button opens a dialog saying so. Example graphs
-   are the only way to populate a graph.
+3. **"Add model" is restored.** `scripts/model_palette.gd` had been removed
+   during earlier debugging, leaving the button as a dialog saying so, and
+   example graphs were the only way to populate a graph. The palette now reads
+   the registry and offers every registered model; the model-parameters form
+   (`scripts/instance_form.gd`) is driven by the model's own manifest. See
+   `reports/GODOT_MODEL_PALETTE_IMPLEMENTATION.md`.
 
 ---
 

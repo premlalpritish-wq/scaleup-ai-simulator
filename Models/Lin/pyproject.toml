@@ -1,0 +1,23 @@
+[project]
+name = "lin2000-uptake-capacities"
+version = "0.1.0"
+description = "The complete simulation model printed in the Appendix of Lin et al. (2001), Biotechnology and Bioengineering 73(5):347-357"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["lin2000"]
+
+[tool.setuptools.package-data]
+lin2000 = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
