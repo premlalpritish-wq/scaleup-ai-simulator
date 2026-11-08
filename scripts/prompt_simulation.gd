@@ -121,6 +121,11 @@ var _badge_broth: Button
 var _badge_impeller: Button
 var _badge_harvest: Button
 
+# WebAssembly & JavaScriptBridge integration handles
+var _js_preset_cb: Variant = null
+var _js_json_cb: Variant = null
+var _js_msg_cb: Variant = null
+
 
 func _ready() -> void:
 	DisplayServer.window_set_title("ScaleUp")
@@ -189,9 +194,12 @@ func _ready() -> void:
 	_update_play_btn()
 	_show_toast("⏸ Simulation Paused at t = 0.0 h — Press Space to Run", 2.5)
 
-	var run_file_path := _get_run_file_arg()
-	if run_file_path != "":
-		load_run_file(run_file_path)
+	if OS.has_feature("web"):
+		_setup_web_integration()
+	else:
+		var run_file_path := _get_run_file_arg()
+		if run_file_path != "":
+			load_run_file(run_file_path)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -1438,35 +1446,55 @@ func load_run_file(path: String) -> void:
 	if err != OK:
 		return
 
-	var payload: Dictionary = test_json_conv.data
+	load_run_dict(test_json_conv.data)
+
+
+func load_run_dict(payload: Dictionary) -> void:
+	_result = payload
 	if _prompt != null:
 		_prompt.text = str(payload.get("prompt", ""))
-	if _status != null:
-		_status.text = "Loaded verified run %s (cache_hit=%s)" % [
-			str(payload.get("run_id", "?")),
-			str(payload.get("cache_hit", true)),
-		]
-		_status.modulate = GOOD
-	if _sim_status != null:
-		_sim_status.text = "Status: %s" % str(payload.get("status", "COMPLETED"))
-		_sim_status.modulate = GOOD
+
+	var is_halted: bool = str(payload.get("status", "")).to_upper() == "HALTED" or str(payload.get("evidence_tier", "")).to_upper() == "UNVERIFIED"
+	if is_halted:
+		if _status != null:
+			_status.text = "HALTED: InsufficientEvidenceError (Scientific Integrity Guard)"
+			_status.modulate = BAD
+		if _sim_status != null:
+			_sim_status.text = "Status: HALTED (Insufficient verified empirical literature)"
+			_sim_status.modulate = BAD
+		if _confidence_badge != null:
+			_confidence_badge.text = "[Confidence: 0% • HALTED: InsufficientEvidenceError]"
+			_confidence_badge.modulate = BAD
+		_show_toast("⚠️ InsufficientEvidenceError: Simulation Aborted", 3.0)
+	else:
+		if _status != null:
+			_status.text = "Loaded verified run %s (cache_hit=%s)" % [
+				str(payload.get("run_id", "?")),
+				str(payload.get("cache_hit", true)),
+			]
+			_status.modulate = GOOD
+		if _sim_status != null:
+			_sim_status.text = "Status: %s" % str(payload.get("status", "COMPLETED"))
+			_sim_status.modulate = GOOD
+
+		var conf: float = float(payload.get("confidence_score", 100.0))
+		var has_analogue: bool = bool(payload.get("has_analogue_bridge", false))
+		if _confidence_badge != null:
+			var tier_str := "DIRECT" if conf >= 99.0 else "ANALOGUE BRIDGE"
+			_confidence_badge.text = "[Confidence: %d%% • %s]" % [int(conf), tier_str]
+			_confidence_badge.modulate = GOOD if conf >= 90.0 else (WARN if conf >= 50.0 else BAD)
+		if _analogue_banner != null:
+			_analogue_banner.visible = has_analogue
 
 	var diagram_path := str(payload.get("diagram_path", ""))
 	if diagram_path != "":
 		_load_diagram(diagram_path)
+	elif _diagram_rect != null:
+		_diagram_rect.texture = null
 
 	var manifest: Dictionary = payload.get("literature_review_manifest", {})
 	_active_run_manifest = manifest
 	_render_literature_manifest(manifest)
-
-	var conf: float = float(payload.get("confidence_score", 100.0))
-	var has_analogue: bool = bool(payload.get("has_analogue_bridge", false))
-	if _confidence_badge != null:
-		var tier_str := "DIRECT" if conf >= 99.0 else "ANALOGUE BRIDGE"
-		_confidence_badge.text = "[Confidence: %d%% • %s]" % [int(conf), tier_str]
-		_confidence_badge.modulate = GOOD if conf >= 90.0 else (WARN if conf >= 50.0 else BAD)
-	if _analogue_banner != null:
-		_analogue_banner.visible = has_analogue
 
 	var trajectories: Dictionary = payload.get("trajectories", {})
 	if not trajectories.is_empty():
@@ -1489,6 +1517,124 @@ func load_run_file(path: String) -> void:
 			_view.build_anatomy_bench(unit_ops)
 		_build_dynamic_floating_badges(unit_ops)
 
+
+func load_preset(preset_name: String) -> void:
+	match preset_name.to_lower():
+		"ecoli", "e. coli", "e_coli", "e-coli":
+			var candidates := ["res://.artifacts/ecoli_run.json", "res://composition/data/runs/ecoli_run.json", "res://assets/runs/ecoli_run.json", ".artifacts/ecoli_run.json"]
+			var loaded := false
+			for p in candidates:
+				if FileAccess.file_exists(p):
+					load_run_file(p)
+					loaded = true
+					break
+			if not loaded:
+				load_run_file("res://composition/data/runs/ecoli_run.json")
+			_show_toast("🧬 Loaded Preset: E. coli Fed-Batch Fermentation", 2.2)
+		"unverified", "unverified_halt", "halt", "insufficient_evidence", "insufficient":
+			var candidates := ["res://.artifacts/unverified_halt_run.json", "res://composition/data/runs/unverified_halt_run.json", "res://assets/runs/unverified_halt_run.json", ".artifacts/unverified_halt_run.json"]
+			var loaded := false
+			for p in candidates:
+				if FileAccess.file_exists(p):
+					load_run_file(p)
+					loaded = true
+					break
+			if not loaded:
+				load_run_file("res://composition/data/runs/unverified_halt_run.json")
+			_show_toast("⚠️ InsufficientEvidenceError: Execution Blocked (Red Alert)", 3.5)
+		_: # "saccharina", default
+			var candidates := ["res://.artifacts/latest_prompt_run.json", "res://composition/data/runs/latest_prompt_run.json", "res://assets/runs/latest_prompt_run.json", ".artifacts/latest_prompt_run.json"]
+			var loaded := false
+			for p in candidates:
+				if FileAccess.file_exists(p):
+					load_run_file(p)
+					loaded = true
+					break
+			if not loaded:
+				load_run_file("res://composition/data/runs/latest_prompt_run.json")
+			_show_toast("🌿 Loaded Preset: Saccharina latissima Alginate Extraction", 2.2)
+
+
+func _setup_web_integration() -> void:
+	if not OS.has_feature("web"):
+		return
+
+	var win = JavaScriptBridge.get_interface("window")
+	_js_preset_cb = JavaScriptBridge.create_callback(_on_js_switch_preset)
+	if win != null:
+		win.scaleupSwitchPreset = _js_preset_cb
+
+	_js_json_cb = JavaScriptBridge.create_callback(_on_js_load_json)
+	if win != null:
+		win.scaleupLoadJson = _js_json_cb
+
+	_js_msg_cb = JavaScriptBridge.create_callback(_on_js_window_message)
+	if win != null:
+		win.addEventListener("message", _js_msg_cb)
+
+	# Read URL query parameters via window.location.search
+	var query_var: Variant = JavaScriptBridge.eval("window.location.search")
+	var query: String = str(query_var) if query_var != null else ""
+	var target_preset := "saccharina"
+	if "preset=ecoli" in query.to_lower():
+		target_preset = "ecoli"
+	elif "preset=unverified" in query.to_lower() or "unverified_halt" in query.to_lower() or "insufficient" in query.to_lower():
+		target_preset = "unverified_halt"
+	elif "preset=saccharina" in query.to_lower():
+		target_preset = "saccharina"
+
+	load_preset(target_preset)
+
+
+func _on_js_switch_preset(args: Array) -> void:
+	if args.size() > 0 and args[0] != null:
+		load_preset(str(args[0]))
+
+
+func _on_js_load_json(args: Array) -> void:
+	if args.is_empty() or args[0] == null:
+		return
+	var arg = args[0]
+	if typeof(arg) == TYPE_STRING:
+		var parser := JSON.new()
+		if parser.parse(str(arg)) == OK and typeof(parser.data) == TYPE_DICTIONARY:
+			load_run_dict(parser.data)
+	elif typeof(arg) == TYPE_DICTIONARY:
+		load_run_dict(arg)
+
+
+func _on_js_window_message(args: Array) -> void:
+	if args.is_empty() or args[0] == null:
+		return
+	var event = args[0]
+	var raw_data: Variant = null
+	if typeof(event) == TYPE_OBJECT:
+		raw_data = event.get("data")
+	elif typeof(event) == TYPE_DICTIONARY:
+		raw_data = event.get("data")
+	else:
+		raw_data = event
+
+	if raw_data == null:
+		return
+
+	if typeof(raw_data) == TYPE_STRING:
+		var s := str(raw_data).strip_edges()
+		if s.begins_with("{"):
+			var parser := JSON.new()
+			if parser.parse(s) == OK and typeof(parser.data) == TYPE_DICTIONARY:
+				var d: Dictionary = parser.data
+				if d.has("preset"):
+					load_preset(str(d["preset"]))
+				elif d.has("run_id") or d.has("trajectories"):
+					load_run_dict(d)
+		else:
+			load_preset(s)
+	elif typeof(raw_data) == TYPE_DICTIONARY:
+		if raw_data.has("preset"):
+			load_preset(str(raw_data["preset"]))
+		elif raw_data.has("run_id") or raw_data.has("trajectories"):
+			load_run_dict(raw_data)
 
 func _load_diagram(rel_path: String) -> void:
 	if _diagram_rect == null:

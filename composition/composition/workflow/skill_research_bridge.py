@@ -46,12 +46,21 @@ ROOT = Path(__file__).resolve().parents[3]
 PAPERS_CACHED_DIR = ROOT / "papers" / "cached"
 DIAGRAMS_DIR = ROOT / "assets" / "diagrams"
 ARTIFACTS_DIR = ROOT / ".artifacts"
+PROMPT_RUNS_DIR = ARTIFACTS_DIR / "runs"
+_CACHED_GODOT_BINARY: str | None = None
 
 
 def _ensure_directories() -> None:
     PAPERS_CACHED_DIR.mkdir(parents=True, exist_ok=True)
     DIAGRAMS_DIR.mkdir(parents=True, exist_ok=True)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    PROMPT_RUNS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _prompt_cache_key(prompt_text: str) -> str:
+    import hashlib
+    norm = " ".join(prompt_text.strip().lower().split())
+    return hashlib.sha256(norm.encode("utf-8")).hexdigest()[:16]
 
 
 def _generate_isometric_bioreactor_svg(output_path: Path) -> Path:
@@ -499,9 +508,50 @@ def resolve_prompt_and_research(
     auto_research: bool = True,
     launch_godot: bool = False,
     base: Path | None = None,
+    force_recompute: bool = False,
 ) -> tuple[dict[str, Any], int]:
-    """Execute the local-first research pipeline and emit verified run artifact."""
+    """Execute the local-first research pipeline and emit verified run artifact.
+    
+    Fast Path: If this exact simulation has already been executed, instantly
+    reuses the verified artifact from disk to open Godot in milliseconds without
+    redundant solver or graph computation.
+    """
     _ensure_directories()
+    cache_key = _prompt_cache_key(prompt_text)
+    cached_run_file = PROMPT_RUNS_DIR / f"{cache_key}.json"
+    latest_run_path = ARTIFACTS_DIR / "latest_prompt_run.json"
+
+    # Fast replay check
+    if not force_recompute:
+        norm_prompt = " ".join(prompt_text.strip().lower().split())
+        for candidate_path in (cached_run_file, latest_run_path):
+            if candidate_path.is_file():
+                try:
+                    data = json.loads(candidate_path.read_text(encoding="utf-8"))
+                    data_prompt = " ".join(str(data.get("prompt", "")).strip().lower().split())
+                    if data_prompt == norm_prompt and data.get("status") == "COMPLETED" and "trajectories" in data:
+                        # Ensure latest_prompt_run.json matches
+                        if candidate_path != latest_run_path:
+                            shutil.copy2(candidate_path, latest_run_path)
+                        # Ensure runs cache file is also populated
+                        if candidate_path != cached_run_file:
+                            shutil.copy2(candidate_path, cached_run_file)
+
+                        # Check diagram exists
+                        diagram_rel = data.get("diagram_path")
+                        if diagram_rel and not (ROOT / diagram_rel).is_file():
+                            bp = data.get("anatomy_blueprint")
+                            if bp:
+                                generate_anatomy_svg(bp, ROOT / diagram_rel)
+
+                        if launch_godot:
+                            _spawn_godot_simulation(str(latest_run_path))
+
+                        data["cached_replay"] = True
+                        return data, 0
+                except Exception:
+                    pass
+
     store = get_library_store()
 
     domain = classify_bioprocess_domain(prompt_text)
@@ -583,7 +633,7 @@ def resolve_prompt_and_research(
     # Step E: Solve Trajectories
     trajectories = _solve_simulation_trajectories(manifest or {})
 
-    # Step F: Construct latest_prompt_run.json
+    # Step F: Construct latest_prompt_run.json and persist to runs cache
     run_id = f"prompt_run_{uuid.uuid4().hex[:8]}"
     run_artifact = {
         "contract_version": "0.1.0",
@@ -616,6 +666,11 @@ def resolve_prompt_and_research(
     latest_run_path = ARTIFACTS_DIR / "latest_prompt_run.json"
     with open(str(latest_run_path), "w", encoding="utf-8") as f:
         f.write(json.dumps(run_artifact, indent=2, ensure_ascii=False) + "\n")
+    try:
+        with open(str(cached_run_file), "w", encoding="utf-8") as f:
+            f.write(json.dumps(run_artifact, indent=2, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
     # Step G: Auto-launch Godot if requested
     if launch_godot:
@@ -624,7 +679,23 @@ def resolve_prompt_and_research(
     return run_artifact, 0
 
 def _find_godot_binary(prefer_gui: bool = True) -> str | None:
-    """Locate Godot 4 binary on host."""
+    """Locate Godot 4 binary on host with fast path and caching."""
+    global _CACHED_GODOT_BINARY
+    if _CACHED_GODOT_BINARY and os.path.isfile(_CACHED_GODOT_BINARY):
+        return _CACHED_GODOT_BINARY
+
+    # Fast direct paths
+    direct_candidates = [
+        Path(r"D:\Godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64.exe"),
+        Path(r"D:\Godot\Godot_v4.7.2-stable_win64.exe"),
+        Path(r"D:\Godot\Godot.exe"),
+        Path(r"C:\Program Files\Godot\Godot.exe"),
+    ]
+    for candidate in direct_candidates:
+        if candidate.is_file():
+            _CACHED_GODOT_BINARY = str(candidate)
+            return _CACHED_GODOT_BINARY
+
     preferred = (
         ("Godot_v4.7.2-stable_win64.exe", "Godot_v4.7-stable_win64.exe", "godot4", "godot", "Godot_v4.7.2-stable_win64_console.exe")
         if prefer_gui
@@ -633,21 +704,44 @@ def _find_godot_binary(prefer_gui: bool = True) -> str | None:
     for name in preferred:
         found = shutil.which(name)
         if found:
+            _CACHED_GODOT_BINARY = found
             return found
+
     for directory in ("D:/Godot", "C:/Program Files/Godot", "C:/Godot"):
         p = Path(directory)
         if not p.is_dir():
             continue
+        # Shallow check first (top 2 levels)
+        shallow_exes: list[Path] = [e for e in p.glob("*.exe") if "godot" in e.name.lower()]
+        try:
+            for sub in p.iterdir():
+                if sub.is_dir() and "godot" in sub.name.lower():
+                    shallow_exes.extend([e for e in sub.glob("*.exe") if "godot" in e.name.lower()])
+        except Exception:
+            pass
+
+        if shallow_exes:
+            if prefer_gui:
+                gui = [e for e in shallow_exes if "console" not in e.name.lower()]
+                if gui:
+                    _CACHED_GODOT_BINARY = str(gui[0])
+                    return _CACHED_GODOT_BINARY
+            _CACHED_GODOT_BINARY = str(shallow_exes[0])
+            return _CACHED_GODOT_BINARY
+
         all_exes = sorted(p.glob("**/Godot*.exe"))
         if prefer_gui:
             gui_exes = [e for e in all_exes if "console" not in e.name.lower() and e.is_file()]
             if gui_exes:
-                return str(gui_exes[0])
+                _CACHED_GODOT_BINARY = str(gui_exes[0])
+                return _CACHED_GODOT_BINARY
         console_exes = [e for e in all_exes if "console" in e.name.lower() and e.is_file()]
         if console_exes:
-            return str(console_exes[0])
+            _CACHED_GODOT_BINARY = str(console_exes[0])
+            return _CACHED_GODOT_BINARY
         if all_exes:
-            return str(all_exes[0])
+            _CACHED_GODOT_BINARY = str(all_exes[0])
+            return _CACHED_GODOT_BINARY
     return None
 
 

@@ -1,0 +1,1382 @@
+{
+  "contract_version": "0.1.0",
+  "schema_version": "1.0.0",
+  "run_id": "prompt_run_a868a636",
+  "status": "COMPLETED",
+  "prompt": "Simulate E. coli fed-batch growth with acetate overflow",
+  "cache_hit": true,
+  "confidence_score": 50.0,
+  "has_analogue_bridge": true,
+  "researched_papers": [],
+  "diagram_path": "assets/diagrams/active_anatomy_blueprint.svg",
+  "anatomy_blueprint": {
+    "process_domain": "microbial_fermentation",
+    "title": "4-Stage Microbial Fermentation & Harvest Train",
+    "target_organism": "Escherichia coli",
+    "duration_hours": 20.0,
+    "unit_operations": [
+      {
+        "stage_id": "seed_inoculation",
+        "index": 0,
+        "title": "Seed Inoculation & Batch Acclimation",
+        "equipment_primitive": "stirred_bioreactor",
+        "time_window_h": [
+          0.0,
+          4.0
+        ],
+        "streams_in": [
+          "Inoculum Culture (OD600 = 0.5)",
+          "Defined Mineral Salts Medium"
+        ],
+        "streams_out": [
+          "Exponentially Growing Seed Broth"
+        ],
+        "required_parameters": [
+          "growth_kinetics.mu_max",
+          "growth_kinetics.Ks"
+        ],
+        "governing_equation": "Exponential growth dX/dt = mu_max * (S / (Ks + S)) * X",
+        "verbatim_quote": "maximum specific growth rate mu_max",
+        "doi": "10.1016/j.bej.2021.108342",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#0f172a",
+          "color_end_hex": "#1e3a8a",
+          "turbidity_port": "biomass_g_per_L",
+          "rpm": 400.0,
+          "particle_type": "aeration_bubbles",
+          "particle_count": 150,
+          "viscosity": 0.05,
+          "vortex_speed": 4.0
+        }
+      },
+      {
+        "stage_id": "exponential_fed_batch",
+        "index": 1,
+        "title": "Exponential Nutrient-Limited Fed-Batch",
+        "equipment_primitive": "stirred_bioreactor",
+        "time_window_h": [
+          4.0,
+          12.0
+        ],
+        "streams_in": [
+          "Exponential Substrate Feed F(t)",
+          "Compressed Sterile Air / O2"
+        ],
+        "streams_out": [
+          "High Cell-Density Culture Broth",
+          "Off-Gas CO2"
+        ],
+        "required_parameters": [
+          "growth_kinetics.Y_xs",
+          "transport.kLa"
+        ],
+        "governing_equation": "Fed-batch mass balance: d(VX)/dt = mu * V * X, d(VS)/dt = F*Sin - (mu/Y_xs)*V*X",
+        "verbatim_quote": "exponential feeding strategy to maintain sub-inhibitory glucose concentrations",
+        "doi": "10.1016/j.bej.2021.108342",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#1e3a8a",
+          "color_end_hex": "#065f46",
+          "turbidity_port": "biomass_g_per_L",
+          "rpm": 800.0,
+          "particle_type": "dense_cells",
+          "particle_count": 300,
+          "viscosity": 0.12,
+          "vortex_speed": 5.0
+        }
+      },
+      {
+        "stage_id": "induction_overflow",
+        "index": 2,
+        "title": "IPTG Induction & Overflow Control",
+        "equipment_primitive": "stirred_bioreactor",
+        "time_window_h": [
+          12.0,
+          18.0
+        ],
+        "streams_in": [
+          "1.0 mM IPTG Inducer",
+          "Feed Stream F(t)"
+        ],
+        "streams_out": [
+          "Induced Recombinant Protein Broth",
+          "Acetate Byproduct"
+        ],
+        "required_parameters": [
+          "protein_expression.q_p",
+          "overflow.k_acetate"
+        ],
+        "governing_equation": "Specific recombinant protein synthesis rate q_p coupled to cybernetic enzyme induction.",
+        "verbatim_quote": "induction with IPTG at target cell density",
+        "doi": "10.1186/1475-2859-13-50",
+        "evidence_tier": "ANALOGUE_BRIDGE",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#065f46",
+          "color_end_hex": "#047857",
+          "turbidity_port": "biomass_g_per_L",
+          "rpm": 900.0,
+          "particle_type": "induced_biomass",
+          "particle_count": 350,
+          "viscosity": 0.18,
+          "vortex_speed": 6.0
+        }
+      },
+      {
+        "stage_id": "centrifugal_harvest",
+        "index": 3,
+        "title": "Centrifugal Biomass Harvest",
+        "equipment_primitive": "centrifuge",
+        "time_window_h": [
+          18.0,
+          20.0
+        ],
+        "streams_in": [
+          "Chilled Fermentation Broth"
+        ],
+        "streams_out": [
+          "Concentrated Biomass Paste",
+          "Clarified Spent Medium"
+        ],
+        "required_parameters": [
+          "downstream.harvest_efficiency"
+        ],
+        "governing_equation": "Centrifugal dewatering and disc-stack solid-liquid separation.",
+        "verbatim_quote": "harvest by centrifugation at 5000 g",
+        "doi": "10.1016/j.bej.2021.108342",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#047857",
+          "color_end_hex": "#10b981",
+          "turbidity_port": "biomass_g_per_L",
+          "rpm": 5000.0,
+          "particle_type": "pellet_harvest",
+          "pellet_fraction": 0.35,
+          "viscosity": 0.5,
+          "vortex_speed": 8.0
+        }
+      }
+    ],
+    "telemetry_schema": {
+      "time_series": [
+        {
+          "id": "biomass_g_per_L",
+          "label": "Biomass (g/L)",
+          "unit": "g/L",
+          "color_hex": "#38bdf8"
+        },
+        {
+          "id": "glucose_g_per_L",
+          "label": "Substrate (g/L)",
+          "unit": "g/L",
+          "color_hex": "#34d399"
+        },
+        {
+          "id": "volume_L",
+          "label": "Vessel Volume (L)",
+          "unit": "L",
+          "color_hex": "#a855f7"
+        },
+        {
+          "id": "feed_rate_L_per_h",
+          "label": "Feed Rate (L/h)",
+          "unit": "L/h",
+          "color_hex": "#f59e0b"
+        }
+      ],
+      "step_metrics": [
+        {
+          "stage_id": "seed_inoculation",
+          "label": "Initial Growth Rate",
+          "unit": "1/h",
+          "value": 0.48
+        },
+        {
+          "stage_id": "exponential_fed_batch",
+          "label": "Peak Biomass Yield",
+          "unit": "g/g",
+          "value": 0.45
+        },
+        {
+          "stage_id": "induction_overflow",
+          "label": "Oxygen Saturation Minimum",
+          "unit": "%",
+          "value": 20.0
+        },
+        {
+          "stage_id": "centrifugal_harvest",
+          "label": "Harvest Recovery Rate",
+          "unit": "%",
+          "value": 97.5
+        }
+      ]
+    },
+    "sandbox_config": {
+      "agitation_control": {
+        "label": "Agitation Impeller RPM",
+        "options": [
+          "400 RPM (Low Shear)",
+          "800 RPM (Optimal kLa)",
+          "1200 RPM (High Shear)"
+        ],
+        "default": "800 RPM (Optimal kLa)"
+      }
+    }
+  },
+  "telemetry_schema": {
+    "time_series": [
+      {
+        "id": "biomass_g_per_L",
+        "label": "Biomass (g/L)",
+        "unit": "g/L",
+        "color_hex": "#38bdf8"
+      },
+      {
+        "id": "glucose_g_per_L",
+        "label": "Substrate (g/L)",
+        "unit": "g/L",
+        "color_hex": "#34d399"
+      },
+      {
+        "id": "volume_L",
+        "label": "Vessel Volume (L)",
+        "unit": "L",
+        "color_hex": "#a855f7"
+      },
+      {
+        "id": "feed_rate_L_per_h",
+        "label": "Feed Rate (L/h)",
+        "unit": "L/h",
+        "color_hex": "#f59e0b"
+      }
+    ],
+    "step_metrics": [
+      {
+        "stage_id": "seed_inoculation",
+        "label": "Initial Growth Rate",
+        "unit": "1/h",
+        "value": 0.48
+      },
+      {
+        "stage_id": "exponential_fed_batch",
+        "label": "Peak Biomass Yield",
+        "unit": "g/g",
+        "value": 0.45
+      },
+      {
+        "stage_id": "induction_overflow",
+        "label": "Oxygen Saturation Minimum",
+        "unit": "%",
+        "value": 20.0
+      },
+      {
+        "stage_id": "centrifugal_harvest",
+        "label": "Harvest Recovery Rate",
+        "unit": "%",
+        "value": 97.5
+      }
+    ]
+  },
+  "sandbox_config": {
+    "agitation_control": {
+      "label": "Agitation Impeller RPM",
+      "options": [
+        "400 RPM (Low Shear)",
+        "800 RPM (Optimal kLa)",
+        "1200 RPM (High Shear)"
+      ],
+      "default": "800 RPM (Optimal kLa)"
+    }
+  },
+  "literature_review_manifest": {
+    "reconstruction_mode": "central_knowledge_library",
+    "prompt": "Simulate E. coli fed-batch growth with acetate overflow",
+    "target_organism": "Escherichia coli",
+    "process_mode": "fed_batch",
+    "operational_domain": "MICROBIAL_FERMENTATION",
+    "confidence_score": 50.0,
+    "evidence_tier": "ANALOGUE_BRIDGE",
+    "has_analogue_bridge": true,
+    "requires_expert_approval": true,
+    "combined_papers": [
+      {
+        "paper_id": "ganjave2022",
+        "doi": "10.1016/j.bej.2021.108342",
+        "title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+        "authors": [
+          "Milind Ganjave",
+          "et al."
+        ],
+        "year": 2022,
+        "sha256": "ebad04319d0d22c22d464e4d2e23063d0f405c969e97060158f25bf9695fdd4d"
+      },
+      {
+        "paper_id": "baez2014",
+        "doi": "10.1186/1475-2859-13-50",
+        "title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+        "authors": [
+          "Antonino Baez",
+          "Nadim Majdalani",
+          "Joseph Shiloach"
+        ],
+        "year": 2014,
+        "sha256": "c959bcaa29e5569c9c1d005e8dc243978fe80754321e49ffa65e883b180732d5"
+      }
+    ],
+    "cross_paper_connections": [
+      {
+        "connection_id": "conn_1_biomass_concentration",
+        "source_mechanism_id": "ganjave.growth_kinetics",
+        "source_instance_id": "growth_kinetics",
+        "source_port": "biomass_concentration",
+        "target_mechanism_id": "baez.exponential_feed",
+        "target_instance_id": "overflow_metabolism",
+        "target_port": "X_F",
+        "quantity_type": "mass_concentration",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110)."
+      },
+      {
+        "connection_id": "conn_2_biomass_concentration",
+        "source_mechanism_id": "ganjave.growth_kinetics",
+        "source_instance_id": "growth_kinetics",
+        "source_port": "biomass_concentration",
+        "target_mechanism_id": "baez.exponential_feed",
+        "target_instance_id": "overflow_metabolism",
+        "target_port": "t",
+        "quantity_type": "mass_concentration",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110)."
+      },
+      {
+        "connection_id": "conn_3_specific_growth_rate",
+        "source_mechanism_id": "ganjave.growth_kinetics",
+        "source_instance_id": "growth_kinetics",
+        "source_port": "specific_growth_rate",
+        "target_mechanism_id": "baez.exponential_feed",
+        "target_instance_id": "overflow_metabolism",
+        "target_port": "t",
+        "quantity_type": "specific_rate",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110)."
+      },
+      {
+        "connection_id": "conn_4_culture_volume",
+        "source_mechanism_id": "ganjave.growth_kinetics",
+        "source_instance_id": "growth_kinetics",
+        "source_port": "culture_volume",
+        "target_mechanism_id": "baez.exponential_feed",
+        "target_instance_id": "overflow_metabolism",
+        "target_port": "V_F",
+        "quantity_type": "volume",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110)."
+      },
+      {
+        "connection_id": "conn_5_culture_volume",
+        "source_mechanism_id": "ganjave.growth_kinetics",
+        "source_instance_id": "growth_kinetics",
+        "source_port": "culture_volume",
+        "target_mechanism_id": "baez.exponential_feed",
+        "target_instance_id": "overflow_metabolism",
+        "target_port": "t",
+        "quantity_type": "volume",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (BL21(DE3) -> W3110)."
+      },
+      {
+        "connection_id": "conn_6_feed_rate",
+        "source_mechanism_id": "baez.exponential_feed",
+        "source_instance_id": "overflow_metabolism",
+        "source_port": "feed_rate",
+        "target_mechanism_id": "ganjave.growth_kinetics",
+        "target_instance_id": "growth_kinetics",
+        "target_port": "feed_rate",
+        "quantity_type": "volume_flow",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3)).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3))."
+      },
+      {
+        "connection_id": "conn_7_acetate_concentration",
+        "source_mechanism_id": "baez.exponential_feed",
+        "source_instance_id": "overflow_metabolism",
+        "source_port": "acetate_concentration",
+        "target_mechanism_id": "ganjave.growth_kinetics",
+        "target_instance_id": "growth_kinetics",
+        "target_port": "glucose_concentration",
+        "quantity_type": "mass_concentration",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3)).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3))."
+      },
+      {
+        "connection_id": "conn_8_acetate_concentration",
+        "source_mechanism_id": "baez.exponential_feed",
+        "source_instance_id": "overflow_metabolism",
+        "source_port": "acetate_concentration",
+        "target_mechanism_id": "ganjave.growth_kinetics",
+        "target_instance_id": "growth_kinetics",
+        "target_port": "galactose_concentration",
+        "quantity_type": "mass_concentration",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3)).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3))."
+      },
+      {
+        "connection_id": "conn_9_biomass_concentration",
+        "source_mechanism_id": "baez.exponential_feed",
+        "source_instance_id": "overflow_metabolism",
+        "source_port": "biomass_concentration",
+        "target_mechanism_id": "ganjave.growth_kinetics",
+        "target_instance_id": "growth_kinetics",
+        "target_port": "glucose_concentration",
+        "quantity_type": "mass_concentration",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3)).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3))."
+      },
+      {
+        "connection_id": "conn_10_biomass_concentration",
+        "source_mechanism_id": "baez.exponential_feed",
+        "source_instance_id": "overflow_metabolism",
+        "source_port": "biomass_concentration",
+        "target_mechanism_id": "ganjave.growth_kinetics",
+        "target_instance_id": "growth_kinetics",
+        "target_port": "galactose_concentration",
+        "quantity_type": "mass_concentration",
+        "tier": "ANALOGUE_BRIDGE",
+        "reason": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3)).",
+        "biological_justification": "Analogue bridge across related contexts: strain bridge (W3110 -> BL21(DE3))."
+      }
+    ],
+    "alternatives_by_module": {
+      "growth_kinetics": [
+        {
+          "mechanism_id": "baez.exponential_feed",
+          "name": "Exponential fed-batch feed rate control",
+          "port_id": "acetate_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "baez2014",
+          "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "doi": "10.1186/1475-2859-13-50",
+          "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+        },
+        {
+          "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+          "name": "Macroalgae alginate extraction and bioprocess kinetics",
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "msc_dissertation_2025",
+          "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+          "doi": "dissertation://msc/biotechnology/302068815/2025",
+          "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+        },
+        {
+          "mechanism_id": "zielinski.fermentation_balance",
+          "name": "Recombinant human insulin process accounting",
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "zielinski2019",
+          "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+          "doi": "10.1002/biot.201800531",
+          "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+        },
+        {
+          "mechanism_id": "baez.exponential_feed",
+          "name": "Exponential fed-batch feed rate control",
+          "port_id": "biomass_growth_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "baez2014",
+          "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "doi": "10.1186/1475-2859-13-50",
+          "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+        },
+        {
+          "mechanism_id": "lin.uptake_capacities",
+          "name": "Maximum substrate and oxygen uptake capacity kinetics",
+          "port_id": "glucose_uptake_capacity",
+          "quantity_type": "specific_rate",
+          "paper_id": "lin2000",
+          "paper_title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+          "doi": "10.1002/bit.1065",
+          "equation_summary": "Temperature- and oxygen-limited capacity caps for glucose and oxygen uptake with acetate overflow threshold."
+        },
+        {
+          "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+          "name": "Macroalgae alginate extraction and bioprocess kinetics",
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "msc_dissertation_2025",
+          "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+          "doi": "dissertation://msc/biotechnology/302068815/2025",
+          "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+        },
+        {
+          "mechanism_id": "nanchen.pirt_chemostat",
+          "name": "Pirt linear substrate consumption rate relation",
+          "port_id": "glucose_consumption_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "nanchen2006",
+          "paper_title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+          "doi": "10.1128/AEM.72.2.1164-1172.2006",
+          "equation_summary": "qglc = (mu / Yglc_max) * 1000 + mglc"
+        },
+        {
+          "mechanism_id": "zielinski.fermentation_balance",
+          "name": "Recombinant human insulin process accounting",
+          "port_id": "fermentation_volume",
+          "quantity_type": "volume",
+          "paper_id": "zielinski2019",
+          "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+          "doi": "10.1002/biot.201800531",
+          "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+        }
+      ],
+      "overflow_metabolism": [
+        {
+          "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+          "name": "Macroalgae alginate extraction and bioprocess kinetics",
+          "port_id": "feed_rate",
+          "quantity_type": "volume_flow",
+          "paper_id": "msc_dissertation_2025",
+          "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+          "doi": "dissertation://msc/biotechnology/302068815/2025",
+          "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+        },
+        {
+          "mechanism_id": "ganjave.growth_kinetics",
+          "name": "Cybernetic growth and substrate uptake",
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "ganjave2022",
+          "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+          "doi": "10.1016/j.bej.2021.108342",
+          "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+        },
+        {
+          "mechanism_id": "lin.uptake_capacities",
+          "name": "Maximum substrate and oxygen uptake capacity kinetics",
+          "port_id": "glucose_uptake_capacity",
+          "quantity_type": "specific_rate",
+          "paper_id": "lin2000",
+          "paper_title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+          "doi": "10.1002/bit.1065",
+          "equation_summary": "Temperature- and oxygen-limited capacity caps for glucose and oxygen uptake with acetate overflow threshold."
+        },
+        {
+          "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+          "name": "Macroalgae alginate extraction and bioprocess kinetics",
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "msc_dissertation_2025",
+          "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+          "doi": "dissertation://msc/biotechnology/302068815/2025",
+          "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+        },
+        {
+          "mechanism_id": "nanchen.pirt_chemostat",
+          "name": "Pirt linear substrate consumption rate relation",
+          "port_id": "glucose_consumption_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "nanchen2006",
+          "paper_title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+          "doi": "10.1128/AEM.72.2.1164-1172.2006",
+          "equation_summary": "qglc = (mu / Yglc_max) * 1000 + mglc"
+        },
+        {
+          "mechanism_id": "ganjave.growth_kinetics",
+          "name": "Cybernetic growth and substrate uptake",
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "ganjave2022",
+          "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+          "doi": "10.1016/j.bej.2021.108342",
+          "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+        },
+        {
+          "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+          "name": "Macroalgae alginate extraction and bioprocess kinetics",
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "msc_dissertation_2025",
+          "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+          "doi": "dissertation://msc/biotechnology/302068815/2025",
+          "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+        },
+        {
+          "mechanism_id": "zielinski.fermentation_balance",
+          "name": "Recombinant human insulin process accounting",
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "zielinski2019",
+          "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+          "doi": "10.1002/biot.201800531",
+          "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+        }
+      ]
+    },
+    "knowledge_gaps": [],
+    "synthesis_summary": "Successfully reconstructed a runnable multi-paper bioprocess simulation combining 2 mechanisms from papers ['ganjave2022', 'baez2014']. Evaluated 10 cross-paper connection(s). Confidence score: 50.0% (ANALOGUE_BRIDGE)."
+  },
+  "composition_graph": {
+    "contract_version": "0.1.0",
+    "schema_version": "0.1.0",
+    "graph_id": "reconstructed_bioprocess_simulation",
+    "title": "Reconstructed Multi-Paper Bioprocess Simulation",
+    "description": "Dynamically assembled from Central Knowledge Library mechanisms and empirical parameters.",
+    "instances": [
+      {
+        "instance_id": "growth_kinetics",
+        "model_id": "ganjave",
+        "model_version": "0.1.0",
+        "label": "Cybernetic growth and substrate uptake",
+        "parameters": {
+          "simulation": {
+            "mode": "fed_batch",
+            "duration_h": 10.0
+          }
+        },
+        "alternatives": [
+          {
+            "mechanism_id": "baez.exponential_feed",
+            "name": "Exponential fed-batch feed rate control",
+            "port_id": "acetate_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "baez2014",
+            "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+            "doi": "10.1186/1475-2859-13-50",
+            "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+          },
+          {
+            "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+            "name": "Macroalgae alginate extraction and bioprocess kinetics",
+            "port_id": "biomass_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "msc_dissertation_2025",
+            "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+            "doi": "dissertation://msc/biotechnology/302068815/2025",
+            "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+          },
+          {
+            "mechanism_id": "zielinski.fermentation_balance",
+            "name": "Recombinant human insulin process accounting",
+            "port_id": "biomass_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "zielinski2019",
+            "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+            "doi": "10.1002/biot.201800531",
+            "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+          },
+          {
+            "mechanism_id": "baez.exponential_feed",
+            "name": "Exponential fed-batch feed rate control",
+            "port_id": "biomass_growth_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "baez2014",
+            "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+            "doi": "10.1186/1475-2859-13-50",
+            "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+          },
+          {
+            "mechanism_id": "lin.uptake_capacities",
+            "name": "Maximum substrate and oxygen uptake capacity kinetics",
+            "port_id": "glucose_uptake_capacity",
+            "quantity_type": "specific_rate",
+            "paper_id": "lin2000",
+            "paper_title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+            "doi": "10.1002/bit.1065",
+            "equation_summary": "Temperature- and oxygen-limited capacity caps for glucose and oxygen uptake with acetate overflow threshold."
+          },
+          {
+            "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+            "name": "Macroalgae alginate extraction and bioprocess kinetics",
+            "port_id": "specific_growth_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "msc_dissertation_2025",
+            "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+            "doi": "dissertation://msc/biotechnology/302068815/2025",
+            "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+          },
+          {
+            "mechanism_id": "nanchen.pirt_chemostat",
+            "name": "Pirt linear substrate consumption rate relation",
+            "port_id": "glucose_consumption_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "nanchen2006",
+            "paper_title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+            "doi": "10.1128/AEM.72.2.1164-1172.2006",
+            "equation_summary": "qglc = (mu / Yglc_max) * 1000 + mglc"
+          },
+          {
+            "mechanism_id": "zielinski.fermentation_balance",
+            "name": "Recombinant human insulin process accounting",
+            "port_id": "fermentation_volume",
+            "quantity_type": "volume",
+            "paper_id": "zielinski2019",
+            "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+            "doi": "10.1002/biot.201800531",
+            "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+          }
+        ]
+      },
+      {
+        "instance_id": "overflow_metabolism",
+        "model_id": "baez2014.overflow_metabolism",
+        "model_version": "0.1.0",
+        "label": "Exponential fed-batch feed rate control",
+        "parameters": {
+          "simulation": {
+            "duration_h": 10.0
+          }
+        },
+        "alternatives": [
+          {
+            "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+            "name": "Macroalgae alginate extraction and bioprocess kinetics",
+            "port_id": "feed_rate",
+            "quantity_type": "volume_flow",
+            "paper_id": "msc_dissertation_2025",
+            "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+            "doi": "dissertation://msc/biotechnology/302068815/2025",
+            "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+          },
+          {
+            "mechanism_id": "ganjave.growth_kinetics",
+            "name": "Cybernetic growth and substrate uptake",
+            "port_id": "specific_growth_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "ganjave2022",
+            "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+            "doi": "10.1016/j.bej.2021.108342",
+            "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+          },
+          {
+            "mechanism_id": "lin.uptake_capacities",
+            "name": "Maximum substrate and oxygen uptake capacity kinetics",
+            "port_id": "glucose_uptake_capacity",
+            "quantity_type": "specific_rate",
+            "paper_id": "lin2000",
+            "paper_title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+            "doi": "10.1002/bit.1065",
+            "equation_summary": "Temperature- and oxygen-limited capacity caps for glucose and oxygen uptake with acetate overflow threshold."
+          },
+          {
+            "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+            "name": "Macroalgae alginate extraction and bioprocess kinetics",
+            "port_id": "specific_growth_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "msc_dissertation_2025",
+            "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+            "doi": "dissertation://msc/biotechnology/302068815/2025",
+            "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+          },
+          {
+            "mechanism_id": "nanchen.pirt_chemostat",
+            "name": "Pirt linear substrate consumption rate relation",
+            "port_id": "glucose_consumption_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "nanchen2006",
+            "paper_title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+            "doi": "10.1128/AEM.72.2.1164-1172.2006",
+            "equation_summary": "qglc = (mu / Yglc_max) * 1000 + mglc"
+          },
+          {
+            "mechanism_id": "ganjave.growth_kinetics",
+            "name": "Cybernetic growth and substrate uptake",
+            "port_id": "biomass_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "ganjave2022",
+            "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+            "doi": "10.1016/j.bej.2021.108342",
+            "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+          },
+          {
+            "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+            "name": "Macroalgae alginate extraction and bioprocess kinetics",
+            "port_id": "biomass_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "msc_dissertation_2025",
+            "paper_title": "Valorising Seaweed Biomass as Films and Fibres",
+            "doi": "dissertation://msc/biotechnology/302068815/2025",
+            "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t))."
+          },
+          {
+            "mechanism_id": "zielinski.fermentation_balance",
+            "name": "Recombinant human insulin process accounting",
+            "port_id": "biomass_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "zielinski2019",
+            "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+            "doi": "10.1002/biot.201800531",
+            "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+          }
+        ]
+      }
+    ],
+    "connections": [
+      {
+        "connection_id": "conn_1_biomass_concentration",
+        "source": {
+          "instance_id": "growth_kinetics",
+          "port_id": "biomass_concentration"
+        },
+        "target": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "X_F"
+        },
+        "label": "Cross-paper coupling: biomass_concentration -> X_F"
+      },
+      {
+        "connection_id": "conn_2_biomass_concentration",
+        "source": {
+          "instance_id": "growth_kinetics",
+          "port_id": "biomass_concentration"
+        },
+        "target": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "t"
+        },
+        "label": "Cross-paper coupling: biomass_concentration -> t"
+      },
+      {
+        "connection_id": "conn_3_specific_growth_rate",
+        "source": {
+          "instance_id": "growth_kinetics",
+          "port_id": "specific_growth_rate"
+        },
+        "target": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "t"
+        },
+        "label": "Cross-paper coupling: specific_growth_rate -> t"
+      },
+      {
+        "connection_id": "conn_4_culture_volume",
+        "source": {
+          "instance_id": "growth_kinetics",
+          "port_id": "culture_volume"
+        },
+        "target": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "V_F"
+        },
+        "label": "Cross-paper coupling: culture_volume -> V_F"
+      },
+      {
+        "connection_id": "conn_5_culture_volume",
+        "source": {
+          "instance_id": "growth_kinetics",
+          "port_id": "culture_volume"
+        },
+        "target": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "t"
+        },
+        "label": "Cross-paper coupling: culture_volume -> t"
+      },
+      {
+        "connection_id": "conn_6_feed_rate",
+        "source": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "feed_rate"
+        },
+        "target": {
+          "instance_id": "growth_kinetics",
+          "port_id": "feed_rate"
+        },
+        "label": "Cross-paper coupling: feed_rate -> feed_rate"
+      },
+      {
+        "connection_id": "conn_7_acetate_concentration",
+        "source": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "acetate_concentration"
+        },
+        "target": {
+          "instance_id": "growth_kinetics",
+          "port_id": "glucose_concentration"
+        },
+        "label": "Cross-paper coupling: acetate_concentration -> glucose_concentration"
+      },
+      {
+        "connection_id": "conn_8_acetate_concentration",
+        "source": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "acetate_concentration"
+        },
+        "target": {
+          "instance_id": "growth_kinetics",
+          "port_id": "galactose_concentration"
+        },
+        "label": "Cross-paper coupling: acetate_concentration -> galactose_concentration"
+      },
+      {
+        "connection_id": "conn_9_biomass_concentration",
+        "source": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "biomass_concentration"
+        },
+        "target": {
+          "instance_id": "growth_kinetics",
+          "port_id": "glucose_concentration"
+        },
+        "label": "Cross-paper coupling: biomass_concentration -> glucose_concentration"
+      },
+      {
+        "connection_id": "conn_10_biomass_concentration",
+        "source": {
+          "instance_id": "overflow_metabolism",
+          "port_id": "biomass_concentration"
+        },
+        "target": {
+          "instance_id": "growth_kinetics",
+          "port_id": "galactose_concentration"
+        },
+        "label": "Cross-paper coupling: biomass_concentration -> galactose_concentration"
+      }
+    ],
+    "literal_inputs": {
+      "growth_kinetics/ganjave.Ks_galactose": {
+        "quantity": "mass_concentration",
+        "unit": "g/L",
+        "value": 0.1,
+        "reason": "From Central Library ganjave2022 empirical value",
+        "source_ref": "ganjave2022 Table 1"
+      },
+      "growth_kinetics/ganjave.Ks_glucose": {
+        "quantity": "mass_concentration",
+        "unit": "g/L",
+        "value": 0.05,
+        "reason": "From Central Library ganjave2022 empirical value",
+        "source_ref": "ganjave2022 Table 1"
+      },
+      "growth_kinetics/ganjave.O2_star": {
+        "quantity": "molar_concentration",
+        "unit": "mmol/L",
+        "value": 0.21,
+        "reason": "From Central Library ganjave2022 empirical value",
+        "source_ref": "ganjave2022 Eq. 16"
+      },
+      "growth_kinetics/ganjave.Y_X_galactose": {
+        "quantity": "mass_ratio",
+        "unit": "g/g",
+        "value": 0.45,
+        "reason": "From Central Library ganjave2022 empirical value",
+        "source_ref": "ganjave2022 Section 2.1"
+      },
+      "growth_kinetics/ganjave.Y_X_glucose": {
+        "quantity": "mass_ratio",
+        "unit": "g/g",
+        "value": 0.5,
+        "reason": "From Central Library ganjave2022 empirical value",
+        "source_ref": "ganjave2022 Section 2.1"
+      },
+      "growth_kinetics/ganjave.kLa": {
+        "quantity": "specific_rate",
+        "unit": "1/h",
+        "value": 133.0,
+        "reason": "From Central Library ganjave2022 empirical value",
+        "source_ref": "ganjave2022 Table S2"
+      },
+      "growth_kinetics/ganjave.mu_max": {
+        "quantity": "specific_rate",
+        "unit": "1/h",
+        "value": 1.5,
+        "reason": "From Central Library ganjave2022 empirical value",
+        "source_ref": "ganjave2022 Table 1 (Kinetics)"
+      },
+      "overflow_metabolism/baez.S_F": {
+        "quantity": "mass_concentration",
+        "unit": "g/L",
+        "value": 600.0,
+        "reason": "From Central Library baez2014 empirical value",
+        "source_ref": "baez2014 Page 6"
+      },
+      "overflow_metabolism/baez.Y_XS": {
+        "quantity": "mass_ratio",
+        "unit": "g/g",
+        "value": 0.5,
+        "reason": "From Central Library baez2014 empirical value",
+        "source_ref": "baez2014 Page 6"
+      },
+      "overflow_metabolism/baez.acetate_final": {
+        "quantity": "mass_concentration",
+        "unit": "g/L",
+        "value": 7.1,
+        "reason": "From Central Library baez2014 empirical value",
+        "source_ref": "baez2014 Page 3"
+      },
+      "overflow_metabolism/baez.dcw_final": {
+        "quantity": "mass_concentration",
+        "unit": "g/L",
+        "value": 29.1,
+        "reason": "From Central Library baez2014 empirical value",
+        "source_ref": "baez2014 Page 3"
+      },
+      "overflow_metabolism/baez.m": {
+        "quantity": "specific_rate",
+        "unit": "g/(g h)",
+        "value": 0.025,
+        "reason": "From Central Library baez2014 empirical value",
+        "source_ref": "baez2014 Page 6"
+      },
+      "overflow_metabolism/baez.mu_30_air_sat": {
+        "quantity": "specific_rate",
+        "unit": "1/h",
+        "value": 1.08,
+        "reason": "From Central Library baez2014 empirical value",
+        "source_ref": "baez2014 Page 2"
+      },
+      "overflow_metabolism/baez.mu_set": {
+        "quantity": "specific_rate",
+        "unit": "1/h",
+        "value": 0.2,
+        "reason": "From Central Library baez2014 empirical value",
+        "source_ref": "baez2014 Page 6"
+      },
+      "growth_kinetics/initial_biomass_concentration": {
+        "quantity": "mass_concentration",
+        "unit": "g/L",
+        "value": 0.1,
+        "reason": "Central library empirical prior",
+        "source_ref": "ganjave2022 Table 1"
+      },
+      "growth_kinetics/initial_complex_substrate_concentration": {
+        "quantity": "mass_concentration",
+        "unit": "g/L",
+        "value": 1.0,
+        "reason": "Central library empirical prior",
+        "source_ref": "ganjave2022 Table 1"
+      },
+      "growth_kinetics/initial_dissolved_oxygen": {
+        "quantity": "dimensionless",
+        "unit": "%",
+        "value": 100.0,
+        "reason": "Central library empirical prior",
+        "source_ref": "ganjave2022 Table 1"
+      }
+    }
+  },
+  "trajectories": {
+    "time_hours": [
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0,
+      8.5,
+      9.0,
+      9.5,
+      10.0,
+      10.5,
+      11.0,
+      11.5,
+      12.0,
+      12.5,
+      13.0,
+      13.5,
+      14.0,
+      14.5,
+      15.0,
+      15.5,
+      16.0,
+      16.5,
+      17.0,
+      17.5,
+      18.0,
+      18.5,
+      19.0,
+      19.5,
+      20.0
+    ],
+    "biomass_g_per_L": [
+      0.619,
+      0.767,
+      0.95,
+      1.176,
+      1.456,
+      1.802,
+      2.231,
+      2.762,
+      3.395,
+      4.173,
+      5.129,
+      6.302,
+      7.741,
+      9.504,
+      11.663,
+      14.299,
+      17.502,
+      21.131,
+      20.856,
+      25.48,
+      25.116,
+      30.661,
+      30.183,
+      36.816,
+      36.19,
+      44.101,
+      43.286,
+      52.695,
+      51.64,
+      62.796,
+      61.438,
+      74.623,
+      72.885,
+      88.418,
+      86.21,
+      104.449,
+      101.66,
+      123.006,
+      119.508,
+      144.408,
+      140.048
+    ],
+    "glucose_g_per_L": [
+      14.666,
+      14.252,
+      13.739,
+      13.105,
+      12.32,
+      11.348,
+      10.147,
+      8.66,
+      10.011,
+      11.109,
+      11.864,
+      12.169,
+      11.889,
+      10.857,
+      8.874,
+      5.7,
+      1.085,
+      0.0,
+      4.993,
+      0.0,
+      5.451,
+      0.0,
+      5.933,
+      0.0,
+      6.436,
+      0.0,
+      6.957,
+      0.0,
+      7.492,
+      0.0,
+      8.035,
+      0.0,
+      8.583,
+      0.0,
+      9.128,
+      0.0,
+      9.663,
+      0.0,
+      10.181,
+      0.0,
+      10.674
+    ],
+    "volume_L": [
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.04,
+      5.082,
+      5.128,
+      5.175,
+      5.226,
+      5.28,
+      5.338,
+      5.399,
+      5.463,
+      5.532,
+      5.605,
+      5.682,
+      5.764,
+      5.852,
+      5.944,
+      6.043,
+      6.147,
+      6.258,
+      6.376,
+      6.501,
+      6.634,
+      6.775,
+      6.924,
+      7.083,
+      7.252,
+      7.431,
+      7.622,
+      7.824,
+      8.039,
+      8.266,
+      8.508,
+      8.765,
+      9.038
+    ],
+    "feed_rate_L_per_h": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.08,
+      0.0849,
+      0.0902,
+      0.0958,
+      0.1017,
+      0.108,
+      0.1147,
+      0.1218,
+      0.1293,
+      0.1373,
+      0.1458,
+      0.1548,
+      0.1644,
+      0.1745,
+      0.1853,
+      0.1968,
+      0.2089,
+      0.2219,
+      0.2356,
+      0.2501,
+      0.2656,
+      0.282,
+      0.2995,
+      0.318,
+      0.3377,
+      0.3585,
+      0.3807,
+      0.4042,
+      0.4292,
+      0.4558,
+      0.484,
+      0.5139,
+      0.5457
+    ],
+    "specific_growth_rate_inv_h": [
+      0.477,
+      0.477,
+      0.477,
+      0.477,
+      0.476,
+      0.476,
+      0.476,
+      0.475,
+      0.475,
+      0.475,
+      0.476,
+      0.476,
+      0.476,
+      0.476,
+      0.476,
+      0.475,
+      0.472,
+      0.439,
+      0.0,
+      0.471,
+      0.0,
+      0.471,
+      0.0,
+      0.472,
+      0.0,
+      0.473,
+      0.0,
+      0.473,
+      0.0,
+      0.474,
+      0.0,
+      0.474,
+      0.0,
+      0.474,
+      0.0,
+      0.475,
+      0.0,
+      0.475,
+      0.0,
+      0.475,
+      0.0
+    ],
+    "dissolved_oxygen_pct": [
+      97.2,
+      96.5,
+      95.7,
+      94.7,
+      93.4,
+      91.9,
+      90.0,
+      87.6,
+      84.7,
+      81.2,
+      76.9,
+      71.6,
+      65.2,
+      57.2,
+      47.5,
+      35.7,
+      21.2,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0
+    ]
+  },
+  "summary": {
+    "final_biomass_dcw_g_L": 140.048,
+    "final_volume_L": 9.038,
+    "duration_hours": 20.0,
+    "scientific_confidence_pct": 50.0,
+    "has_analogue_bridge": true,
+    "combined_paper_count": 2,
+    "cross_paper_connection_count": 10
+  }
+}

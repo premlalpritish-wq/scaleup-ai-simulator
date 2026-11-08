@@ -44,6 +44,12 @@ def main() -> int:
         help="Spawn Godot simulation scene immediately",
     )
     parser.add_argument(
+        "--force-recompute",
+        action="store_true",
+        default=False,
+        help="Bypass simulation cache and re-run solver from scratch",
+    )
+    parser.add_argument(
         "--result",
         help="Optional path to write output JSON",
     )
@@ -55,6 +61,7 @@ def main() -> int:
         auto_research=args.auto_research,
         launch_godot=args.launch_godot,
         base=REPO_ROOT,
+        force_recompute=args.force_recompute,
     )
 
     print(f"Reconstruction status: {payload.get('status')}")

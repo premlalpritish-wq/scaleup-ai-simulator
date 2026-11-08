@@ -1,0 +1,1190 @@
+{
+  "schema_version": "1.0.0",
+  "papers": {
+    "baez2014": {
+      "paper_id": "baez2014",
+      "doi": "10.1186/1475-2859-13-50",
+      "title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+      "authors": [
+        "Antonino Baez",
+        "Nadim Majdalani",
+        "Joseph Shiloach"
+      ],
+      "year": 2014,
+      "sha256": "c959bcaa29e5569c9c1d005e8dc243978fe80754321e49ffa65e883b180732d5"
+    },
+    "ganjave2022": {
+      "paper_id": "ganjave2022",
+      "doi": "10.1016/j.bej.2021.108342",
+      "title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+      "authors": [
+        "Milind Ganjave",
+        "et al."
+      ],
+      "year": 2022,
+      "sha256": "ebad04319d0d22c22d464e4d2e23063d0f405c969e97060158f25bf9695fdd4d"
+    },
+    "lin2000": {
+      "paper_id": "lin2000",
+      "doi": "10.1002/bit.1065",
+      "title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+      "authors": [
+        "H. Y. Lin",
+        "B. Mathiszik",
+        "B. Xu",
+        "S.-O. Enfors",
+        "P. Neubauer"
+      ],
+      "year": 2001,
+      "sha256": "920102a4733f18a59b82de6d6141e3b9048921e1c1291a4bbeb55c268a128c0f"
+    },
+    "morris2011": {
+      "paper_id": "morris2011",
+      "doi": "10.1017/CBO9780511977756",
+      "title": "Chemical Engineering Design and Analysis: An Introduction (Chapter 4 Material Balances)",
+      "authors": [
+        "T. Duncan Morris",
+        "Gordon Geiger",
+        "Linda Fine"
+      ],
+      "year": 2011,
+      "sha256": "5f2d5131f364e143bc0cd5e04512dac695551e15c4a324d896b8dff7725900a8"
+    },
+    "msc_dissertation_2025": {
+      "paper_id": "msc_dissertation_2025",
+      "doi": "dissertation://msc/biotechnology/302068815/2025",
+      "title": "Valorising Seaweed Biomass as Films and Fibres",
+      "authors": [
+        "Prenithan (Candidate 302068815)"
+      ],
+      "year": 2025,
+      "sha256": "6c17efa002e7ac1b2c219d7f6cdf9400a7bcfba789008ee3b911a5ba9bff2d3c"
+    },
+    "nanchen2006": {
+      "paper_id": "nanchen2006",
+      "doi": "10.1128/AEM.72.2.1164-1172.2006",
+      "title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+      "authors": [
+        "A. Nanchen",
+        "A. Schicker",
+        "U. Sauer"
+      ],
+      "year": 2006,
+      "sha256": "f4faaf678468004b529d639f8622ae727cdf123d7ad5150a66cbbadf2f5e31ba"
+    },
+    "simensen2022": {
+      "paper_id": "simensen2022",
+      "doi": "10.1002/bit.28189",
+      "title": "Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+      "authors": [
+        "V. Simensen",
+        "et al."
+      ],
+      "year": 2022,
+      "sha256": "9586c0b923e37ec2bdc4dc8f07a804be6eea53fa8a445ff3d001811418ec798e"
+    },
+    "zielinski2019": {
+      "paper_id": "zielinski2019",
+      "doi": "10.1002/biot.201800531",
+      "title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+      "authors": [
+        "Marcin Zieliński",
+        "et al."
+      ],
+      "year": 2019,
+      "sha256": "b0dad4a20a49d83a9fc461e01fd96d98cfa2ab54b912b6465650f5d68b26928b"
+    }
+  },
+  "parameters": {
+    "baez.S_F": {
+      "param_id": "baez.S_F",
+      "quantity_type": "mass_concentration",
+      "value": 600.0,
+      "unit": "g/L",
+      "paper_id": "baez2014",
+      "verbatim_quote": "glucose feed solution concentration S_F = 600 g/L",
+      "section_anchor": "Page 6",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "baez.Y_XS": {
+      "param_id": "baez.Y_XS",
+      "quantity_type": "mass_ratio",
+      "value": 0.5,
+      "unit": "g/g",
+      "paper_id": "baez2014",
+      "verbatim_quote": "yield coefficient Y_XS = 0.5 g/g",
+      "section_anchor": "Page 6",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "baez.acetate_final": {
+      "param_id": "baez.acetate_final",
+      "quantity_type": "mass_concentration",
+      "value": 7.1,
+      "unit": "g/L",
+      "paper_id": "baez2014",
+      "verbatim_quote": "final accumulated acetate 7.1 g/L",
+      "section_anchor": "Page 3",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "baez.dcw_final": {
+      "param_id": "baez.dcw_final",
+      "quantity_type": "mass_concentration",
+      "value": 29.1,
+      "unit": "g/L",
+      "paper_id": "baez2014",
+      "verbatim_quote": "final cell dry weight 29.1 g/L",
+      "section_anchor": "Page 3",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "baez.m": {
+      "param_id": "baez.m",
+      "quantity_type": "specific_rate",
+      "value": 0.025,
+      "unit": "g/(g h)",
+      "paper_id": "baez2014",
+      "verbatim_quote": "maintenance coefficient m = 0.025 g/(g h)",
+      "section_anchor": "Page 6",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "baez.mu_30_air_sat": {
+      "param_id": "baez.mu_30_air_sat",
+      "quantity_type": "specific_rate",
+      "value": 1.08,
+      "unit": "1/h",
+      "paper_id": "baez2014",
+      "verbatim_quote": "specific growth rate 1.08 h^-1 at 30% air saturation",
+      "section_anchor": "Page 2",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "baez.mu_set": {
+      "param_id": "baez.mu_set",
+      "quantity_type": "specific_rate",
+      "value": 0.2,
+      "unit": "1/h",
+      "paper_id": "baez2014",
+      "verbatim_quote": "exponential feed rate setting mu_set = 0.2 h^-1",
+      "section_anchor": "Page 6",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "ganjave.Ks_galactose": {
+      "param_id": "ganjave.Ks_galactose",
+      "quantity_type": "mass_concentration",
+      "value": 0.1,
+      "unit": "g/L",
+      "paper_id": "ganjave2022",
+      "verbatim_quote": "galactose saturation constant Ks2 = 0.10 g/L",
+      "section_anchor": "Table 1",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "BL21(DE3)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined minimal glucose",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "ganjave.Ks_glucose": {
+      "param_id": "ganjave.Ks_glucose",
+      "quantity_type": "mass_concentration",
+      "value": 0.05,
+      "unit": "g/L",
+      "paper_id": "ganjave2022",
+      "verbatim_quote": "glucose saturation constant Ks1 = 0.05 g/L",
+      "section_anchor": "Table 1",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "BL21(DE3)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined minimal glucose",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "ganjave.O2_star": {
+      "param_id": "ganjave.O2_star",
+      "quantity_type": "molar_concentration",
+      "value": 0.21,
+      "unit": "mmol/L",
+      "paper_id": "ganjave2022",
+      "verbatim_quote": "dissolved oxygen saturation concentration",
+      "section_anchor": "Eq. 16",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "BL21(DE3)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined minimal glucose",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "ganjave.Y_X_galactose": {
+      "param_id": "ganjave.Y_X_galactose",
+      "quantity_type": "mass_ratio",
+      "value": 0.45,
+      "unit": "g/g",
+      "paper_id": "ganjave2022",
+      "verbatim_quote": "biomass yield coefficient on galactose Y_X/S = 0.45 g/g",
+      "section_anchor": "Section 2.1",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "BL21(DE3)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined minimal glucose",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "ganjave.Y_X_glucose": {
+      "param_id": "ganjave.Y_X_glucose",
+      "quantity_type": "mass_ratio",
+      "value": 0.5,
+      "unit": "g/g",
+      "paper_id": "ganjave2022",
+      "verbatim_quote": "biomass yield coefficient on glucose Y_X/S = 0.5 g/g",
+      "section_anchor": "Section 2.1",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "BL21(DE3)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined minimal glucose",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "ganjave.kLa": {
+      "param_id": "ganjave.kLa",
+      "quantity_type": "specific_rate",
+      "value": 133.0,
+      "unit": "1/h",
+      "paper_id": "ganjave2022",
+      "verbatim_quote": "volumetric oxygen transfer coefficient kLa = 133 h^-1",
+      "section_anchor": "Table S2",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "BL21(DE3)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined minimal glucose",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "ganjave.mu_max": {
+      "param_id": "ganjave.mu_max",
+      "quantity_type": "specific_rate",
+      "value": 1.5,
+      "unit": "1/h",
+      "paper_id": "ganjave2022",
+      "verbatim_quote": "maximum specific growth rate mu_max = 1.5 h^-1",
+      "section_anchor": "Table 1 (Kinetics)",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "BL21(DE3)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined minimal glucose",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "lin.H_henry": {
+      "param_id": "lin.H_henry",
+      "quantity_type": "dimensionless",
+      "value": 14000.0,
+      "unit": "% L/g",
+      "paper_id": "lin2000",
+      "verbatim_quote": "oxygen solubility constant H = 14000 % L/g",
+      "section_anchor": "Page 356",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110 / RB791",
+        "temperature_c": 35.0,
+        "ph": 7.0,
+        "medium": "phosphate-buffered mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "lin.mu_max": {
+      "param_id": "lin.mu_max",
+      "quantity_type": "specific_rate",
+      "value": 0.55,
+      "unit": "1/h",
+      "paper_id": "lin2000",
+      "verbatim_quote": "maximum growth rate mu_max = 0.55 h^-1",
+      "section_anchor": "Page 348",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110 / RB791",
+        "temperature_c": 35.0,
+        "ph": 7.0,
+        "medium": "phosphate-buffered mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "lin.q_o_max": {
+      "param_id": "lin.q_o_max",
+      "quantity_type": "specific_rate",
+      "value": 15.0,
+      "unit": "mmol/(g h)",
+      "paper_id": "lin2000",
+      "verbatim_quote": "maximum specific oxygen uptake capacity q_O,max = 15 mmol/(g h)",
+      "section_anchor": "Page 349",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110 / RB791",
+        "temperature_c": 35.0,
+        "ph": 7.0,
+        "medium": "phosphate-buffered mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "lin.q_s_max_35": {
+      "param_id": "lin.q_s_max_35",
+      "quantity_type": "specific_rate",
+      "value": 1.35,
+      "unit": "g/(g h)",
+      "paper_id": "lin2000",
+      "verbatim_quote": "maximum specific glucose uptake capacity q_S,max = 1.35 g/(g h)",
+      "section_anchor": "Page 348",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "W3110 / RB791",
+        "temperature_c": 35.0,
+        "ph": 7.0,
+        "medium": "phosphate-buffered mineral salt medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "morris.conservation_tolerance": {
+      "param_id": "morris.conservation_tolerance",
+      "quantity_type": "dimensionless",
+      "value": 1e-06,
+      "unit": "dimensionless",
+      "paper_id": "morris2011",
+      "verbatim_quote": "Mass in equals mass out for steady state non-reacting system",
+      "section_anchor": "Chapter 4, Section 4.2",
+      "biological_context": {
+        "organism": "Universal",
+        "strain": "control_volume",
+        "temperature_c": null,
+        "ph": null,
+        "medium": "multi-component stream",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.Mw_extracted": {
+      "param_id": "msc_dissertation.Mw_extracted",
+      "quantity_type": "molecular_weight",
+      "value": 251.0,
+      "unit": "kDa",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "weight-average molecular weight Mw = 251 kDa with narrow PDI = 1.17",
+      "section_anchor": "Table 4 (GPC)",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.alginate_purity": {
+      "param_id": "msc_dissertation.alginate_purity",
+      "quantity_type": "mass_fraction",
+      "value": 0.915,
+      "unit": "g/g",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "total alginate purity 91.5% in dry extracted product",
+      "section_anchor": "Table 3 (HPAEC)",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.extraction_na2co3": {
+      "param_id": "msc_dissertation.extraction_na2co3",
+      "quantity_type": "mass_fraction",
+      "value": 2.0,
+      "unit": "%",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "2% (w/v) sodium carbonate alkaline solubilisation",
+      "section_anchor": "Section 2.1",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.fibre_tensile_strength": {
+      "param_id": "msc_dissertation.fibre_tensile_strength",
+      "quantity_type": "stress",
+      "value": 29.3,
+      "unit": "MPa",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "mean ultimate tensile strength of wet-spun extracted alginate fibre = 29.3 MPa",
+      "section_anchor": "Section 3.5 & Figure 8",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.fibre_youngs_modulus": {
+      "param_id": "msc_dissertation.fibre_youngs_modulus",
+      "quantity_type": "modulus",
+      "value": 0.1,
+      "unit": "MPa",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "mean Young's modulus of extracted alginate fibre = 0.10 MPa",
+      "section_anchor": "Table 6",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.mannuronic_guluronic_ratio": {
+      "param_id": "msc_dissertation.mannuronic_guluronic_ratio",
+      "quantity_type": "dimensionless",
+      "value": 2.491,
+      "unit": "-",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "mannuronic acid to guluronic acid ratio M/G = 2.491",
+      "section_anchor": "Table 3 (HPAEC)",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.pretreatment_citric_acid": {
+      "param_id": "msc_dissertation.pretreatment_citric_acid",
+      "quantity_type": "mass_fraction",
+      "value": 4.0,
+      "unit": "%",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "4% (w/v) citric acid demineralisation wash",
+      "section_anchor": "Section 2.1",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.yield_scaled_up": {
+      "param_id": "msc_dissertation.yield_scaled_up",
+      "quantity_type": "mass_ratio",
+      "value": 0.3307,
+      "unit": "g/g",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "scaled-up two-stage extraction yield Y = 0.33 g/g dry biomass (33%)",
+      "section_anchor": "Section 3.1 & Table 1",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "msc_dissertation.yield_small_scale": {
+      "param_id": "msc_dissertation.yield_small_scale",
+      "quantity_type": "mass_ratio",
+      "value": 0.26,
+      "unit": "g/g",
+      "paper_id": "msc_dissertation_2025",
+      "verbatim_quote": "initial small-scale neutralised extraction yield Y = 0.26 g/g dry biomass (26%)",
+      "section_anchor": "Table 1 (Yield analysis)",
+      "biological_context": {
+        "organism": "Saccharina latissima",
+        "strain": "wild-harvested sugar kelp",
+        "temperature_c": 20.0,
+        "ph": 7.0,
+        "medium": "citric acid demineralised aqueous sodium carbonate",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "nanchen.Y_glc_max": {
+      "param_id": "nanchen.Y_glc_max",
+      "quantity_type": "molar_mass_ratio",
+      "value": 76.0,
+      "unit": "g/mol",
+      "paper_id": "nanchen2006",
+      "verbatim_quote": "maximum molar biomass yield Yglc_max = 76 gdw mol-1",
+      "section_anchor": "Table 1",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "MG1655 (F- rph-1)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "M9 minimal glucose medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "nanchen.m_glc": {
+      "param_id": "nanchen.m_glc",
+      "quantity_type": "specific_rate",
+      "value": 0.37,
+      "unit": "mmol/(g h)",
+      "paper_id": "nanchen2006",
+      "verbatim_quote": "maintenance energy coefficient mglc = 0.37 mmol gdw-1 h-1",
+      "section_anchor": "Table 1",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "MG1655 (F- rph-1)",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "M9 minimal glucose medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "simensen.carbohydrate_fraction": {
+      "param_id": "simensen.carbohydrate_fraction",
+      "quantity_type": "mass_ratio",
+      "value": 0.0312,
+      "unit": "g/g",
+      "paper_id": "simensen2022",
+      "verbatim_quote": "carbohydrate mass fraction 0.0312 g/gCDW",
+      "section_anchor": "Table 1 (This work)",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "MG1655",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined glucose minimal medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "simensen.dna_fraction": {
+      "param_id": "simensen.dna_fraction",
+      "quantity_type": "mass_ratio",
+      "value": 0.013,
+      "unit": "g/g",
+      "paper_id": "simensen2022",
+      "verbatim_quote": "DNA mass fraction 0.013 g/gCDW",
+      "section_anchor": "Table 1 (This work)",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "MG1655",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined glucose minimal medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "simensen.lipid_fraction": {
+      "param_id": "simensen.lipid_fraction",
+      "quantity_type": "mass_ratio",
+      "value": 0.061,
+      "unit": "g/g",
+      "paper_id": "simensen2022",
+      "verbatim_quote": "lipid mass fraction 0.061 g/gCDW",
+      "section_anchor": "Table 1 (This work)",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "MG1655",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined glucose minimal medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "simensen.protein_fraction": {
+      "param_id": "simensen.protein_fraction",
+      "quantity_type": "mass_ratio",
+      "value": 0.54,
+      "unit": "g/g",
+      "paper_id": "simensen2022",
+      "verbatim_quote": "protein mass fraction 0.54 g/gCDW",
+      "section_anchor": "Table 1 (This work)",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "MG1655",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined glucose minimal medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "simensen.rna_fraction": {
+      "param_id": "simensen.rna_fraction",
+      "quantity_type": "mass_ratio",
+      "value": 0.19,
+      "unit": "g/g",
+      "paper_id": "simensen2022",
+      "verbatim_quote": "RNA mass fraction 0.19 g/gCDW",
+      "section_anchor": "Table 1 (This work)",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "MG1655",
+        "temperature_c": 37.0,
+        "ph": 7.0,
+        "medium": "defined glucose minimal medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "zielinski.X_final": {
+      "param_id": "zielinski.X_final",
+      "quantity_type": "mass_concentration",
+      "value": 36.8,
+      "unit": "g/L",
+      "paper_id": "zielinski2019",
+      "verbatim_quote": "Final biomass concentration 36.8 g/L",
+      "section_anchor": "Page 65",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "20 IBA 1 (CSH50R derivative)",
+        "temperature_c": 30.0,
+        "ph": 6.8,
+        "medium": "GMS semi-synthetic medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "zielinski.insulin_yield": {
+      "param_id": "zielinski.insulin_yield",
+      "quantity_type": "mass_concentration",
+      "value": 0.45,
+      "unit": "g/L",
+      "paper_id": "zielinski2019",
+      "verbatim_quote": "Recombinant proinsulin yield",
+      "section_anchor": "Page 66",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "20 IBA 1 (CSH50R derivative)",
+        "temperature_c": 30.0,
+        "ph": 6.8,
+        "medium": "GMS semi-synthetic medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "zielinski.mu_batch": {
+      "param_id": "zielinski.mu_batch",
+      "quantity_type": "specific_rate",
+      "value": 0.35,
+      "unit": "1/h",
+      "paper_id": "zielinski2019",
+      "verbatim_quote": "Specific growth rate in batch phase",
+      "section_anchor": "Page 64",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "20 IBA 1 (CSH50R derivative)",
+        "temperature_c": 30.0,
+        "ph": 6.8,
+        "medium": "GMS semi-synthetic medium",
+        "evidence_tier": "DIRECT"
+      }
+    },
+    "zielinski.working_volume": {
+      "param_id": "zielinski.working_volume",
+      "quantity_type": "volume",
+      "value": 4.0,
+      "unit": "L",
+      "paper_id": "zielinski2019",
+      "verbatim_quote": "Working volume 4 L in 7.5 L reactor",
+      "section_anchor": "Page 64",
+      "biological_context": {
+        "organism": "Escherichia coli",
+        "strain": "20 IBA 1 (CSH50R derivative)",
+        "temperature_c": 30.0,
+        "ph": 6.8,
+        "medium": "GMS semi-synthetic medium",
+        "evidence_tier": "DIRECT"
+      }
+    }
+  },
+  "mechanisms": {
+    "baez.exponential_feed": {
+      "mechanism_id": "baez.exponential_feed",
+      "name": "Exponential fed-batch feed rate control",
+      "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))",
+      "input_ports": [
+        {
+          "port_id": "X_F",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        },
+        {
+          "port_id": "V_F",
+          "quantity_type": "volume",
+          "unit": "L",
+          "description": ""
+        },
+        {
+          "port_id": "t_F",
+          "quantity_type": "time",
+          "unit": "h",
+          "description": ""
+        },
+        {
+          "port_id": "t",
+          "quantity_type": "time",
+          "unit": "h",
+          "description": ""
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "feed_rate",
+          "quantity_type": "volume_flow",
+          "unit": "L/h",
+          "description": ""
+        },
+        {
+          "port_id": "biomass_growth_rate",
+          "quantity_type": "specific_rate",
+          "unit": "1/h",
+          "description": ""
+        },
+        {
+          "port_id": "acetate_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        },
+        {
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        }
+      ],
+      "paper_id": "baez2014",
+      "compatible_contexts": [
+        {
+          "organism": "Escherichia coli",
+          "strain": "W3110",
+          "mode": "fed_batch",
+          "temperature_c": 37.0,
+          "ph": 7.0
+        }
+      ]
+    },
+    "ganjave.growth_kinetics": {
+      "mechanism_id": "ganjave.growth_kinetics",
+      "name": "Cybernetic growth and substrate uptake",
+      "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation.",
+      "input_ports": [
+        {
+          "port_id": "glucose_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        },
+        {
+          "port_id": "galactose_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        },
+        {
+          "port_id": "dissolved_oxygen",
+          "quantity_type": "dissolved_oxygen",
+          "unit": "%",
+          "description": ""
+        },
+        {
+          "port_id": "feed_rate",
+          "quantity_type": "volume_flow",
+          "unit": "L/h",
+          "description": ""
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        },
+        {
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "unit": "1/h",
+          "description": ""
+        },
+        {
+          "port_id": "dissolved_oxygen",
+          "quantity_type": "dissolved_oxygen",
+          "unit": "%",
+          "description": ""
+        },
+        {
+          "port_id": "culture_volume",
+          "quantity_type": "volume",
+          "unit": "L",
+          "description": ""
+        }
+      ],
+      "paper_id": "ganjave2022",
+      "compatible_contexts": [
+        {
+          "organism": "Escherichia coli",
+          "strain": "BL21(DE3)",
+          "mode": "fed_batch",
+          "temperature_c": 37.0,
+          "ph": 7.0
+        }
+      ]
+    },
+    "lin.uptake_capacities": {
+      "mechanism_id": "lin.uptake_capacities",
+      "name": "Maximum substrate and oxygen uptake capacity kinetics",
+      "equation_summary": "Temperature- and oxygen-limited capacity caps for glucose and oxygen uptake with acetate overflow threshold.",
+      "input_ports": [
+        {
+          "port_id": "temperature",
+          "quantity_type": "temperature",
+          "unit": "degC",
+          "description": ""
+        },
+        {
+          "port_id": "dissolved_oxygen",
+          "quantity_type": "dissolved_oxygen",
+          "unit": "%",
+          "description": ""
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "glucose_uptake_capacity",
+          "quantity_type": "specific_rate",
+          "unit": "g/(g h)",
+          "description": ""
+        },
+        {
+          "port_id": "oxygen_uptake_capacity",
+          "quantity_type": "specific_rate",
+          "unit": "mmol/(g h)",
+          "description": ""
+        },
+        {
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "unit": "1/h",
+          "description": ""
+        }
+      ],
+      "paper_id": "lin2000",
+      "compatible_contexts": [
+        {
+          "organism": "Escherichia coli",
+          "strain": "W3110",
+          "mode": "fed_batch",
+          "temperature_c": 35.0,
+          "ph": 7.0
+        }
+      ]
+    },
+    "morris.material_balance": {
+      "mechanism_id": "morris.material_balance",
+      "name": "Steady-state material balance",
+      "equation_summary": "Total and component mass balance equations without generation/consumption.",
+      "input_ports": [
+        {
+          "port_id": "stream_mass_in",
+          "quantity_type": "mass",
+          "unit": "kg",
+          "description": ""
+        },
+        {
+          "port_id": "component_fraction_in",
+          "quantity_type": "mass_ratio",
+          "unit": "kg/kg",
+          "description": ""
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "stream_mass_out",
+          "quantity_type": "mass",
+          "unit": "kg",
+          "description": ""
+        },
+        {
+          "port_id": "component_fraction_out",
+          "quantity_type": "mass_ratio",
+          "unit": "kg/kg",
+          "description": ""
+        }
+      ],
+      "paper_id": "morris2011",
+      "compatible_contexts": [
+        {
+          "organism": "Universal",
+          "mode": "control_volume"
+        }
+      ]
+    },
+    "msc_dissertation.bioprocess_kinetics": {
+      "mechanism_id": "msc_dissertation.bioprocess_kinetics",
+      "name": "Macroalgae alginate extraction and bioprocess kinetics",
+      "equation_summary": "Solid-liquid extraction kinetics and mass balance modeling polymer yield as a function of biomass loading, extraction duration, and alkaline reagent feed rate: Y(t) = Y_max * (1 - exp(-k_ext * t)).",
+      "input_ports": [
+        {
+          "port_id": "t",
+          "quantity_type": "time",
+          "unit": "h",
+          "description": "Process / extraction elapsed time"
+        },
+        {
+          "port_id": "biomass",
+          "quantity_type": "mass",
+          "unit": "g",
+          "description": "Biomass input dry mass"
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "product_yield",
+          "quantity_type": "mass_ratio",
+          "unit": "g/g",
+          "description": "Biopolymer product yield relative to dry biomass"
+        },
+        {
+          "port_id": "feed_rate",
+          "quantity_type": "volume_flow",
+          "unit": "L/h",
+          "description": "Effluent / extractant feed rate"
+        },
+        {
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": "Biomass concentration"
+        },
+        {
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "unit": "1/h",
+          "description": "Equivalent biomass accumulation rate"
+        }
+      ],
+      "paper_id": "msc_dissertation_2025",
+      "compatible_contexts": [
+        {
+          "organism": "Saccharina latissima",
+          "strain": "wild-harvested sugar kelp",
+          "mode": "batch",
+          "temperature_c": 20.0,
+          "ph": 7.0
+        }
+      ]
+    },
+    "nanchen.pirt_chemostat": {
+      "mechanism_id": "nanchen.pirt_chemostat",
+      "name": "Pirt linear substrate consumption rate relation",
+      "equation_summary": "qglc = (mu / Yglc_max) * 1000 + mglc",
+      "input_ports": [
+        {
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "unit": "1/h",
+          "description": ""
+        },
+        {
+          "port_id": "biomass_yield",
+          "quantity_type": "mass_ratio",
+          "unit": "g/g",
+          "description": ""
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "glucose_consumption_rate",
+          "quantity_type": "specific_rate",
+          "unit": "mmol/(g h)",
+          "description": ""
+        },
+        {
+          "port_id": "maintenance_rate",
+          "quantity_type": "specific_rate",
+          "unit": "mmol/(g h)",
+          "description": ""
+        }
+      ],
+      "paper_id": "nanchen2006",
+      "compatible_contexts": [
+        {
+          "organism": "Escherichia coli",
+          "strain": "MG1655",
+          "mode": "chemostat",
+          "temperature_c": 37.0,
+          "ph": 7.0
+        }
+      ]
+    },
+    "simensen.biomass_composition": {
+      "mechanism_id": "simensen.biomass_composition",
+      "name": "Macromolecular biomass composition partition",
+      "equation_summary": "Partition of dry cell weight into protein, RNA, DNA, and lipid fractions.",
+      "input_ports": [
+        {
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "protein_fraction",
+          "quantity_type": "mass_ratio",
+          "unit": "g/g",
+          "description": ""
+        },
+        {
+          "port_id": "rna_fraction",
+          "quantity_type": "mass_ratio",
+          "unit": "g/g",
+          "description": ""
+        },
+        {
+          "port_id": "dna_fraction",
+          "quantity_type": "mass_ratio",
+          "unit": "g/g",
+          "description": ""
+        },
+        {
+          "port_id": "lipid_fraction",
+          "quantity_type": "mass_ratio",
+          "unit": "g/g",
+          "description": ""
+        }
+      ],
+      "paper_id": "simensen2022",
+      "compatible_contexts": [
+        {
+          "organism": "Escherichia coli",
+          "strain": "MG1655",
+          "mode": "batch",
+          "temperature_c": 37.0,
+          "ph": 7.0
+        }
+      ]
+    },
+    "zielinski.fermentation_balance": {
+      "mechanism_id": "zielinski.fermentation_balance",
+      "name": "Recombinant human insulin process accounting",
+      "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield.",
+      "input_ports": [
+        {
+          "port_id": "starting_medium_volume",
+          "quantity_type": "volume",
+          "unit": "L",
+          "description": ""
+        },
+        {
+          "port_id": "glucose_feed_mass",
+          "quantity_type": "mass",
+          "unit": "g",
+          "description": ""
+        },
+        {
+          "port_id": "induction_optical_density",
+          "quantity_type": "optical_density",
+          "unit": "AU",
+          "description": ""
+        }
+      ],
+      "output_ports": [
+        {
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "unit": "g/L",
+          "description": ""
+        },
+        {
+          "port_id": "recombinant_protein_mass",
+          "quantity_type": "mass",
+          "unit": "g",
+          "description": ""
+        },
+        {
+          "port_id": "fermentation_volume",
+          "quantity_type": "volume",
+          "unit": "L",
+          "description": ""
+        }
+      ],
+      "paper_id": "zielinski2019",
+      "compatible_contexts": [
+        {
+          "organism": "Escherichia coli",
+          "strain": "20 IBA 1",
+          "mode": "fed_batch",
+          "temperature_c": 30.0,
+          "ph": 6.8
+        }
+      ]
+    }
+  }
+}

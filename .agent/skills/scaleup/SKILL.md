@@ -46,6 +46,22 @@ flowchart TD
      - Strain-bridge badges (`[DIRECT]` vs `[ANALOGUE_BRIDGE]`).
      - Live hot-swap dropdowns to switch competing published mechanisms on the fly.
 
+## Execution Policy & Ultra-Low Latency (<30s Rule)
+
+> [!IMPORTANT]
+> **IMMEDIATE EXECUTION MANDATE**:
+> When `/scaleup <prompt>` or bioprocess simulation is requested, do **NOT** spend turns browsing directories or reading model files. The underlying script `research_to_godot.py` is fully autonomous and self-contained:
+> - Checks disk cache in <1s (cached replays execute in **~0.76s**).
+> - Resolves missing literature via OpenAlex / CrossRef automatically on cache miss.
+> - Solves trajectories and generates Anatomy SVG.
+> - Spawns Godot 4.x GUI immediately on interactive desktop.
+> 
+> **Execute on Tool Call 1**:
+> ```powershell
+> python composition/tools/research_to_godot.py --prompt "<prompt>" --launch-godot
+> ```
+> Inspect the JSON output in the return stream, then respond to the user immediately. Target latency: **< 5 seconds**.
+
 ## Command-Line Usage
 
 Run from repository root:

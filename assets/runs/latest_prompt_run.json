@@ -1,0 +1,1275 @@
+{
+  "contract_version": "0.1.0",
+  "schema_version": "1.0.0",
+  "run_id": "prompt_run_ff8357b7",
+  "status": "COMPLETED",
+  "prompt": "Simulate Saccharina latissima alginate extraction",
+  "cache_hit": true,
+  "confidence_score": 100.0,
+  "has_analogue_bridge": false,
+  "researched_papers": [],
+  "diagram_path": "assets/diagrams/active_anatomy_blueprint.svg",
+  "anatomy_blueprint": {
+    "process_domain": "biopolymer_extraction",
+    "title": "6-Stage Saccharina latissima Alginate Extraction & Wet Spinning Train",
+    "target_organism": "Saccharina latissima",
+    "duration_hours": 40.0,
+    "unit_operations": [
+      {
+        "stage_id": "dry_biomass_milling",
+        "index": 0,
+        "title": "0. Dry Kelp Milling & Weighing",
+        "equipment_primitive": "dry_biomass_hopper_mill",
+        "time_window_h": [
+          0.0,
+          2.0
+        ],
+        "streams_in": [
+          "Whole Dried Saccharina latissima Fronds (15.0 g Dry Mass)"
+        ],
+        "streams_out": [
+          "Milled Dry Brown Seaweed Flakes (15.0 g)"
+        ],
+        "required_parameters": [
+          "msc_dissertation.dry_mass_loading",
+          "msc_dissertation.target_organism"
+        ],
+        "governing_equation": "Size reduction: 15.0 g dried Saccharina latissima fronds milled to 0.5-2.0 mm flakes on precision analytical balance.",
+        "verbatim_quote": "15.0 g of dried brown kelp (Saccharina latissima) was weighed out and milled into flakes",
+        "doi": "dissertation://msc/biotechnology/302068815/2025",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#4a3520",
+          "color_end_hex": "#382410",
+          "solid_phase": {
+            "solid_form": "milled_seaweed_pile",
+            "pile_mesh_name": "DryMilledSeaweedPile",
+            "frond_count": 12,
+            "flake_count": 85,
+            "mass_g": 15.0,
+            "organism": "Saccharina latissima",
+            "label_text": "RAW BIOMASS: 15.0 g Dry Milled Saccharina latissima (Sugar Kelp)"
+          },
+          "rpm": 1800.0
+        },
+        "blackboard": {
+          "what_went_in": "15.0 g Dried Whole Brown Kelp Fronds",
+          "physical_state": "Rotary Grinding & Weighing -> Conical Pile of Coarse Flakes on Analytical Balance",
+          "what_comes_out": "15.0 g Dry Milled Flakes -> Chute Feed to Tank 1"
+        }
+      },
+      {
+        "stage_id": "acid_demineralisation",
+        "index": 1,
+        "title": "1. Acid Demineralisation Wash",
+        "equipment_primitive": "agitated_extraction_vessel",
+        "time_window_h": [
+          2.0,
+          16.0
+        ],
+        "streams_in": [
+          "Milled Seaweed Flakes (15.0 g)",
+          "4% (w/v) Citric Acid Pretreatment (500 mL)"
+        ],
+        "streams_out": [
+          "Demineralised Biomass Pulp",
+          "Ca2+/Mg2+ Mineral Effluent"
+        ],
+        "required_parameters": [
+          "msc_dissertation.pretreatment_citric_acid",
+          "msc_dissertation.yield_small_scale"
+        ],
+        "governing_equation": "Demineralisation wash: Ca2+ / Mg2+ ion exchange and polyphenol elimination at pH 2.8, 20°C.",
+        "verbatim_quote": "4% (w/v) citric acid demineralisation wash",
+        "doi": "dissertation://msc/biotechnology/302068815/2025",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#1e293b",
+          "color_end_hex": "#334155",
+          "turbidity_port": "biomass_g_per_L",
+          "rpm": 120.0,
+          "reagent_feed": "4% Citric Acid Wash",
+          "viscosity": 0.08,
+          "vortex_speed": 2.5,
+          "solid_phase": {
+            "solid_form": "suspended_kelp_flakes",
+            "flakes_group_name": "SolidKelpFlakesGroup",
+            "flake_count": 120,
+            "flake_size_m": 0.08,
+            "insoluble": true
+          }
+        },
+        "blackboard": {
+          "what_went_in": "15.0 g Dry Milled Kelp Flakes + 500 mL Citric Acid (4%)",
+          "physical_state": "Solid Kelp Swelling & Demineralisation -> Ca2+/Mg2+ Leached (Solids Retained)",
+          "what_comes_out": "Demineralised Alginic-Acid Kelp Pulp (Solid Phase)"
+        }
+      },
+      {
+        "stage_id": "alkaline_solubilisation",
+        "index": 2,
+        "title": "2. Alkaline Extraction & Solubilisation",
+        "equipment_primitive": "agitated_extraction_vessel",
+        "time_window_h": [
+          16.0,
+          32.0
+        ],
+        "streams_in": [
+          "Demineralised Seaweed Pulp",
+          "2% (w/v) Na2CO3 Extractant (750 mL)"
+        ],
+        "streams_out": [
+          "Viscous Sodium Alginate Broth",
+          "Insoluble Cellulose Debris"
+        ],
+        "required_parameters": [
+          "msc_dissertation.extraction_na2co3",
+          "msc_dissertation.yield_scaled_up",
+          "msc_dissertation.mannuronic_guluronic_ratio"
+        ],
+        "governing_equation": "Solid-liquid conversion: Y(t) = Y_max * (1 - exp(-k_ext * (t - 16))) with k_ext = 0.35 h^-1, Y_max = 0.3307 g/g.",
+        "verbatim_quote": "scaled-up two-stage extraction yield Y = 0.33 g/g dry biomass (33%)",
+        "doi": "dissertation://msc/biotechnology/302068815/2025",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#064e3b",
+          "color_end_hex": "#047857",
+          "turbidity_port": "product_yield_g_per_g",
+          "rpm": 250.0,
+          "reagent_feed": "2% Na2CO3 Extractant",
+          "viscosity": 0.85,
+          "vortex_speed": 1.1,
+          "solid_phase": {
+            "solid_form": "swelling_dissolving_pulp",
+            "flakes_group_name": "SolidKelpFlakesGroup",
+            "initial_count": 120,
+            "dissolution_ratio": 0.7
+          }
+        },
+        "blackboard": {
+          "what_went_in": "Wet Kelp Pulp + 750 mL 2% Na2CO3 Reagent",
+          "physical_state": "Solid Kelp Softening & Dissolving -> Thick Viscous Amber Gel",
+          "what_comes_out": "Viscous Sodium Alginate Broth (4.96 g Alginate, 33.07% Yield)"
+        }
+      },
+      {
+        "stage_id": "centrifugation_neutralisation",
+        "index": 3,
+        "title": "3. Centrifugation & Neutralisation",
+        "equipment_primitive": "centrifuge",
+        "time_window_h": [
+          32.0,
+          34.0
+        ],
+        "streams_in": [
+          "Viscous Sodium Alginate Broth",
+          "Dropwise 1M HCl Titrant"
+        ],
+        "streams_out": [
+          "Clarified Golden Alginate Supernatant",
+          "Compacted Cellulose Residue Pellet"
+        ],
+        "required_parameters": [
+          "msc_dissertation.alginate_purity"
+        ],
+        "governing_equation": "Centrifugal clarification at 4500 rpm (20 min) and neutralisation to pH 7.0.",
+        "verbatim_quote": "total alginate purity 91.5% in dry extracted product",
+        "doi": "dissertation://msc/biotechnology/302068815/2025",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#047857",
+          "color_end_hex": "#10b981",
+          "turbidity_port": "biomass_g_per_L",
+          "rpm": 4500.0,
+          "pellet_fraction": 0.22,
+          "drip_reagent": "HCl Neutralisation",
+          "ph_start": 12.0,
+          "ph_end": 7.0,
+          "solid_phase": {
+            "solid_form": "compacted_bottom_pellet",
+            "pellet_mesh_name": "CentrifugeSolidPellet",
+            "rpm": 4500.0,
+            "pellet_color": "#3B2614"
+          }
+        },
+        "blackboard": {
+          "what_went_in": "Viscous Alginate Slurry + Dropwise 1M HCl Titrant",
+          "physical_state": "Centrifugal Sedimentation (4500 rpm) -> Insoluble Cellulose Pellet + Clear Broth",
+          "what_comes_out": "Clarified Golden-Amber Supernatant (pH 7.0, 91.5% Purity)"
+        }
+      },
+      {
+        "stage_id": "ethanol_precipitation",
+        "index": 4,
+        "title": "4. Chilled Ethanol Precipitation",
+        "equipment_primitive": "precipitation_tank",
+        "time_window_h": [
+          34.0,
+          36.0
+        ],
+        "streams_in": [
+          "Clarified Supernatant",
+          "Chilled 96% Ethanol (-20 °C, 2.5 vol)"
+        ],
+        "streams_out": [
+          "Fibrous Sodium Alginate Clots",
+          "Spent Ethanol Liquor"
+        ],
+        "required_parameters": [
+          "msc_dissertation.Mw_extracted"
+        ],
+        "governing_equation": "Antisolvent polymer aggregation: Mw = 251 kDa, polydispersity index PDI = 1.17.",
+        "verbatim_quote": "weight-average molecular weight Mw = 251 kDa with narrow PDI = 1.17",
+        "doi": "dissertation://msc/biotechnology/302068815/2025",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#10b981",
+          "color_end_hex": "#34d399",
+          "turbidity_port": "product_yield_g_per_g",
+          "rpm": 60.0,
+          "frost_effect": true,
+          "temperature_c": -20.0,
+          "reagent_feed": "96% Ethanol (2.5 vol, -20 °C)",
+          "solid_phase": {
+            "solid_form": "fibrous_white_clot",
+            "clot_mesh_name": "PrecipitatedAlginateClot",
+            "temperature_c": -20.0,
+            "purity_pct": 91.5,
+            "floc_growth": true
+          }
+        },
+        "blackboard": {
+          "what_went_in": "Clarified Supernatant + 2.5 Vol Chilled 96% Ethanol (-20 °C)",
+          "physical_state": "Antisolvent Flocculation -> Tangled White Fibrous Clots -> Acetone Wash",
+          "what_comes_out": "Dry Sodium Alginate Ivory Powder (Mw 251 kDa, PDI 1.17)"
+        }
+      },
+      {
+        "stage_id": "wet_spinning_mechanics",
+        "index": 5,
+        "title": "5. Wet Spinning & Tensile Rig",
+        "equipment_primitive": "wet_spinning_bath",
+        "time_window_h": [
+          36.0,
+          40.0
+        ],
+        "streams_in": [
+          "4% (w/v) Redissolved Sodium Alginate Dope",
+          "2% (w/v) CaCl2 Coagulation Bath"
+        ],
+        "streams_out": [
+          "Continuous Calcium Alginate Monofilament Yarn"
+        ],
+        "required_parameters": [
+          "msc_dissertation.fibre_tensile_strength",
+          "msc_dissertation.fibre_youngs_modulus"
+        ],
+        "governing_equation": "Ionotropic egg-box crosslinking: Ultimate Tensile Strength = 29.3 MPa, Young's Modulus = 0.10 MPa.",
+        "verbatim_quote": "mean ultimate tensile strength of wet-spun extracted alginate fibre = 29.3 MPa",
+        "doi": "dissertation://msc/biotechnology/302068815/2025",
+        "evidence_tier": "DIRECT",
+        "visual_drivers": {
+          "volume_port": "volume_L",
+          "color_start_hex": "#34d399",
+          "color_end_hex": "#6ee7b7",
+          "turbidity_port": "product_yield_g_per_g",
+          "rpm": 25.0,
+          "extrusion_dope": "4% Sodium Alginate",
+          "coagulation_bath": "2% CaCl2",
+          "fibre_extrusion": true,
+          "pure_uts_mpa": 29.3,
+          "crosslinked_uts_mpa": 43.1,
+          "blended_uts_mpa": 42.1,
+          "solid_phase": {
+            "solid_form": "extruded_filament_and_tensile_rig",
+            "tensile_tester": true,
+            "pure_uts_mpa": 29.3,
+            "crosslinked_uts_mpa": 43.1
+          }
+        },
+        "blackboard": {
+          "what_went_in": "Redissolved 4% Alginate Dope + 2% CaCl2 Coagulation Bath",
+          "physical_state": "Spinneret Extrusion -> Ionotropic Crosslinking -> Roller Take-up Spool",
+          "what_comes_out": "Continuous Calcium Alginate Monofilament Yarn (UTS 29.3 - 43.1 MPa)"
+        }
+      }
+    ],
+    "telemetry_schema": {
+      "time_series": [
+        {
+          "id": "biomass_g_per_L",
+          "label": "Biomass (g/L)",
+          "unit": "g/L",
+          "color_hex": "#38bdf8"
+        },
+        {
+          "id": "product_yield_g_per_g",
+          "label": "Alginate Yield (g/g)",
+          "unit": "g/g",
+          "color_hex": "#34d399"
+        },
+        {
+          "id": "volume_L",
+          "label": "Vessel Volume (L)",
+          "unit": "L",
+          "color_hex": "#a855f7"
+        },
+        {
+          "id": "feed_rate_L_per_h",
+          "label": "Extractant Feed Rate (L/h)",
+          "unit": "L/h",
+          "color_hex": "#f59e0b"
+        }
+      ],
+      "step_metrics": [
+        {
+          "stage_id": "dry_biomass_milling",
+          "label": "Dry Kelp Mass Loaded",
+          "unit": "g",
+          "value": 15.0
+        },
+        {
+          "stage_id": "acid_demineralisation",
+          "label": "Demineralisation Efficiency",
+          "unit": "%",
+          "value": 98.2
+        },
+        {
+          "stage_id": "alkaline_solubilisation",
+          "label": "Maximum Yield Y_max",
+          "unit": "g/g",
+          "value": 0.3307
+        },
+        {
+          "stage_id": "centrifugation_neutralisation",
+          "label": "Centrifugal Purity",
+          "unit": "%",
+          "value": 91.5
+        },
+        {
+          "stage_id": "ethanol_precipitation",
+          "label": "Molecular Weight Mw",
+          "unit": "kDa",
+          "value": 251.0
+        },
+        {
+          "stage_id": "wet_spinning_mechanics",
+          "label": "Ultimate Tensile Strength",
+          "unit": "MPa",
+          "value": 29.3
+        }
+      ]
+    },
+    "sandbox_config": {
+      "neutralisation_ph": {
+        "label": "Neutralisation pH State",
+        "options": [
+          "pH 7.0 (Neutralised)",
+          "pH 12.0 (Unneutralised)"
+        ],
+        "default": "pH 7.0 (Neutralised)",
+        "effects": {
+          "pH 7.0 (Neutralised)": {
+            "yield_factor": 1.0,
+            "mw_kda": 251.0,
+            "depolymerisation": false,
+            "badge_text": "[pH 7.0] Neutralised Alginate • Stable"
+          },
+          "pH 12.0 (Unneutralised)": {
+            "yield_factor": 0.74,
+            "mw_kda": 110.0,
+            "depolymerisation": true,
+            "badge_text": "⚠️ [pH 12.0] ALKALINE DEPOLYMERISATION ACTIVE: β-Elimination Cleavage"
+          }
+        }
+      },
+      "extraction_scale": {
+        "label": "Extraction Scale Mode",
+        "options": [
+          "Scaled-Up Two-Stage 15.0g (33.07% Yield)",
+          "Small-Scale 2.5g (26.0% Yield)"
+        ],
+        "default": "Scaled-Up Two-Stage 15.0g (33.07% Yield)",
+        "effects": {
+          "Scaled-Up Two-Stage 15.0g (33.07% Yield)": {
+            "y_max": 0.3307,
+            "biomass_g": 15.0,
+            "yield_pct": 33.07
+          },
+          "Small-Scale 2.5g (26.0% Yield)": {
+            "y_max": 0.26,
+            "biomass_g": 2.5,
+            "yield_pct": 26.0
+          }
+        }
+      },
+      "fibre_crosslinking": {
+        "label": "Fibre Crosslinking Chemistry",
+        "options": [
+          "Pure Alginate Fibre (29.3 MPa)",
+          "Citric-Acid Crosslinked (43.1 MPa)",
+          "Blended Alginate (42.1 MPa)"
+        ],
+        "default": "Pure Alginate Fibre (29.3 MPa)",
+        "effects": {
+          "Pure Alginate Fibre (29.3 MPa)": {
+            "uts_mpa": 29.3,
+            "modulus_mpa": 0.1,
+            "threshold_mpa": 29.3,
+            "can_snap_under_load": true
+          },
+          "Citric-Acid Crosslinked (43.1 MPa)": {
+            "uts_mpa": 43.1,
+            "modulus_mpa": 0.22,
+            "threshold_mpa": 43.1,
+            "can_snap_under_load": false
+          },
+          "Blended Alginate (42.1 MPa)": {
+            "uts_mpa": 42.1,
+            "modulus_mpa": 0.18,
+            "threshold_mpa": 42.1,
+            "can_snap_under_load": false
+          }
+        }
+      }
+    }
+  },
+  "telemetry_schema": {
+    "time_series": [
+      {
+        "id": "biomass_g_per_L",
+        "label": "Biomass (g/L)",
+        "unit": "g/L",
+        "color_hex": "#38bdf8"
+      },
+      {
+        "id": "product_yield_g_per_g",
+        "label": "Alginate Yield (g/g)",
+        "unit": "g/g",
+        "color_hex": "#34d399"
+      },
+      {
+        "id": "volume_L",
+        "label": "Vessel Volume (L)",
+        "unit": "L",
+        "color_hex": "#a855f7"
+      },
+      {
+        "id": "feed_rate_L_per_h",
+        "label": "Extractant Feed Rate (L/h)",
+        "unit": "L/h",
+        "color_hex": "#f59e0b"
+      }
+    ],
+    "step_metrics": [
+      {
+        "stage_id": "dry_biomass_milling",
+        "label": "Dry Kelp Mass Loaded",
+        "unit": "g",
+        "value": 15.0
+      },
+      {
+        "stage_id": "acid_demineralisation",
+        "label": "Demineralisation Efficiency",
+        "unit": "%",
+        "value": 98.2
+      },
+      {
+        "stage_id": "alkaline_solubilisation",
+        "label": "Maximum Yield Y_max",
+        "unit": "g/g",
+        "value": 0.3307
+      },
+      {
+        "stage_id": "centrifugation_neutralisation",
+        "label": "Centrifugal Purity",
+        "unit": "%",
+        "value": 91.5
+      },
+      {
+        "stage_id": "ethanol_precipitation",
+        "label": "Molecular Weight Mw",
+        "unit": "kDa",
+        "value": 251.0
+      },
+      {
+        "stage_id": "wet_spinning_mechanics",
+        "label": "Ultimate Tensile Strength",
+        "unit": "MPa",
+        "value": 29.3
+      }
+    ]
+  },
+  "sandbox_config": {
+    "neutralisation_ph": {
+      "label": "Neutralisation pH State",
+      "options": [
+        "pH 7.0 (Neutralised)",
+        "pH 12.0 (Unneutralised)"
+      ],
+      "default": "pH 7.0 (Neutralised)",
+      "effects": {
+        "pH 7.0 (Neutralised)": {
+          "yield_factor": 1.0,
+          "mw_kda": 251.0,
+          "depolymerisation": false,
+          "badge_text": "[pH 7.0] Neutralised Alginate • Stable"
+        },
+        "pH 12.0 (Unneutralised)": {
+          "yield_factor": 0.74,
+          "mw_kda": 110.0,
+          "depolymerisation": true,
+          "badge_text": "⚠️ [pH 12.0] ALKALINE DEPOLYMERISATION ACTIVE: β-Elimination Cleavage"
+        }
+      }
+    },
+    "extraction_scale": {
+      "label": "Extraction Scale Mode",
+      "options": [
+        "Scaled-Up Two-Stage 15.0g (33.07% Yield)",
+        "Small-Scale 2.5g (26.0% Yield)"
+      ],
+      "default": "Scaled-Up Two-Stage 15.0g (33.07% Yield)",
+      "effects": {
+        "Scaled-Up Two-Stage 15.0g (33.07% Yield)": {
+          "y_max": 0.3307,
+          "biomass_g": 15.0,
+          "yield_pct": 33.07
+        },
+        "Small-Scale 2.5g (26.0% Yield)": {
+          "y_max": 0.26,
+          "biomass_g": 2.5,
+          "yield_pct": 26.0
+        }
+      }
+    },
+    "fibre_crosslinking": {
+      "label": "Fibre Crosslinking Chemistry",
+      "options": [
+        "Pure Alginate Fibre (29.3 MPa)",
+        "Citric-Acid Crosslinked (43.1 MPa)",
+        "Blended Alginate (42.1 MPa)"
+      ],
+      "default": "Pure Alginate Fibre (29.3 MPa)",
+      "effects": {
+        "Pure Alginate Fibre (29.3 MPa)": {
+          "uts_mpa": 29.3,
+          "modulus_mpa": 0.1,
+          "threshold_mpa": 29.3,
+          "can_snap_under_load": true
+        },
+        "Citric-Acid Crosslinked (43.1 MPa)": {
+          "uts_mpa": 43.1,
+          "modulus_mpa": 0.22,
+          "threshold_mpa": 43.1,
+          "can_snap_under_load": false
+        },
+        "Blended Alginate (42.1 MPa)": {
+          "uts_mpa": 42.1,
+          "modulus_mpa": 0.18,
+          "threshold_mpa": 42.1,
+          "can_snap_under_load": false
+        }
+      }
+    }
+  },
+  "literature_review_manifest": {
+    "reconstruction_mode": "central_knowledge_library",
+    "prompt": "Simulate Saccharina latissima alginate extraction",
+    "target_organism": "Saccharina latissima",
+    "process_mode": "batch",
+    "operational_domain": "SOLID_LIQUID_EXTRACTION",
+    "confidence_score": 100.0,
+    "evidence_tier": "DIRECT",
+    "has_analogue_bridge": false,
+    "requires_expert_approval": false,
+    "combined_papers": [
+      {
+        "paper_id": "msc_dissertation_2025",
+        "doi": "dissertation://msc/biotechnology/302068815/2025",
+        "title": "Valorising Seaweed Biomass as Films and Fibres",
+        "authors": [
+          "Prenithan (Candidate 302068815)"
+        ],
+        "year": 2025,
+        "sha256": "6c17efa002e7ac1b2c219d7f6cdf9400a7bcfba789008ee3b911a5ba9bff2d3c"
+      }
+    ],
+    "cross_paper_connections": [],
+    "alternatives_by_module": {
+      "extraction_kinetics": [
+        {
+          "mechanism_id": "morris.material_balance",
+          "name": "Steady-state material balance",
+          "port_id": "component_fraction_out",
+          "quantity_type": "mass_ratio",
+          "paper_id": "morris2011",
+          "paper_title": "Chemical Engineering Design and Analysis: An Introduction (Chapter 4 Material Balances)",
+          "doi": "10.1017/CBO9780511977756",
+          "equation_summary": "Total and component mass balance equations without generation/consumption."
+        },
+        {
+          "mechanism_id": "simensen.biomass_composition",
+          "name": "Macromolecular biomass composition partition",
+          "port_id": "protein_fraction",
+          "quantity_type": "mass_ratio",
+          "paper_id": "simensen2022",
+          "paper_title": "Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+          "doi": "10.1002/bit.28189",
+          "equation_summary": "Partition of dry cell weight into protein, RNA, DNA, and lipid fractions."
+        },
+        {
+          "mechanism_id": "baez.exponential_feed",
+          "name": "Exponential fed-batch feed rate control",
+          "port_id": "feed_rate",
+          "quantity_type": "volume_flow",
+          "paper_id": "baez2014",
+          "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "doi": "10.1186/1475-2859-13-50",
+          "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+        },
+        {
+          "mechanism_id": "baez.exponential_feed",
+          "name": "Exponential fed-batch feed rate control",
+          "port_id": "acetate_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "baez2014",
+          "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "doi": "10.1186/1475-2859-13-50",
+          "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+        },
+        {
+          "mechanism_id": "ganjave.growth_kinetics",
+          "name": "Cybernetic growth and substrate uptake",
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "ganjave2022",
+          "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+          "doi": "10.1016/j.bej.2021.108342",
+          "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+        },
+        {
+          "mechanism_id": "zielinski.fermentation_balance",
+          "name": "Recombinant human insulin process accounting",
+          "port_id": "biomass_concentration",
+          "quantity_type": "mass_concentration",
+          "paper_id": "zielinski2019",
+          "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+          "doi": "10.1002/biot.201800531",
+          "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+        },
+        {
+          "mechanism_id": "baez.exponential_feed",
+          "name": "Exponential fed-batch feed rate control",
+          "port_id": "biomass_growth_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "baez2014",
+          "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+          "doi": "10.1186/1475-2859-13-50",
+          "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+        },
+        {
+          "mechanism_id": "ganjave.growth_kinetics",
+          "name": "Cybernetic growth and substrate uptake",
+          "port_id": "specific_growth_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "ganjave2022",
+          "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+          "doi": "10.1016/j.bej.2021.108342",
+          "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+        },
+        {
+          "mechanism_id": "lin.uptake_capacities",
+          "name": "Maximum substrate and oxygen uptake capacity kinetics",
+          "port_id": "glucose_uptake_capacity",
+          "quantity_type": "specific_rate",
+          "paper_id": "lin2000",
+          "paper_title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+          "doi": "10.1002/bit.1065",
+          "equation_summary": "Temperature- and oxygen-limited capacity caps for glucose and oxygen uptake with acetate overflow threshold."
+        },
+        {
+          "mechanism_id": "nanchen.pirt_chemostat",
+          "name": "Pirt linear substrate consumption rate relation",
+          "port_id": "glucose_consumption_rate",
+          "quantity_type": "specific_rate",
+          "paper_id": "nanchen2006",
+          "paper_title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+          "doi": "10.1128/AEM.72.2.1164-1172.2006",
+          "equation_summary": "qglc = (mu / Yglc_max) * 1000 + mglc"
+        }
+      ]
+    },
+    "knowledge_gaps": [],
+    "synthesis_summary": "Successfully reconstructed a runnable multi-paper bioprocess simulation combining 1 mechanisms from papers ['msc_dissertation_2025']. Evaluated 0 cross-paper connection(s). Confidence score: 100.0% (DIRECT)."
+  },
+  "composition_graph": {
+    "contract_version": "0.1.0",
+    "schema_version": "0.1.0",
+    "graph_id": "reconstructed_bioprocess_simulation",
+    "title": "Reconstructed Multi-Paper Bioprocess Simulation",
+    "description": "Dynamically assembled from Central Knowledge Library mechanisms and empirical parameters.",
+    "instances": [
+      {
+        "instance_id": "extraction_kinetics",
+        "model_id": "msc_dissertation_2025.bioprocess_kinetics",
+        "model_version": "0.1.0",
+        "label": "Macroalgae alginate extraction and bioprocess kinetics",
+        "parameters": {
+          "simulation": {
+            "duration_h": 16.0
+          }
+        },
+        "alternatives": [
+          {
+            "mechanism_id": "morris.material_balance",
+            "name": "Steady-state material balance",
+            "port_id": "component_fraction_out",
+            "quantity_type": "mass_ratio",
+            "paper_id": "morris2011",
+            "paper_title": "Chemical Engineering Design and Analysis: An Introduction (Chapter 4 Material Balances)",
+            "doi": "10.1017/CBO9780511977756",
+            "equation_summary": "Total and component mass balance equations without generation/consumption."
+          },
+          {
+            "mechanism_id": "simensen.biomass_composition",
+            "name": "Macromolecular biomass composition partition",
+            "port_id": "protein_fraction",
+            "quantity_type": "mass_ratio",
+            "paper_id": "simensen2022",
+            "paper_title": "Experimental determination of Escherichia coli biomass composition for constraint-based metabolic modeling",
+            "doi": "10.1002/bit.28189",
+            "equation_summary": "Partition of dry cell weight into protein, RNA, DNA, and lipid fractions."
+          },
+          {
+            "mechanism_id": "baez.exponential_feed",
+            "name": "Exponential fed-batch feed rate control",
+            "port_id": "feed_rate",
+            "quantity_type": "volume_flow",
+            "paper_id": "baez2014",
+            "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+            "doi": "10.1186/1475-2859-13-50",
+            "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+          },
+          {
+            "mechanism_id": "baez.exponential_feed",
+            "name": "Exponential fed-batch feed rate control",
+            "port_id": "acetate_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "baez2014",
+            "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+            "doi": "10.1186/1475-2859-13-50",
+            "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+          },
+          {
+            "mechanism_id": "ganjave.growth_kinetics",
+            "name": "Cybernetic growth and substrate uptake",
+            "port_id": "biomass_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "ganjave2022",
+            "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+            "doi": "10.1016/j.bej.2021.108342",
+            "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+          },
+          {
+            "mechanism_id": "zielinski.fermentation_balance",
+            "name": "Recombinant human insulin process accounting",
+            "port_id": "biomass_concentration",
+            "quantity_type": "mass_concentration",
+            "paper_id": "zielinski2019",
+            "paper_title": "Expression and purification of recombinant human insulin from E. coli 20 strain",
+            "doi": "10.1002/biot.201800531",
+            "equation_summary": "Process accounting for E. coli fermentation, glucose feeding, and insulin inclusion body yield."
+          },
+          {
+            "mechanism_id": "baez.exponential_feed",
+            "name": "Exponential fed-batch feed rate control",
+            "port_id": "biomass_growth_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "baez2014",
+            "paper_title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+            "doi": "10.1186/1475-2859-13-50",
+            "equation_summary": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * exp(mu_set * (t - t_F))"
+          },
+          {
+            "mechanism_id": "ganjave.growth_kinetics",
+            "name": "Cybernetic growth and substrate uptake",
+            "port_id": "specific_growth_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "ganjave2022",
+            "paper_title": "A cybernetic model for fed-batch cultures of Escherichia coli",
+            "doi": "10.1016/j.bej.2021.108342",
+            "equation_summary": "ODE system governing biomass growth, dual substrate consumption, and dissolved oxygen transfer with cybernetic regulation."
+          },
+          {
+            "mechanism_id": "lin.uptake_capacities",
+            "name": "Maximum substrate and oxygen uptake capacity kinetics",
+            "port_id": "glucose_uptake_capacity",
+            "quantity_type": "specific_rate",
+            "paper_id": "lin2000",
+            "paper_title": "Determination of the Maximum Specific Uptake Capacities for Glucose and Oxygen in Glucose-Limited Fed-Batch Cultivations of Escherichia coli",
+            "doi": "10.1002/bit.1065",
+            "equation_summary": "Temperature- and oxygen-limited capacity caps for glucose and oxygen uptake with acetate overflow threshold."
+          },
+          {
+            "mechanism_id": "nanchen.pirt_chemostat",
+            "name": "Pirt linear substrate consumption rate relation",
+            "port_id": "glucose_consumption_rate",
+            "quantity_type": "specific_rate",
+            "paper_id": "nanchen2006",
+            "paper_title": "Nonlinear Dependency of Intracellular Fluxes on Growth Rate in Miniaturized Continuous Cultures of Escherichia coli",
+            "doi": "10.1128/AEM.72.2.1164-1172.2006",
+            "equation_summary": "qglc = (mu / Yglc_max) * 1000 + mglc"
+          }
+        ]
+      }
+    ],
+    "connections": [],
+    "literal_inputs": {
+      "extraction_kinetics/msc_dissertation.Mw_extracted": {
+        "quantity": "molecular_weight",
+        "unit": "kDa",
+        "value": 251.0,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Table 4 (GPC)"
+      },
+      "extraction_kinetics/msc_dissertation.alginate_purity": {
+        "quantity": "mass_fraction",
+        "unit": "g/g",
+        "value": 0.915,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Table 3 (HPAEC)"
+      },
+      "extraction_kinetics/msc_dissertation.extraction_na2co3": {
+        "quantity": "mass_fraction",
+        "unit": "%",
+        "value": 2.0,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Section 2.1"
+      },
+      "extraction_kinetics/msc_dissertation.fibre_tensile_strength": {
+        "quantity": "stress",
+        "unit": "MPa",
+        "value": 29.3,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Section 3.5 & Figure 8"
+      },
+      "extraction_kinetics/msc_dissertation.fibre_youngs_modulus": {
+        "quantity": "modulus",
+        "unit": "MPa",
+        "value": 0.1,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Table 6"
+      },
+      "extraction_kinetics/msc_dissertation.mannuronic_guluronic_ratio": {
+        "quantity": "dimensionless",
+        "unit": "-",
+        "value": 2.491,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Table 3 (HPAEC)"
+      },
+      "extraction_kinetics/msc_dissertation.pretreatment_citric_acid": {
+        "quantity": "mass_fraction",
+        "unit": "%",
+        "value": 4.0,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Section 2.1"
+      },
+      "extraction_kinetics/msc_dissertation.yield_scaled_up": {
+        "quantity": "mass_ratio",
+        "unit": "g/g",
+        "value": 0.3307,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Section 3.1 & Table 1"
+      },
+      "extraction_kinetics/msc_dissertation.yield_small_scale": {
+        "quantity": "mass_ratio",
+        "unit": "g/g",
+        "value": 0.26,
+        "reason": "From Central Library msc_dissertation_2025 empirical value",
+        "source_ref": "msc_dissertation_2025 Table 1 (Yield analysis)"
+      },
+      "extraction_kinetics/biomass": {
+        "quantity": "mass",
+        "unit": "g",
+        "value": 15.0,
+        "reason": "Central library empirical prior",
+        "source_ref": "msc_dissertation_2025 Section 2.1"
+      },
+      "extraction_kinetics/t": {
+        "quantity": "time",
+        "unit": "h",
+        "value": 16.0,
+        "reason": "Central library empirical prior",
+        "source_ref": "msc_dissertation_2025 Section 2.1"
+      },
+      "extraction_kinetics/feed_rate": {
+        "quantity": "volume_flow",
+        "unit": "L/h",
+        "value": 0.05,
+        "reason": "Central library empirical prior",
+        "source_ref": "msc_dissertation_2025 Section 2.1"
+      }
+    }
+  },
+  "trajectories": {
+    "time_hours": [
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0,
+      17.0,
+      18.0,
+      19.0,
+      20.0,
+      21.0,
+      22.0,
+      23.0,
+      24.0,
+      25.0,
+      26.0,
+      27.0,
+      28.0,
+      29.0,
+      30.0,
+      31.0,
+      32.0,
+      33.0,
+      34.0,
+      35.0,
+      36.0,
+      37.0,
+      38.0,
+      39.0,
+      40.0
+    ],
+    "biomass_g_per_L": [
+      20.0,
+      19.9,
+      19.8,
+      19.7,
+      19.6,
+      19.5,
+      19.4,
+      19.3,
+      19.2,
+      19.1,
+      19.0,
+      18.9,
+      18.8,
+      18.7,
+      18.6,
+      18.5,
+      18.4,
+      15.955,
+      14.232,
+      13.017,
+      12.162,
+      11.559,
+      11.134,
+      10.835,
+      10.624,
+      10.475,
+      10.37,
+      10.296,
+      10.244,
+      10.207,
+      10.182,
+      10.163,
+      10.151,
+      0.25,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "volume_L": [
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.05,
+      5.1,
+      5.15,
+      5.2,
+      5.25,
+      5.3,
+      5.35,
+      5.4,
+      5.45,
+      5.5,
+      5.55,
+      5.6,
+      5.65,
+      5.7,
+      5.75,
+      5.8,
+      5.2,
+      5.2,
+      15.6,
+      15.6,
+      2.0,
+      2.0,
+      2.0,
+      2.0
+    ],
+    "feed_rate_L_per_h": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "dissolved_oxygen_pct": [
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0,
+      95.0
+    ],
+    "glucose_g_per_L": [
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      5.0,
+      3.52,
+      2.48,
+      1.75,
+      1.23,
+      0.87,
+      0.61,
+      0.43,
+      0.3,
+      0.21,
+      0.15,
+      0.11,
+      0.07,
+      0.05,
+      0.04,
+      0.03,
+      0.02,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "specific_growth_rate_inv_h": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0816,
+      0.0575,
+      0.0405,
+      0.0285,
+      0.0201,
+      0.0142,
+      0.01,
+      0.007,
+      0.005,
+      0.0035,
+      0.0025,
+      0.0017,
+      0.0012,
+      0.0009,
+      0.0006,
+      0.0004,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "product_yield_g_per_g": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0977,
+      0.1665,
+      0.215,
+      0.2492,
+      0.2732,
+      0.2902,
+      0.3022,
+      0.3106,
+      0.3165,
+      0.3207,
+      0.3237,
+      0.3257,
+      0.3272,
+      0.3282,
+      0.329,
+      0.3295,
+      0.3307,
+      0.3307,
+      0.3307,
+      0.3307,
+      0.3307,
+      0.3307,
+      0.3307,
+      0.3307
+    ]
+  },
+  "summary": {
+    "final_biomass_dcw_g_L": 0.0,
+    "final_volume_L": 2.0,
+    "duration_hours": 40.0,
+    "scientific_confidence_pct": 100.0,
+    "has_analogue_bridge": false,
+    "combined_paper_count": 1,
+    "cross_paper_connection_count": 0
+  }
+}

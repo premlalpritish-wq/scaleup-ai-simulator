@@ -1,0 +1,66 @@
+{
+  "contract_version": "0.1.0",
+  "schema_version": "1.0.0",
+  "run_id": "halt_unverified_process",
+  "status": "HALTED",
+  "error": "InsufficientEvidenceError: Simulation solver blocked. Central Knowledge Library lacks direct empirical evidence for this unindexed process. Aborted to prevent unverified scale-up predictions.",
+  "prompt": "Simulate Artemisia annua maceration & artemisinin extraction (Unindexed Process)",
+  "cache_hit": false,
+  "confidence_score": 0.0,
+  "evidence_tier": "UNVERIFIED",
+  "has_analogue_bridge": false,
+  "diagram_path": "",
+  "anatomy_blueprint": {
+    "unit_operations": [
+      {
+        "stage_id": "stage_0_macerator",
+        "title": "Maceration Tank [UNVERIFIED]",
+        "equipment_primitive": "agitated_extraction_vessel",
+        "evidence_tier": "UNVERIFIED",
+        "status": "insufficient_evidence",
+        "time_window_h": [0.0, 10.0]
+      },
+      {
+        "stage_id": "stage_1_separator",
+        "title": "Continuous Centrifuge [UNVERIFIED]",
+        "equipment_primitive": "centrifuge",
+        "evidence_tier": "UNVERIFIED",
+        "status": "insufficient_evidence",
+        "time_window_h": [10.0, 20.0]
+      },
+      {
+        "stage_id": "stage_2_purifier",
+        "title": "Crystallization Column [UNVERIFIED]",
+        "equipment_primitive": "membrane_ultrafiltration",
+        "evidence_tier": "UNVERIFIED",
+        "status": "insufficient_evidence",
+        "time_window_h": [20.0, 40.0]
+      }
+    ]
+  },
+  "trajectories": {
+    "time_hours": [0.0, 10.0, 20.0, 40.0],
+    "biomass_g_per_L": [0.0, 0.0, 0.0, 0.0],
+    "substrate_g_per_L": [0.0, 0.0, 0.0, 0.0],
+    "volume_L": [0.0, 0.0, 0.0, 0.0]
+  },
+  "literature_review_manifest": {
+    "summary": "HALTED: Insufficient verified empirical literature found. Central Knowledge Library lacks direct evidence. Simulation aborted to prevent unverified predictions.",
+    "knowledge_gaps": [
+      {
+        "variable": "Extraction kinetics & yield constants",
+        "evidence": "None (Target species missing in Central Library)",
+        "missing_evidence": ["Peer-reviewed empirical rate constants", "Validated stoichiometric coefficients"]
+      }
+    ],
+    "combined_papers": [],
+    "cross_paper_connections": []
+  },
+  "summary": {
+    "scientific_confidence_pct": 0.0,
+    "has_analogue_bridge": false,
+    "combined_paper_count": 0,
+    "cross_paper_connection_count": 0,
+    "status": "HALTED: InsufficientEvidenceError"
+  }
+}

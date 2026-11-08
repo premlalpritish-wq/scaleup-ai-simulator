@@ -1,0 +1,109 @@
+{
+  "paper_id": "msc_dissertation_2025",
+  "title": "Valorising Seaweed Biomass as Films and Fibres",
+  "authors": [
+    "Prenithan (Candidate 302068815)"
+  ],
+  "year": 2025,
+  "doi": "dissertation://msc/biotechnology/302068815/2025",
+  "sha256": "6c17efa002e7ac1b2c219d7f6cdf9400a7bcfba789008ee3b911a5ba9bff2d3c",
+  "pdf_path": "D:\\Uni\\MSc\\Semister 2\\Project\\Induvual\\project\\Writeup\\Project Report Final 302068815.pdf",
+  "biological_context": {
+    "organism": "Saccharina latissima",
+    "strain": "wild-harvested sugar kelp",
+    "temperature_c": 20.0,
+    "ph": 7.0,
+    "medium": "citric acid demineralised aqueous sodium carbonate",
+    "evidence_tier": "DIRECT"
+  },
+  "cultivation_and_extraction_parameters": {
+    "feedstock": "Dried Saccharina latissima biomass",
+    "pretreatment_acid": "citric acid",
+    "pretreatment_acid_concentration_pct": 4.0,
+    "pretreatment_liquid_to_solid_ratio_mL_per_g": 33.2,
+    "pretreatment_duration_hours": 16.0,
+    "pretreatment_temperature_c": 20.0,
+    "alkaline_extraction_reagent": "sodium carbonate (Na2CO3)",
+    "alkaline_extraction_concentration_pct": 2.0,
+    "alkaline_extraction_liquid_to_solid_ratio_mL_per_g": 50.0,
+    "alkaline_extraction_duration_hours": 16.0,
+    "alkaline_extraction_temperature_c": 20.0,
+    "centrifugation_speed_rpm": 4500,
+    "centrifugation_duration_min": 30,
+    "centrifugation_temperature_c": 25.0,
+    "neutralisation_target_ph": 7.0,
+    "unneutralised_crude_ph": 12.0,
+    "precipitation_solvent": "ethanol (96%)",
+    "precipitation_solvent_ratio": 2.5,
+    "precipitation_temperature_c": -20.0,
+    "washing_solvent": "acetone",
+    "fibre_wet_spinning_dope_concentration_pct": 4.5,
+    "fibre_plasticiser_glycerol_ratio_pct": 6.0,
+    "fibre_coagulation_bath_cacl2_concentration_pct": 4.0,
+    "film_casting_alginate_concentration_pct": 2.0,
+    "film_plasticiser_glycerol_concentration_pct": 1.5,
+    "film_crosslinking_cacl2_concentration_pct": 2.0
+  },
+  "analytical_yields_and_properties": {
+    "yield_small_scale_unneutralised_pct": 24.0,
+    "yield_small_scale_neutralised_pct": 26.0,
+    "yield_scaled_15g_two_stage_pct": 33.07,
+    "mannuronic_to_guluronic_ratio_P1": 2.355,
+    "mannuronic_to_guluronic_ratio_P2": 2.369,
+    "mannuronic_to_guluronic_ratio_P3": 2.491,
+    "mannuronic_to_guluronic_ratio_sigma_standard": 2.440,
+    "uronic_acid_alginate_purity_pct": 91.5,
+    "weight_average_molecular_weight_Mw_kDa": 251.0,
+    "number_average_molecular_weight_Mn_kDa": 215.0,
+    "polydispersity_index_PDI": 1.17,
+    "commercial_sigma_Mw_kDa": 68.7,
+    "commercial_sigma_PDI": 1.31,
+    "fibre_tensile_strength_pure_extracted_MPa": 29.3,
+    "fibre_tensile_strength_citric_crosslinked_MPa": 43.1,
+    "fibre_tensile_strength_blended_MPa": 42.1,
+    "fibre_tensile_strength_sigma_reference_MPa": 51.2,
+    "fibre_youngs_modulus_extracted_MPa": 0.10,
+    "fibre_youngs_modulus_sigma_MPa": 0.40,
+    "fibre_elongation_at_break_extracted_pct": 29.31,
+    "fibre_elongation_at_break_citric_pct": 43.09,
+    "fibre_elongation_at_break_sigma_pct": 51.25,
+    "film_youngs_modulus_extracted_MPa": 0.10,
+    "film_youngs_modulus_sigma_MPa": 0.357,
+    "film_elongation_at_break_extracted_pct": 1.72,
+    "film_elongation_at_break_sigma_pct": 2.04
+  },
+  "section_anchors": {
+    "section_1_1": {
+      "heading": "1.1 Aims and objectives",
+      "verbatim_quote": "The overarching aim of this project was to evaluate the potential of seaweed-derived alginate for sustainable fibre and film applications. The specific objectives were to: Extract alginate from Saccharina latissima using an environmentally benign process and determine yield. Characterise structural and molecular features of extracted alginate relative to commercial standards."
+    },
+    "section_2_1": {
+      "heading": "2.1 Phase 1: Extraction of Alginate",
+      "verbatim_quote": "Dried seaweed (2.5 g) was immersed in 83 mL of 4% (w/v) citric acid and agitated overnight (16 h) at room temperature... The pre-treated biomass was then suspended in 40 mL of 2% (w/v) sodium carbonate and agitated overnight to extract alginate as sodium alginate... The extract was centrifuged (4500 rpm, 30 min, 25 °C) to remove insoluble debris. The supernatant, containing solubilised alginate, was precipitated by addition of chilled ethanol (2.5× solution volume, pre-cooled to –20 °C)... The extract was found to have an elevated pH (~12)... dilute HCl was carefully added dropwise to the supernatant following sodium carbonate extraction... Following the pH adjustment, 2.5 volumes of cold (-20oC) ethanol was added."
+    },
+    "section_2_1_scaled": {
+      "heading": "2.1 Phase 1: Scaled extraction (15 g scale)",
+      "verbatim_quote": "In this case, 495 mL of 4% (w/v) citric acid was used for the pre-treatment, followed by 375 mL of 2% (w/v) sodium carbonate for the first extraction step. Due to the larger biomass volume, residual insoluble material retained significant alginate, so a second extraction was carried out by re-suspending the pellet in an additional 375 mL of sodium carbonate."
+    },
+    "section_3_1": {
+      "heading": "3.1 Yield analysis",
+      "verbatim_quote": "In the initial 2.5 g seaweed sample there was 0.63 g of alginate was obtained at 7 pH so it had a yield of 25.2%, in the second extraction 0.65 g of alginate was obtained with a pH of 7 and for the 15 g extraction the yield was 4.96 g or 33% which are all around the range where the yield should be normally so these results were good to proceed with."
+    },
+    "section_3_3": {
+      "heading": "3.3 HPAEC results and TFA hydrolysis",
+      "verbatim_quote": "The pH 7 extraction showed an M/G ratio more closely aligned with that of the commercial Sigma alginate, while the pH 12 extraction showed minor deviations... ManA/GuluA: P1 2.355, P2 2.369, P3 2.491, Sigma 2.440; Total Alginate %: P1 91.3%, P2 90.2%, P3 91.5%, Sigma 99.4%."
+    },
+    "section_3_4": {
+      "heading": "3.4 GPC results",
+      "verbatim_quote": "Sigma alginate (S) exhibited a broad elution spanning 10.5–17.0 min, corresponding to molecular weights of ~54–69 kDa with a heterogeneous distribution (PDI up to 1.31). In contrast, the extracted alginate (P) showed earlier elution (~10.8–12.8 min), corresponding to higher molecular weight fractions of ~215–251 kDa with a narrower distribution (PDI 1.02–1.17)."
+    },
+    "section_3_5": {
+      "heading": "3.5 Tensile test results (Fibres and Films)",
+      "verbatim_quote": "Table 6 Shows the Young's modulus and the mean elongation at break of all the fibre samples: FPS Young's Modulus 0.4 MPa, Elongation 51.25%; FP1 Modulus 0.1 MPa, Elongation 27.48%; FP2 Modulus 0.1 MPa, Elongation 29.31%; FP4 (citric acid) Modulus 0.1 MPa, Elongation 43.09%... Film sample FPF Mean Young's Modulus 0.1 MPa, Elongation 1.72%; FPS Modulus 0.357 MPa, Elongation 2.04%."
+    },
+    "section_4_1": {
+      "heading": "4.1 Discussion: Extraction and yield",
+      "verbatim_quote": "Alginate was successfully extracted from Saccharina latissima using a two-step chemical process involving citric acid pre-treatment followed by sodium carbonate solubilisation, with ethanol precipitation to recover the polymer. Initial small-scale extractions (2.5 g seaweed) yielded 0.63–0.65 g of alginate (approximately 25–26% yield), while the scaled 15 g extraction produced 4.96 g (33% yield)... Controlled neutralisation to approximately pH 7, achieved by gradual addition of dilute HCl following sodium carbonate treatment, preserved polymer integrity."
+    }
+  }
+}
