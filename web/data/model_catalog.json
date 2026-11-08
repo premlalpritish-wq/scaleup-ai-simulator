@@ -1,0 +1,2305 @@
+{
+  "catalogue_version": 1,
+  "registry_version": "1",
+  "registry_scientific_status": "Registration records that a specification artefact exists, is identified, and can be located and hashed. It does NOT establish that a model is correct, independently supported, or executable.",
+  "registry_issues": [],
+  "models": [
+    {
+      "model_id": "ganjave",
+      "model_version": "0.1.0",
+      "title": "Ganjave et al. (2022) cybernetic growth and fed-batch model",
+      "source_paper": "Ganjave et al. 2022, Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694",
+      "capabilities": [
+        "batch simulation over eq. (8)-(11)",
+        "fed-batch simulation over eq. (12)-(16)",
+        "full state trajectories with solver report and run provenance",
+        "structured diagnostics on every failure, with no result returned"
+      ],
+      "ports_dependence": "fixed",
+      "port_counts": {
+        "input": 9,
+        "output": 6
+      },
+      "ports": [
+        {
+          "port_id": "biomass_concentration",
+          "direction": "output",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "complex_substrate_concentration",
+          "direction": "output",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "culture_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "dissolved_oxygen",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "feed_complex_substrate_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "feed_flow_rate",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME_FLOW",
+          "unit": "mL/h",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "feed_glycerol_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "feed_start_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "glycerol_concentration",
+          "direction": "output",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "initial_biomass_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": true,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "initial_complex_substrate_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": true,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "initial_culture_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "initial_dissolved_oxygen",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": true,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "initial_glycerol_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "",
+          "location": ""
+        },
+        {
+          "port_id": "simulation_time",
+          "direction": "output",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "",
+          "location": ""
+        }
+      ],
+      "unknown_fields": [
+        "doi"
+      ],
+      "scientific_status": {
+        "state": "registered_only",
+        "means": "Registration records that a specification artefact exists, is identified, and can be located and hashed. It does NOT establish that the model is correct, independently supported by evidence, or executable. None of those claims is made or implied by appearing here.",
+        "does_not_mean": "Correct, validated, independently supported, or executable. A model can be registered and still be wrong."
+      },
+      "reference": "ganjave@0.1.0",
+      "browser_mode": "pyodide_live"
+    },
+    {
+      "model_id": "morris2011.material_balance",
+      "model_version": "0.1.0",
+      "title": null,
+      "source_paper": null,
+      "capabilities": null,
+      "ports_dependence": "instance_parameterised",
+      "port_counts": {
+        "input": 0,
+        "output": 0
+      },
+      "ports": [],
+      "unknown_fields": [
+        "assumptions",
+        "capabilities",
+        "doi",
+        "ports",
+        "source_paper",
+        "title",
+        "units",
+        "variables"
+      ],
+      "scientific_status": {
+        "state": "registered_only",
+        "means": "Registration records that a specification artefact exists, is identified, and can be located and hashed. It does NOT establish that the model is correct, independently supported by evidence, or executable. None of those claims is made or implied by appearing here.",
+        "does_not_mean": "Correct, validated, independently supported, or executable. A model can be registered and still be wrong."
+      },
+      "reference": "morris2011.material_balance@0.1.0",
+      "browser_mode": "registered_no_fixed_port_surface"
+    },
+    {
+      "model_id": "zielinski2019.rhi_process",
+      "model_version": "1.0.0",
+      "title": "Recombinant human insulin from Escherichia coli 20 (Zielinski et al. 2019)",
+      "source_paper": "M. Zielinski, A. Romanik-Chruscielewska, D. Mikiewicz, N. Lukasiewicz, I. Sokolowska, J. Antosik, A. Sobolewska-Ruta, A. Bierczynska-Krzysik, P. Zaleski, A. Plucienniczak, 'Expression and purification of recombinant human insulin from E. coli 20 strain', Protein Expression and Purification 157 (2019) 63-69.",
+      "capabilities": [
+        "evidence_replay",
+        "fail_closed_prediction",
+        "accounting_identities",
+        "verbatim_source_formulas",
+        "digitized_trajectory",
+        "declared_cross_checks",
+        "calculation_traces"
+      ],
+      "ports_dependence": "fixed",
+      "port_counts": {
+        "input": 139,
+        "output": 57
+      },
+      "ports": [
+        {
+          "port_id": "node:N01#biomass_per_od_descriptive",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "g_per_L_per_OD600",
+          "required": false,
+          "role": "calculated",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#dissolved_oxygen",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "1",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#fermenter_nominal_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "L",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#fermenter_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#glucose_feed_concentration",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#glucose_limitation_od600",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#glucose_target_initial",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "mg/dL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#growth_duration",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#induction_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#inoculum_cultivation_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#inoculum_proline",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "ug/mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#inoculum_target_od600",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#inoculum_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#inoculum_tetracycline",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "ug/mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#inoculum_thiamine",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "ug/mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#inoculum_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#od600_from_inputs",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#od600_max",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#ph_control_reagent",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#ph_stat_dead_band",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "1",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#ph_stat_glucose_target",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "mg/dL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#post_induction_duration",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#proline_feed_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "mg/mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#specific_growth_rate",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "1/h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#starting_medium_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "L",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#stationary_phase_od600",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#wet_biomass_from_inputs",
+          "direction": "input",
+          "quantity": "Quantity.MASS",
+          "unit": "g",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N01#wet_biomass_g_per_L_reported",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N01"
+        },
+        {
+          "port_id": "node:N02#centrifugation_force",
+          "direction": "input",
+          "quantity": "Quantity.RELATIVE_CENTRIFUGAL_FORCE",
+          "unit": "xg",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N02"
+        },
+        {
+          "port_id": "node:N02#centrifugation_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N02"
+        },
+        {
+          "port_id": "node:N02#centrifugation_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N02"
+        },
+        {
+          "port_id": "node:N02#wet_biomass_g_per_L",
+          "direction": "output",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "computed",
+          "location": "node:N02"
+        },
+        {
+          "port_id": "node:N03#clarification_force",
+          "direction": "input",
+          "quantity": "Quantity.RELATIVE_CENTRIFUGAL_FORCE",
+          "unit": "xg",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#clarification_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#clarification_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#final_centrifugation_force",
+          "direction": "input",
+          "quantity": "Quantity.RELATIVE_CENTRIFUGAL_FORCE",
+          "unit": "xg",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#final_centrifugation_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#final_centrifugation_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#inclusion_bodies_g_per_L",
+          "direction": "output",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "computed",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#inclusion_bodies_g_per_L_reported",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g/L",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#inclusion_body_fraction_of_biomass",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "1",
+          "required": false,
+          "role": "computed",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#lysozyme_concentration",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#lysozyme_mix_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#storage_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#triton_stir_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N03#triton_x100_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N03"
+        },
+        {
+          "port_id": "node:N04#adjusted_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N04#carbonate_buffer",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "mM",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N04#clarification_force",
+          "direction": "input",
+          "quantity": "Quantity.RELATIVE_CENTRIFUGAL_FORCE",
+          "unit": "xg",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N04#clarification_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N04#clarification_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N04#dissolution_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N04#edta_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "mM",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N04#initial_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N04"
+        },
+        {
+          "port_id": "node:N05#final_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N05#folding_time_methods",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N05#folding_time_results",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N05#implied_refolding_yield_pct",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "computed",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N05#refolding_time_predictive",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N05#refolding_yield_low_temperature",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N05#refolding_yield_predictive",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N05#refolding_yield_room_temperature",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N05"
+        },
+        {
+          "port_id": "node:N06#citraconic_anhydride_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N06#ethanolamine_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N06#ethanolamine_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N06#naoh_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N06#ph_window_high",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N06#ph_window_low",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N06#quench_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N06#reaction_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N06"
+        },
+        {
+          "port_id": "node:N07#aprotinin_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "mg/mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N07"
+        },
+        {
+          "port_id": "node:N07#aprotinin_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "uL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N07"
+        },
+        {
+          "port_id": "node:N07#conductivity_limit",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N07"
+        },
+        {
+          "port_id": "node:N07#reaction_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N07"
+        },
+        {
+          "port_id": "node:N07#reaction_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N07"
+        },
+        {
+          "port_id": "node:N07#trypsin_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "g_per_100mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N07"
+        },
+        {
+          "port_id": "node:N07#trypsin_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "uL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N07"
+        },
+        {
+          "port_id": "node:N08#elution_de_conductivity",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#elution_de_isopropanol",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#equilibration_1",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#equilibration_2",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "mM",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#flow_rate",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME_FLOW",
+          "unit": "mL/min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#total_au",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE",
+          "unit": "AU",
+          "required": false,
+          "role": "computed",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#wash_dw_i_conductivity",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#wash_dw_ii_conductivity",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N08#wash_dw_ii_isopropanol",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N08"
+        },
+        {
+          "port_id": "node:N09#diluted_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N09"
+        },
+        {
+          "port_id": "node:N09#dilution_factor",
+          "direction": "input",
+          "quantity": "Quantity.CONCENTRATION_FACTOR",
+          "unit": "fold",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N09"
+        },
+        {
+          "port_id": "node:N09#hold_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N09"
+        },
+        {
+          "port_id": "node:N09#reaction_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N09"
+        },
+        {
+          "port_id": "node:N09#reaction_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N09"
+        },
+        {
+          "port_id": "node:N10#dissolution_conductivity_limit",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#edta_stock_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#edta_volume_from_formula",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#edta_volume_reported",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#final_volume_reported_path",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#implied_final_volume_from_tris",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#precipitation_centrifugation_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#precipitation_centrifugation_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#precipitation_force",
+          "direction": "input",
+          "quantity": "Quantity.RELATIVE_CENTRIFUGAL_FORCE",
+          "unit": "xg",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#precipitation_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#precipitation_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#storage_duration",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "d",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#storage_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#tris_concentration_from_reported_volume",
+          "direction": "output",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "mM",
+          "required": false,
+          "role": "computed",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#tris_stock_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#tris_stock_volume_reported",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#tris_target_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "mM",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#water_volume_from_formula",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#water_volume_reported",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#zinc_chloride_stock",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#zinc_chloride_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N10#zinc_chloride_volume_reported",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N10"
+        },
+        {
+          "port_id": "node:N11#elution_qe1_conductivity",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#elution_qe1_isopropanol",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#elution_qe2_conductivity",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#elution_qe2_isopropanol",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#equilibration_1",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#equilibration_2",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "mM",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#flow_rate",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME_FLOW",
+          "unit": "mL/min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#total_au",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE",
+          "unit": "AU",
+          "required": false,
+          "role": "computed",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#wash_qw_conductivity",
+          "direction": "input",
+          "quantity": "Quantity.CONDUCTIVITY",
+          "unit": "mS",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N11#wash_qw_isopropanol",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N11"
+        },
+        {
+          "port_id": "node:N12#cpb_stock_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MASS_CONCENTRATION",
+          "unit": "mg/mL",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N12"
+        },
+        {
+          "port_id": "node:N12#cpb_volume_from_formula",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "uL",
+          "required": false,
+          "role": "computed",
+          "location": "node:N12"
+        },
+        {
+          "port_id": "node:N12#cpb_volume_reported",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "uL",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N12"
+        },
+        {
+          "port_id": "node:N12#dilution_factor",
+          "direction": "input",
+          "quantity": "Quantity.CONCENTRATION_FACTOR",
+          "unit": "fold",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N12"
+        },
+        {
+          "port_id": "node:N12#reaction_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N12"
+        },
+        {
+          "port_id": "node:N12#reaction_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N12"
+        },
+        {
+          "port_id": "node:N13#mobile_phase_a_acetonitrile",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N13#mobile_phase_a_na2so4",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "M",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N13#mobile_phase_a_na2so4_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N13#mobile_phase_b_acetonitrile",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N13#mobile_phase_b_na2so4_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N13#mobile_phase_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N13#post_column_dilution",
+          "direction": "input",
+          "quantity": "Quantity.CONCENTRATION_FACTOR",
+          "unit": "fold",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N13#total_au",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE",
+          "unit": "AU",
+          "required": false,
+          "role": "computed",
+          "location": "node:N13"
+        },
+        {
+          "port_id": "node:N14#elution_buffer_concentration",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_CONCENTRATION",
+          "unit": "mM",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N14"
+        },
+        {
+          "port_id": "node:N14#elution_buffer_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N14"
+        },
+        {
+          "port_id": "node:N14#equilibration_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N14"
+        },
+        {
+          "port_id": "node:N14#total_au",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE",
+          "unit": "AU",
+          "required": false,
+          "role": "computed",
+          "location": "node:N14"
+        },
+        {
+          "port_id": "node:N15#activity",
+          "direction": "input",
+          "quantity": "Quantity.ACTIVITY_PER_VOLUME",
+          "unit": "IU/L",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#au_to_protein_mass_factor",
+          "direction": "input",
+          "quantity": "Quantity.ABSORBANCE_PER_MASS",
+          "unit": "g/AU",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#batch_activity",
+          "direction": "output",
+          "quantity": "Quantity.ACTIVITY",
+          "unit": "IU",
+          "required": false,
+          "role": "computed",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#final_activity_from_au",
+          "direction": "input",
+          "quantity": "Quantity.ACTIVITY",
+          "unit": "IU",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#insulin_mass_from_au",
+          "direction": "input",
+          "quantity": "Quantity.MASS",
+          "unit": "g",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#mass_deviation",
+          "direction": "output",
+          "quantity": "Quantity.MOLAR_MASS",
+          "unit": "Da",
+          "required": false,
+          "role": "computed",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#mass_deviation_ppm",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "1",
+          "required": false,
+          "role": "computed",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#measured_molecular_mass",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_MASS",
+          "unit": "Da",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#purity",
+          "direction": "input",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "%",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#retention_time",
+          "direction": "input",
+          "quantity": "Quantity.TIME",
+          "unit": "min",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#theoretical_molecular_mass",
+          "direction": "input",
+          "quantity": "Quantity.MOLAR_MASS",
+          "unit": "Da",
+          "required": false,
+          "role": "measurement",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_detection_wavelength",
+          "direction": "input",
+          "quantity": "Quantity.WAVELENGTH",
+          "unit": "nm",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_eluent_ph",
+          "direction": "input",
+          "quantity": "Quantity.PH",
+          "unit": "pH",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_eluent_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_flow_rate",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME_FLOW",
+          "unit": "mL/min",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_injection_volume",
+          "direction": "input",
+          "quantity": "Quantity.VOLUME",
+          "unit": "uL",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_na2h2po4",
+          "direction": "input",
+          "quantity": "Quantity.MASS",
+          "unit": "g",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_naclO4",
+          "direction": "input",
+          "quantity": "Quantity.MASS",
+          "unit": "g",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "node:N15#uhplc_temperature",
+          "direction": "input",
+          "quantity": "Quantity.TEMPERATURE",
+          "unit": "degC",
+          "required": false,
+          "role": "operating_condition",
+          "location": "node:N15"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_25_crossing_h",
+          "direction": "output",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_50_crossing_h",
+          "direction": "output",
+          "quantity": "Quantity.TIME",
+          "unit": "h",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h01",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h02",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h03",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h04",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h05",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h06",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h07",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h08",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h09",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h10",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h11",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h12",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h13",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h14",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h15",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h16",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h17",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h18",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_h19",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S02_culture_broth#od600_plateau_max",
+          "direction": "output",
+          "quantity": "Quantity.DIMENSIONLESS",
+          "unit": "OD600",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S02_culture_broth"
+        },
+        {
+          "port_id": "stream:S03_wet_biomass#wet_biomass_total",
+          "direction": "output",
+          "quantity": "Quantity.MASS",
+          "unit": "g",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S03_wet_biomass"
+        },
+        {
+          "port_id": "stream:S04_inclusion_bodies#inclusion_bodies_total",
+          "direction": "output",
+          "quantity": "Quantity.MASS",
+          "unit": "g",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S04_inclusion_bodies"
+        },
+        {
+          "port_id": "stream:S05_denatured_solution#dissolved_protein",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE",
+          "unit": "AU",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S05_denatured_solution"
+        },
+        {
+          "port_id": "stream:S05_denatured_solution#dissolved_protein_concentration",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE_PER_VOLUME",
+          "unit": "AU/mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S05_denatured_solution"
+        },
+        {
+          "port_id": "stream:S05_denatured_solution#ib_aliquot_mass",
+          "direction": "output",
+          "quantity": "Quantity.MASS",
+          "unit": "g",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S05_denatured_solution"
+        },
+        {
+          "port_id": "stream:S06_renatured_precursor#protein_after_refolding",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE",
+          "unit": "AU",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S06_renatured_precursor"
+        },
+        {
+          "port_id": "stream:S09_deae_fraction#fraction_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S09_deae_fraction"
+        },
+        {
+          "port_id": "stream:S09_deae_fraction#protein_concentration",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE_PER_VOLUME",
+          "unit": "AU/mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S09_deae_fraction"
+        },
+        {
+          "port_id": "stream:S13_q_fraction#fraction_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S13_q_fraction"
+        },
+        {
+          "port_id": "stream:S13_q_fraction#protein_concentration",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE_PER_VOLUME",
+          "unit": "AU/mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S13_q_fraction"
+        },
+        {
+          "port_id": "stream:S15_rp_hplc_fraction#fraction_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S15_rp_hplc_fraction"
+        },
+        {
+          "port_id": "stream:S15_rp_hplc_fraction#protein_concentration",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE_PER_VOLUME",
+          "unit": "AU/mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S15_rp_hplc_fraction"
+        },
+        {
+          "port_id": "stream:S16_g25_fraction#fraction_volume",
+          "direction": "output",
+          "quantity": "Quantity.VOLUME",
+          "unit": "mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S16_g25_fraction"
+        },
+        {
+          "port_id": "stream:S16_g25_fraction#protein_concentration",
+          "direction": "output",
+          "quantity": "Quantity.ABSORBANCE_PER_VOLUME",
+          "unit": "AU/mL",
+          "required": false,
+          "role": "stream_quantity",
+          "location": "stream:S16_g25_fraction"
+        }
+      ],
+      "unknown_fields": [],
+      "scientific_status": {
+        "state": "registered_only",
+        "means": "Registration records that a specification artefact exists, is identified, and can be located and hashed. It does NOT establish that the model is correct, independently supported by evidence, or executable. None of those claims is made or implied by appearing here.",
+        "does_not_mean": "Correct, validated, independently supported, or executable. A model can be registered and still be wrong."
+      },
+      "reference": "zielinski2019.rhi_process@1.0.0",
+      "browser_mode": "stored_evidence_replay"
+    }
+  ],
+  "inspection_only": [
+    {
+      "model_id": "baez2014-oxygen-induced",
+      "title": "Production of recombinant protein by a novel oxygen-induced system in Escherichia coli",
+      "source_paper": "A. Baez, N. Majdalani, J. Shiloach, 'Production of recombinant protein by a novel oxygen-induced system in Escherichia coli', Microbial Cell Factories 2014, 13:50.",
+      "registration": "not_registered_in_composition_registry",
+      "browser_mode": "inspection_only",
+      "reason": "No composition adapter is registered. The package documents one printed formula and explicitly excludes a growth/oxygen/GFP predictive model.",
+      "disclaimer": "A passing test verifies that this implementation matches the supplied specification. It does not establish scientific validity, and the package contains no predictive capability beyond evaluating one printed equation at the caller's own inputs.",
+      "equations": [
+        {
+          "label": "Exponential fed-batch feed rate",
+          "printed_expression": "F(t) = ((mu_set / Y_XS) + m) * (X_F * V_F / S_F) * e^(mu_set*(t - t_F))",
+          "output_key": "feed_rate",
+          "output_unit": "L/h",
+          "required_run_inputs": [
+            "X_F",
+            "V_F",
+            "t_F",
+            "t"
+          ],
+          "source_reference": "Baez et al. 2014, p. 6, Methods: fed-batch culture"
+        }
+      ],
+      "excluded_capabilities": [
+        "a Monod or any other growth equation",
+        "a dissolved-oxygen differential equation",
+        "an oxygen-transfer or oxygen-uptake model",
+        "a kinetic model of GFP expression",
+        "a conversion between fluorescence (FU) and GFP mass (mg/L)",
+        "a digitised time series, absent a separately supplied dataset that defines the coordinates and the digitisation provenance",
+        "any automatic coupling to the Morris or Zielinski models"
+      ]
+    }
+  ],
+  "compatibility": {
+    "contract_version": "0.1.0",
+    "claim_scope": "A connection is judged on dimensional compatibility, semantic compatibility, organism/strain/process context, the initial and operating conditions each model requires, the evidence supporting the relationship, and what remains unresolved. A matching unit is necessary and never sufficient.",
+    "validation_status": "This is a composition-side assessment of interfaces. It is not a scientific validation of any model, and running these checks does not upgrade any model's reproduction_status.",
+    "boundaries": [
+      {
+        "source_model": "morris2011.material_balance",
+        "target_model": "morris2011.material_balance",
+        "stance": "permitted",
+        "permitted": true,
+        "enforced_by_engine": false,
+        "reason": "Conservation across adjacent non-reacting control volumes is the premise the balance engine exists to apply. Both instances declare their components, the engine checks the sets agree, and the balance closes. This is the only boundary here that a published source directly supports, and the only one with a shipped example.",
+        "evidence": [
+          "Morris, Geiger & Fine (2011), Fundamentals of Material Balances with Applications to Non-Reacting Systems, Chapter 4: conservation equations sum(inflow) - sum(outflow) [- accumulation] = 0, with no reaction term.",
+          "composition/composition/adapters/morris.py::_slot_map -- the composition-side port surface derived from a declared control volume.",
+          "composition/examples/brass_batch_chain.json -- the shipped graph that carries material between two Morris instances."
+        ],
+        "unresolved": [],
+        "remediation": "Connect the ports the upstream instance publishes.",
+        "quantity_pairs": [],
+        "dimensional_note": "",
+        "assumptions": [],
+        "evidence_basis": "permitted"
+      },
+      {
+        "source_model": "morris2011.material_balance",
+        "target_model": "ganjave",
+        "stance": "no_shared_quantity",
+        "permitted": false,
+        "enforced_by_engine": false,
+        "reason": "Morris is not an organism model. It is a non-reacting control-volume engine: it conserves declared masses and fractions and has nowhere to declare a yield, a rate constant or a reaction. Feeding a culture into it would require a component set the culture does not publish, and drawing a balance around a reaction it cannot express would be arithmetically valid and physically wrong. Independently of that, the two models share no quantity: Morris publishes mass and mass_fraction and accepts only mass, mass_flow, mass_fraction, amount and amount_flow, while Ganjave publishes mass_concentration, dimensionless, volume and time. There is no port pair to refuse.",
+        "evidence": [
+          "Morris, Geiger & Fine (2011), Fundamentals of Material Balances with Applications to Non-Reacting Systems, Chapter 4: conservation equations sum(inflow) - sum(outflow) [- accumulation] = 0, with no reaction term.",
+          "composition/composition/adapters/morris.py::_slot_map -- the composition-side port surface derived from a declared control volume.",
+          "composition/examples/brass_batch_chain.json -- the shipped graph that carries material between two Morris instances.",
+          "Ganjave et al. (2022), Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694. Cybernetic fed-batch culture, equations (8)-(16), parameters from the paper's Table 2 loaded as fitted.",
+          "Models/Ganjave/models/composition.py -- the model's own declaration of its ports, its required inputs and its unsupported capabilities, including component_identity.",
+          "composition/composition/adapters/ganjave_contract.py::INPUT_CONTRACT -- what Ganjave will and will not accept on an input port, in the model's own words.",
+          "composition/composition/dimensions.py -- the declared quantity vocabularies of all three models, kept as data rather than inferred from a unit."
+        ],
+        "unresolved": [],
+        "remediation": "Nothing in this repository can connect them. A control volume for a fed-batch culture would need the component-resolved reaction model that does not exist here.",
+        "quantity_pairs": [],
+        "dimensional_note": "Morris quantities {mass, mass_flow, mass_fraction, amount, amount_flow} and Ganjave quantities {mass_concentration, dimensionless, volume, time, volume_flow} are disjoint.",
+        "assumptions": [],
+        "evidence_basis": "documented_incompatibility"
+      },
+      {
+        "source_model": "ganjave",
+        "target_model": "morris2011.material_balance",
+        "stance": "no_shared_quantity",
+        "permitted": false,
+        "enforced_by_engine": false,
+        "reason": "Morris is not an organism model. It is a non-reacting control-volume engine: it conserves declared masses and fractions and has nowhere to declare a yield, a rate constant or a reaction. Feeding a culture into it would require a component set the culture does not publish, and drawing a balance around a reaction it cannot express would be arithmetically valid and physically wrong. The quantity vocabularies are disjoint in this direction too, so no connection is mechanically constructible even before the component rules are reached.",
+        "evidence": [
+          "Morris, Geiger & Fine (2011), Fundamentals of Material Balances with Applications to Non-Reacting Systems, Chapter 4: conservation equations sum(inflow) - sum(outflow) [- accumulation] = 0, with no reaction term.",
+          "composition/composition/adapters/morris.py::_slot_map -- the composition-side port surface derived from a declared control volume.",
+          "composition/examples/brass_batch_chain.json -- the shipped graph that carries material between two Morris instances.",
+          "Ganjave et al. (2022), Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694. Cybernetic fed-batch culture, equations (8)-(16), parameters from the paper's Table 2 loaded as fitted.",
+          "Models/Ganjave/models/composition.py -- the model's own declaration of its ports, its required inputs and its unsupported capabilities, including component_identity.",
+          "composition/composition/adapters/ganjave_contract.py::INPUT_CONTRACT -- what Ganjave will and will not accept on an input port, in the model's own words.",
+          "composition/composition/dimensions.py -- the declared quantity vocabularies of all three models, kept as data rather than inferred from a unit."
+        ],
+        "unresolved": [],
+        "remediation": "Same as the reverse direction: a reaction-aware, component-resolved culture model would have to exist first.",
+        "quantity_pairs": [],
+        "dimensional_note": "Ganjave publishes no quantity Morris accepts.",
+        "assumptions": [],
+        "evidence_basis": "documented_incompatibility"
+      },
+      {
+        "source_model": "morris2011.material_balance",
+        "target_model": "zielinski2019.rhi_process",
+        "stance": "refused_component_identity",
+        "permitted": false,
+        "enforced_by_engine": true,
+        "reason": "Zielinski publishes process roles, not conserved chemical entities: no stream of its own carries a component amount or a mass fraction. A Morris port either names a component (and the names will not agree) or is a control-volume total whose every entering unit must be attributable to one (and it is not). A Zielinski quantity forwarded into a Chapter 4 balance would therefore be relabelled as a component, which is an invented assumption that silently determines the answer.",
+        "evidence": [
+          "Zielinski et al. (2019), Protein Expression and Purification 157: 63-69, doi:10.1016/j.pep.2019.02.002. E. coli 20 strain, recombinant human insulin, 4 L working volume in a 7.5 L nominal fermenter.",
+          "Models/Zielinski/scaleup_ai: the process graph declares operating conditions, measurements and calculated quantities; StreamKind is a process-role vocabulary (wet_biomass, inclusion_bodies, chromatographic_fraction), not a set of conserved entities.",
+          "composition/composition/adapters/zielinski.py -- the adapter publishes every quantity the model's own graph declares, with its provenance.",
+          "Morris, Geiger & Fine (2011), Fundamentals of Material Balances with Applications to Non-Reacting Systems, Chapter 4: conservation equations sum(inflow) - sum(outflow) [- accumulation] = 0, with no reaction term.",
+          "composition/composition/adapters/morris.py::_slot_map -- the composition-side port surface derived from a declared control volume.",
+          "composition/examples/brass_batch_chain.json -- the shipped graph that carries material between two Morris instances."
+        ],
+        "unresolved": [],
+        "remediation": "Declare the component mapping explicitly, with a justification and a component definition, or do not connect the ports.",
+        "quantity_pairs": [],
+        "dimensional_note": "",
+        "assumptions": [],
+        "evidence_basis": "documented_incompatibility"
+      },
+      {
+        "source_model": "zielinski2019.rhi_process",
+        "target_model": "morris2011.material_balance",
+        "stance": "refused_component_identity",
+        "permitted": false,
+        "enforced_by_engine": true,
+        "reason": "The same refusal from the other side, and a stronger one: Morris is a non-reacting control volume, so drawing a balance across a boundary whose model publishes neither component identity nor reaction terms is the case CG-09 names explicitly as numerically valid and physically wrong. Zielinski's own manifest declares component_identity unsupported, in those words.",
+        "evidence": [
+          "Zielinski et al. (2019), Protein Expression and Purification 157: 63-69, doi:10.1016/j.pep.2019.02.002. E. coli 20 strain, recombinant human insulin, 4 L working volume in a 7.5 L nominal fermenter.",
+          "Models/Zielinski/scaleup_ai: the process graph declares operating conditions, measurements and calculated quantities; StreamKind is a process-role vocabulary (wet_biomass, inclusion_bodies, chromatographic_fraction), not a set of conserved entities.",
+          "composition/composition/adapters/zielinski.py -- the adapter publishes every quantity the model's own graph declares, with its provenance.",
+          "Morris, Geiger & Fine (2011), Fundamentals of Material Balances with Applications to Non-Reacting Systems, Chapter 4: conservation equations sum(inflow) - sum(outflow) [- accumulation] = 0, with no reaction term.",
+          "composition/composition/adapters/morris.py::_slot_map -- the composition-side port surface derived from a declared control volume.",
+          "composition/examples/brass_batch_chain.json -- the shipped graph that carries material between two Morris instances."
+        ],
+        "unresolved": [],
+        "remediation": "Provide a non-reactive boundary with a declared component set, or a reaction-aware engine that can declare its reaction terms.",
+        "quantity_pairs": [],
+        "dimensional_note": "",
+        "assumptions": [],
+        "evidence_basis": "documented_incompatibility"
+      },
+      {
+        "source_model": "ganjave",
+        "target_model": "zielinski2019.rhi_process",
+        "stance": "refused_dimensional_only",
+        "permitted": false,
+        "enforced_by_engine": false,
+        "reason": "Both models describe an Escherichia coli fed-batch culture, and neither quantity nor unit is what stands between them. They are two different experiments: different strain, different construct, different medium, different scale, different objective, five years apart. A matching quantity here is a coincidence of the vocabulary, not a shared physical quantity, and connecting them would substitute one culture's reported number for another's while reporting a success.",
+        "evidence": [
+          "Ganjave et al. (2022), Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694. Cybernetic fed-batch culture, equations (8)-(16), parameters from the paper's Table 2 loaded as fitted.",
+          "Models/Ganjave/models/composition.py -- the model's own declaration of its ports, its required inputs and its unsupported capabilities, including component_identity.",
+          "composition/composition/adapters/ganjave_contract.py::INPUT_CONTRACT -- what Ganjave will and will not accept on an input port, in the model's own words.",
+          "Zielinski et al. (2019), Protein Expression and Purification 157: 63-69, doi:10.1016/j.pep.2019.02.002. E. coli 20 strain, recombinant human insulin, 4 L working volume in a 7.5 L nominal fermenter.",
+          "Models/Zielinski/scaleup_ai: the process graph declares operating conditions, measurements and calculated quantities; StreamKind is a process-role vocabulary (wet_biomass, inclusion_bodies, chromatographic_fraction), not a set of conserved entities.",
+          "composition/composition/adapters/zielinski.py -- the adapter publishes every quantity the model's own graph declares, with its provenance."
+        ],
+        "unresolved": [
+          "A model built to be matched to both -- declaring a shared component set, an explicit dry-to-wet biomass basis, a scale relationship and a common medium -- could carry quantities between them honestly. No such model exists here."
+        ],
+        "remediation": "Leave the ports unconnected and declare the value on the Zielinski instance instead, with its own source reference -- which is what the shipped examples already do.",
+        "quantity_pairs": [
+          [
+            "mass_concentration",
+            "mass_concentration"
+          ],
+          [
+            "volume",
+            "volume"
+          ],
+          [
+            "dimensionless",
+            "dimensionless"
+          ],
+          [
+            "time",
+            "time"
+          ]
+        ],
+        "dimensional_note": "",
+        "assumptions": [],
+        "evidence_basis": "documented_incompatibility"
+      },
+      {
+        "source_model": "zielinski2019.rhi_process",
+        "target_model": "ganjave",
+        "stance": "refused_dimensional_only",
+        "permitted": false,
+        "enforced_by_engine": false,
+        "reason": "The two cultures share an organism and nothing else. Nothing in either paper declares a relationship between them: not a component set, not a biomass basis, not a scale relationship, and not a medium. Forwarding a quantity between them is not a transfer, it is an assertion about two unrelated batches that no source in this repository supports.",
+        "evidence": [
+          "Zielinski et al. (2019), Protein Expression and Purification 157: 63-69, doi:10.1016/j.pep.2019.02.002. E. coli 20 strain, recombinant human insulin, 4 L working volume in a 7.5 L nominal fermenter.",
+          "Models/Zielinski/scaleup_ai: the process graph declares operating conditions, measurements and calculated quantities; StreamKind is a process-role vocabulary (wet_biomass, inclusion_bodies, chromatographic_fraction), not a set of conserved entities.",
+          "composition/composition/adapters/zielinski.py -- the adapter publishes every quantity the model's own graph declares, with its provenance.",
+          "Ganjave et al. (2022), Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694. Cybernetic fed-batch culture, equations (8)-(16), parameters from the paper's Table 2 loaded as fitted.",
+          "Models/Ganjave/models/composition.py -- the model's own declaration of its ports, its required inputs and its unsupported capabilities, including component_identity.",
+          "composition/composition/adapters/ganjave_contract.py::INPUT_CONTRACT -- what Ganjave will and will not accept on an input port, in the model's own words."
+        ],
+        "unresolved": [
+          "A model built to be matched to both -- declaring a shared component set, an explicit dry-to-wet biomass basis, a scale relationship and a common medium -- could carry quantities between them honestly. No such model exists here."
+        ],
+        "remediation": "Declare the value on the Ganjave instance instead. Ganjave's own contract already refuses two of its required inputs from any upstream model; this refuses the rest of the biological boundary.",
+        "quantity_pairs": [
+          [
+            "mass_concentration",
+            "mass_concentration"
+          ],
+          [
+            "volume",
+            "volume"
+          ],
+          [
+            "dimensionless",
+            "dimensionless"
+          ],
+          [
+            "time",
+            "time"
+          ]
+        ],
+        "dimensional_note": "",
+        "assumptions": [],
+        "evidence_basis": "documented_incompatibility"
+      },
+      {
+        "source_model": "zielinski2019.rhi_process",
+        "target_model": "zielinski2019.rhi_process",
+        "stance": "refused_no_supplyable_port",
+        "permitted": false,
+        "enforced_by_engine": false,
+        "reason": "Zielinski declares no port as supplyable by another instance, and that omission is deliberate: its ports are the operating conditions, measurements and transcribed values of a single reported experiment, and none of them is a stream another run could take. Two connected instances would both describe the same published batch, so the connection would assert a relationship between them that no source states -- not a transfer, and not a conservation check, since there is nothing to conserve.",
+        "evidence": [
+          "Zielinski et al. (2019), Protein Expression and Purification 157: 63-69, doi:10.1016/j.pep.2019.02.002. E. coli 20 strain, recombinant human insulin, 4 L working volume in a 7.5 L nominal fermenter.",
+          "Models/Zielinski/scaleup_ai: the process graph declares operating conditions, measurements and calculated quantities; StreamKind is a process-role vocabulary (wet_biomass, inclusion_bodies, chromatographic_fraction), not a set of conserved entities.",
+          "composition/composition/adapters/zielinski.py -- the adapter publishes every quantity the model's own graph declares, with its provenance."
+        ],
+        "unresolved": [],
+        "remediation": "Run the graph once and let the model report its own cross-checks, which is what its five declared checks already do.",
+        "quantity_pairs": [],
+        "dimensional_note": "",
+        "assumptions": [],
+        "evidence_basis": "documented_incompatibility"
+      },
+      {
+        "source_model": "ganjave",
+        "target_model": "ganjave",
+        "stance": "permitted_forward_cascade",
+        "permitted": true,
+        "enforced_by_engine": false,
+        "reason": "A forward cascade between two instances of the same model is a sequential use, not a fixed point: the second instance is ordered after the first and never feeds back, so nothing has to iterate. Ganjave's contract declares exactly one thing upstream-supplyable for this purpose -- initial_glycerol_concentration -- on the stated assumption that the upstream value is residual glycerol in this medium, and the project's own acceptance suite runs the cascade.",
+        "evidence": [
+          "Ganjave et al. (2022), Biotechnology Reports 33:e00694, doi:10.1016/j.btre.2021.e00694. Cybernetic fed-batch culture, equations (8)-(16), parameters from the paper's Table 2 loaded as fitted.",
+          "Models/Ganjave/models/composition.py -- the model's own declaration of its ports, its required inputs and its unsupported capabilities, including component_identity.",
+          "composition/composition/adapters/ganjave_contract.py::INPUT_CONTRACT -- what Ganjave will and will not accept on an input port, in the model's own words."
+        ],
+        "unresolved": [
+          "The cascade is permitted under the model's declared assumption, not validated by it: nothing in the paper seeds a second culture from the first. A run through it demonstrates that the software carries a quantity across the boundary, not that the resulting batch is the one the paper describes."
+        ],
+        "remediation": "Connect the port the model's contract names. Two of Ganjave's required inputs accept no upstream model at all, and continue to refuse one here.",
+        "quantity_pairs": [],
+        "dimensional_note": "",
+        "assumptions": [
+          "ganjave/initial_glycerol_concentration: The upstream value must be glycerol, in this medium. A mass concentration of another substance is not a substitute, even though the quantities match exactly."
+        ],
+        "evidence_basis": "permitted"
+      }
+    ],
+    "quantity_pairs_examined": [
+      [
+        "dimensionless",
+        "dimensionless"
+      ],
+      [
+        "dimensionless",
+        "dimensionless"
+      ],
+      [
+        "mass_concentration",
+        "mass_concentration"
+      ],
+      [
+        "mass_concentration",
+        "mass_concentration"
+      ],
+      [
+        "time",
+        "time"
+      ],
+      [
+        "time",
+        "time"
+      ],
+      [
+        "volume",
+        "volume"
+      ],
+      [
+        "volume",
+        "volume"
+      ]
+    ]
+  }
+}

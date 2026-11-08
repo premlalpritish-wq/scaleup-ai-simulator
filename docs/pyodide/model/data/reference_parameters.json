@@ -1,0 +1,207 @@
+{
+  "parameter_set_id": "ganjave2022.table2",
+  "version": "1.0.0",
+  "equations_version": "1.1.0",
+  "source": {
+    "source_id": "ganjave2022",
+    "citation": "S. D. Ganjave, V. A. J. E. S. Waghmare, P. P. Wangikar, 'High cell density cultivation of E. coli in shake flasks for the production of recombinant proteins', Biotechnology Reports 33 (2022) e00694.",
+    "doi": "10.1016/j.btre.2021.e00694",
+    "table": "Table 2, printed page 4",
+    "fitting_statement": "The paper states the parameters were estimated by fitting the model to six fed-batch experiments (p. 5) with a hybrid scheme: a genetic algorithm to locate the region of the optimum followed by MATLAB's fmincon to refine it. The model was then validated on two further experimental combinations. Every parameter below is therefore FITTED, not measured, even though the values are printed."
+  },
+  "parameters": [
+    {
+      "symbol": "mum1",
+      "label": "maximum specific growth rate for combination 1",
+      "kind": "specific_growth_rate",
+      "provenance": "fitted",
+      "unit": "1/h",
+      "value": 1.497,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Maximum specific growth rate for combination 1 ?m1 h 1 1.497"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "mum2",
+      "label": "maximum specific growth rate for combination 2",
+      "kind": "specific_growth_rate",
+      "provenance": "fitted",
+      "unit": "1/h",
+      "value": 0.834,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Maximum specific growth rate for combination 2 ?m2 h 1 0.834"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "K11",
+      "label": "half-saturation constant for substrate S1 in combination 1",
+      "kind": "half_saturation_concentration",
+      "provenance": "fitted",
+      "unit": "g/L",
+      "value": 0.131,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Half-saturation constant for substrate S1 for combination 1 K11 g/L 0.131"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "K12",
+      "label": "half-saturation constant for substrate S2 in combination 1",
+      "kind": "half_saturation_concentration",
+      "provenance": "fitted",
+      "unit": "g/L",
+      "value": 36.154,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Half-saturation constant for substrate S2 for combination 1 K12 g/L 36.154"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "K22",
+      "label": "half-saturation constant for substrate S2 in combination 2",
+      "kind": "half_saturation_concentration",
+      "provenance": "fitted",
+      "unit": "g/L",
+      "value": 1.001,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Half-saturation constant for substrate S2 for combination 2 K22 g/L 1.001"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "Ko1",
+      "label": "half-saturation constant for dissolved oxygen in combination 1",
+      "kind": "half_saturation_dissolved_oxygen",
+      "provenance": "fitted",
+      "unit": "%",
+      "value": 0.326,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Half-saturation constant for DO in combination 1 Ko,1 % 0.326"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)",
+      "note": "Percent of the dissolved-oxygen reading, not a mass fraction."
+    },
+    {
+      "symbol": "Ko2",
+      "label": "half-saturation constant for dissolved oxygen in combination 2",
+      "kind": "half_saturation_dissolved_oxygen",
+      "provenance": "fitted",
+      "unit": "%",
+      "value": 8.944,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Half-saturation constant for DO in combination 2 Ko,2 % 8.944"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)",
+      "note": "Percent of the dissolved-oxygen reading, not a mass fraction."
+    },
+    {
+      "symbol": "Y11",
+      "label": "yield coefficient for substrate S1 in combination 1",
+      "kind": "yield",
+      "provenance": "fitted",
+      "unit": "g/g",
+      "value": 0.44,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Yield coefficient for substrate S1 for combination 1 Y11 g of biomass/g of S1 0.440"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "Y12",
+      "label": "yield coefficient for substrate S2 in combination 1",
+      "kind": "yield",
+      "provenance": "fitted",
+      "unit": "g/g",
+      "value": 0.881,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Yield coefficient for substrate S2 for combination 1 Y12 g of biomass/g of S2 0.881"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "Y22",
+      "label": "yield coefficient for substrate S2 in combination 2",
+      "kind": "yield",
+      "provenance": "fitted",
+      "unit": "g/g",
+      "value": 0.254,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Yield coefficient for substrate S2 for combination 2 Y22 g of biomass/g of S2 0.254"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "Yo1",
+      "label": "yield coefficient for dissolved oxygen in combination 1",
+      "kind": "yield",
+      "provenance": "fitted",
+      "unit": "g/g",
+      "value": 0.925,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Yield coefficient for DO in combination 1 Yo1 g of biomass/g of oxygen 0.925"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "Yo2",
+      "label": "yield coefficient for dissolved oxygen in combination 2",
+      "kind": "yield",
+      "provenance": "fitted",
+      "unit": "g/g",
+      "value": 1.219,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Yield coefficient for DO in combination 2 Yo2 g of biomass/g of oxygen 1.219"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "e_ratio1_0",
+      "label": "initial ratio of key enzyme 1 concentration to its maximum",
+      "kind": "enzyme_ratio",
+      "provenance": "fitted",
+      "unit": "1",
+      "value": 0.082,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Ratio of initial key Enzyme concentration to its maximum concentration for combination 1 e10/em1 ? 0.082"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)",
+      "note": "Used as an initial state of the normalised enzyme fraction e1/e_m1 in eq. (7). Table 2 prints the ratio 'e10/em1'."
+    },
+    {
+      "symbol": "e_ratio2_0",
+      "label": "initial ratio of key enzyme 2 concentration to its maximum",
+      "kind": "enzyme_ratio",
+      "provenance": "fitted",
+      "unit": "1",
+      "value": 0.874,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Ratio of initial key Enzyme concentration to its maximum concentration for combination 2 e20/em1 ? 0.874"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)",
+      "note": "Used as an initial state of the normalised enzyme fraction e2/e_m2 in eq. (7). Table 2 prints 'e20/em1'; the denominator is em1, which is the maximum enzyme of combination 1 and cannot be the maximum of combination 2. Read as e20/em2 -- see transcription note TN-02."
+    },
+    {
+      "symbol": "beta1",
+      "label": "enzyme degradation constant for combination 1",
+      "kind": "specific_growth_rate",
+      "provenance": "fitted",
+      "unit": "1/h",
+      "value": 0.001,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Enzyme Degradation constant for combination 1 ?1 h 1 0.001"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "beta2",
+      "label": "enzyme degradation constant for combination 2",
+      "kind": "specific_growth_rate",
+      "provenance": "fitted",
+      "unit": "1/h",
+      "value": 0.028,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Enzyme Degradation constant for combination 2 ?2 h 1 0.028"},
+      "fitting": "estimated by the authors' hybrid genetic-algorithm + fmincon fit to six fed-batch experiments (p. 5)"
+    },
+    {
+      "symbol": "kLa",
+      "label": "volumetric mass transfer coefficient for oxygen",
+      "kind": "oxygen_transfer_coefficient",
+      "provenance": "reported",
+      "unit": "1/h",
+      "value": 133.0,
+      "source": {"section": "3.1 Initial media composition and operating parameters", "locator": "text, p. 3 (Table S2)", "printed_page": 3, "quote": "The kLa was found to be 133 h 1 for the 500 ml PreSens baffled flask at 200 rpm shaking speed, 5 cm pitch and a fill ratio of 1:5 (Table S2)."},
+      "note": "Measured by the gassing-out/gassing-in technique, not fitted. Valid for this flask geometry, fill ratio and shaking speed only; predicting kLa elsewhere is out of scope."
+    },
+    {
+      "symbol": "C_star",
+      "label": "maximum solubility of oxygen in the medium",
+      "kind": "oxygen_saturation_concentration",
+      "provenance": "reported",
+      "unit": "g/L",
+      "value": 0.0075,
+      "source": {"section": "Notations", "locator": "notation table, p. 2", "printed_page": 2, "quote": "C* Maximum solubility of oxygen in media (0.0075 g. l 1)"}
+    },
+    {
+      "symbol": "of_minimum",
+      "label": "minimum value of the authors' objective function",
+      "kind": "enzyme_ratio",
+      "provenance": "reported",
+      "unit": "1",
+      "value": 2.277,
+      "source": {"section": "3.2 Model formulation and parameter estimation", "locator": "Table 2", "printed_page": 4, "quote": "Minimum value of Objective function OF ? 2.277"},
+      "note": "Reported for completeness. The objective function of eq. (17)-(18) is not implemented in this version; see the validation policy in README.md."
+    }
+  ]
+}

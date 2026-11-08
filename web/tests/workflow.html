@@ -1,37 +1,136 @@
-<!doctype html><meta charset="utf-8"><title>Browser workflow acceptance</title>
-<pre id="result">RUNNING</pre><iframe id="app" src="../index.html?api=http%3A%2F%2Flocalhost%3A8080" style="width:100%;height:900px;border:0"></iframe>
+<!doctype html>
+<meta charset="utf-8">
+<title>ScaleUp browser-to-Python smoke test</title>
+<pre id="result">RUNNING</pre>
+<iframe id="app" src="../index.html?api=http%3A%2F%2Flocalhost%3A8080" style="width:100%;height:900px;border:0"></iframe>
 <script>
-const result=document.querySelector('#result'), frame=document.querySelector('#app');
-const fail=(e)=>{result.textContent=`FAIL: ${e}`;document.title='FAIL';};
-frame.addEventListener('load',()=>{
-  const w=frame.contentWindow, d=frame.contentDocument; let cycles=0;
-  const timer=setInterval(async()=>{
-    try {
-      if(++cycles>360) throw new Error('Timed out waiting for the app workflow');
-      if(d.querySelector('#api-state')?.textContent!=='Python execution service online') return;
-      clearInterval(timer);
-      const first=d.querySelector('#input-fields input'); if(!first) throw new Error('No model inputs loaded');
-      first.value=String(Number(first.value)+0.001); first.dispatchEvent(new Event('input',{bubbles:true}));
-      d.querySelector('#run-button').click();
-      const runTimer=setInterval(async()=>{
-        try {
-          const status=d.querySelector('#run-status').textContent;
-          if(status.startsWith('Computed by ')) {
-            clearInterval(runTimer);
-            if(d.querySelector('#result-chip').textContent!=='PYTHON RESULT') throw new Error('Result not labelled as Python computed');
-            if(d.querySelector('#timeline').disabled) throw new Error('Timeline was not driven by returned data');
-            if(d.querySelector('#volume-readout').textContent==='—'||d.querySelector('#biomass-value').textContent==='—'||d.querySelector('#oxygen-value').textContent==='—') throw new Error('Returned quantities did not update readouts');
-            const slider=d.querySelector('#timeline'); slider.value='500'; slider.dispatchEvent(new Event('input',{bubbles:true}));
-            const before=d.querySelector('#time-value').textContent;
-            first.value=String(Number(first.value)+0.001);first.dispatchEvent(new Event('input',{bubbles:true}));
-            if(d.querySelector('#result-chip').textContent!=='STALE RESULT') throw new Error('Input edit did not mark the prior trajectory stale');
-            const invalid=await fetch(`${w.SCALEUP_API_BASE||'http://localhost:8080'}/api/validate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({graph:{contract_version:'0.1.0',graph_id:'browser_invalid',instances:[{instance_id:'x',model_id:'unregistered.python.module'}],connections:[],literal_inputs:{}}})});
-            if(invalid.status!==400) throw new Error(`Invalid model request was not rejected (${invalid.status})`);
-            result.textContent=`PASS: Chromium loaded model metadata, changed an input, received actual Python trajectories, updated the timeline/readouts, marked edited results stale, and confirmed invalid model identifiers are rejected. Scrubbed time: ${before} h.`;document.title='PASS';
-          } else if(d.querySelector('#run-status').classList.contains('error')) throw new Error(status);
-        } catch(e){clearInterval(runTimer);fail(e.message||e);}
-      },200);
-    } catch(e){clearInterval(timer);fail(e.message||e);}
-  },200);
+const API = 'http://localhost:8080';
+const result = document.querySelector('#result');
+const frame = document.querySelector('#app');
+const fail = (error) => {
+  result.textContent = `FAIL: ${error}`;
+  document.title = 'FAIL';
+};
+const check = (condition, message) => {
+  if (!condition) throw new Error(message);
+};
+const waitFor = async (predicate, message, timeout = 120000) => {
+  const end = Date.now() + timeout;
+  while (Date.now() < end) {
+    if (predicate()) return;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  throw new Error(message);
+};
+const jsonPost = async (path, body) => {
+  const response = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return { response, body: await response.json() };
+};
+const runInBrowser = async (doc) => {
+  doc.querySelector('#run-button').click();
+  await waitFor(() => {
+    const status = doc.querySelector('#run-status');
+    return status?.textContent.startsWith('Computed by ') || status?.classList.contains('error');
+  }, 'Timed out waiting for a browser simulation');
+  check(doc.querySelector('#run-status').textContent.startsWith('Computed by '),
+    doc.querySelector('#run-status').textContent);
+};
+
+frame.addEventListener('load', async () => {
+  try {
+    const doc = frame.contentDocument;
+    await waitFor(() => doc.querySelector('#api-state')?.textContent === 'Python execution service online',
+      'The browser did not load API-backed model metadata');
+    check(new URL(frame.src).searchParams.get('api') === API,
+      'The acceptance page is not configured for the local API');
+    check(doc.querySelector('#model-tag').textContent.includes('ganjave'),
+      'The live panel is not bound to the registered Ganjave model');
+
+    const input = doc.querySelector('#input-fields input');
+    check(input, 'No editable model input was rendered');
+    const originalInput = Number(input.value);
+
+    // First run is the unedited declared graph. Its result must come from Python.
+    await runInBrowser(doc);
+    check(doc.querySelector('#result-chip').textContent === 'PYTHON RESULT',
+      'The successful result is not labelled as Python-computed');
+    check(!doc.querySelector('#timeline').disabled, 'Returned time series did not enable the timeline');
+    for (const selector of ['#volume-readout', '#biomass-value', '#oxygen-value']) {
+      check(doc.querySelector(selector).textContent !== '—', `${selector} was not rendered from returned data`);
+    }
+    const timeline = doc.querySelector('#timeline');
+    timeline.value = '0';
+    timeline.dispatchEvent(new Event('input', { bubbles: true }));
+    const baselineBiomass = Number(doc.querySelector('#biomass-value').textContent);
+
+    // A changed, valid initial biomass must make a second, distinct Python run.
+    input.value = String(originalInput + 0.25);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    check(doc.querySelector('#result-chip').textContent === 'STALE RESULT',
+      'Changing a valid input did not mark the previous result stale');
+    await runInBrowser(doc);
+    timeline.value = '0';
+    timeline.dispatchEvent(new Event('input', { bubbles: true }));
+    const changedBiomass = Number(doc.querySelector('#biomass-value').textContent);
+    check(Math.abs(changedBiomass - baselineBiomass) > 0.1,
+      `The changed input did not change the returned initial biomass (${baselineBiomass} -> ${changedBiomass})`);
+
+    doc.querySelector('.tab[data-panel="evidence"]').click();
+    check(doc.querySelector('#details-panel').textContent.includes('declared graph input'),
+      'The evidence panel does not identify caller-supplied inputs');
+    doc.querySelector('.tab[data-panel="report"]').click();
+    const report = doc.querySelector('#details-panel').textContent;
+    check(report.includes('not_yet_validated'), 'The model reproduction status is missing or overstated');
+    check(report.includes('Provenance digest'), 'The report does not expose provenance');
+    doc.querySelector('.tab[data-panel="models"]').click();
+    check(doc.querySelector('#details-panel').textContent.includes('literature replay · replay only, not a predictive model'),
+      'The Zieliński replay is not clearly separated from live prediction');
+
+    // Invalid browser input must clear the display and show a useful error.
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    doc.querySelector('#run-button').click();
+    check(doc.querySelector('#run-status').classList.contains('error'),
+      'A blank numeric input was not rejected in the browser');
+    check(doc.querySelector('#result-chip').textContent === 'NO CURRENT RUN' && timeline.disabled,
+      'Invalid input left a stale trajectory visible as current');
+
+    // API refusal and runner/solver failures must never return a computed result.
+    const unknown = await jsonPost('/api/validate', { graph: {
+      contract_version: '0.1.0', graph_id: 'browser_unknown',
+      instances: [{ instance_id: 'x', model_id: 'unregistered.python.module' }],
+      connections: [], literal_inputs: {},
+    } });
+    check(unknown.response.status === 400, `Unknown model was not refused (${unknown.response.status})`);
+
+    const defaultResponse = await fetch(`${API}/api/default-graph`);
+    const defaultPayload = await defaultResponse.json();
+    const missingInput = structuredClone(defaultPayload.graph);
+    delete missingInput.literal_inputs['ganjave_fed_batch/initial_biomass_concentration'];
+    const runnerFailure = await jsonPost('/api/simulations', { graph: missingInput });
+    check(runnerFailure.response.status === 422 && runnerFailure.body.result_kind === 'none',
+      'A contract failure was not returned as a failed, non-computed run');
+    check(runnerFailure.body.diagnostics.some((item) => item.code === 'connection.missing_required_input'),
+      'The runner failure omitted its required-input diagnostic');
+
+    const exhausted = structuredClone(defaultPayload.graph);
+    exhausted.instances[0].parameters.simulation.solver.max_steps = 1;
+    const solverFailure = await jsonPost('/api/simulations', { graph: exhausted });
+    check(solverFailure.response.status === 422 && solverFailure.body.result_kind === 'none',
+      'Solver-budget exhaustion was not returned as a failed, non-computed run');
+    check(solverFailure.body.result.results[0].raw_summary.solver_report.steps_taken === 1,
+      'The runner did not report the configured solver-step budget');
+    check(!Object.keys(solverFailure.body.trajectories).length,
+      'A solver-budget failure returned a trajectory');
+
+    result.textContent = 'PASS: real browser runs returned Python trajectories; changed input changed the result; stale and invalid UI states cleared; evidence, provenance, scientific status and replay labeling were visible; unknown models, missing inputs and exhausted solver budgets were refused without stale or computed trajectories.';
+    document.title = 'PASS';
+  } catch (error) {
+    fail(error.message || error);
+  }
 });
 </script>

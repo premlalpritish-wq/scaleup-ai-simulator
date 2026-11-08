@@ -1,0 +1,721 @@
+{
+  "run_id": "zielinski-replay::3a37c6059328",
+  "status": "success_with_warnings",
+  "digest": "2f5a2820c622b74d2ad46fcf9b6f90a5632d249dec9ec27b7523a3a588ce5fad",
+  "scientific_status": "not_yet_validated",
+  "evidence_summary": {
+    "mode": "evidence_replay",
+    "observed_reference_values": 142,
+    "digitized_values": 20,
+    "computed_values": 20,
+    "predicted_values": 0,
+    "unknown_values": 11,
+    "unresolved_targets": 3,
+    "validation_errors": 5,
+    "validation_warnings": 6,
+    "cross_check_errors": 2,
+    "graph_is_predictive": false
+  },
+  "source": {
+    "citation": "Zielinski et al. (2019), Protein Expression and Purification 157: 63–69, doi:10.1016/j.pep.2019.02.002",
+    "doi_url": "https://doi.org/10.1016/j.pep.2019.02.002",
+    "figure": "Fig. 3",
+    "pdf_page": 5,
+    "printed_page": 67,
+    "uncertainty": {
+      "time_h": 0.1,
+      "od600": 0.5,
+      "basis": "Dominated by marker-centroid bias on steep segments and by JPEG compression of the embedded figure. The plateau markers, where the curve is flat and the centroid is unambiguous, reproduce to within 0.01 OD, so 0.5 OD is a conservative envelope that also covers the steep-region bias."
+    },
+    "method": "Marker centres recovered from the embedded raster image by gridline calibration plus a vertical thickness profile of the curve colour."
+  },
+  "points": [
+    {
+      "hour": 1,
+      "value": 0.37,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 2,
+      "value": 0.37,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 3,
+      "value": 0.36,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 4,
+      "value": 0.36,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 5,
+      "value": 0.37,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 6,
+      "value": 0.37,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 7,
+      "value": 0.73,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 8,
+      "value": 1.47,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 9,
+      "value": 2.57,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 10,
+      "value": 4.79,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 11,
+      "value": 7.41,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 12,
+      "value": 13.88,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 13,
+      "value": 24.39,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 14,
+      "value": 33.82,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 15,
+      "value": 43.16,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 16,
+      "value": 52.2,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 17,
+      "value": 53.66,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 18,
+      "value": 53.67,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    },
+    {
+      "hour": 19,
+      "value": 53.67,
+      "unit": "OD600",
+      "provenance": "digitized",
+      "source_ref": "p.67, Fig. 3, 4.2",
+      "method": "marker centroid from the embedded raster of Fig. 3, calibrated against the plot gridlines",
+      "chain": [
+        {
+          "kind": "source",
+          "producer_model": "zielinski2019.rhi_process",
+          "producer_version": "1.0.0",
+          "where": "instance:zielinski_replay",
+          "detail": "evidence_replay: 142 reported, 20 digitized, 20 computed, 11 unknown, 3 unresolved targets",
+          "connection_id": null,
+          "source_port": null,
+          "target_port": null,
+          "method": "Zielinski et al. (2019) process graph; reported conditions and observations restated, supported accounting identities applied",
+          "inputs": [],
+          "source_ref": "Zielinski et al. 2019, Protein Expression and Purification 157 (2019) 63-69, doi:10.1016/j.pep.2019.02.002",
+          "conversion": null
+        }
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "label": "node:N01#inoculum_volume",
+      "display": "50 mL",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#inoculum_cultivation_time",
+      "display": "18 h",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#inoculum_temperature",
+      "display": "30 degC",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#inoculum_target_od600",
+      "display": "0.5-1 OD600",
+      "provenance": "unknown",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": false
+    },
+    {
+      "label": "node:N01#inoculum_tetracycline",
+      "display": "100 ug/mL",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#inoculum_proline",
+      "display": "600 ug/mL",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#inoculum_thiamine",
+      "display": "2 ug/mL",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#fermenter_nominal_volume",
+      "display": "7.5 L",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#starting_medium_volume",
+      "display": "4 L",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#fermenter_temperature",
+      "display": "37 degC",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#growth_duration",
+      "display": "15-16 h",
+      "provenance": "unknown",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": false
+    },
+    {
+      "label": "node:N01#post_induction_duration",
+      "display": "4-5 h",
+      "provenance": "unknown",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": false
+    },
+    {
+      "label": "node:N01#glucose_feed_concentration",
+      "display": "40 %",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#glucose_target_initial",
+      "display": "70-120 mg/dL",
+      "provenance": "unknown",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": false
+    },
+    {
+      "label": "node:N01#proline_feed_concentration",
+      "display": "12 mg/mL",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    },
+    {
+      "label": "node:N01#ph_control_reagent",
+      "display": "16 %",
+      "provenance": "reported",
+      "source_ref": "p.64, 2.4 Cell culture",
+      "is_resolved": true
+    }
+  ],
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "code": "value.unit_unregistered",
+      "message": "[manifest] port 'node:N01#specific_growth_rate' carries no usable unit: the model declares dimension '(none)' for unit '1/h', which this contract does not define. The port is published so the gap is visible, and it cannot be connected.. It is declared so the gap is visible and countable, and it cannot be connected."
+    },
+    {
+      "severity": "info",
+      "code": "capability.unsupported",
+      "message": "[manifest] zielinski2019.rhi_process does not support 'growth_kinetics': The paper reports no kinetic parameters, no mu_max, no Ks and no oxygen-transfer data. Fitting a curve to the single Fig. 3 batch would be a fitted mechanistic model, not a sourced one."
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] wet biomass per litre: computed 224 g / 4 L vs the paper's own 56 g/L: computed 56 g/L vs reported 56 g/L (relative difference 0.00%, tolerance 1.00%)"
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] inclusion bodies per litre: computed 58 g / 4 L vs the paper's own 14.5 g/L: computed 14.5 g/L vs reported 14.5 g/L (relative difference 0.00%, tolerance 1.00%)"
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] ZnCl2 dose: formula 2 x V/100 on 500 mL vs the reported 10 mL: computed 10 mL vs reported 10 mL (relative difference 0.00%, tolerance 1.00%)"
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] EDTA dose: formula 2142.5 AU / 190 vs the reported 11.3 mL: computed 11.28 mL vs reported 11.3 mL (relative difference 0.21%, tolerance 2.00%)"
+    },
+    {
+      "severity": "error",
+      "code": "model.finding",
+      "message": "[zielinski2019] zinc-salt dissolution water: formula 2142.5 AU / 7 vs the reported 285 mL: computed 306.1 mL vs reported 285 mL (relative difference 7.39%, tolerance 2.00%)"
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] total volume implied by 9.2 mL of 1 M Tris to reach 30 mM vs the volume implied by the paper's own /7 formula: computed 306.7 mL vs reported 306.1 mL (relative difference 0.19%, tolerance 2.00%)"
+    },
+    {
+      "severity": "warning",
+      "code": "model.finding",
+      "message": "[zielinski2019] Tris concentration actually achieved on the reported 285 + 9.2 mL path vs the stated 30 mM target: computed 31.27 mM vs reported 30 mM (relative difference 4.24%, tolerance 3.00%)"
+    },
+    {
+      "severity": "error",
+      "code": "model.finding",
+      "message": "[zielinski2019] carboxypeptidase B dose: 626.02 AU x 10/150 vs the reported 50 uL: computed 41.73 uL vs reported 50 uL (relative difference 16.53%, tolerance 2.00%)"
+    },
+    {
+      "severity": "warning",
+      "code": "model.finding",
+      "message": "[zielinski2019] sec. 2.4 reports two durations without stating how they relate: 'Cells were grown for 15-16 h at 37 C' and 'After induction, the culture was grown for 4-5 h until OD600 nm was about 50-60'. Whether 15-16 h is the total batch duration or the pre-induction duration is not stated, and the two readings differ by 4-5 h. The digitized Fig. 3 axis ends at 19 h, which is consistent with a total of about 19-21 h under the second reading but does not settle it. Both durations are stored as reported intervals and neither is adjusted."
+    },
+    {
+      "severity": "warning",
+      "code": "model.finding",
+      "message": "[zielinski2019] The digitized Fig. 3 plateau reaches 53.67 OD600, while sec. 4.2 states a maximum of 54.4 OD600. The difference (0.73) is larger than the declared +/-0.5 OD digitization uncertainty. Both values are retained; neither is adjusted to match the other."
+    },
+    {
+      "severity": "warning",
+      "code": "model.finding",
+      "message": "[zielinski2019] The narrative order in sec. 2.4 cannot be reconciled with Fig. 3. Glucose feeding is limited once OD600 reaches 25-35, which the digitized curve places at about 13.1 h; but a 4-5 h post-induction phase ending at OD600 50-60 (reached at about 15.7 h) would place induction at about 10.7-11.7 h, i.e. BEFORE the glucose limitation. The induction time is not stated, so the conflict is recorded rather than resolved."
+    },
+    {
+      "severity": "error",
+      "code": "model.finding",
+      "message": "[zielinski2019] sec. 4.4 reports 5460 AU after dissolution and sec. 4.5 reports 5450 AU after renaturation, which is 5450/5460 = 99.82%. The same section states a room-temperature yield of 95-96%, which would imply only 5187-5242 AU. The two statements are not on the same basis; both are retained and neither is adjusted."
+    },
+    {
+      "severity": "warning",
+      "code": "model.finding",
+      "message": "[zielinski2019] sec. 2.7 states the precursor was 'allowed to fold during the subsequent 18 h period'; sec. 4.5 states 'The refolding process was completed after 18-19 h'. The methods value is stored as an exact 18 h and the results value as the 18-19 h interval; neither is reconciled against the other and no refolding rate is derived from them."
+    },
+    {
+      "severity": "error",
+      "code": "model.finding",
+      "message": "[zielinski2019] sec. 2.13 specifies the dissolution volume as post-DEAE protein / 7. With the reported post-DEAE protein of 2142.5 AU this evaluates to 306.07 mL, but sec. 4.9 reports 285 mL of water (7.4% lower). The same paper's 9.2 mL of 1 M Tris to reach 30 mM implies a total volume of about 306.7 mL, which is consistent with the formula and not with 285 mL. Both statements are retained; neither is adjusted."
+    },
+    {
+      "severity": "error",
+      "code": "model.finding",
+      "message": "[zielinski2019] sec. 2.15 states 10 ul of carboxypeptidase B per 150 AU of main-fraction protein, and sec. 4.10 reports that fraction as 226 ml at 2.77 AU/ml (626.02 AU). That dosing rule implies 41.73 ul, but the paper states 50 ul was added (20% more). The paper does not say whether the dose was rounded up or based on a different batch."
+    },
+    {
+      "severity": "warning",
+      "code": "model.finding",
+      "message": "[zielinski2019] The signed deviation 5807.5 - 5807.63 = -0.13 Da is reported as an arithmetic difference only. The measured value is printed to +/-0.05 Da and the theoretical value to +/-0.005 Da, giving a reporting-precision interval of about +/-0.055 Da. The paper reports no replicates, no standard and no error bars, so this is NOT a statistical test and no claim of significance, agreement or disagreement is made."
+    },
+    {
+      "severity": "warning",
+      "code": "model.finding",
+      "message": "[zielinski2019] 2700 IU/L is reported at the end of the whole process as a retrospective average per litre of culture medium. It is not a stage measurement and no equation links it to any AU value, so it cannot be reproduced by this model."
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] unresolved target N06:citraconic_anhydride_volume: the paper prints this formula but its dimensional interpretation is unresolved, so it is not executed"
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] unresolved target N06:ethanolamine_volume: the paper prints this formula but its dimensional interpretation is unresolved, so it is not executed"
+    },
+    {
+      "severity": "info",
+      "code": "model.finding",
+      "message": "[zielinski2019] unresolved target N07:trypsin_volume: the paper prints this formula but its dimensional interpretation is unresolved, so it is not executed"
+    }
+  ],
+  "limitations": [
+    "Points at 1-6 h sit on the OD=0 baseline; the digitized 0.36-0.37 is within the declared +/-0.5 OD uncertainty of zero.",
+    "The digitized plateau (53.66-53.67) is slightly below the OD600 of 54.4 reported in the text at sec. 4.2. Both are retained; the discrepancy is surfaced as a cross-check rather than resolved.",
+    "The paper never states the induction time point; it is not recoverable from this figure either."
+  ]
+}

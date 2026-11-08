@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScaleUp browser Python smoke test</title>
+<style>body{font:16px system-ui;max-width:900px;margin:2rem auto;padding:0 1rem}#status{padding:1rem;background:#eee;white-space:pre-wrap}iframe{width:100%;height:80vh;border:1px solid #888}</style>
+<h1>Browser-side Ganjave execution smoke test</h1>
+<p>The checks below require a real Pyodide/WebAssembly run in the embedded visitor UI. The stored reference trajectory is not loaded.</p>
+<div id="status" role="status">Loading runtime…</div>
+<details open><summary>Live startup log</summary><pre id="startup-log">Waiting for the embedded application…</pre></details>
+<iframe id="demo" src="../index.html?model=ganjave" title="ScaleUp AI browser Python demo"></iframe>
+<script>
+(async()=>{
+  const status=document.querySelector('#status'), frame=document.querySelector('#demo'), log=document.querySelector('#startup-log');
+  const check=(name,ok)=>{checks.push(`${ok?'PASS':'FAIL'} — ${name}`);if(!ok)throw new Error(name);};
+  const checks=[];
+  const capture=()=>{try{const entries=frame.contentWindow?.scaleupStartupLog||[];log.textContent=entries.map(x=>`[${x.at||'worker'} +${x.elapsedMs??'?'}ms] ${x.message||''}${x.url?` | ${x.url}`:''}${x.status?` | HTTP ${x.status}`:''}${x.bytes!=null?` | ${x.bytes} bytes`:''}${x.contentType?` | ${x.contentType}`:''}${x.error?` | ${x.error}`:''}`).join('\n')||'The application script has not reported a stage. Check whether app.js loaded and inspect DevTools Console/Network.';}catch(error){log.textContent=`Could not read embedded diagnostics: ${error.message}`;}};
+  const logTimer=setInterval(capture,500);
+  try {
+    await new Promise((resolve,reject)=>{const end=Date.now()+180000;const poll=()=>{try{capture();const d=frame.contentDocument;if(!d){if(Date.now()>end)reject(new Error('Demo document did not become available'));else setTimeout(poll,300);return;}const text=d.querySelector('#run-status')?.textContent||'';if(text.includes('Python/WebAssembly ready'))resolve();else if(text.includes('could not start')||text.includes('unavailable')||text.includes('Timed out'))reject(new Error(text));else if(Date.now()>end)reject(new Error(`Smoke harness limit reached; last app status: ${text||'(missing #run-status)'}`));else setTimeout(poll,300);}catch(e){reject(e);}};frame.addEventListener('load',poll,{once:true});poll();});
+    let d=frame.contentDocument, w=frame.contentWindow;
+    check('browser identifies Python/WebAssembly execution',d.querySelector('#execution-label').textContent.includes('PYTHON'));
+    check('no precomputed trajectory is shown before Run',d.querySelector('#result-chip').textContent==='NO CURRENT RUN');
+    check('declared input fields are editable',d.querySelectorAll('#input-fields input').length>=7&&[...d.querySelectorAll('#input-fields input')].every(x=>!x.disabled));
+    const waitFor=(predicate,label)=>new Promise((resolve,reject)=>{const end=Date.now()+180000;const poll=()=>{try{if(predicate())resolve();else if(Date.now()>end)reject(new Error(label));else setTimeout(poll,250);}catch(e){reject(e);}};poll();});
+    d.querySelector('#run-button').click();
+    await waitFor(()=>d.querySelector('#result-chip').textContent==='PYTHON RESULT','Baseline browser-side run did not complete');
+    d.querySelector('#timeline').value='1000';d.querySelector('#timeline').dispatchEvent(new Event('input',{bubbles:true}));
+    const baselineBiomass=Number(d.querySelector('#biomass-value').textContent.replace(/,/g,''));
+    check('baseline simulation returned 2,448 trajectory points',d.querySelector('#timeline-hint').textContent.includes('2,448'));
+    d.querySelector('[data-panel="report"]').click();
+    check('scientific status remains not_yet_validated',d.querySelector('#details-panel').textContent.includes('not_yet_validated'));
+    check('provenance digest is visible',d.querySelector('#details-panel').textContent.includes('input_digest'));
+    const readProvenance=()=>JSON.parse(d.querySelector('#details-panel details pre')?.textContent||'{}').provenance||{};
+    const baselineDigest=readProvenance().input_digest||'';
+    check('baseline input_digest is present',baselineDigest.length>0);
+    const biomass=d.querySelector('#input-initial_biomass_concentration');biomass.value='0.06';biomass.dispatchEvent(new Event('input',{bubbles:true}));
+    check('editing an input marks the old result stale',d.querySelector('#result-chip').textContent==='STALE RESULT'&&!d.querySelector('#stale-notice').hidden);
+    d.querySelector('#run-button').click();
+    await waitFor(()=>d.querySelector('#result-chip').textContent==='PYTHON RESULT','Changed-input browser-side run did not complete');
+    d.querySelector('#timeline').value='1000';d.querySelector('#timeline').dispatchEvent(new Event('input',{bubbles:true}));
+    const changedBiomass=Number(d.querySelector('#biomass-value').textContent.replace(/,/g,''));
+    check('valid input change changed the Python trajectory',Number.isFinite(changedBiomass)&&Math.abs(changedBiomass-baselineBiomass)>1e-4);
+    const changedDigest=readProvenance().input_digest||'';
+    check('valid input change changed the provenance input_digest',changedDigest.length>0&&changedDigest!==baselineDigest);
+    biomass.value='-1';biomass.dispatchEvent(new Event('input',{bubbles:true}));d.querySelector('#run-button').click();
+    await waitFor(()=>d.querySelector('#result-chip').textContent==='NO CURRENT RUN'&&d.querySelector('#run-status').classList.contains('error'),'Invalid input did not clear the current result');
+    check('invalid input is refused without reusing the previous result',d.querySelector('#result-chip').textContent==='NO CURRENT RUN');
+    const invalidMessage=d.querySelector('#run-status').textContent;
+    d.querySelector('[data-panel="models"]').click();
+    check('Zieliński is labelled as a literature replay, not a predictive model',d.querySelector('#details-panel').textContent.includes('Zieliński literature replay · replay only, not a predictive model'));
+    clearInterval(logTimer);capture();status.textContent=`PASS — ${checks.length} browser checks
+Baseline final biomass: ${baselineBiomass} g/L
+Baseline input_digest: ${baselineDigest}
+Changed final biomass: ${changedBiomass} g/L
+Changed input_digest: ${changedDigest}
+Invalid-input message: ${invalidMessage}
+${checks.join('\n')}`;status.dataset.result='pass';
+  } catch(error) {
+    clearInterval(logTimer);capture();
+    const startup=frame.contentDocument?.querySelector('#run-status')?.textContent||'No embedded app status was available.';
+    status.textContent=`FAIL — ${error.message}\nLast app status: ${startup}\nSee the timestamped startup log above and save DevTools Network evidence (HAR with content) plus Console errors.\n${checks.join('\n')}`;
+    status.dataset.result='fail';
+  }
+})();
+</script>
+</html>

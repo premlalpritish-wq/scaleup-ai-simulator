@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScaleUp Research Explorer — Pecan RNA extraction</title>
+<meta name="description" content="A browser view of a completed, reproducible research-to-simulation run for pecan embryo total RNA extraction. Evidence, provenance, gaps and executed model outputs.">
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <div class="title-row">
+      <h1>ScaleUp Research Explorer</h1>
+      <span class="tag">Pecan RNA extraction · MVP</span>
+    </div>
+    <p class="lede">
+      A browser view of a research-to-simulation run that already exists in this
+      repository. Evidence is quoted from the acquired papers, the model is an
+      evidence-constrained protocol audit, and the numbers in the analysis section
+      are produced by the Python workflow when you press <strong>Run analysis</strong>.
+      Nothing on this page is mocked.
+    </p>
+    <div id="service-state" class="service-state" role="status" aria-live="polite">
+      <span class="dot pending" aria-hidden="true"></span>
+      <span id="service-text">Connecting to the Python service…</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="wrap">
+    <a href="#overview">Case overview</a>
+    <a href="#protocol">Protocol input</a>
+    <a href="#evidence">Evidence explorer</a>
+    <a href="#gaps">Research gaps</a>
+    <a href="#analysis">Run analysis</a>
+    <a href="#export">Export &amp; feedback</a>
+  </div>
+</nav>
+
+<main id="main" class="wrap">
+
+  <section id="overview" aria-labelledby="overview-h">
+    <h2 id="overview-h">1. Case overview</h2>
+    <p class="note">
+      This is the shipped pecan case. Its artifacts are read from
+      <code>composition/workflow_runs/pecan/</code>; every quotation below is
+      re-checked against the acquired source text before it is shown.
+    </p>
+
+    <div id="overview-problem" class="card" aria-live="polite">
+      <p class="muted">Loading the pecan problem specification…</p>
+    </div>
+
+    <div class="grid two">
+      <div class="card">
+        <h3>What the existing protocol establishes</h3>
+        <p>
+          The pecan paper (PMC11430883, <em>Foods</em> 2024) extracts total RNA
+          from <em>Carya illinoinensis</em> embryos with a TRIzol kit, treats with
+          DNase I and checks quality by gel and NanoDrop before small-RNA and
+          transcriptome sequencing. It names the kit and says the manufacturer's
+          protocol was followed.
+        </p>
+        <p class="muted">
+          It does not print the lysis volumes, incubation times, centrifugation
+          speeds, elution volume, yield or RIN. Those stay unknown here.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Where the exact parameters come from</h3>
+        <p>
+          Two other open-access papers give exact modified-CTAB and TRIzol
+          parameters: Norway spruce (<em>Picea abies</em>) and pigeonpea
+          (<em>Cajanus cajan</em>). They are different species, so the workflow
+          records them as <strong>analogue hypotheses</strong>, never as pecan
+          measurements.
+        </p>
+        <p class="muted">
+          Two method reviews cover secondary-metabolite-rich and difficult plant
+          species.
+        </p>
+      </div>
+    </div>
+
+    <h3>Evidence summary</h3>
+    <div id="case-summary" class="stats" aria-live="polite"></div>
+
+    <h3>What this tool can and cannot do</h3>
+    <div class="grid two">
+      <div class="card">
+        <h4 class="ok">Capabilities</h4>
+        <ul id="capabilities"></ul>
+      </div>
+      <div class="card">
+        <h4 class="warn">Limitations</h4>
+        <ul id="limitations"></ul>
+      </div>
+    </div>
+    <p class="warning">
+      This model does not predict RNA yield, RIN, purity or degradation, and no
+      value of that kind appears anywhere in this application. It reports what the
+      literature establishes, what is transferred by analogy, and what remains
+      unknown.
+    </p>
+
+    <h3>Corpus</h3>
+    <div class="table-scroll">
+      <table id="sources-table">
+        <thead>
+          <tr><th scope="col">Source</th><th scope="col">Role</th><th scope="col">DOI</th><th scope="col">PMCID</th><th scope="col">Extraction</th></tr>
+        </thead>
+        <tbody><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="protocol" aria-labelledby="protocol-h">
+    <h2 id="protocol-h">2. Protocol input</h2>
+    <p class="note">
+      Describe your own protocol or problem. The workflow parses the organism,
+      material, target molecule, downstream application and constraints. The
+      extraction method, extra details and observations are recorded in your report
+      as context — they are <strong>not</strong> turned into evidence and do not
+      change the model. Unknown fields may be left empty; they are reported as
+      unknown, never guessed.
+    </p>
+
+    <form id="protocol-form" novalidate>
+      <div class="grid two">
+        <label class="field">
+          <span>Organism</span>
+          <input id="f-organism" name="organism" type="text" maxlength="200" autocomplete="off"
+                 placeholder="Carya illinoinensis" aria-describedby="h-organism">
+          <small id="h-organism">Binomial name if you know it. Empty is allowed.</small>
+        </label>
+        <label class="field">
+          <span>Material / tissue</span>
+          <input id="f-tissue" name="tissue" type="text" maxlength="200" autocomplete="off"
+                 placeholder="embryo" aria-describedby="h-tissue">
+          <small id="h-tissue">The tissue the protocol extracts from.</small>
+        </label>
+        <label class="field">
+          <span>Target molecule</span>
+          <input id="f-molecule" name="molecule" type="text" maxlength="200" autocomplete="off"
+                 placeholder="total RNA" aria-describedby="h-molecule">
+          <small id="h-molecule">e.g. total RNA, small RNA, mRNA.</small>
+        </label>
+        <label class="field">
+          <span>Downstream application</span>
+          <input id="f-downstream" name="downstream" type="text" maxlength="300" autocomplete="off"
+                 placeholder="small RNA sequencing, transcriptome sequencing" aria-describedby="h-downstream">
+          <small id="h-downstream">Comma-separated. Optional.</small>
+        </label>
+      </div>
+
+      <label class="field wide">
+        <span>Current problem <em>(required)</em></span>
+        <textarea id="f-problem" name="problem" rows="3" maxlength="4000" required
+                  aria-describedby="h-problem"></textarea>
+        <small id="h-problem">What you are trying to do and what is going wrong. The organism and target molecule are read from this text if the fields above are empty.</small>
+      </label>
+
+      <div class="grid two">
+        <label class="field">
+          <span>Extraction method</span>
+          <input id="f-method" name="extraction_method" type="text" maxlength="400" autocomplete="off"
+                 placeholder="TRIzol kit, manufacturer protocol" aria-describedby="h-method">
+          <small id="h-method">Recorded in the report as context, not used as evidence.</small>
+        </label>
+        <label class="field">
+          <span>Constraints</span>
+          <input id="f-constraints" name="constraints" type="text" maxlength="400" autocomplete="off"
+                 placeholder="polyphenol-rich, recalcitrant tissue" aria-describedby="h-constraints">
+          <small id="h-constraints">Comma-separated. Optional.</small>
+        </label>
+      </div>
+
+      <div class="grid two">
+        <label class="field">
+          <span>Additional protocol details</span>
+          <textarea id="f-details" name="details" rows="3" maxlength="4000" aria-describedby="h-details"></textarea>
+          <small id="h-details">Volumes, times, kits. Recorded as context, not used as evidence.</small>
+        </label>
+        <label class="field">
+          <span>Observations</span>
+          <textarea id="f-observations" name="observations" rows="3" maxlength="4000" aria-describedby="h-observations"></textarea>
+          <small id="h-observations">What you observed. Recorded as context, not used as evidence.</small>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="submit" id="run-button" class="primary">Run analysis</button>
+        <button type="button" id="sample-button" class="secondary">Load the pecan example</button>
+        <button type="button" id="reset-button" class="secondary">Clear</button>
+        <span id="form-status" class="form-status" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+
+  <section id="evidence" aria-labelledby="evidence-h">
+    <h2 id="evidence-h">3. Evidence explorer</h2>
+    <p class="note">
+      Direct evidence is quoted from the pecan paper. Analogous evidence is quoted
+      from other species and is a hypothesis. Method-review evidence is neither.
+      Each card carries its source, DOI/PMCID, section and the offsets the quote
+      was verified at.
+    </p>
+    <div class="filters" role="group" aria-label="Filter evidence by class">
+      <button type="button" class="chip active" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="chip" data-filter="direct" aria-pressed="false">Direct (pecan)</button>
+      <button type="button" class="chip" data-filter="analogue" aria-pressed="false">Analogous (hypotheses)</button>
+      <button type="button" class="chip" data-filter="method_review" aria-pressed="false">Method review</button>
+      <span id="evidence-count" class="count" aria-live="polite"></span>
+    </div>
+    <div id="evidence-list" class="evidence-list" aria-live="polite">
+      <p class="muted">Loading evidence…</p>
+    </div>
+  </section>
+
+
+  <section id="gaps" aria-labelledby="gaps-h">
+    <h2 id="gaps-h">4. Research gaps</h2>
+    <p class="note">
+      Every item below is a quantity or question the acquired sources do not
+      resolve. The workflow kept each one unknown; nothing was defaulted, and no
+      recommendation is invented. Where an analogue protocol reports a value, it is
+      shown as a hypothesis only.
+    </p>
+    <div id="gap-summary" class="stats" aria-live="polite"></div>
+    <div id="gap-list" class="gap-list" aria-live="polite">
+      <p class="muted">Loading gaps…</p>
+    </div>
+  </section>
+
+  <section id="analysis" aria-labelledby="analysis-h">
+    <h2 id="analysis-h">5. Run analysis</h2>
+    <p class="note">
+      Pressing <strong>Run analysis</strong> sends your problem to this
+      deployment's Python service, which runs the same workflow as the command
+      line and the desktop scene. Results below are its outputs. If the workflow
+      refuses the problem, the refusal and its diagnostics are shown instead —
+      never a substitute result.
+    </p>
+    <div id="analysis-status" class="analysis-status" role="status" aria-live="polite">
+      No analysis has run in this session.
+    </div>
+    <div id="analysis-output" hidden>
+      <div class="grid two">
+        <div class="card">
+          <h3>Computed outputs</h3>
+          <p class="muted small">Produced by the executed evidence-audit model through the composition engine.</p>
+          <div class="table-scroll">
+            <table id="outputs-table">
+              <thead><tr><th scope="col">Port</th><th scope="col">Value</th><th scope="col">Unit</th><th scope="col">Method</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Evidence summary and hypotheses</h3>
+          <div id="analysis-summary" class="stats"></div>
+          <h4 class="warn">Hypotheses in this run</h4>
+          <ul id="analysis-hypotheses" class="hypotheses"></ul>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Researcher input</h3>
+        <div id="analysis-input"></div>
+      </div>
+      <div class="card">
+        <h3>Diagnostics</h3>
+        <ul id="analysis-diagnostics" class="diagnostics"></ul>
+      </div>
+      <div class="card">
+        <h3>Artifacts written by this run</h3>
+        <div id="analysis-artifacts" class="artifacts"></div>
+      </div>
+    </div>
+    <div id="analysis-refusal" class="card refusal" hidden>
+      <h3>No result was produced</h3>
+      <p id="refusal-message"></p>
+      <p id="refusal-note" class="muted"></p>
+      <ul id="refusal-diagnostics" class="diagnostics"></ul>
+    </div>
+  </section>
+
+
+  <section id="export" aria-labelledby="export-h">
+    <h2 id="export-h">6. Export and feedback</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>Export the report</h3>
+        <p>
+          The Markdown report contains the case, the evidence with provenance, the
+          gaps, the computed outputs and the limitations. Use your browser's
+          <em>Print → Save as PDF</em> on this page for a PDF copy.
+        </p>
+        <p class="actions-inline">
+          <a id="case-report-link" class="button secondary" href="/api/research/case/report.md" download="pecan-case-report.md">Download case report (.md)</a>
+          <a id="run-report-link" class="button secondary" href="#" hidden download="pecan-analysis-report.md">Download this analysis (.md)</a>
+          <button type="button" id="print-button" class="button secondary">Print / Save as PDF</button>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Feedback</h3>
+        <form id="feedback-form" novalidate>
+          <label class="field">
+            <span>What would make this useful for your work?</span>
+            <textarea id="f-feedback" rows="3" maxlength="4000" required aria-describedby="h-feedback"></textarea>
+            <small id="h-feedback">At least a sentence. Stored on this server only, when the operator configured a feedback directory.</small>
+          </label>
+          <label class="field">
+            <span>Your role (optional)</span>
+            <input id="f-role" type="text" maxlength="200" autocomplete="off" placeholder="e.g. plant molecular biologist">
+          </label>
+          <div class="actions">
+            <button type="submit" class="primary">Send feedback</button>
+            <span id="feedback-status" class="form-status" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="privacy" role="note" aria-labelledby="privacy-h">
+      <h3 id="privacy-h">Privacy notice</h3>
+      <ul>
+        <li>Your problem, extraction method, details and observations are sent to <strong>this deployment's Python service</strong> when you press <em>Run analysis</em>. That is what runs the workflow. They are not sent to any third-party service, and this application has no API key of any kind.</li>
+        <li>Analyses are held in the service's memory and temporary storage for a bounded number of recent runs, and disappear when the service restarts. Export anything you need to keep.</li>
+        <li>Feedback is stored only on this server, and only if the operator configured a feedback directory. The response tells you whether it was stored.</li>
+        <li>No analytics, tracking pixels or third-party scripts are loaded by this page.</li>
+      </ul>
+    </div>
+
+    <details class="card">
+      <summary>How this page is produced</summary>
+      <p>
+        The page is static HTML/CSS/JavaScript. It reads the pecan case from
+        <code>GET /api/research/case</code>, which serves the shipped artifacts in
+        <code>composition/workflow_runs/pecan/</code> after re-verifying every
+        quote at its recorded character offsets. <em>Run analysis</em> calls
+        <code>POST /api/research/analysis</code>, which writes your problem to a
+        temporary file and runs
+        <code>composition.workflow.execute.run_workflow</code> — the same entry
+        point the CLI and the desktop scene use. If this page is served by a static
+        host with no Python service, the API calls fail and this page says so
+        instead of showing sample results.
+      </p>
+    </details>
+  </section>
+</main>
+
+<footer class="bottom">
+  <div class="wrap">
+    <p>
+      ScaleUp AI Simulator · research-to-simulation workflow
+      (<code>reports/RESEARCH_TO_SIMULATION_ARCHITECTURE.md</code>).
+      The model is an evidence-constrained protocol audit, not a predictive RNA
+      yield or degradation model.
+    </p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
+

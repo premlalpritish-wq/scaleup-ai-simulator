@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101715">
+  <title>ScaleUp AI — Scientific Simulation Workshop</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="scene.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">S</span><span>ScaleUp <b>AI</b><small>SCIENTIFIC DIGITAL TWINS</small></span></a>
+    <div class="top-meta"><span class="live-dot"></span><span id="api-state">Loading model registry</span><span class="separator">/</span><span id="selected-model-title">Scientific model selector</span></div>
+    <nav class="top-nav">
+      <a href="#architecture">Architecture</a>
+      <a href="#showcase">6-Stage Digital Twin</a>
+      <a href="#workshop">Model Workshop</a>
+    </nav>
+    <button class="quiet-button" id="about-button">About this model ↗</button>
+  </header>
+
+  <main>
+    <div class="mode-banner" id="execution-mode" hidden role="status"><b id="execution-banner-title">PYTHON RUNTIME READY.</b> <span id="execution-banner-copy">Run the bundled Ganjave Python model locally in this browser. No stored trajectory is substituted when execution is unavailable.</span></div>
+    <section class="intro">
+      <div><div class="eyebrow" id="execution-label">PROMPT-TO-PROCESS DIGITAL TWINS · ZERO-HALLUCINATION PROTOCOL</div><h1>Prompt-to-Process Digital Twins<br><em>with Zero-Hallucination Scientific Integrity.</em></h1></div>
+      <p id="execution-description">ScaleUp AI autonomously constructs multi-stage wet-lab and pilot-plant unit operations—from microbial bioreactors (Ganjave, Baez, Lin) to multi-stage solid-liquid biopolymer extraction and wet-spinning (<em>Saccharina latissima</em>). Every reaction constant and kinetic boundary is anchored to DOI-verified literature with formal mathematical provenance.</p>
+    </section>
+
+    <!-- 4-Stage Scientific Integrity Protocol Section -->
+    <section class="architecture-section" id="architecture">
+      <div class="section-header">
+        <span class="eyebrow">ZERO-HALLUCINATION ARCHITECTURE</span>
+        <h2>The 4-Stage Scientific Integrity Protocol</h2>
+        <p>Industrial bioprocess R&D cannot tolerate hallucinations or ungrounded generative chemistry. ScaleUp AI enforces an unbroken chain of custody from peer-reviewed publications to executable 3D physics.</p>
+      </div>
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="arch-num">01</div>
+          <div class="arch-badge">TOPOLOGY ENGINE</div>
+          <h3>Anatomy P&ID Engine</h3>
+          <p>Decomposes natural-language protocols into physical unit operations, material streams, phase transitions, and isometric P&ID schematic blueprints.</p>
+          <div class="arch-tech">SVG Vector Generation · Stream Balancing</div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-num">02</div>
+          <div class="arch-badge">EVIDENCE STORE</div>
+          <h3>Central Knowledge Library</h3>
+          <p>Binds every reaction constant, yield coefficient, and mass balance to SHA-256 and DOI-verified primary papers with verbatim author quotes (<code>DIRECT</code> vs <code>ANALOGUE_BRIDGE</code>).</p>
+          <div class="arch-tech">central_library.json · Primary Literature Proofs</div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-num">03</div>
+          <div class="arch-badge">RESEARCH AGENT</div>
+          <h3>Autonomous Gatekeeper</h3>
+          <p>Queries OpenAlex and CrossRef APIs on the fly when knowledge gaps appear, and <b>hard-fails (<code>InsufficientEvidenceError</code>)</b> rather than guessing parameters.</p>
+          <div class="arch-tech">Zero-Hallucination Guardrails · Real-Time Gap Resolution</div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-num">04</div>
+          <div class="arch-badge">GPU WORKBENCH</div>
+          <h3>Godot 4 3D Workbench</h3>
+          <p>Asynchronous GPU-instanced 3D phase transitions, mass-conserved batch continuity across vessels, live parameter sandbox dials, and one-click provenance inspection.</p>
+          <div class="arch-tech">Forward+ D3D12 / Vulkan · Single-Draw MultiMesh</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Case Study: 6-Stage Saccharina latissima Alginate Extraction -->
+    <section class="showcase-section" id="showcase">
+      <div class="section-header">
+        <span class="eyebrow">FEATURED DIGITAL TWIN · SCALE-UP VALIDATION</span>
+        <h2>6-Stage <em>Saccharina latissima</em> Alginate Extraction & Wet-Spinning Train</h2>
+        <p>A full-process reconstruction of macroalgae biopolymer processing—from raw dry kelp milling through acid wash, alkaline extraction, centrifugal phase separation, alcohol flocculation, and wet-spun hydrogel fiber tensile testing.</p>
+      </div>
+
+      <div class="showcase-card">
+        <div class="showcase-visuals">
+          <div class="showcase-hero-img-wrap">
+            <img src="assets/showcase/saccharina_6stage_bench_overview.png" id="showcase-main-img" alt="6-Stage Saccharina latissima bioprocess bench in Godot 4" class="showcase-img">
+          </div>
+          <div class="showcase-thumbs">
+            <button type="button" class="thumb-btn active" data-src="assets/showcase/saccharina_6stage_bench_overview.png">
+              <span>Overview</span>
+              <small>All 6 Stages</small>
+            </button>
+            <button type="button" class="thumb-btn" data-src="assets/showcase/stage_0_dry_milling.png">
+              <span>Stage 0</span>
+              <small>Milling & Scale</small>
+            </button>
+            <button type="button" class="thumb-btn" data-src="assets/showcase/stage_2_alkaline_dissolution.png">
+              <span>Stage 2</span>
+              <small>Alkaline Gel</small>
+            </button>
+            <button type="button" class="thumb-btn" data-src="assets/showcase/stage_4_cryo_precipitation.png">
+              <span>Stage 4</span>
+              <small>Alcohol Curd</small>
+            </button>
+            <button type="button" class="thumb-btn" data-src="assets/showcase/stage_5_wet_spinning_tensile.png">
+              <span>Stage 5</span>
+              <small>Wet Spinning</small>
+            </button>
+            <button type="button" class="thumb-btn" data-src="assets/showcase/active_anatomy_blueprint.svg">
+              <span>Schematic</span>
+              <small>Anatomy P&ID</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="showcase-details">
+          <div class="showcase-kpis">
+            <div class="kpi-box">
+              <span class="kpi-label">EXTRACTION YIELD</span>
+              <strong class="kpi-val highlight">33.07%</strong>
+              <small>Scaled-Up 15.0g Loading (vs 26.0% small-scale benchmark)</small>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-label">MOLECULAR WEIGHT</span>
+              <strong class="kpi-val">251 kDa</strong>
+              <small>pH 7.0 Controlled Neutralisation Preserved</small>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-label">PURITY (URONIC ACID)</span>
+              <strong class="kpi-val">91.5%</strong>
+              <small>Mannuronic/Guluronic Ratio M/G = 2.491</small>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-label">FIBRE TENSILE UTS</span>
+              <strong class="kpi-val highlight">29.3 – 43.1 MPa</strong>
+              <small>Pure Alginate → Citric Crosslinked Formulation</small>
+            </div>
+          </div>
+
+          <div class="process-train">
+            <h4>Continuous 40-Hour Unit Operations Train</h4>
+            <ul class="train-steps">
+              <li><b>0. Dry Kelp Milling & Weighing (0–2h):</b> 15.000 g whole dried fronds milled to 0.5–2.0 mm flakes with analytical LCD feedback.</li>
+              <li><b>1. Acid Demineralisation Wash (2–16h):</b> 4% citric acid wash protonating alginate into alginic acid while leaching polyphenols.</li>
+              <li><b>2. Alkaline Solubilisation (16–32h):</b> 2% Na₂CO₃ at 60°C dissolving 75% solid kelp into viscous amber sodium alginate hydrogel.</li>
+              <li><b>3. Centrifugation & Phase Separation (32–34h):</b> 4500 rpm sedimentation isolating waste pellet while supernatant pH is adjusted to 7.0.</li>
+              <li><b>4. Alcohol Precipitation (34–36h):</b> Isopropanol/ethanol flocculation generating pure precipitated fibrous alginate curd.</li>
+              <li><b>5. Wet-Spinning & Mechanical Pull (36–40h):</b> 2–5% CaCl₂ bath crosslinking into continuous yarn extruded onto motorized spools.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="workshop" style="padding-top: 15px;"></div>
+
+    <section class="selector-bar"><label for="model-selector">MODEL</label><select id="model-selector" aria-label="Select registered model"><option>Loading registry…</option></select><span id="model-selector-status">Registry metadata determines available views and execution claims.</span></section>
+    <section class="replay-view" id="zielinski-view" hidden>
+      <div class="replay-banner"><b>STORED LITERATURE EVIDENCE REPLAY · NOT A LIVE SIMULATION</b><span>The trajectory below was digitized from a published figure and loaded from a recorded composition-runner result. Changing the replay cursor only inspects those stored observations; it does not rerun a predictive model.</span></div>
+      <div class="panel replay-card"><div class="panel-heading"><span class="section-label">ZIELIŃSKI ET AL. · 2019</span><span class="status-chip precomputed">EVIDENCE REPLAY</span></div><h2>Reported E. coli 20 growth trajectory</h2><p id="replay-source"></p><div class="replay-chart-wrap"><svg id="replay-chart" viewBox="0 0 760 300" role="img" aria-label="Digitized optical density observations over time"></svg></div><div class="replay-controls"><label for="replay-timeline">Replay the recorded observations</label><input id="replay-timeline" type="range" min="0" max="18" value="0"><strong id="replay-readout">1 h · OD600 0.37</strong></div><div class="metric-row replay-metrics"><div class="metric"><span>OBSERVED TIME</span><strong id="replay-hour">1 h</strong><small>reported x-axis, digitized marker</small></div><div class="metric"><span>DIGITIZED OD600</span><strong id="replay-od">0.37</strong><small>declared digitization uncertainty ±0.5</small></div><div class="metric"><span>SCIENTIFIC STATUS</span><strong>not_yet_validated</strong><small>replay does not validate a model</small></div></div></div>
+      <div class="replay-grid"><section class="panel"><h3>Evidence, provenance & limitations</h3><div id="replay-provenance"></div></section><section class="panel"><h3>Recorded composition results</h3><div id="replay-results"></div></section></div>
+    </section>
+    <section class="registry-view panel" id="registry-view" hidden><div class="panel-heading"><span class="section-label">REGISTRY-DRIVEN CAPABILITY BOUNDARY</span><span class="status-chip">NOT RUNNABLE HERE</span></div><h2 id="registry-title"></h2><div id="registry-description"></div><h3>Registered metadata</h3><div id="registry-metadata"></div><div id="registry-caveat" class="warning"></div></section>
+    <section class="workspace" id="ganjave-workspace">
+      <div class="visual-column">
+        <div class="viewer-card">
+          <div class="viewer-head"><div><span class="section-label">BIOREACTOR VIEW</span><h2>Shake flask · 500 mL</h2></div><span class="status-chip" id="result-chip">NO RUN YET</span></div>
+          <div class="scene" id="scene" aria-label="Interactive 3D shake-flask schematic">
+            <div class="scene-grid"></div><div class="axis-label">SCHEMATIC VESSEL · LIQUID HEIGHT TRACKS COMPUTED CULTURE VOLUME</div>
+            <canvas id="vessel3d" class="vessel-canvas" aria-label="3D shake-flask schematic; liquid appears only after a computed result"></canvas>
+            <div class="scene-bottom"><span>DRAG TO ORBIT</span><span class="scene-legend"><i></i>culture volume <b id="volume-readout">—</b></span></div>
+          </div>
+          <div class="timeline-block">
+            <div class="timeline-controls"><button class="play-button" id="play-button" disabled aria-label="Play">▶</button><button class="text-button" id="reset-button" disabled>Reset</button><span class="time-readout"><b id="time-value">0.0</b> h <small>/ <span id="duration-value">—</span> h</small></span><span class="timeline-hint" id="timeline-hint">Run the model to load its computed time axis</span></div>
+            <input id="timeline" type="range" min="0" max="1000" value="0" disabled aria-label="Simulation timeline">
+            <div class="timeline-scale"><span id="time-start">0 h</span><span id="time-end">—</span></div>
+          </div>
+          <div class="metric-row">
+            <div class="metric"><span>DRY BIOMASS</span><strong id="biomass-value">—</strong><small>g/L · returned model quantity</small></div>
+            <div class="metric"><span>DISSOLVED OXYGEN</span><strong id="oxygen-value">—</strong><small>% · returned model quantity</small></div>
+            <div class="metric"><span>CULTURE VOLUME</span><strong id="volume-metric">—</strong><small>L · returned model quantity</small></div>
+          </div>
+        </div>
+        <div class="note-card"><span class="note-icon">i</span><p><b>What you are seeing.</b> The vessel is a schematic. Its liquid height follows the model’s returned culture-volume trajectory; the model does not calculate bubbles, mixing, flow, or spatial gradients.</p></div>
+      </div>
+
+      <aside class="control-column">
+        <div class="panel run-panel"><div class="panel-heading"><span class="section-label">MODEL WORKSPACE</span><span class="model-tag" id="model-tag">Loading registry</span></div><h2>Operating inputs</h2><p class="panel-copy">Values are sent to the registered Python model with their declared units and provenance.</p>
+          <div id="input-fields" class="input-fields"><div class="skeleton"></div></div>
+          <div id="stale-notice" class="stale-notice" hidden><span>●</span> Inputs changed. The displayed result is stale.</div>
+          <button id="run-button" class="run-button" disabled><span>Run scientific model</span><span>↗</span></button>
+          <div id="run-status" class="run-status" role="status">Starting page scripts…</div>
+          <details class="startup-details"><summary>Startup diagnostics</summary><pre id="startup-log" aria-live="polite">Waiting for the application script…</pre></details>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Research panels">
+          <button class="tab active" data-panel="evidence">Evidence</button><button class="tab" data-panel="gaps">Gaps</button><button class="tab" data-panel="models">Models</button><button class="tab" data-panel="report">Report</button><button class="tab" data-panel="research">Research</button>
+        </div>
+        <section class="details-panel" id="details-panel"><div class="empty-panel">Load the model context to inspect evidence, gaps, compatibility, provenance, and related papers.</div></section>
+      </aside>
+    </section>
+
+    <footer><span>ScaleUp AI <span class="footer-dim">· scientific composition, with provenance</span></span><span id="footer-version">Execution API · connecting</span></footer>
+  </main>
+  <script src="config.js"></script><script src="scene3d.js"></script><script src="app.js"></script>
+  <script>
+    document.querySelectorAll('.thumb-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.thumb-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var img = document.getElementById('showcase-main-img');
+        if (img && btn.dataset.src) {
+          img.src = btn.dataset.src;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
