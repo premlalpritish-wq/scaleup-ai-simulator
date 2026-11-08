@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 Set-Location -LiteralPath $repo
 $godot = "D:\Godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe"
@@ -32,7 +32,7 @@ variant/extensions_support=false
 vram_texture_compression/for_desktop=true
 vram_texture_compression/for_mobile=false
 html/export_icon=true
-html/title="ScaleUp AI Composition"
+html/title="ScaleUp Composition"
 html/head_include="<script type=\"module\" src=\"godot_pyodide_bridge.js\"></script>"
 html/canvas_resize_policy=2
 html/focus_canvas_on_start=true

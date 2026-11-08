@@ -123,6 +123,7 @@ var _badge_harvest: Button
 
 
 func _ready() -> void:
+	DisplayServer.window_set_title("ScaleUp")
 	# Full-screen 3D Viewport container (takes 100% of window, overlays sit on top)
 	var main_stack := Control.new()
 	main_stack.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -959,7 +960,7 @@ func _create_pause_menu_modal() -> Control:
 	v.add_child(title)
 
 	var sub := Label.new()
-	sub.text = "ScaleUp AI Interactive Engine • Alginate Extraction Process"
+	sub.text = "ScaleUp Interactive Engine • Alginate Extraction Process"
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.add_theme_font_size_override("font_size", 10)
 	sub.modulate = MUTED

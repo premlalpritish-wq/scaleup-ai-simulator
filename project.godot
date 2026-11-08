@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="ScaleUp AI Composition"
+config/name="ScaleUp"
 run/main_scene="res://scenes/workshop.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
