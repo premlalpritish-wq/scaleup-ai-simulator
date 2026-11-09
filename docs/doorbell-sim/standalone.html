@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ScaleUp Electromechanical Trembler Doorbell - 3D Simulation Workbench</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #0c0e12; color: #e1e7ec; }
+    #canvas-container { position: absolute; inset: 0; z-index: 1; }
+    
+    /* Top Bar */
+    #top-bar {
+      position: absolute; top: 12px; left: 16px; right: 16px; z-index: 10;
+      background: rgba(18, 22, 28, 0.88); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px;
+      padding: 10px 18px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .title-box h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; color: #fff; }
+    .title-box p { font-size: 11px; color: #8fa0b5; margin-top: 2px; }
+    .status-badge {
+      display: flex; gap: 12px; align-items: center; font-size: 12px; font-weight: 600;
+    }
+    .badge { padding: 4px 10px; border-radius: 4px; }
+    .badge-power-on { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-power-off { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-contact-closed { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-contact-open { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+    /* Left Telemetry Panel */
+    #left-panel {
+      position: absolute; top: 76px; left: 16px; width: 310px; z-index: 10;
+      background: rgba(18, 22, 28, 0.88); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px 16px;
+    }
+    .panel-header { font-size: 12px; font-weight: 700; color: #38bdf8; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .telem-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 7px; color: #cbd5e1; }
+    .telem-val { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; color: #f8fafc; }
+    .highlight-hz { color: #facc15; font-size: 14px; }
+
+    /* Right Controls Panel */
+    #right-panel {
+      position: absolute; top: 76px; right: 16px; width: 330px; z-index: 10;
+      background: rgba(18, 22, 28, 0.88); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px 16px;
+    }
+    .ctrl-row { margin-bottom: 9px; }
+    .ctrl-header { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; color: #94a3b8; }
+    .ctrl-val { font-family: ui-monospace, monospace; color: #e2e8f0; font-weight: 600; }
+    input[type=range] { width: 100%; accent-color: #38bdf8; cursor: pointer; height: 5px; }
+    
+    .btn-row { display: flex; gap: 6px; margin-top: 12px; }
+    button {
+      flex: 1; padding: 6px 10px; font-size: 11px; font-weight: 600; background: #1e293b;
+      color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 4px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    button:hover { background: #334155; }
+    button.active { background: #0284c7; border-color: #38bdf8; }
+
+    /* Bottom Quickbar & Switch Link */
+    #bottom-bar {
+      position: absolute; bottom: 12px; left: 16px; right: 16px; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+    }
+    .quick-actions { display: flex; gap: 8px; pointer-events: auto; }
+    .nav-pill {
+      background: rgba(30, 41, 59, 0.9); border: 1px solid #38bdf8; color: #38bdf8;
+      text-decoration: none; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      pointer-events: auto; display: flex; align-items: center; gap: 6px;
+    }
+    .nav-pill:hover { background: #0284c7; color: #fff; }
+
+    /* Inspector Card */
+    #inspector-card {
+      position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 620px; max-width: 90vw;
+      background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(12px);
+      border: 1px solid #38bdf8; border-radius: 8px; padding: 14px 18px; z-index: 20; display: none;
+    }
+    #inspector-card .card-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    #inspector-card .card-title { font-size: 14px; font-weight: 700; color: #38bdf8; }
+    #inspector-card .card-close { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; flex: none; width: auto; padding: 0 4px; }
+    #inspector-card .card-role { font-size: 11px; color: #cbd5e1; margin-bottom: 6px; }
+    #inspector-card .card-formula { font-size: 12px; color: #facc15; font-family: ui-monospace, monospace; margin-bottom: 6px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; }
+    #inspector-card .card-telem { font-size: 11px; color: #e2e8f0; font-family: ui-monospace, monospace; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- Header -->
+  <div id="top-bar">
+    <div class="title-box">
+      <h1>SCALEUP ELECTROMECHANICAL TREMBLER DOORBELL</h1>
+      <p>Coupled Multi-Physics Workbench: RL Circuit + Maxwell Reluctance Force + Kinematics</p>
+    </div>
+    <div class="status-badge">
+      <span id="badge-power" class="badge badge-power-on">POWER: ON</span>
+      <span id="badge-contact" class="badge badge-contact-closed">INTERRUPTER: CLOSED</span>
+    </div>
+  </div>
+
+  <!-- Left Telemetry Panel -->
+  <div id="left-panel">
+    <div class="panel-header">LIVE SYSTEM TELEMETRY</div>
+    <div class="telem-row"><span>Current (I):</span><span id="tel-i" class="telem-val">0.00 A</span></div>
+    <div class="telem-row"><span>Magnetic Pull (F_mag):</span><span id="tel-fmag" class="telem-val">0.000 N</span></div>
+    <div class="telem-row"><span>Spring Restoring (F_spring):</span><span id="tel-fspring" class="telem-val">0.000 N</span></div>
+    <div class="telem-row"><span>Dynamic Air Gap (g):</span><span id="tel-gap" class="telem-val">5.000 mm</span></div>
+    <div class="telem-row"><span>Displacement (x):</span><span id="tel-x" class="telem-val">0.000 mm</span></div>
+    <div class="telem-row"><span>Linear Velocity (v):</span><span id="tel-v" class="telem-val">+0.000 m/s</span></div>
+    <div class="telem-row"><span>Conduction Duty Cycle:</span><span id="tel-duty" class="telem-val">0.0 %</span></div>
+    <hr style="border:0;border-top:1px solid rgba(255,255,255,0.08);margin:8px 0;">
+    <div class="telem-row"><span style="color:#facc15;font-weight:700;">Strike Frequency:</span><span id="tel-hz" class="telem-val highlight-hz">0.0 Hz</span></div>
+    <div class="telem-row"><span>Total Bell Strikes:</span><span id="tel-strikes" class="telem-val">0</span></div>
+  </div>
+
+  <!-- Right Controls Panel -->
+  <div id="right-panel">
+    <div class="panel-header" style="color:#4ade80;">HARDWARE TUNING (UNSW LAB)</div>
+    
+    <div class="ctrl-row">
+      <div class="ctrl-header"><span>Supply Voltage (V):</span><span id="val-v" class="ctrl-val">9.0 V</span></div>
+      <input type="range" id="sl-v" min="1" max="24" step="0.5" value="9">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-header"><span>Coil Turns (N):</span><span id="val-n" class="ctrl-val">200 T</span></div>
+      <input type="range" id="sl-n" min="50" max="500" step="10" value="200">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-header"><span>Spring Constant (k):</span><span id="val-k" class="ctrl-val">40.0 N/m</span></div>
+      <input type="range" id="sl-k" min="5" max="150" step="1" value="40">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-header"><span>Contact Break (x_break):</span><span id="val-xb" class="ctrl-val">1.50 mm</span></div>
+      <input type="range" id="sl-xb" min="0.5" max="3.5" step="0.05" value="1.5">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-header"><span>Circuit Resistance (R):</span><span id="val-r" class="ctrl-val">1.5 Ω</span></div>
+      <input type="range" id="sl-r" min="0.5" max="10" step="0.1" value="1.5">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-header"><span>Inductance (L) [mH]:</span><span id="val-l" class="ctrl-val">5.0 mH</span></div>
+      <input type="range" id="sl-l" min="1" max="40" step="0.5" value="5">
+    </div>
+    <div class="ctrl-row">
+      <div class="ctrl-header"><span>Viscous Damping (c):</span><span id="val-c" class="ctrl-val">0.15 Ns/m</span></div>
+      <input type="range" id="sl-c" min="0.02" max="0.5" step="0.01" value="0.15">
+    </div>
+
+    <div class="btn-row">
+      <button id="btn-reset">Reset Defaults</button>
+      <button id="btn-sp-1" class="active">1x</button>
+      <button id="btn-sp-slow">0.2x</button>
+      <button id="btn-sp-ultra">0.04x</button>
+      <button id="btn-pause">Pause</button>
+    </div>
+  </div>
+
+  <!-- Inspector Card -->
+  <div id="inspector-card">
+    <div class="card-title-row">
+      <span id="card-title" class="card-title">COMPONENT INSPECTOR</span>
+      <button id="card-close" class="card-close">✕</button>
+    </div>
+    <div id="card-role" class="card-role">Component Role</div>
+    <div id="card-formula" class="card-formula">Governing Equation</div>
+    <div id="card-telem" class="card-telem">Telemetry</div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div id="bottom-bar">
+    <div class="quick-actions">
+      <button id="btn-switch-mode">Mode: LATCHING (Continuous)</button>
+      <button id="btn-power-toggle">Power: ON</button>
+      <button id="btn-reset-cam">Reset View (R)</button>
+    </div>
+    <a href="index.html" class="nav-pill">🎮 Open Godot 4 WebAssembly Version →</a>
+  </div>
+
+  <script>
+    // =========================================================================
+    // PHYSICAL CONSTANTS & HYPOTHESES
+    // =========================================================================
+    const MU_0 = 1.2566370614359173e-6;
+    let voltage = 9.0;
+    let resistance = 1.5;
+    let inductance = 0.005;
+    let coil_turns = 200;
+    let core_area = 0.0001;
+    let min_air_gap = 0.0002;
+    let armature_mass = 0.015;
+    let spring_constant = 40.0;
+    let damping_coeff = 0.15;
+    let initial_air_gap = 0.005;
+    let contact_break_distance = 0.0015;
+    let chime_strike_distance = 0.004;
+    let restitution_chime = 0.35;
+    let restitution_backstop = 0.20;
+
+    // Simulation State
+    let x = 0.0;
+    let v = 0.0;
+    let current = 0.0;
+    let F_mag = 0.0;
+    let F_spring = 0.0;
+    let F_damp = 0.0;
+    let dynamic_gap = initial_air_gap;
+    let contact_closed = true;
+    let power_on = true;
+    let momentary_mode = false;
+    let momentary_pressed = false;
+    let time_scale = 1.0;
+
+    // Telemetry
+    let strikes = 0;
+    let strike_timestamps = [];
+    let strike_frequency = 0.0;
+    let chime_flash = 0.0;
+    let duty_closed_time = 0.0;
+    let duty_total_time = 0.0;
+    let duty_cycle = 100.0;
+    let selected_part = null;
+
+    // =========================================================================
+    // THREE.JS SCENE SETUP
+    // =========================================================================
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c0e12);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.set(5, 12, 34);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.target.set(5, 8, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 100;
+    controls.minDistance = 4;
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xfff5ea, 1.2);
+    dirLight.position.set(12, 25, 20);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Materials
+    const matBase = new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.85, metalness: 0.2 });
+    const matIron = new THREE.MeshStandardMaterial({ color: 0x3d434d, roughness: 0.35, metalness: 0.88 });
+    const matCopper = new THREE.MeshStandardMaterial({ color: 0xd96c2b, roughness: 0.35, metalness: 0.85 });
+    const matSteel = new THREE.MeshStandardMaterial({ color: 0xc4ccd6, roughness: 0.22, metalness: 0.95 });
+    const matBrass = new THREE.MeshStandardMaterial({ color: 0xe8c138, roughness: 0.22, metalness: 0.92 });
+    const matBell = new THREE.MeshStandardMaterial({ color: 0xe5bf2e, roughness: 0.16, metalness: 0.96 });
+    const matSpark = new THREE.MeshBasicMaterial({ color: 0x4deeea });
+    const matMarker = new THREE.MeshBasicMaterial({ color: 0xff8c1a, transparent: true, opacity: 0.35 });
+    const matStrikeMarker = new THREE.MeshBasicMaterial({ color: 0xff3366, transparent: true, opacity: 0.35 });
+    const matSwitchBase = new THREE.MeshStandardMaterial({ color: 0x2d3436, roughness: 0.4 });
+    const matSwitchBtn = new THREE.MeshStandardMaterial({ color: 0xd63031, roughness: 0.3 });
+    const matSwitchLED = new THREE.MeshBasicMaterial({ color: 0x00b894 });
+
+    // Force Vector Materials
+    const matVecMag = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+    const matVecSpring = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+
+    // Meshes
+    // Baseboard
+    const baseBoard = new THREE.Mesh(new THREE.BoxGeometry(56, 44, 2.5), matBase);
+    baseBoard.position.set(3, 9, -2.5);
+    scene.add(baseBoard);
+
+    // Electromagnet Core & Coil
+    const coreGroup = new THREE.Group();
+    coreGroup.position.set(13, 0, 0);
+    coreGroup.name = "Electromagnet_Core";
+    const coreMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 16, 24), matIron);
+    coreMesh.rotation.z = Math.PI / 2;
+    coreGroup.add(coreMesh);
+    const coilMesh = new THREE.Mesh(new THREE.CylinderGeometry(5.6, 5.6, 12, 24), matCopper);
+    coilMesh.rotation.z = Math.PI / 2;
+    coilMesh.name = "Coil_Windings";
+    coreGroup.add(coilMesh);
+    const poleMarker = new THREE.Mesh(new THREE.BoxGeometry(0.05, 14, 8), matMarker);
+    poleMarker.position.set(-8, 0, 0);
+    coreGroup.add(poleMarker);
+    scene.add(coreGroup);
+
+    // Armature & Striker (Moving Group)
+    const armatureGroup = new THREE.Group();
+    armatureGroup.name = "Armature_Striker";
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(1.0, 12.0, 7.0), matSteel);
+    plate.position.set(-0.5, 0, 0);
+    armatureGroup.add(plate);
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 16, 16), matSteel);
+    rod.position.set(0, 13, 0);
+    armatureGroup.add(rod);
+    const hammer = new THREE.Mesh(new THREE.SphereGeometry(1.6, 16, 16), matSteel);
+    hammer.position.set(0, 21, 0);
+    armatureGroup.add(hammer);
+
+    // Force Vectors attached to armature
+    const vecMagGroup = new THREE.Group();
+    vecMagGroup.position.set(0.5, 0, 0);
+    const magShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 3, 8), matVecMag);
+    magShaft.rotation.z = -Math.PI / 2;
+    magShaft.position.x = 1.5;
+    vecMagGroup.add(magShaft);
+    const magHead = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.9, 8), matVecMag);
+    magHead.rotation.z = -Math.PI / 2;
+    magHead.position.x = 3.45;
+    vecMagGroup.add(magHead);
+    armatureGroup.add(vecMagGroup);
+
+    const vecSpringGroup = new THREE.Group();
+    vecSpringGroup.position.set(-1.0, 0, 0);
+    const springShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 3, 8), matVecSpring);
+    springShaft.rotation.z = Math.PI / 2;
+    springShaft.position.x = -1.5;
+    vecSpringGroup.add(springShaft);
+    const springHead = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.9, 8), matVecSpring);
+    springHead.rotation.z = Math.PI / 2;
+    springHead.position.x = -3.45;
+    vecSpringGroup.add(springHead);
+    armatureGroup.add(vecSpringGroup);
+
+    scene.add(armatureGroup);
+
+    // Leaf Spring
+    const leafSpring = new THREE.Mesh(new THREE.BoxGeometry(0.35, 14.0, 4.0), matSteel);
+    leafSpring.position.set(-0.8, -10, 0);
+    leafSpring.name = "Leaf_Spring";
+    scene.add(leafSpring);
+
+    // Contact Screw Group
+    const contactGroup = new THREE.Group();
+    contactGroup.position.set(-4.5, 0, 0);
+    contactGroup.name = "Contact_Screw";
+    const screwPost = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 8, 16), matBrass);
+    screwPost.rotation.z = Math.PI / 2;
+    contactGroup.add(screwPost);
+    const screwTip = new THREE.Mesh(new THREE.SphereGeometry(0.8, 12, 12), matBrass);
+    screwTip.position.set(4.0, 0, 0);
+    contactGroup.add(screwTip);
+    const breakPlane = new THREE.Mesh(new THREE.BoxGeometry(0.05, 14, 8), matMarker);
+    breakPlane.position.set(6.0, 0, 0);
+    contactGroup.add(breakPlane);
+    const sparkMesh = new THREE.Mesh(new THREE.SphereGeometry(0.85, 12, 12), matSpark);
+    sparkMesh.position.set(4.5, 0, 0);
+    sparkMesh.visible = false;
+    contactGroup.add(sparkMesh);
+    scene.add(contactGroup);
+
+    // Bell Chime
+    const chimeGroup = new THREE.Group();
+    chimeGroup.position.set(16.6, 21, 0);
+    chimeGroup.name = "Bell_Chime";
+    const chimeDome = new THREE.Mesh(new THREE.SphereGeometry(11.0, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5), matBell);
+    chimeDome.rotation.z = -Math.PI / 2;
+    chimeGroup.add(chimeDome);
+    const strikeMarker = new THREE.Mesh(new THREE.BoxGeometry(0.05, 12, 6), matStrikeMarker);
+    strikeMarker.position.set(-12.6, 0, 0);
+    chimeGroup.add(strikeMarker);
+    scene.add(chimeGroup);
+
+    // Pushbutton Switch
+    const switchGroup = new THREE.Group();
+    switchGroup.position.set(-14, 0, 0);
+    switchGroup.name = "Power_Supply_Switch";
+    const swBase = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.2, 2.0, 20), matSwitchBase);
+    switchGroup.add(swBase);
+    const swBtn = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 1.8, 20), matSwitchBtn);
+    swBtn.position.y = 1.2;
+    switchGroup.add(swBtn);
+    const swLED = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 12), matSwitchLED);
+    swLED.position.set(0, 0, 3.2);
+    switchGroup.add(swLED);
+    scene.add(switchGroup);
+
+    // =========================================================================
+    // RAYCASTING SELECTION & INSPECTOR
+    // =========================================================================
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const pickables = [coreGroup, coilMesh, plate, rod, hammer, leafSpring, screwPost, chimeDome, swBtn];
+
+    window.addEventListener('click', (event) => {
+      if (event.clientY < 70 || event.clientX > window.innerWidth - 350) return;
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(pickables, true);
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        while (obj.parent && !obj.name && obj.parent !== scene) obj = obj.parent;
+        selectPart(obj.name || "Component");
+      }
+    });
+
+    function selectPart(name) {
+      selected_part = name;
+      const card = document.getElementById('inspector-card');
+      card.style.display = 'block';
+      const t = document.getElementById('card-title');
+      const r = document.getElementById('card-role');
+      const f = document.getElementById('card-formula');
+      
+      if (name.includes("Coil")) {
+        t.innerText = "COMPONENT: ELECTROMAGNET SOLENOID COIL";
+        r.innerText = "Converts driving circuit current into concentrated magnetic tractive flux.";
+        f.innerText = "Governing ODE: V = L(dI/dt) + IR  |  F_mag = (mu_0 * N^2 * I^2 * A) / (2 * g^2)";
+      } else if (name.includes("Armature")) {
+        t.innerText = "COMPONENT: MOVING ARMATURE & STRIKER HAMMER";
+        r.innerText = "1-DOF dynamic mass accelerated forward toward bell chime.";
+        f.innerText = "Equation of Motion: m(d^2x/dt^2) = F_mag - k*x - c*v";
+      } else if (name.includes("Spring")) {
+        t.innerText = "COMPONENT: RESTORING LEAF SPRING";
+        r.innerText = "Provides restoring preload pulling armature back against contact screw.";
+        f.innerText = "Hooke's Law: F_spring = -k * x   |   Damping: F_damp = -c * (dx/dt)";
+      } else if (name.includes("Contact")) {
+        t.innerText = "COMPONENT: ADJUSTABLE CONTACT SCREW (INTERRUPTER)";
+        r.innerText = "Mechanically opens circuit when armature displacement exceeds x_break.";
+        f.innerText = "Switch Logic: Closed if x <= x_break else Open";
+      } else if (name.includes("Chime")) {
+        t.innerText = "COMPONENT: BELL GONG CHIME (ACOUSTIC RESONATOR)";
+        r.innerText = "Stops travel at x_strike and rebounds hammer with restitution.";
+        f.innerText = "Boundary Impact: v_after = -e_chime * v_before  (at x = x_strike)";
+      } else if (name.includes("Switch")) {
+        t.innerText = "COMPONENT: 3D PUSHBUTTON POWER SWITCH";
+        r.innerText = "Controls DC circuit power supply in Latching or Momentary mode.";
+        f.innerText = "Drive: V_circuit = V_source * Switch_State";
+      } else {
+        t.innerText = "COMPONENT: ELECTROMAGNET CORE";
+        r.innerText = "Soft iron magnetic circuit with low reluctance.";
+        f.innerText = "Reluctance: R = l / (mu_0 * mu_r * A)";
+      }
+    }
+
+    document.getElementById('card-close').onclick = () => {
+      document.getElementById('inspector-card').style.display = 'none';
+      selected_part = null;
+    };
+
+    // =========================================================================
+    // UI SLIDERS & CONTROLS BINDING
+    // =========================================================================
+    const slV = document.getElementById('sl-v');
+    const slN = document.getElementById('sl-n');
+    const slK = document.getElementById('sl-k');
+    const slXb = document.getElementById('sl-xb');
+    const slR = document.getElementById('sl-r');
+    const slL = document.getElementById('sl-l');
+    const slC = document.getElementById('sl-c');
+
+    slV.oninput = (e) => { voltage = parseFloat(e.target.value); document.getElementById('val-v').innerText = voltage.toFixed(1) + ' V'; };
+    slN.oninput = (e) => { coil_turns = parseInt(e.target.value); document.getElementById('val-n').innerText = coil_turns + ' T'; };
+    slK.oninput = (e) => { spring_constant = parseFloat(e.target.value); document.getElementById('val-k').innerText = spring_constant.toFixed(1) + ' N/m'; };
+    slXb.oninput = (e) => {
+      contact_break_distance = parseFloat(e.target.value) / 1000.0;
+      document.getElementById('val-xb').innerText = (contact_break_distance * 1000).toFixed(2) + ' mm';
+      contactGroup.position.x = -4.5 + (contact_break_distance - 0.0015) * 1000;
+    };
+    slR.oninput = (e) => { resistance = parseFloat(e.target.value); document.getElementById('val-r').innerText = resistance.toFixed(1) + ' Ω'; };
+    slL.oninput = (e) => { inductance = parseFloat(e.target.value) / 1000.0; document.getElementById('val-l').innerText = (inductance * 1000).toFixed(1) + ' mH'; };
+    slC.oninput = (e) => { damping_coeff = parseFloat(e.target.value); document.getElementById('val-c').innerText = damping_coeff.toFixed(2) + ' Ns/m'; };
+
+    document.getElementById('btn-reset').onclick = () => {
+      slV.value = 9; slV.oninput({target: slV});
+      slN.value = 200; slN.oninput({target: slN});
+      slK.value = 40; slK.oninput({target: slK});
+      slXb.value = 1.5; slXb.oninput({target: slXb});
+      slR.value = 1.5; slR.oninput({target: slR});
+      slL.value = 5; slL.oninput({target: slL});
+      slC.value = 0.15; slC.oninput({target: slC});
+      time_scale = 1.0;
+      controls.target.set(5, 8, 0);
+      camera.position.set(5, 12, 34);
+    };
+
+    const spBtns = [
+      { id: 'btn-sp-1', s: 1.0 }, { id: 'btn-sp-slow', s: 0.2 },
+      { id: 'btn-sp-ultra', s: 0.04 }, { id: 'btn-pause', s: 0.0 }
+    ];
+    spBtns.forEach(b => {
+      document.getElementById(b.id).onclick = () => {
+        spBtns.forEach(o => document.getElementById(o.id).classList.remove('active'));
+        document.getElementById(b.id).classList.add('active');
+        time_scale = b.s;
+      };
+    });
+
+    const btnMode = document.getElementById('btn-switch-mode');
+    btnMode.onclick = () => {
+      momentary_mode = !momentary_mode;
+      btnMode.innerText = momentary_mode ? "Mode: MOMENTARY (Hold Space)" : "Mode: LATCHING (Continuous)";
+      updateSwitchUI();
+    };
+
+    const btnPower = document.getElementById('btn-power-toggle');
+    btnPower.onclick = () => {
+      power_on = !power_on;
+      updateSwitchUI();
+    };
+
+    document.getElementById('btn-reset-cam').onclick = () => {
+      controls.target.set(5, 8, 0);
+      camera.position.set(5, 12, 34);
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && momentary_mode) {
+        momentary_pressed = true;
+        updateSwitchUI();
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        controls.target.set(5, 8, 0);
+        camera.position.set(5, 12, 34);
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'Space' && momentary_mode) {
+        momentary_pressed = false;
+        updateSwitchUI();
+      }
+    });
+
+    function isPowerActive() {
+      return momentary_mode ? momentary_pressed : power_on;
+    }
+
+    function updateSwitchUI() {
+      const active = isPowerActive();
+      swBtn.position.y = active ? 0.5 : 1.2;
+      matSwitchLED.color.setHex(active ? 0x00b894 : 0xd63031);
+      const bP = document.getElementById('badge-power');
+      bP.innerText = active ? "POWER: ON" : "POWER: OFF";
+      bP.className = "badge " + (active ? "badge-power-on" : "badge-power-off");
+      btnPower.innerText = active ? "Power: ON" : "Power: OFF";
+    }
+
+    // =========================================================================
+    // COUPLED MULTI-PHYSICS ODE SOLVER LOOP
+    // =========================================================================
+    let lastTime = performance.now();
+
+    function physicsStep(dt) {
+      const active_v = isPowerActive() ? voltage : 0.0;
+
+      // 1. Electrical RL Circuit
+      contact_closed = (x <= contact_break_distance);
+      if (contact_closed && active_v > 0.0) {
+        const dI_dt = (active_v - current * resistance) / Math.max(inductance, 1e-6);
+        current += dI_dt * dt;
+        if (current < 0) current = 0;
+      } else {
+        current = 0.0;
+      }
+
+      // 2. Reluctance Force
+      dynamic_gap = Math.max(min_air_gap, initial_air_gap - x);
+      const N2 = coil_turns * coil_turns;
+      const I2 = current * current;
+      F_mag = (MU_0 * N2 * I2 * core_area) / (2.0 * dynamic_gap * dynamic_gap);
+
+      // 3. Mechanical Kinematics (Symplectic Euler)
+      F_spring = -spring_constant * x;
+      F_damp = -damping_coeff * v;
+      const a = (F_mag + F_spring + F_damp) / armature_mass;
+      v += a * dt;
+      x += v * dt;
+
+      // 4. Discontinuous Collision Boundaries
+      if (x >= chime_strike_distance) {
+        x = chime_strike_distance;
+        if (v > 0) {
+          v = -restitution_chime * v;
+          strikes++;
+          chime_flash = 1.0;
+          const nowS = performance.now() / 1000.0;
+          strike_timestamps.push(nowS);
+          while (strike_timestamps.length > 0 && (nowS - strike_timestamps[0]) > 1.2) {
+            strike_timestamps.shift();
+          }
+          if (strike_timestamps.length >= 2) {
+            const span = strike_timestamps[strike_timestamps.length - 1] - strike_timestamps[0];
+            if (span > 0.005) {
+              const hz = (strike_timestamps.length - 1) / span;
+              strike_frequency = strike_frequency * 0.6 + hz * 0.4;
+            }
+          }
+        }
+      }
+
+      if (x <= 0) {
+        x = 0;
+        if (v < 0) v = -restitution_backstop * v;
+      }
+
+      // Duty cycle tracking
+      duty_total_time += dt;
+      if (contact_closed && active_v > 0) duty_closed_time += dt;
+      if (duty_total_time >= 1.0) {
+        duty_cycle = (duty_closed_time / duty_total_time) * 100.0;
+        duty_closed_time = 0;
+        duty_total_time = 0;
+      }
+    }
+
+    // =========================================================================
+    // MAIN RENDER & ANIMATION LOOP
+    // =========================================================================
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const now = performance.now();
+      const delta = Math.min((now - lastTime) / 1000.0, 0.05);
+      lastTime = now;
+
+      const effective_dt = delta * time_scale;
+      if (effective_dt > 0) {
+        const sub_steps = 50;
+        const sub_dt = effective_dt / sub_steps;
+        for (let s = 0; s < sub_steps; s++) {
+          physicsStep(sub_dt);
+        }
+      }
+
+      // Sync 3D transforms
+      armatureGroup.position.x = x * 1000.0;
+
+      // Force vectors
+      const showVec = time_scale <= 0.2 || current > 0.05 || Math.abs(F_spring) > 0.01;
+      vecMagGroup.visible = showVec;
+      vecSpringGroup.visible = showVec;
+      if (showVec) {
+        vecMagGroup.scale.x = Math.max(0.1, Math.min(F_mag * 1.2, 7.5));
+        vecSpringGroup.scale.x = Math.max(0.1, Math.min(Math.abs(F_spring) * 35.0, 7.5));
+      }
+
+      // Spark glow
+      sparkMesh.visible = contact_closed && current > 0.1 && isPowerActive();
+
+      // Chime impact flash
+      if (chime_flash > 0) {
+        chime_flash = Math.max(0, chime_flash - 5.0 * delta);
+        matBell.color.setRGB(0.9 + chime_flash * 0.1, 0.75 + chime_flash * 0.25, 0.18 + chime_flash * 0.6);
+      }
+
+      // Update HUD
+      document.getElementById('tel-i').innerText = current.toFixed(2) + ' A';
+      document.getElementById('tel-fmag').innerText = F_mag.toFixed(3) + ' N';
+      document.getElementById('tel-fspring').innerText = F_spring.toFixed(3) + ' N';
+      document.getElementById('tel-gap').innerText = (dynamic_gap * 1000).toFixed(3) + ' mm';
+      document.getElementById('tel-x').innerText = (x * 1000).toFixed(3) + ' mm';
+      document.getElementById('tel-v').innerText = (v >= 0 ? '+' : '') + v.toFixed(3) + ' m/s';
+      document.getElementById('tel-duty').innerText = duty_cycle.toFixed(1) + ' %';
+      document.getElementById('tel-hz').innerText = strike_frequency.toFixed(1) + ' Hz';
+      document.getElementById('tel-strikes').innerText = strikes;
+
+      const bC = document.getElementById('badge-contact');
+      bC.innerText = contact_closed ? "INTERRUPTER: CLOSED" : "INTERRUPTER: OPEN";
+      bC.className = "badge " + (contact_closed ? "badge-contact-closed" : "badge-contact-open");
+
+      // Inspector card update
+      if (selected_part) {
+        const ct = document.getElementById('card-telem');
+        if (selected_part.includes("Coil")) {
+          ct.innerText = `Current: ${current.toFixed(2)} A | Turns: ${coil_turns} | Power: ${(current*current*resistance).toFixed(2)} W | Force: ${F_mag.toFixed(3)} N`;
+        } else if (selected_part.includes("Armature")) {
+          ct.innerText = `x: ${(x*1000).toFixed(3)} mm | v: ${v.toFixed(3)} m/s | Kinetic Energy: ${(0.5*armature_mass*v*v*1000).toFixed(3)} mJ`;
+        } else if (selected_part.includes("Spring")) {
+          ct.innerText = `Restoring Force: ${F_spring.toFixed(3)} N | Elastic Energy: ${(0.5*spring_constant*x*x*1000).toFixed(3)} mJ`;
+        } else if (selected_part.includes("Contact")) {
+          ct.innerText = `State: ${contact_closed ? "CLOSED" : "OPEN"} | x_break: ${(contact_break_distance*1000).toFixed(2)} mm | Duty: ${duty_cycle.toFixed(1)} %`;
+        } else if (selected_part.includes("Chime")) {
+          ct.innerText = `Strike Frequency: ${strike_frequency.toFixed(1)} Hz | Strikes: ${strikes} | Limit: ${(chime_strike_distance*1000).toFixed(2)} mm`;
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+  </script>
+</body>
+</html>

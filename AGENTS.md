@@ -12,3 +12,10 @@ When the user prompts `/scaleup <prompt>` or asks to simulate any bioprocess (e.
    - Cached runs resolve, verify, and launch Godot in **< 1 second** (`~0.76s`).
    - Uncached runs perform autonomous research, trajectory solving, and launch Godot in **< 15 seconds**.
 4. **Respond immediately** with the run ID, evidence tier, and link to the live simulation scene.
+
+## 2. Zero-CLI Handoff & Auto-Launch Policy
+
+In the ScaleUp prompt-to-simulation workflow:
+1. **Headless Verification Gate Only**: Headless runs (`--headless`) are strictly an internal pre-flight verification gate to validate ODE numerical stability, energy bounds, and limit cycles.
+2. **Mandatory Auto-Launch**: Once headless verification passes, the final step of every run must automatically spawn the interactive non-headless Godot GUI process directly onto the user's desktop (`WinSta0\default`).
+3. **Zero-CLI Handoff**: Never output terminal commands instructing the user to launch Godot manually. The window must open autonomously before completing the turn.

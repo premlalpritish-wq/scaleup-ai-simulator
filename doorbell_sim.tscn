@@ -1,0 +1,902 @@
+[gd_scene load_steps=36 format=3 uid="uid://tremblerdoorbellsim02"]
+
+[ext_resource type="Script" path="res://doorbell_solver.gd" id="1_solver"]
+[ext_resource type="Script" path="res://orbit_camera.gd" id="2_camera"]
+
+[sub_resource type="Environment" id="Environment_sim"]
+background_mode = 1
+background_color = Color(0.05, 0.06, 0.08, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.32, 0.35, 0.40, 1)
+ambient_light_energy = 0.85
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.5
+glow_bloom = 0.15
+
+[sub_resource type="StandardMaterial3D" id="Mat_BaseBoard"]
+albedo_color = Color(0.10, 0.11, 0.14, 1)
+metallic = 0.2
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="Mesh_BaseBoard"]
+size = Vector3(56, 44, 2.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_IronCore"]
+albedo_color = Color(0.25, 0.28, 0.33, 1)
+metallic = 0.88
+roughness = 0.32
+
+[sub_resource type="CylinderMesh" id="Mesh_IronCore"]
+top_radius = 3.5
+bottom_radius = 3.5
+height = 16.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_CopperCoil"]
+albedo_color = Color(0.86, 0.44, 0.18, 1)
+metallic = 0.85
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="Mesh_CopperCoil"]
+top_radius = 5.6
+bottom_radius = 5.6
+height = 12.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_SteelArmature"]
+albedo_color = Color(0.78, 0.82, 0.88, 1)
+metallic = 0.95
+roughness = 0.22
+
+[sub_resource type="BoxMesh" id="Mesh_ArmaturePlate"]
+size = Vector3(1.0, 12.0, 7.0)
+
+[sub_resource type="BoxMesh" id="Mesh_LeafSpring"]
+size = Vector3(0.35, 14.0, 4.0)
+
+[sub_resource type="CylinderMesh" id="Mesh_StrikerRod"]
+top_radius = 0.45
+bottom_radius = 0.45
+height = 16.0
+
+[sub_resource type="SphereMesh" id="Mesh_StrikerHammer"]
+radius = 1.6
+height = 3.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_Brass"]
+albedo_color = Color(0.92, 0.76, 0.22, 1)
+metallic = 0.92
+roughness = 0.22
+
+[sub_resource type="CylinderMesh" id="Mesh_ContactScrew"]
+top_radius = 1.6
+bottom_radius = 1.6
+height = 8.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ContactSpark"]
+albedo_color = Color(0.4, 0.9, 1.0, 1)
+emission_enabled = true
+emission = Color(0.3, 0.9, 1.0, 1)
+emission_energy_multiplier = 3.5
+
+[sub_resource type="SphereMesh" id="Mesh_ContactSpark"]
+radius = 0.75
+height = 1.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_TranslucentMarker"]
+transparency = 1
+albedo_color = Color(1.0, 0.55, 0.1, 0.35)
+
+[sub_resource type="BoxMesh" id="Mesh_BreakPlane"]
+size = Vector3(0.05, 14.0, 8.0)
+
+[sub_resource type="StandardMaterial3D" id="Mat_BellChime"]
+albedo_color = Color(0.90, 0.75, 0.18, 1)
+metallic = 0.96
+roughness = 0.16
+
+[sub_resource type="SphereMesh" id="Mesh_BellChime"]
+radius = 11.0
+height = 7.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_StrikeMarker"]
+transparency = 1
+albedo_color = Color(1.0, 0.2, 0.4, 0.35)
+
+[sub_resource type="BoxMesh" id="Mesh_StrikePlane"]
+size = Vector3(0.05, 12.0, 6.0)
+
+[sub_resource type="StandardMaterial3D" id="Mat_SwitchBase"]
+albedo_color = Color(0.2, 0.22, 0.25, 1)
+metallic = 0.8
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id="Mesh_SwitchBase"]
+top_radius = 3.0
+bottom_radius = 3.2
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_SwitchButton"]
+albedo_color = Color(0.85, 0.15, 0.15, 1)
+roughness = 0.4
+
+[sub_resource type="CylinderMesh" id="Mesh_SwitchButton"]
+top_radius = 2.2
+bottom_radius = 2.2
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_SwitchLED"]
+albedo_color = Color(0.2, 0.8, 0.3, 1)
+emission_enabled = true
+emission = Color(0.2, 0.8, 0.3, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="SphereMesh" id="Mesh_SwitchLED"]
+radius = 0.6
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_VectorMag"]
+albedo_color = Color(0.1, 0.9, 0.5, 1)
+emission_enabled = true
+emission = Color(0.1, 0.9, 0.5, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_VectorSpring"]
+albedo_color = Color(1.0, 0.3, 0.2, 1)
+emission_enabled = true
+emission = Color(1.0, 0.3, 0.2, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="CylinderMesh" id="Mesh_ArrowShaft"]
+top_radius = 0.18
+bottom_radius = 0.18
+height = 3.0
+
+[sub_resource type="CylinderMesh" id="Mesh_ArrowHead"]
+top_radius = 0.02
+bottom_radius = 0.45
+height = 0.9
+
+[sub_resource type="BoxShape3D" id="Shape_Core"]
+size = Vector3(16.0, 8.0, 8.0)
+
+[sub_resource type="BoxShape3D" id="Shape_Coil"]
+size = Vector3(14.0, 12.0, 12.0)
+
+[sub_resource type="BoxShape3D" id="Shape_Armature"]
+size = Vector3(3.0, 14.0, 8.0)
+
+[sub_resource type="BoxShape3D" id="Shape_Spring"]
+size = Vector3(3.0, 16.0, 6.0)
+
+[sub_resource type="BoxShape3D" id="Shape_Contact"]
+size = Vector3(8.0, 8.0, 8.0)
+
+[sub_resource type="SphereShape3D" id="Shape_Bell"]
+radius = 11.5
+
+[sub_resource type="CylinderShape3D" id="Shape_Switch"]
+height = 3.5
+radius = 3.5
+
+[node name="DoorbellSimulation" type="Node3D"]
+script = ExtResource("1_solver")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_sim")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 12, 26, 22)
+light_color = Color(0.98, 0.97, 0.95, 1)
+light_energy = 1.3
+shadow_enabled = true
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 5, 8, 0)
+script = ExtResource("2_camera")
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 34)
+fov = 48.0
+near = 0.5
+far = 300.0
+
+[node name="BaseBoard" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 9, -2.5)
+material_override = SubResource("Mat_BaseBoard")
+mesh = SubResource("Mesh_BaseBoard")
+
+[node name="Electromagnet_Core" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Electromagnet_Core"]
+shape = SubResource("Shape_Core")
+
+[node name="Core_Iron" type="MeshInstance3D" parent="Electromagnet_Core"]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("Mat_IronCore")
+mesh = SubResource("Mesh_IronCore")
+
+[node name="Pole_Face_Marker" type="MeshInstance3D" parent="Electromagnet_Core"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 0)
+material_override = SubResource("Mat_TranslucentMarker")
+mesh = SubResource("Mesh_BreakPlane")
+
+[node name="Coil_Windings" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Coil_Windings"]
+shape = SubResource("Shape_Coil")
+
+[node name="Coil_Mesh" type="MeshInstance3D" parent="Coil_Windings"]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("Mat_CopperCoil")
+mesh = SubResource("Mesh_CopperCoil")
+
+[node name="Armature_Striker" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Armature_Striker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+shape = SubResource("Shape_Armature")
+
+[node name="Armature_Plate" type="MeshInstance3D" parent="Armature_Striker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
+material_override = SubResource("Mat_SteelArmature")
+mesh = SubResource("Mesh_ArmaturePlate")
+
+[node name="Striker_Rod" type="MeshInstance3D" parent="Armature_Striker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13, 0)
+material_override = SubResource("Mat_SteelArmature")
+mesh = SubResource("Mesh_StrikerRod")
+
+[node name="Striker_Hammer" type="MeshInstance3D" parent="Armature_Striker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 21, 0)
+material_override = SubResource("Mat_SteelArmature")
+mesh = SubResource("Mesh_StrikerHammer")
+
+[node name="ForceVector_Mag" type="Node3D" parent="Armature_Striker"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
+
+[node name="Shaft" type="MeshInstance3D" parent="Armature_Striker/ForceVector_Mag"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 1.5, 0, 0)
+material_override = SubResource("Mat_VectorMag")
+mesh = SubResource("Mesh_ArrowShaft")
+
+[node name="Head" type="MeshInstance3D" parent="Armature_Striker/ForceVector_Mag"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 3.45, 0, 0)
+material_override = SubResource("Mat_VectorMag")
+mesh = SubResource("Mesh_ArrowHead")
+
+[node name="Label3D" type="Label3D" parent="Armature_Striker/ForceVector_Mag"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.5, 0)
+pixel_size = 0.035
+billboard = 1
+modulate = Color(0.2, 1, 0.5, 1)
+text = "F_mag: 0.0 N"
+
+[node name="ForceVector_Spring" type="Node3D" parent="Armature_Striker"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -1.0, 0, 0)
+
+[node name="Shaft" type="MeshInstance3D" parent="Armature_Striker/ForceVector_Spring"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 1.5, 0, 0)
+material_override = SubResource("Mat_VectorSpring")
+mesh = SubResource("Mesh_ArrowShaft")
+
+[node name="Head" type="MeshInstance3D" parent="Armature_Striker/ForceVector_Spring"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 3.45, 0, 0)
+material_override = SubResource("Mat_VectorSpring")
+mesh = SubResource("Mesh_ArrowHead")
+
+[node name="Label3D" type="Label3D" parent="Armature_Striker/ForceVector_Spring"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.5, 0)
+pixel_size = 0.035
+billboard = 1
+modulate = Color(1, 0.4, 0.3, 1)
+text = "F_spring: 0.0 N"
+
+[node name="Leaf_Spring" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, -10, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Leaf_Spring"]
+shape = SubResource("Shape_Spring")
+
+[node name="Spring_Mesh" type="MeshInstance3D" parent="Leaf_Spring"]
+material_override = SubResource("Mat_SteelArmature")
+mesh = SubResource("Mesh_LeafSpring")
+
+[node name="Contact_Screw" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Contact_Screw"]
+shape = SubResource("Shape_Contact")
+
+[node name="Screw_Post" type="MeshInstance3D" parent="Contact_Screw"]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("Mat_Brass")
+mesh = SubResource("Mesh_ContactScrew")
+
+[node name="Screw_Tip" type="MeshInstance3D" parent="Contact_Screw"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 0, 0)
+material_override = SubResource("Mat_Brass")
+mesh = SubResource("Mesh_ContactSpark")
+
+[node name="Break_Threshold_Plane" type="MeshInstance3D" parent="Contact_Screw"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0, 0, 0)
+material_override = SubResource("Mat_TranslucentMarker")
+mesh = SubResource("Mesh_BreakPlane")
+
+[node name="Contact_Spark" type="MeshInstance3D" parent="Contact_Screw"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0, 0)
+material_override = SubResource("Mat_ContactSpark")
+mesh = SubResource("Mesh_ContactSpark")
+
+[node name="Bell_Chime" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6, 21, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bell_Chime"]
+shape = SubResource("Shape_Bell")
+
+[node name="Chime_Dome" type="MeshInstance3D" parent="Bell_Chime"]
+material_override = SubResource("Mat_BellChime")
+mesh = SubResource("Mesh_BellChime")
+
+[node name="Strike_Limit_Marker" type="MeshInstance3D" parent="Bell_Chime"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.6, 0, 0)
+material_override = SubResource("Mat_StrikeMarker")
+mesh = SubResource("Mesh_StrikePlane")
+
+[node name="Power_Supply_Switch" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Power_Supply_Switch"]
+shape = SubResource("Shape_Switch")
+
+[node name="Switch_Base" type="MeshInstance3D" parent="Power_Supply_Switch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("Mat_SwitchBase")
+mesh = SubResource("Mesh_SwitchBase")
+
+[node name="Switch_Button" type="MeshInstance3D" parent="Power_Supply_Switch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+material_override = SubResource("Mat_SwitchButton")
+mesh = SubResource("Mesh_SwitchButton")
+
+[node name="Switch_LED" type="MeshInstance3D" parent="Power_Supply_Switch"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.2)
+material_override = SubResource("Mat_SwitchLED")
+mesh = SubResource("Mesh_SwitchLED")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Margin" type="MarginContainer" parent="HUD"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="VBoxMain" type="VBoxContainer" parent="HUD/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="HeaderPanel" type="PanelContainer" parent="HUD/Margin/VBoxMain"]
+layout_mode = 2
+mouse_filter = 1
+
+[node name="HBoxHeader" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HeaderPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TitleBox" type="VBoxContainer" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader/TitleBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 19
+text = "SCALEUP INTERACTIVE 3D ENGINEERING WORKBENCH"
+
+[node name="SubTitleLabel" type="Label" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader/TitleBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.65, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 12
+text = "Drag Left/Right/Middle: Orbit | Scroll: Zoom | Shift+Drag/WASD: Pan | Q/E: Rotate | F: Focus | R: Reset"
+
+[node name="StatusBox" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader"]
+layout_mode = 2
+alignment = 2
+mouse_filter = 2
+
+[node name="PowerStatus" type="Label" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader/StatusBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "POWER: ON"
+
+[node name="Sep" type="VSeparator" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader/StatusBox"]
+layout_mode = 2
+
+[node name="ContactStatusTag" type="Label" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader/StatusBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Interrupter: "
+
+[node name="ContactStatus" type="Label" parent="HUD/Margin/VBoxMain/HeaderPanel/HBoxHeader/StatusBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "CLOSED (CONDUCTING)"
+
+[node name="HBoxBody" type="HBoxContainer" parent="HUD/Margin/VBoxMain"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="TelemetryPanel" type="PanelContainer" parent="HUD/Margin/VBoxMain/HBoxBody"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="VBoxTelemetry" type="VBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="TelemHeader" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "LIVE SYSTEM TELEMETRY"
+
+[node name="HSeparator1" type="HSeparator" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="RowCurrent" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowCurrent"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Current (I):"
+
+[node name="ReadoutCurrent" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowCurrent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.00 A"
+
+[node name="RowFmag" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowFmag"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Magnetic Pull (F_mag):"
+
+[node name="ReadoutFmag" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowFmag"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.000 N"
+
+[node name="RowFspring" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowFspring"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Spring Restoring (F_spring):"
+
+[node name="ReadoutFspring" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowFspring"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.000 N"
+
+[node name="RowGap" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowGap"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Dynamic Air Gap (g):"
+
+[node name="ReadoutGap" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowGap"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "5.000 mm"
+
+[node name="RowPos" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowPos"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Displacement (x):"
+
+[node name="ReadoutPos" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowPos"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.000 mm"
+
+[node name="RowVel" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowVel"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Velocity (v):"
+
+[node name="ReadoutVel" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowVel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+0.000 m/s"
+
+[node name="RowDuty" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowDuty"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Conduction Duty Cycle:"
+
+[node name="ReadoutDuty" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowDuty"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 %"
+
+[node name="HSeparator2" type="HSeparator" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="RowFreq" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowFreq"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+text = "Strike Frequency:"
+
+[node name="ReadoutFreq" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowFreq"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 15
+text = "0.0 Hz"
+
+[node name="RowStrikes" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowStrikes"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Total Strikes Count:"
+
+[node name="ReadoutStrikes" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/TelemetryPanel/VBoxTelemetry/RowStrikes"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="Spacer" type="Control" parent="HUD/Margin/VBoxMain/HBoxBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="ControlsPanel" type="PanelContainer" parent="HUD/Margin/VBoxMain/HBoxBody"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="VBoxControls" type="VBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="ControlsHeader" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 13
+text = "HARDWARE PARAMETERS (UNSW LAB)"
+
+[node name="HSeparator3" type="HSeparator" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="RowV" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowV"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Supply Voltage (V):"
+
+[node name="ValVoltage" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowV"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "9.0 V"
+
+[node name="SliderVoltage" type="HSlider" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 24.0
+step = 0.5
+value = 9.0
+
+[node name="RowN" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowN"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Coil Turns (N):"
+
+[node name="ValTurns" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowN"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "200 T"
+
+[node name="SliderTurns" type="HSlider" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 50.0
+max_value = 500.0
+step = 10.0
+value = 200.0
+
+[node name="RowK" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowK"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Spring Constant (k):"
+
+[node name="ValSpring" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowK"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "40.0 N/m"
+
+[node name="SliderSpring" type="HSlider" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 5.0
+max_value = 150.0
+step = 1.0
+value = 40.0
+
+[node name="RowBreak" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowBreak"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Contact Break (x_break):"
+
+[node name="ValBreak" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowBreak"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "1.50 mm"
+
+[node name="SliderBreak" type="HSlider" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.5
+max_value = 3.5
+step = 0.05
+value = 1.5
+
+[node name="RowR" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowR"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Resistance (R):"
+
+[node name="ValResistance" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowR"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "1.5 Ohm"
+
+[node name="SliderResistance" type="HSlider" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.5
+max_value = 10.0
+step = 0.1
+value = 1.5
+
+[node name="RowL" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowL"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Inductance (L) [mH]:"
+
+[node name="ValInductance" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowL"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "5.0 mH"
+
+[node name="SliderInductance" type="HSlider" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 40.0
+step = 0.5
+value = 5.0
+
+[node name="RowDamp" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowDamp"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Damping (c) [Ns/m]:"
+
+[node name="ValDamping" type="Label" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/RowDamp"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.15 Ns/m"
+
+[node name="SliderDamping" type="HSlider" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.02
+max_value = 0.5
+step = 0.01
+value = 0.15
+
+[node name="HSeparator4" type="HSeparator" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+
+[node name="HBoxButtons" type="HBoxContainer" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BtnResetDefaults" type="Button" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/HBoxButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reset Defaults"
+
+[node name="BtnSpeed1x" type="Button" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/HBoxButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "1x"
+
+[node name="BtnSpeedSlow" type="Button" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/HBoxButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.2x"
+
+[node name="BtnSpeedUltra" type="Button" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/HBoxButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.04x"
+
+[node name="BtnPause" type="Button" parent="HUD/Margin/VBoxMain/HBoxBody/ControlsPanel/VBoxControls/HBoxButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pause"
+
+[node name="QuickBar" type="HBoxContainer" parent="HUD/Margin/VBoxMain"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="CheckForceVectors" type="CheckBox" parent="HUD/Margin/VBoxMain/QuickBar"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+button_pressed = true
+text = "3D Force Vectors (F_mag & F_spring)"
+
+[node name="BtnSwitchMode" type="Button" parent="HUD/Margin/VBoxMain/QuickBar"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+text = "Switch Mode: LATCHING (Continuous)"
+
+[node name="BtnResetView" type="Button" parent="HUD/Margin/VBoxMain/QuickBar"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+text = "Reset Camera (R)"
+
+[node name="LabelHint" type="Label" parent="HUD/Margin/VBoxMain/QuickBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 11
+text = "Click any 3D component to inspect equations & telemetry | F: Focus | Q/E: Rotate | Scroll: Zoom"
+horizontal_alignment = 2
+
+[node name="InspectorCard" type="PanelContainer" parent="HUD"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -240.0
+offset_right = 340.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="Margin" type="MarginContainer" parent="HUD/InspectorCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="HUD/InspectorCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HBoxTop" type="HBoxContainer" parent="HUD/InspectorCard/Margin/VBox"]
+layout_mode = 2
+
+[node name="InspectorTitle" type="Label" parent="HUD/InspectorCard/Margin/VBox/HBoxTop"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "COMPONENT INSPECTOR: ELECTROMAGNET COIL"
+
+[node name="BtnFocusPart" type="Button" parent="HUD/InspectorCard/Margin/VBox/HBoxTop"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Focus Camera (F)"
+
+[node name="BtnCloseInspector" type="Button" parent="HUD/InspectorCard/Margin/VBox/HBoxTop"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "  ✕  "
+
+[node name="InspectorRole" type="Label" parent="HUD/InspectorCard/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Converts electrical supply current into concentrated magnetic tractive flux."
+
+[node name="InspectorFormula" type="Label" parent="HUD/InspectorCard/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "Governing Equation: V = L(dI/dt) + IR  |  F_mag = (mu_0 * N^2 * I^2 * A) / (2 * g^2)"
+
+[node name="HSeparator" type="HSeparator" parent="HUD/InspectorCard/Margin/VBox"]
+layout_mode = 2
+
+[node name="InspectorTelemetry" type="Label" parent="HUD/InspectorCard/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Current: 4.82 A | Inductance: 5.0 mH | Power Dissipation: 34.8 W | Magnetic Pull: 2.34 N"
+
+[node name="InspectorActionLabel" type="Label" parent="HUD/InspectorCard/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 11
+text = "Adjust related parameters in the right panel or interact in 3D."
