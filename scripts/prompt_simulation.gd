@@ -1978,6 +1978,34 @@ func _render_literature_manifest(manifest: Dictionary) -> void:
 			paper_lines.append("%s (%s) — DOI: %s" % [title, yr, doi])
 	_field(_manifest_body, "Combined Papers", _bullet(paper_lines), GOOD)
 
+	var grounded_params: Dictionary = _result.get("grounded_parameters", {})
+	if not grounded_params.is_empty():
+		var param_lines: Array = []
+		for p_key in grounded_params.keys():
+			var gp: Variant = grounded_params[p_key]
+			if not (gp is Dictionary):
+				continue
+			var gp_d: Dictionary = gp
+			var val_str := "%.2f %s" % [float(gp_d.get("value", 0.0)), str(gp_d.get("unit", ""))]
+			var meta_parts: Array = []
+			if gp_d.get("value_min", null) != null and gp_d.get("value_max", null) != null:
+				meta_parts.append("Range: %.2f - %.2f %s" % [float(gp_d["value_min"]), float(gp_d["value_max"]), str(gp_d.get("unit", ""))])
+			var env: Variant = gp_d.get("operating_envelope", null)
+			if env is Dictionary:
+				var env_d: Dictionary = env
+				var env_bits: Array = []
+				if env_d.get("temperature_c", null) != null:
+					env_bits.append("%.1f °C" % float(env_d["temperature_c"]))
+				if env_d.get("ph", null) != null:
+					env_bits.append("pH %.1f" % float(env_d["ph"]))
+				if env_d.get("pressure_bar", null) != null:
+					env_bits.append("%.1f bar" % float(env_d["pressure_bar"]))
+				if not env_bits.is_empty():
+					meta_parts.append("Envelope: " + ", ".join(PackedStringArray(env_bits)))
+			var suffix := (" [" + " | ".join(PackedStringArray(meta_parts)) + "]") if not meta_parts.is_empty() else ""
+			param_lines.append("%s: %s%s" % [str(p_key), val_str, suffix])
+		_field(_manifest_body, "Grounded Parameters & Envelopes", _bullet(param_lines), GOOD)
+
 
 func _on_hotswap_selected(index: int) -> void:
 	if index <= 0:

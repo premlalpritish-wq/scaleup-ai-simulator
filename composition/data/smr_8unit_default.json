@@ -1,7 +1,7 @@
 {
   "contract_version": "0.1.0",
   "schema_version": "1.0.0",
-  "run_id": "prompt_run_80bda25c",
+  "run_id": "prompt_run_a4196b66",
   "status": "COMPLETED",
   "prompt": "simulate a 5-stage 120,000 Nm3/h steam methane reforming (SMR) hydrogen production plant from 95% methane natural gas feedstock and superheated steam: (1) Primary Reformer & Furnace Burner node executing endothermic steam methane reforming (CH4 + H2O <-> CO + 3H2) with temperature and pressure control loops and emergency nitrogen purge interlock, (2) Auxiliary Heat Exchanger E_105 for syngas waste heat recovery and process cooling, (3) Water-Gas Shift (WGS) Reactor converting carbon monoxide and steam to additional hydrogen and CO2 (CO + H2O <-> CO2 + H2), (4) Pressure Swing Adsorption (PSA) purification unit separating tail gas to achieve 99% H2 product purity with optional CO2 capture routing, and (5) Multi-stage Hydrogen Product Compressor pressurizing the 99% pure H2 stream to 400 bar for high-pressure storage.",
   "cache_hit": false,
@@ -1026,7 +1026,14 @@
       "entity_name": "smr_reaction_enthalpy",
       "target_system": "SMR Hydrogen Plant",
       "value": 206.0,
+      "value_min": null,
+      "value_max": null,
       "unit": "kJ / mol",
+      "operating_envelope": {
+        "temperature_c": 850.0,
+        "ph": null,
+        "pressure_bar": 28.0
+      },
       "verification_tier": "tier_1_quarantine",
       "source_doi": "10.1016/j.ijhydene.2010.04.093",
       "source_snippet": "Endothermic steam methane reforming reaction CH4 + H2O <-> CO + 3H2 has standard enthalpy dH_298 = 206 kJ/mol.",
@@ -1036,7 +1043,14 @@
       "entity_name": "wgs_reaction_enthalpy",
       "target_system": "SMR Hydrogen Plant",
       "value": -41.0,
+      "value_min": null,
+      "value_max": null,
       "unit": "kJ / mol",
+      "operating_envelope": {
+        "temperature_c": 350.0,
+        "ph": null,
+        "pressure_bar": 26.0
+      },
       "verification_tier": "tier_1_quarantine",
       "source_doi": "10.1016/j.ijhydene.2010.04.093",
       "source_snippet": "Exothermic water-gas shift reaction CO + H2O <-> CO2 + H2 has standard enthalpy dH_298 = -41 kJ/mol.",
@@ -1046,7 +1060,14 @@
       "entity_name": "smr_steam_to_carbon_ratio",
       "target_system": "SMR Hydrogen Plant",
       "value": 3.0,
+      "value_min": null,
+      "value_max": null,
       "unit": "dimensionless",
+      "operating_envelope": {
+        "temperature_c": 850.0,
+        "ph": null,
+        "pressure_bar": 28.0
+      },
       "verification_tier": "tier_1_quarantine",
       "source_doi": "10.1016/j.ijhydene.2013.08.055",
       "source_snippet": "Industrial SMR primary reformers typically operate at a steam-to-carbon molar ratio S/C = 3.0 to prevent coking.",
@@ -1056,7 +1077,14 @@
       "entity_name": "smr_reformer_outlet_temperature",
       "target_system": "SMR Hydrogen Plant",
       "value": 850.0,
+      "value_min": null,
+      "value_max": null,
       "unit": "degC",
+      "operating_envelope": {
+        "temperature_c": 850.0,
+        "ph": null,
+        "pressure_bar": 28.0
+      },
       "verification_tier": "tier_1_quarantine",
       "source_doi": "10.1016/j.ijhydene.2013.08.055",
       "source_snippet": "Primary reformer syngas outlet temperature is maintained between 850 and 900 C at equilibrium.",
@@ -1066,7 +1094,14 @@
       "entity_name": "smr_operating_pressure",
       "target_system": "SMR Hydrogen Plant",
       "value": 28.0,
+      "value_min": null,
+      "value_max": null,
       "unit": "bar",
+      "operating_envelope": {
+        "temperature_c": 850.0,
+        "ph": null,
+        "pressure_bar": 28.0
+      },
       "verification_tier": "tier_1_quarantine",
       "source_doi": "10.1016/j.ijhydene.2013.08.055",
       "source_snippet": "Modern industrial steam methane reforming plants operate at 25-30 bar pressure in the primary reformer.",
@@ -1076,7 +1111,14 @@
       "entity_name": "psa_hydrogen_recovery",
       "target_system": "SMR Hydrogen Plant",
       "value": 88.0,
+      "value_min": null,
+      "value_max": null,
       "unit": "percent",
+      "operating_envelope": {
+        "temperature_c": 40.0,
+        "ph": null,
+        "pressure_bar": 24.0
+      },
       "verification_tier": "tier_1_quarantine",
       "source_doi": "10.1016/j.seppur.2018.03.058",
       "source_snippet": "Pressure swing adsorption (PSA) achieves 85-90% H2 recovery at 99%+ product purity with tail gas recycle.",
@@ -1089,7 +1131,14 @@
         "entity_name": "smr_reaction_enthalpy",
         "target_system": "SMR Hydrogen Plant",
         "value": 206.0,
+        "value_min": null,
+        "value_max": null,
         "unit": "kJ / mol",
+        "operating_envelope": {
+          "temperature_c": 850.0,
+          "ph": null,
+          "pressure_bar": 28.0
+        },
         "verification_tier": "tier_1_quarantine",
         "source_doi": "10.1016/j.ijhydene.2010.04.093",
         "source_snippet": "Endothermic steam methane reforming reaction CH4 + H2O <-> CO + 3H2 has standard enthalpy dH_298 = 206 kJ/mol.",
@@ -1099,7 +1148,14 @@
         "entity_name": "wgs_reaction_enthalpy",
         "target_system": "SMR Hydrogen Plant",
         "value": -41.0,
+        "value_min": null,
+        "value_max": null,
         "unit": "kJ / mol",
+        "operating_envelope": {
+          "temperature_c": 350.0,
+          "ph": null,
+          "pressure_bar": 26.0
+        },
         "verification_tier": "tier_1_quarantine",
         "source_doi": "10.1016/j.ijhydene.2010.04.093",
         "source_snippet": "Exothermic water-gas shift reaction CO + H2O <-> CO2 + H2 has standard enthalpy dH_298 = -41 kJ/mol.",
@@ -1109,7 +1165,14 @@
         "entity_name": "smr_steam_to_carbon_ratio",
         "target_system": "SMR Hydrogen Plant",
         "value": 3.0,
+        "value_min": null,
+        "value_max": null,
         "unit": "dimensionless",
+        "operating_envelope": {
+          "temperature_c": 850.0,
+          "ph": null,
+          "pressure_bar": 28.0
+        },
         "verification_tier": "tier_1_quarantine",
         "source_doi": "10.1016/j.ijhydene.2013.08.055",
         "source_snippet": "Industrial SMR primary reformers typically operate at a steam-to-carbon molar ratio S/C = 3.0 to prevent coking.",
@@ -1119,7 +1182,14 @@
         "entity_name": "smr_reformer_outlet_temperature",
         "target_system": "SMR Hydrogen Plant",
         "value": 850.0,
+        "value_min": null,
+        "value_max": null,
         "unit": "degC",
+        "operating_envelope": {
+          "temperature_c": 850.0,
+          "ph": null,
+          "pressure_bar": 28.0
+        },
         "verification_tier": "tier_1_quarantine",
         "source_doi": "10.1016/j.ijhydene.2013.08.055",
         "source_snippet": "Primary reformer syngas outlet temperature is maintained between 850 and 900 C at equilibrium.",
@@ -1129,7 +1199,14 @@
         "entity_name": "smr_operating_pressure",
         "target_system": "SMR Hydrogen Plant",
         "value": 28.0,
+        "value_min": null,
+        "value_max": null,
         "unit": "bar",
+        "operating_envelope": {
+          "temperature_c": 850.0,
+          "ph": null,
+          "pressure_bar": 28.0
+        },
         "verification_tier": "tier_1_quarantine",
         "source_doi": "10.1016/j.ijhydene.2013.08.055",
         "source_snippet": "Modern industrial steam methane reforming plants operate at 25-30 bar pressure in the primary reformer.",
@@ -1139,7 +1216,14 @@
         "entity_name": "psa_hydrogen_recovery",
         "target_system": "SMR Hydrogen Plant",
         "value": 88.0,
+        "value_min": null,
+        "value_max": null,
         "unit": "percent",
+        "operating_envelope": {
+          "temperature_c": 40.0,
+          "ph": null,
+          "pressure_bar": 24.0
+        },
         "verification_tier": "tier_1_quarantine",
         "source_doi": "10.1016/j.seppur.2018.03.058",
         "source_snippet": "Pressure swing adsorption (PSA) achieves 85-90% H2 recovery at 99%+ product purity with tail gas recycle.",
