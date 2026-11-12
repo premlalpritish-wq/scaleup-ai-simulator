@@ -1878,15 +1878,16 @@ func _setup_web_integration() -> void:
 	# Read URL query parameters via window.location.search
 	var query_var: Variant = JavaScriptBridge.eval("window.location.search")
 	var query: String = str(query_var) if query_var != null else ""
-	var target_preset := "saccharina"
 	if "preset=ecoli" in query.to_lower():
-		target_preset = "ecoli"
+		load_preset("ecoli")
 	elif "preset=unverified" in query.to_lower() or "unverified_halt" in query.to_lower() or "insufficient" in query.to_lower():
-		target_preset = "unverified_halt"
+		load_preset("unverified_halt")
 	elif "preset=saccharina" in query.to_lower():
-		target_preset = "saccharina"
-
-	load_preset(target_preset)
+		load_preset("saccharina")
+	elif FileAccess.file_exists("res://composition/data/smr_8unit_default.json"):
+		load_run_file("res://composition/data/smr_8unit_default.json")
+	else:
+		load_preset("saccharina")
 
 
 func _on_js_switch_preset(args: Array) -> void:
