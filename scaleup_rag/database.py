@@ -174,6 +174,30 @@ class ParameterDatabase:
             )
             existing = session.execute(exists_stmt).scalar_one_or_none()
             if existing:
+                dirty = False
+                if existing.value_min is None and param.value_min is not None:
+                    existing.value_min = param.value_min
+                    existing.raw_value_min = param.raw_value_min
+                    dirty = True
+                if existing.value_max is None and param.value_max is not None:
+                    existing.value_max = param.value_max
+                    existing.raw_value_max = param.raw_value_max
+                    dirty = True
+                if existing.uncertainty is None and param.uncertainty is not None:
+                    existing.uncertainty = param.uncertainty
+                    dirty = True
+                if existing.pressure_bar is None and param.envelope.pressure_bar is not None:
+                    existing.pressure_bar = param.envelope.pressure_bar
+                    dirty = True
+                env_cur = dict(existing.envelope_json or {})
+                env_new = param.envelope.model_dump()
+                for ek in ("temperature_c", "ph", "pressure_bar", "shear_rate_s_inv", "substrate", "medium_or_catalyst", "notes"):
+                    if env_cur.get(ek) is None and env_new.get(ek) is not None:
+                        env_cur[ek] = env_new[ek]
+                        dirty = True
+                if dirty:
+                    existing.envelope_json = env_cur
+                    session.commit()
                 return
 
             record = ScientificParameterRecord(
