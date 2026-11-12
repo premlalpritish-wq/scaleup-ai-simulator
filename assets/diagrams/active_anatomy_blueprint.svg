@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1620 540" width="100%" height="100%">
   <defs>
     <linearGradient id="vesselGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#1e293b" stop-opacity="0.9" />
@@ -21,23 +21,23 @@
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
-  <rect width="900" height="540" fill="#090d16" rx="8" />
+  <rect width="1620" height="540" fill="#090d16" rx="8" />
 
   <!-- Header / Metadata -->
   <g transform="translate(40, 36)">
-    <rect width="820" height="60" rx="6" fill="#131c2e" stroke="#1e293b" stroke-width="1.2" />
-    <text x="20" y="24" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold">SCALEUP ANATOMY BLUEPRINT &bull; MICROBIAL_FERMENTATION</text>
-    <text x="20" y="44" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="600">4-Stage Microbial Fermentation & Harvest Train</text>
-    <text x="660" y="36" fill="#94a3b8" font-family="monospace" font-size="11">Total Duration: 20.0 h</text>
+    <rect width="1540" height="60" rx="6" fill="#131c2e" stroke="#1e293b" stroke-width="1.2" />
+    <text x="20" y="24" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold">SCALEUP ANATOMY BLUEPRINT &bull; CHEMICAL_PLANT</text>
+    <text x="20" y="44" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="600">8-Stage 120,000 Nm3/h SMR Hydrogen Production Plant</text>
+    <text x="1380" y="36" fill="#94a3b8" font-family="monospace" font-size="11">Total Duration: 32.0 h</text>
   </g>
 
   <!-- Multi-Unit Operation Train -->
-  <g id="stage_0" transform="translate(79.0, 120)">
+  <g id="stage_0" transform="translate(78.0, 120)">
     <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">Seed Inoculation & B</text>
-    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[0h - 4h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">1. Feed HDS (R-101A/</text>
+    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[0h - 2h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
   </g>
-  <g id="prim_0" transform="translate(154.0, 280)">
+  <g id="prim_0" transform="translate(153.0, 280)">
     <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
     <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
     <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
@@ -46,21 +46,21 @@
     <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
   </g>
   <!-- Interstage Pipe 0 -> 1 -->
-  <path d="M 190.0 300 L 303.0 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
-  <polygon points="303.0,300 295.0,296 295.0,304" fill="#38bdf8" />
-  <g transform="translate(79.0, 380)">
+  <path d="M 189.0 300 L 299.5 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
+  <polygon points="299.5,300 291.5,296 291.5,304" fill="#38bdf8" />
+  <g transform="translate(78.0, 380)">
     <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
     <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
-    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">growth_kinetics.mu_max, growth_kine</text>
-    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: 10.1016/j.bej.2021.1</text>
-    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">stirred_bioreactor</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">pre_reformer</text>
   </g>
-  <g id="stage_1" transform="translate(264.0, 120)">
+  <g id="stage_1" transform="translate(260.5, 120)">
     <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">Exponential Nutrient</text>
-    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[4h - 12h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">2. Primary SMR Furna</text>
+    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[2h - 5h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
   </g>
-  <g id="prim_1" transform="translate(339.0, 280)">
+  <g id="prim_1" transform="translate(335.5, 280)">
     <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
     <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
     <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
@@ -69,21 +69,21 @@
     <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
   </g>
   <!-- Interstage Pipe 1 -> 2 -->
-  <path d="M 375.0 300 L 488.0 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
-  <polygon points="488.0,300 480.0,296 480.0,304" fill="#38bdf8" />
-  <g transform="translate(264.0, 380)">
+  <path d="M 371.5 300 L 482.0 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
+  <polygon points="482.0,300 474.0,296 474.0,304" fill="#38bdf8" />
+  <g transform="translate(260.5, 380)">
     <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
     <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
-    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">growth_kinetics.Y_xs, transport.kLa</text>
-    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: 10.1016/j.bej.2021.1</text>
-    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">stirred_bioreactor</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">furnace_reformer</text>
   </g>
-  <g id="stage_2" transform="translate(449.0, 120)">
+  <g id="stage_2" transform="translate(443.0, 120)">
     <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">IPTG Induction & Ove</text>
-    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[12h - 18h] &bull; <tspan fill="#fbbf24">ANALOGUE_BRIDGE</tspan></text>
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">3. Waste Heat Boiler</text>
+    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[5h - 8h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
   </g>
-  <g id="prim_2" transform="translate(524.0, 280)">
+  <g id="prim_2" transform="translate(518.0, 280)">
     <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
     <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
     <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
@@ -92,34 +92,128 @@
     <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
   </g>
   <!-- Interstage Pipe 2 -> 3 -->
-  <path d="M 560.0 300 L 673.0 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
-  <polygon points="673.0,300 665.0,296 665.0,304" fill="#38bdf8" />
-  <g transform="translate(449.0, 380)">
+  <path d="M 554.0 300 L 664.5 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
+  <polygon points="664.5,300 656.5,296 656.5,304" fill="#38bdf8" />
+  <g transform="translate(443.0, 380)">
     <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
     <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
-    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">protein_expression.q_p, overflow.k_</text>
-    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: 10.1186/1475-2859-13</text>
-    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">stirred_bioreactor</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">shell_tube_hx</text>
   </g>
-  <g id="stage_3" transform="translate(634.0, 120)">
+  <g id="stage_3" transform="translate(625.5, 120)">
     <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
-    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">Centrifugal Biomass </text>
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">4. Dual-Stage WGS Is</text>
+    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[8h - 10h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
+  </g>
+  <g id="prim_3" transform="translate(700.5, 280)">
+    <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+    <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
+    <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
+    <ellipse cx="0" cy="-45" rx="36" ry="10" fill="#475569" stroke="#64748b" stroke-width="1.5" />
+    <line x1="0" y1="-60" x2="0" y2="35" stroke="#cbd5e1" stroke-width="3.5" stroke-linecap="round" />
+    <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
+  </g>
+  <!-- Interstage Pipe 3 -> 4 -->
+  <path d="M 736.5 300 L 847.0 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
+  <polygon points="847.0,300 839.0,296 839.0,304" fill="#38bdf8" />
+  <g transform="translate(625.5, 380)">
+    <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
+    <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">packed_bed_reactor</text>
+  </g>
+  <g id="stage_4" transform="translate(808.0, 120)">
+    <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">5. Syngas Trim Coole</text>
+    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[10h - 12h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
+  </g>
+  <g id="prim_4" transform="translate(883.0, 280)">
+    <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+    <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
+    <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
+    <ellipse cx="0" cy="-45" rx="36" ry="10" fill="#475569" stroke="#64748b" stroke-width="1.5" />
+    <line x1="0" y1="-60" x2="0" y2="35" stroke="#cbd5e1" stroke-width="3.5" stroke-linecap="round" />
+    <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
+  </g>
+  <!-- Interstage Pipe 4 -> 5 -->
+  <path d="M 919.0 300 L 1029.5 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
+  <polygon points="1029.5,300 1021.5,296 1021.5,304" fill="#38bdf8" />
+  <g transform="translate(808.0, 380)">
+    <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
+    <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">knockout_cooler</text>
+  </g>
+  <g id="stage_5" transform="translate(990.5, 120)">
+    <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">6. Amine CO2 Capture</text>
+    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[12h - 15h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
+  </g>
+  <g id="prim_5" transform="translate(1065.5, 280)">
+    <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+    <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
+    <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
+    <ellipse cx="0" cy="-45" rx="36" ry="10" fill="#475569" stroke="#64748b" stroke-width="1.5" />
+    <line x1="0" y1="-60" x2="0" y2="35" stroke="#cbd5e1" stroke-width="3.5" stroke-linecap="round" />
+    <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
+  </g>
+  <!-- Interstage Pipe 5 -> 6 -->
+  <path d="M 1101.5 300 L 1212.0 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
+  <polygon points="1212.0,300 1204.0,296 1204.0,304" fill="#38bdf8" />
+  <g transform="translate(990.5, 380)">
+    <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
+    <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">co2_absorber</text>
+  </g>
+  <g id="stage_6" transform="translate(1173.0, 120)">
+    <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">7. 8-Bed PSA Matrix </text>
+    <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[15h - 18h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
+  </g>
+  <g id="prim_6" transform="translate(1248.0, 280)">
+    <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+    <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
+    <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
+    <ellipse cx="0" cy="-45" rx="36" ry="10" fill="#475569" stroke="#64748b" stroke-width="1.5" />
+    <line x1="0" y1="-60" x2="0" y2="35" stroke="#cbd5e1" stroke-width="3.5" stroke-linecap="round" />
+    <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
+  </g>
+  <!-- Interstage Pipe 6 -> 7 -->
+  <path d="M 1284.0 300 L 1394.5 300" fill="none" stroke="url(#pipeGrad)" stroke-width="3.5" stroke-dasharray="6,4" />
+  <polygon points="1394.5,300 1386.5,296 1386.5,304" fill="#38bdf8" />
+  <g transform="translate(1173.0, 380)">
+    <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
+    <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">psa_skid</text>
+  </g>
+  <g id="stage_7" transform="translate(1355.5, 120)">
+    <rect width="150" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
+    <text x="10" y="18" fill="#e2e8f0" font-family="sans-serif" font-size="10" font-weight="bold">8. H2 Compressor (K-</text>
     <text x="10" y="32" fill="#94a3b8" font-family="monospace" font-size="9">[18h - 20h] &bull; <tspan fill="#34d399">DIRECT</tspan></text>
   </g>
-  <g id="prim_3" transform="translate(709.0, 280)">
-    <path d="M -35 -40 L 35 -40 L 15 40 L -15 40 Z" fill="url(#centrifugeGrad)" stroke="#64748b" stroke-width="1.5" />
-    <ellipse cx="0" cy="-40" rx="35" ry="12" fill="#64748b" stroke="#94a3b8" stroke-width="1.2" />
-    <ellipse cx="0" cy="40" rx="15" ry="6" fill="#334155" />
-    <line x1="0" y1="-50" x2="0" y2="30" stroke="#cbd5e1" stroke-width="3" />
+  <g id="prim_7" transform="translate(1430.5, 280)">
+    <ellipse cx="0" cy="45" rx="36" ry="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+    <path d="M -36 -45 L -36 45 A 36 12 0 0 0 36 45 L 36 -45 Z" fill="url(#vesselGrad)" stroke="#38bdf8" stroke-width="1.8" />
+    <path d="M -34 0 L -34 42 A 34 10 0 0 0 34 42 L 34 0 Z" fill="#047857" opacity="0.75" />
+    <ellipse cx="0" cy="-45" rx="36" ry="10" fill="#475569" stroke="#64748b" stroke-width="1.5" />
+    <line x1="0" y1="-60" x2="0" y2="35" stroke="#cbd5e1" stroke-width="3.5" stroke-linecap="round" />
+    <rect x="-18" y="25" width="36" height="8" rx="2" fill="#94a3b8" />
   </g>
-  <g transform="translate(634.0, 380)">
+  <g transform="translate(1355.5, 380)">
     <rect width="150" height="70" rx="4" fill="#0b1120" stroke="#1e293b" stroke-width="1" />
     <text x="8" y="16" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="bold">PARAMS:</text>
-    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">downstream.harvest_efficiency</text>
-    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: 10.1016/j.bej.2021.1</text>
-    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">centrifuge</text>
+    <text x="8" y="28" fill="#94a3b8" font-family="monospace" font-size="8">smr_reaction_enthalpy, wgs_reaction</text>
+    <text x="8" y="44" fill="#64748b" font-family="monospace" font-size="7.5">DOI: </text>
+    <text x="8" y="58" fill="#cbd5e1" font-family="sans-serif" font-size="8">high_pressure_compressor</text>
   </g>
-  <g transform="translate(660, 470)">
+  <g transform="translate(1380, 470)">
     <rect width="200" height="42" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.2" />
     <text x="12" y="18" fill="#94a3b8" font-family="monospace" font-size="9">TOPOLOGY STATUS:</text>
     <text x="12" y="32" fill="#34d399" font-family="sans-serif" font-size="11" font-weight="bold">&bull; Fully Grounded in Library</text>

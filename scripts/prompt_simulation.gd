@@ -44,12 +44,36 @@ var _kpi_uts: Label
 
 # Interactive Sandbox Mode Dock (Bottom-Left)
 var _sandbox_panel: PanelContainer
+var _sandbox_title_label: Label
+var _bio_sandbox_box: VBoxContainer
+var _smr_sandbox_box: VBoxContainer
 var _sandbox_ph_btn: Button
 var _sandbox_scale_btn: Button
 var _sandbox_crosslink_btn: Button
 var _sandbox_tension_slider: HSlider
 var _sandbox_tension_label: Label
 var _sandbox_banner: Label
+
+# SMR Chemical Plant Interactive Controls & HAZOP Faults
+var _smr_mode: bool = false
+var _smr_sc_slider: HSlider
+var _smr_sc_val: Label
+var _smr_temp_slider: HSlider
+var _smr_temp_val: Label
+var _smr_press_slider: HSlider
+var _smr_press_val: Label
+var _smr_btn_e105: Button
+var _smr_btn_coking: Button
+var _smr_btn_purge: Button
+var _smr_btn_xray: Button
+var _xray_enabled: bool = true
+var _smr_kpis_label: Label
+var _smr_fault_state: Dictionary = {
+	"e105_cooling_loss": false,
+	"coking_warning": false,
+	"n2_purge_active": false,
+	"purity_pct": 99.0,
+}
 
 # Slide-Out Right Drawer (Scientific Dossier & Charts)
 var _right_drawer: PanelContainer
@@ -563,9 +587,12 @@ func _create_kpi_card(title: String, initial_val: String, glow_col: Color) -> La
 func _create_sandbox_dock() -> Control:
 	_sandbox_panel = PanelContainer.new()
 	_sandbox_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_sandbox_panel.offset_left = 32
+	_sandbox_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_sandbox_panel.offset_left = 20
+	_sandbox_panel.offset_right = 310
+	_sandbox_panel.offset_top = -195
 	_sandbox_panel.offset_bottom = -16
-	_sandbox_panel.custom_minimum_size = Vector2(275, 175)
+	_sandbox_panel.custom_minimum_size = Vector2(290, 175)
 
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.06, 0.08, 0.12, 0.94)
@@ -581,36 +608,40 @@ func _create_sandbox_dock() -> Control:
 	_sandbox_panel.add_theme_stylebox_override("panel", style)
 
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 6)
+	v.add_theme_constant_override("separation", 5)
 	_sandbox_panel.add_child(v)
 
-	var title := Label.new()
-	title.text = "🧪 WHAT-IF PROCESS SANDBOX"
-	title.add_theme_font_size_override("font_size", 11)
-	title.modulate = Color(0.35, 0.85, 1.0)
-	v.add_child(title)
+	_sandbox_title_label = Label.new()
+	_sandbox_title_label.text = "🧪 WHAT-IF PROCESS SANDBOX"
+	_sandbox_title_label.add_theme_font_size_override("font_size", 11)
+	_sandbox_title_label.modulate = Color(0.35, 0.85, 1.0)
+	v.add_child(_sandbox_title_label)
+
+	_bio_sandbox_box = VBoxContainer.new()
+	_bio_sandbox_box.add_theme_constant_override("separation", 5)
+	v.add_child(_bio_sandbox_box)
 
 	# 1. Neutralisation pH Lever
 	_sandbox_ph_btn = Button.new()
 	_sandbox_ph_btn.text = "pH State: pH 7.0 [Neutralised]"
 	_sandbox_ph_btn.pressed.connect(_on_sandbox_ph_toggle)
-	v.add_child(_sandbox_ph_btn)
+	_bio_sandbox_box.add_child(_sandbox_ph_btn)
 
 	# 2. Scale Mode Lever
 	_sandbox_scale_btn = Button.new()
 	_sandbox_scale_btn.text = "Scale: Scaled-Up 15.0g (33.07%)"
 	_sandbox_scale_btn.pressed.connect(_on_sandbox_scale_toggle)
-	v.add_child(_sandbox_scale_btn)
+	_bio_sandbox_box.add_child(_sandbox_scale_btn)
 
 	# 3. Fibre Crosslinking Lever
 	_sandbox_crosslink_btn = Button.new()
 	_sandbox_crosslink_btn.text = "Fibre: Pure Alginate (29.3 MPa)"
 	_sandbox_crosslink_btn.pressed.connect(_on_sandbox_crosslink_toggle)
-	v.add_child(_sandbox_crosslink_btn)
+	_bio_sandbox_box.add_child(_sandbox_crosslink_btn)
 
 	# 4. Mechanical Tension Pull Test Slider
 	var t_row := HBoxContainer.new()
-	v.add_child(t_row)
+	_bio_sandbox_box.add_child(t_row)
 	var t_lbl := Label.new()
 	t_lbl.text = "Pull Load:"
 	t_lbl.add_theme_font_size_override("font_size", 10)
@@ -629,7 +660,63 @@ func _create_sandbox_dock() -> Control:
 	_sandbox_tension_slider.step = 0.5
 	_sandbox_tension_slider.value = 12.0
 	_sandbox_tension_slider.value_changed.connect(_on_sandbox_tension_changed)
-	v.add_child(_sandbox_tension_slider)
+	_bio_sandbox_box.add_child(_sandbox_tension_slider)
+
+	# ---- SMR Chemical Plant Controls & HAZOP Faults ----
+	_smr_sandbox_box = VBoxContainer.new()
+	_smr_sandbox_box.add_theme_constant_override("separation", 4)
+	_smr_sandbox_box.visible = false
+	v.add_child(_smr_sandbox_box)
+
+	var sc_res := _make_smr_slider_row(_smr_sandbox_box, "Steam/Carbon (S/C):", 2.0, 4.5, 0.1, 3.0, "%.2f")
+	_smr_sc_slider = sc_res[0]
+	_smr_sc_val = sc_res[1]
+	_smr_sc_slider.value_changed.connect(_on_smr_param_changed)
+
+	var t_res := _make_smr_slider_row(_smr_sandbox_box, "Reformer Outlet (°C):", 750.0, 920.0, 5.0, 850.0, "%.0f °C")
+	_smr_temp_slider = t_res[0]
+	_smr_temp_val = t_res[1]
+	_smr_temp_slider.value_changed.connect(_on_smr_param_changed)
+
+	var p_res := _make_smr_slider_row(_smr_sandbox_box, "Operating Press (bar):", 15.0, 35.0, 0.5, 28.0, "%.1f bar")
+	_smr_press_slider = p_res[0]
+	_smr_press_val = p_res[1]
+	_smr_press_slider.value_changed.connect(_on_smr_param_changed)
+
+	_smr_kpis_label = Label.new()
+	_smr_kpis_label.text = "CH4 Slip: 2.1% | WGS CO: 94.2%\nH2: 120,000 Nm3/h | Comp: 14,200 kW"
+	_smr_kpis_label.add_theme_font_size_override("font_size", 9)
+	_smr_kpis_label.modulate = Color(0.55, 0.95, 1.0)
+	_smr_sandbox_box.add_child(_smr_kpis_label)
+
+	var hazop_row := VBoxContainer.new()
+	hazop_row.add_theme_constant_override("separation", 3)
+	_smr_sandbox_box.add_child(hazop_row)
+
+	_smr_btn_e105 = Button.new()
+	_smr_btn_e105.text = "⚡ Trigger E_105 Cooling Loss"
+	_smr_btn_e105.add_theme_font_size_override("font_size", 10)
+	_smr_btn_e105.pressed.connect(_on_hazop_e105_toggle)
+	hazop_row.add_child(_smr_btn_e105)
+
+	_smr_btn_coking = Button.new()
+	_smr_btn_coking.text = "🔥 Trigger Low S/C Carbon Coking"
+	_smr_btn_coking.add_theme_font_size_override("font_size", 10)
+	_smr_btn_coking.pressed.connect(_on_hazop_coking_toggle)
+	hazop_row.add_child(_smr_btn_coking)
+
+	_smr_btn_purge = Button.new()
+	_smr_btn_purge.text = "🚨 Trip Emergency N2 Purge (XV-101)"
+	_smr_btn_purge.add_theme_font_size_override("font_size", 10)
+	_smr_btn_purge.pressed.connect(_on_hazop_n2_purge_toggle)
+	hazop_row.add_child(_smr_btn_purge)
+
+	_smr_btn_xray = Button.new()
+	_smr_btn_xray.text = "🔍 X-Ray / Cutaway View: ON"
+	_smr_btn_xray.add_theme_font_size_override("font_size", 10)
+	_smr_btn_xray.modulate = Color(0.55, 0.95, 1.0)
+	_smr_btn_xray.pressed.connect(_on_smr_xray_toggle)
+	hazop_row.add_child(_smr_btn_xray)
 
 	_sandbox_banner = Label.new()
 	_sandbox_banner.text = "System nominal. All parameters verified."
@@ -639,6 +726,166 @@ func _create_sandbox_dock() -> Control:
 	v.add_child(_sandbox_banner)
 
 	return _sandbox_panel
+
+
+func _make_smr_slider_row(parent: VBoxContainer, label_txt: String, min_v: float, max_v: float, step_v: float, init_v: float, fmt: String) -> Array:
+	var row := HBoxContainer.new()
+	parent.add_child(row)
+	var lbl := Label.new()
+	lbl.text = label_txt
+	lbl.add_theme_font_size_override("font_size", 9)
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(lbl)
+	var val_lbl := Label.new()
+	val_lbl.text = fmt % init_v
+	val_lbl.add_theme_font_size_override("font_size", 9)
+	val_lbl.modulate = GOOD
+	row.add_child(val_lbl)
+
+	var sl := HSlider.new()
+	sl.min_value = min_v
+	sl.max_value = max_v
+	sl.step = step_v
+	sl.value = init_v
+	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	parent.add_child(sl)
+	return [sl, val_lbl]
+
+
+func _set_sandbox_mode(is_smr: bool) -> void:
+	_smr_mode = is_smr
+	if _bio_sandbox_box != null:
+		_bio_sandbox_box.visible = not is_smr
+	if _smr_sandbox_box != null:
+		_smr_sandbox_box.visible = is_smr
+	if _sandbox_title_label != null:
+		_sandbox_title_label.text = "⚙️ SMR PLANT & HAZOP CONTROLS" if is_smr else "🧪 WHAT-IF PROCESS SANDBOX"
+	if _sandbox_panel != null:
+		_sandbox_panel.visible = true
+		_sandbox_panel.offset_top = -355 if is_smr else -195
+		_sandbox_panel.offset_right = 315 if is_smr else 300
+		_sandbox_panel.custom_minimum_size = Vector2(295, 335) if is_smr else Vector2(275, 175)
+	if is_smr:
+		_recalculate_smr_equilibrium()
+
+
+func _on_smr_param_changed(_val: float) -> void:
+	_recalculate_smr_equilibrium()
+
+
+func _on_hazop_e105_toggle() -> void:
+	_smr_fault_state["e105_cooling_loss"] = not bool(_smr_fault_state.get("e105_cooling_loss", false))
+	_recalculate_smr_equilibrium()
+
+
+func _on_hazop_coking_toggle() -> void:
+	var active := not bool(_smr_fault_state.get("coking_warning", false))
+	_smr_fault_state["coking_warning"] = active
+	if active and _smr_sc_slider != null:
+		_smr_sc_slider.value = 2.0
+	elif not active and _smr_sc_slider != null and _smr_sc_slider.value < 2.5:
+		_smr_sc_slider.value = 3.0
+	_recalculate_smr_equilibrium()
+
+
+func _on_hazop_n2_purge_toggle() -> void:
+	_smr_fault_state["n2_purge_active"] = not bool(_smr_fault_state.get("n2_purge_active", false))
+	_recalculate_smr_equilibrium()
+
+
+func _on_smr_xray_toggle() -> void:
+	_xray_enabled = not _xray_enabled
+	if _smr_btn_xray != null:
+		_smr_btn_xray.text = "🔍 X-Ray / Cutaway View: %s" % ("ON" if _xray_enabled else "OFF (Solid)")
+		_smr_btn_xray.modulate = Color(0.55, 0.95, 1.0) if _xray_enabled else Color.WHITE
+	if _view != null and _view.has_method("set_xray_cutaway"):
+		_view.set_xray_cutaway(_xray_enabled)
+
+
+func _recalculate_smr_equilibrium() -> void:
+	if not _smr_mode or _smr_sc_slider == null:
+		return
+	var sc: float = _smr_sc_slider.value
+	var temp_c: float = _smr_temp_slider.value
+	var press: float = _smr_press_slider.value
+
+	_smr_sc_val.text = "%.2f" % sc
+	_smr_temp_val.text = "%.0f °C" % temp_c
+	_smr_press_val.text = "%.1f bar" % press
+
+	# Auto-flag carbon coking if S/C <= 2.15
+	var coking_active: bool = bool(_smr_fault_state.get("coking_warning", false)) or (sc <= 2.15)
+	_smr_fault_state["coking_warning"] = coking_active
+	var e105_loss: bool = bool(_smr_fault_state.get("e105_cooling_loss", false))
+	var n2_purge: bool = bool(_smr_fault_state.get("n2_purge_active", false))
+
+	# Van 't Hoff temperature dependence & Le Chatelier pressure scaling tied to grounded RAG parameters
+	var grounded: Dictionary = _result.get("grounded_parameters", {})
+	var dh_smr_kj: float = 206.0
+	if grounded.has("smr_reaction_enthalpy") and (grounded["smr_reaction_enthalpy"] is Dictionary):
+		dh_smr_kj = float((grounded["smr_reaction_enthalpy"] as Dictionary).get("value", 206.0))
+	var t_ref_k: float = 850.0 + 273.15
+	var t_k: float = temp_c + 273.15
+	var k_vant_hoff: float = exp((-dh_smr_kj * 1000.0 / 8.314) * ((1.0 / t_k) - (1.0 / t_ref_k)))
+	var le_chatelier_p: float = pow(press / 28.0, 2.0)
+
+	var r102_c2_conv_pct: float = clampf(99.5 - maxf(0.0, 2.5 - sc) * 4.0, 88.0, 100.0)
+	var ch4_slip_pct: float = clampf(2.1 * (1.0 / maxf(0.05, k_vant_hoff)) * (3.0 / sc) * sqrt(le_chatelier_p), 0.25, 22.0)
+	var wgs_co_conv_pct: float = clampf((96.4 + (sc - 3.0) * 1.2) - (16.5 if e105_loss else 0.0), 65.0, 99.0)
+	var psa_rec_pct: float = clampf(88.0 - (0.4 if e105_loss else 0.0) - (0.5 if ch4_slip_pct > 5.0 else 0.0), 75.0, 91.0)
+	var purity_pct: float = 0.0 if n2_purge else clampf(99.99 - maxf(0.0, ch4_slip_pct - 4.0) * 0.20 - (0.6 if e105_loss else 0.0), 92.0, 99.99)
+	_smr_fault_state["purity_pct"] = purity_pct
+
+	var h2_flow: float = 0.0 if n2_purge else 120000.0 * ((1.0 - ch4_slip_pct * 0.015) / (1.0 - 2.1 * 0.015)) * (wgs_co_conv_pct / 96.4) * (psa_rec_pct / 88.0)
+	var comp_kw: float = 0.0 if n2_purge else 14200.0 * (h2_flow / 120000.0) * (log(400.0 / maxf(press - 4.0, 8.0)) / log(400.0 / 24.0))
+	_smr_fault_state["h2_flow"] = h2_flow
+
+	_smr_kpis_label.text = "R-102 C2+ Conv: %.1f%% | R-201 CH4 Slip: %.1f%%\nWGS CO: %.1f%% | H2: %.0f Nm3/h | %.0f kW" % [r102_c2_conv_pct, ch4_slip_pct, wgs_co_conv_pct, h2_flow, comp_kw]
+
+	var is_perturbed: bool = absf(sc - 3.0) > 0.05 or absf(temp_c - 850.0) > 1.0 or absf(press - 28.0) > 0.2 or e105_loss or coking_active or n2_purge
+	if _confidence_badge != null:
+		if is_perturbed:
+			_confidence_badge.text = "[Reduced-Order Equilibrium Perturbation Model • Van 't Hoff + Le Chatelier]"
+			_confidence_badge.modulate = WARN
+		else:
+			var prov: Dictionary = _result.get("epistemic_provenance", {})
+			var audit: Dictionary = _result.get("epistemic_audit", {})
+			var peer_cnt: int = int(prov.get("tier_1_quarantine_count", 0)) + int(prov.get("tier_0_internal_bench_count", 0))
+			var set_cnt: int = (audit.get("user_design_setpoints", {}) as Dictionary).size()
+			var unv_cnt: int = (audit.get("unverified_assumptions", {}) as Dictionary).size()
+			var gap_cnt: int = int(audit.get("gap_count", 0))
+			_confidence_badge.text = "[Provenance: %d Tier 1 Peer-Reviewed • %d User Setpoints • %d Unverified Hypotheses • %d Gaps]" % [peer_cnt, set_cnt, unv_cnt, gap_cnt]
+			_confidence_badge.modulate = GOOD if (gap_cnt == 0 and unv_cnt == 0) else WARN
+
+	if _smr_btn_e105 != null:
+		_smr_btn_e105.modulate = BAD if e105_loss else Color.WHITE
+	if _smr_btn_coking != null:
+		_smr_btn_coking.modulate = WARN if coking_active else Color.WHITE
+	if _smr_btn_purge != null:
+		_smr_btn_purge.modulate = BAD if n2_purge else Color.WHITE
+
+	if n2_purge:
+		_sandbox_banner.text = "🚨 SIS-101 TRIPPED: Emergency N2 Purge active (XV-101 OPEN). Burners shut down; plant depressurising."
+		_sandbox_banner.modulate = BAD
+	elif e105_loss:
+		_sandbox_banner.text = "⚠️ E_105 COOLING LOSS: Syngas outlet 580°C! WGS equilibrium degraded (%.1f%% CO conv)." % wgs_co_conv_pct
+		_sandbox_banner.modulate = BAD
+	elif coking_active:
+		_sandbox_banner.text = "🔥 LOW S/C COKING RISK: S/C = %.2f <= 2.15! Carbon deposition on Ni catalyst tubes." % sc
+		_sandbox_banner.modulate = WARN
+	else:
+		_sandbox_banner.text = "Plant nominal: %.2f%% H2 purity | %.0f Nm3/h | %.0f kW." % [purity_pct, h2_flow, comp_kw]
+		_sandbox_banner.modulate = GOOD
+
+	if _story_banner != null and not _unit_operations.is_empty():
+		var active_idx := clampi(_last_stage_index, 0, _unit_operations.size() - 1)
+		var active_op: Dictionary = _unit_operations[active_idx]
+		_story_banner.text = "▶ Unit %d00 (%s) [Continuous Steady-State] | H2 Output: %.0f Nm³/h (%.2f%% Purity @ 400 bar)" % [
+			active_idx + 1, str(active_op.get("title", "")), h2_flow, purity_pct
+		]
+
+	if _view != null and _view.has_method("update_smr_process_state"):
+		_view.update_smr_process_state(sc, temp_c, press, _smr_fault_state)
 
 
 func _on_sandbox_ph_toggle() -> void:
@@ -1180,11 +1427,17 @@ func _update_process_story_at_hour(hour: float, yield_val: float, biomass_val: f
 		var t_win: Array = op.get("time_window_h", [0, 40])
 		if hour >= float(t_win[0]) and hour <= float(t_win[1]):
 			var title: String = str(op.get("title", ""))
-			var prim: String = str(op.get("equipment_primitive", ""))
 			var eq: String = str(op.get("governing_equation", ""))
-			_story_banner.text = "▶ Stage %d (%s) [%.0fh-%.0fh]: %s | Yield: %.2f%%" % [
-				i + 1, title, float(t_win[0]), float(t_win[1]), eq, yield_val * 100.0
-			]
+			if _smr_mode or op.has("temperature_c"):
+				var p_val: float = float(_smr_fault_state.get("purity_pct", op.get("h2_purity_pct", 99.99)))
+				var f_val: float = float(_smr_fault_state.get("h2_flow", 120000.0))
+				_story_banner.text = "▶ Unit %d00 (%s) [Continuous Steady-State] | H2 Output: %.0f Nm³/h (%.2f%% Purity @ 400 bar)" % [
+					i + 1, title, f_val, p_val
+				]
+			else:
+				_story_banner.text = "▶ Stage %d (%s) [%.0fh-%.0fh]: %s | Yield: %.2f%%" % [
+					i + 1, title, float(t_win[0]), float(t_win[1]), eq, yield_val * 100.0
+				]
 			# Highlight active stepper button
 			for b_idx in range(_stepper_buttons.size()):
 				var btn: Button = _stepper_buttons[b_idx]
@@ -1279,7 +1532,11 @@ func _build_dynamic_stepper(unit_ops: Array) -> void:
 		var t_win: Array = op.get("time_window_h", [0, 0])
 
 		var btn := Button.new()
-		btn.text = "[%d] %s" % [i + 1, title]
+		if op.has("temperature_c"):
+			var pill_names := ["U-100 Pre-Ref", "U-200 SMR", "U-300 WHB", "U-400 WGS", "U-500 Cooler/KO", "U-600 CO2 Cap", "U-700 PSA", "U-800 400bar Comp"]
+			btn.text = "[%d] %s" % [i + 1, pill_names[mini(i, pill_names.size() - 1)]]
+		else:
+			btn.text = "[%d] %s" % [i + 1, title]
 		btn.add_theme_font_size_override("font_size", 10)
 		btn.pressed.connect(func() -> void:
 			_on_stage_clicked(stage_id, i)
@@ -1299,19 +1556,37 @@ func _on_stage_clicked(stage_id: String, stage_index: int) -> void:
 			_view.focus_on_stage(stage_index)
 
 		if _sim_status != null:
-			_sim_status.text = "Unit Operation: %s (%s)
-Governing Equation: %s
-Verbatim Quote: %s
-DOI: %s
-Evidence Tier: %s" % [
-				str(op.get("title", stage_id)),
-				str(op.get("equipment_primitive", "")),
-				str(op.get("governing_equation", "")),
-				str(op.get("verbatim_quote", "")),
-				str(op.get("doi", "")),
-				str(op.get("evidence_tier", "DIRECT"))
-			]
+			if op.has("temperature_c") and op.has("pressure_bar"):
+				var loops_str: String = ", ".join(PackedStringArray(op.get("control_loops", [])))
+				var hazop_str: String = ", ".join(PackedStringArray(op.get("hazop_interlocks", [])))
+				var req_str: String = ", ".join(PackedStringArray(op.get("required_parameters", [])))
+				_sim_status.text = "Stage: %s [%s]\nTemp: %.1f C | Pressure: %.1f bar | Flow: %.0f Nm3/h (%s)\nDry Flow: %.0f Nm3/h | H2 Flow: %.0f Nm3/h (%.2f%%)\nP&ID Loops: %s\nHAZOP: %s\nRAG Params: %s\nEvidence Tier: %s" % [
+					str(op.get("title", stage_id)),
+					str(op.get("archetype", op.get("equipment_primitive", ""))),
+					float(op.get("temperature_c", 0.0)),
+					float(op.get("pressure_bar", 0.0)),
+					float(op.get("flow_nm3_h", 0.0)),
+					str(op.get("flow_basis", "Wet")),
+					float(op.get("dry_flow_nm3_h", op.get("flow_nm3_h", 0.0))),
+					float(op.get("h2_flow_nm3_h", 0.0)),
+					float(op.get("h2_purity_pct", 0.0)),
+					loops_str if loops_str != "" else "Standard Control",
+					hazop_str if hazop_str != "" else "None",
+					req_str if req_str != "" else "User Design Setpoint",
+					str(op.get("evidence_tier", "DIRECT"))
+				]
+			else:
+				_sim_status.text = "Unit Operation: %s (%s)\nGoverning Equation: %s\nVerbatim Quote: %s\nDOI: %s\nEvidence Tier: %s" % [
+					str(op.get("title", stage_id)),
+					str(op.get("equipment_primitive", "")),
+					str(op.get("governing_equation", "")),
+					str(op.get("verbatim_quote", "")),
+					str(op.get("doi", "")),
+					str(op.get("evidence_tier", "DIRECT"))
+				]
 			_sim_status.modulate = GOOD if str(op.get("evidence_tier")) == "DIRECT" else WARN
+			if not _is_drawer_open:
+				_toggle_right_drawer()
 
 
 func _build_dynamic_floating_badges(unit_ops: Array) -> void:
@@ -1329,13 +1604,19 @@ func _build_dynamic_floating_badges(unit_ops: Array) -> void:
 		var t_win: Array = op.get("time_window_h", [0, 0])
 		var col := GOOD if tier == "DIRECT" else (WARN if tier == "ANALOGUE_BRIDGE" else Color(0.95, 0.25, 0.25))
 
-		var label_text := "[%s] %s [%.0fh-%.0fh] • %s" % [
-			title,
-			str(op.get("equipment_primitive", "vessel")),
-			float(t_win[0]),
-			float(t_win[1]),
-			tier
-		]
+		var label_text: String
+		if op.has("temperature_c"):
+			var short_names := ["R-102 PRE-REF", "F-201 SMR", "E-105 WHB", "R-301A/B WGS", "E-401 / V-401", "C-501 CO2 CAP", "U-601 PSA", "K-701 COMP"]
+			var sname: String = short_names[mini(i, short_names.size() - 1)]
+			label_text = "[%d] %s" % [i + 1, sname]
+		else:
+			label_text = "[%s] %s [%.0fh-%.0fh] • %s" % [
+				title,
+				str(op.get("equipment_primitive", "vessel")),
+				float(t_win[0]),
+				float(t_win[1]),
+				tier
+			]
 		var badge := _create_callout_badge("stage_%d" % i, label_text, col)
 		badge.pressed.connect(_on_stage_clicked.bind(stage_id, i))
 		_hud_overlay.add_child(badge)
@@ -1350,15 +1631,21 @@ func _update_floating_badges_positions() -> void:
 		if cam == null:
 			return
 		var count := _unit_operations.size()
+		var is_chem: bool = count > 0 and (_unit_operations[0] is Dictionary) and (_unit_operations[0] as Dictionary).has("temperature_c")
 		var total_span := float(count - 1) * 1.95
 		for i in range(_dynamic_badges.size()):
 			var b: Button = _dynamic_badges[i]
 			if not is_instance_valid(b):
 				continue
-			var pos_x := -total_span * 0.5 + float(i) * 1.95
-			var world_pos := Vector3(pos_x, 2.2, 0.0)
+			var world_pos: Vector3
+			if is_chem and i < ReplayVesselView.CHEM_PLOT_POSITIONS.size():
+				var base_p: Vector3 = ReplayVesselView.CHEM_PLOT_POSITIONS[i]
+				world_pos = base_p + Vector3(0.0, 0.14, 1.35)
+			else:
+				var pos_x := -total_span * 0.5 + float(i) * 1.95
+				world_pos = Vector3(pos_x, 2.2, 0.0)
 			var sp := cam.unproject_position(world_pos)
-			b.position = sp + Vector2(-80, -25)
+			b.position = sp + (Vector2(-48, -12) if is_chem else Vector2(-80, -25))
 			b.visible = (not cam.is_position_behind(world_pos))
 		return
 
@@ -1479,10 +1766,26 @@ func load_run_dict(payload: Dictionary) -> void:
 
 		var conf: float = float(payload.get("confidence_score", 100.0))
 		var has_analogue: bool = bool(payload.get("has_analogue_bridge", false))
+		var prov: Dictionary = payload.get("epistemic_provenance", {})
+		var audit: Dictionary = payload.get("epistemic_audit", {})
+		var sandbox_cfg: Dictionary = payload.get("sandbox_config", {})
+		var is_chem_sandbox: bool = str(sandbox_cfg.get("mode", "")) == "chemical_plant"
+		_set_sandbox_mode(is_chem_sandbox)
+
 		if _confidence_badge != null:
-			var tier_str := "DIRECT" if conf >= 99.0 else "ANALOGUE BRIDGE"
-			_confidence_badge.text = "[Confidence: %d%% • %s]" % [int(conf), tier_str]
-			_confidence_badge.modulate = GOOD if conf >= 90.0 else (WARN if conf >= 50.0 else BAD)
+			if not prov.is_empty() and not has_analogue:
+				var t1_cnt: int = int(prov.get("tier_1_quarantine_count", 0))
+				var t0_cnt: int = int(prov.get("tier_0_internal_bench_count", 0))
+				var setpoints_dict: Dictionary = audit.get("user_design_setpoints", {})
+				var unv_dict: Dictionary = audit.get("unverified_assumptions", {})
+				var gaps_cnt: int = int(audit.get("gap_count", 0))
+				var peer_cnt: int = t1_cnt + t0_cnt
+				_confidence_badge.text = "[Provenance: %d Tier 1 Peer-Reviewed • %d User Setpoints • %d Unverified Hypotheses • %d Gaps]" % [peer_cnt, setpoints_dict.size(), unv_dict.size(), gaps_cnt]
+				_confidence_badge.modulate = GOOD if (gaps_cnt == 0 and unv_dict.is_empty()) else WARN
+			else:
+				var tier_str := "ANALOGUE BRIDGE" if has_analogue else ("DIRECT" if conf >= 99.0 else "PEER-REVIEWED")
+				_confidence_badge.text = "[Confidence: %d%% • %s]" % [int(conf), tier_str]
+				_confidence_badge.modulate = GOOD if conf >= 90.0 else (WARN if conf >= 50.0 else BAD)
 		if _analogue_banner != null:
 			_analogue_banner.visible = has_analogue
 
@@ -1510,9 +1813,9 @@ func load_run_dict(payload: Dictionary) -> void:
 		_apply_playback_time(0.0)
 
 	var blueprint: Dictionary = payload.get("anatomy_blueprint", {})
-	if not blueprint.is_empty():
+	if not blueprint.is_empty() or payload.has("stages"):
 		_anatomy_blueprint = blueprint
-		var unit_ops: Array = blueprint.get("unit_operations", [])
+		var unit_ops: Array = payload.get("stages", blueprint.get("unit_operations", []))
 		if _view != null and _view.has_method("build_anatomy_bench"):
 			_view.build_anatomy_bench(unit_ops)
 		_build_dynamic_floating_badges(unit_ops)

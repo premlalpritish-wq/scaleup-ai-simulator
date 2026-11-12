@@ -12,8 +12,20 @@ const VESSEL_HEIGHT := 2.4
 const FILL_BASE_Y := 0.11
 const STAGE_SPACING := 1.95
 
+const CHEM_PLOT_POSITIONS: Array = [
+	Vector3(-9.5, 0.0, 2.8),   # Unit 100: R-101A/B HDS & R-102 Pre-Reformer (Front Row)
+	Vector3(-3.5, 0.0, 2.8),   # Unit 200: F-201 / R-201 Primary SMR Furnace (Front Row)
+	Vector3(2.5, 0.0, 2.8),    # Unit 300: E-105 WHB & V-102 Steam Drum (Front Row)
+	Vector3(8.5, 0.0, 2.8),    # Unit 400: R-301A/B Dual-Stage WGS (Front Row)
+	Vector3(11.2, 0.6, -2.8),  # Unit 500: E-401 Trim Cooler & V-401 Condensate KO (Mezzanine)
+	Vector3(5.5, 0.6, -2.8),   # Unit 600: C-501 / C-502 Amine CO2 Capture (Mezzanine)
+	Vector3(-0.5, 0.6, -2.8),  # Unit 700: U-601 8-Bed PSA & V-601 Tail Gas Drum (Mezzanine)
+	Vector3(-6.5, 0.6, -2.8),  # Unit 800: K-701 H2 Compressor & V-701A/B/C 400 bar Bullets (Mezzanine)
+]
+
 var _viewport: SubViewport
 var _world: Node3D
+var _bench_env_root: Node3D
 var _bench_root: Node3D
 var _camera: Camera3D
 var _pitch_axis: Node3D
@@ -45,6 +57,16 @@ var _stage_vessels: Array = []
 var _active_stage_index: int = 0
 var _flow_chevrons: Array = []
 var _transfer_slugs: Array = []
+var _pipe_pulses: Array = []
+var _smr_refs: Dictionary = {}
+var _smr_process_state: Dictionary = {
+	"sc_ratio": 3.0,
+	"reformer_temp_c": 850.0,
+	"pressure_bar": 28.0,
+	"e105_cooling_loss": false,
+	"coking_warning": false,
+	"n2_purge_active": false,
+}
 
 # Fibre tension & fracture state
 var _fibre_mesh: MeshInstance3D
@@ -118,6 +140,76 @@ func _process(delta: float) -> void:
 
 	if _impeller != null and _impeller_speed > 0.0:
 		_impeller.rotate_y(_impeller_speed * delta * 6.0)
+
+	# Animate ASME interstage flow pulses along elbow-routed waypoints
+	var purge_active: bool = bool(_smr_process_state.get("n2_purge_active", false))
+	var flow_rate_mult: float = 0.25 if purge_active else 1.0
+	for p_item in _pipe_pulses:
+		if not is_instance_valid(p_item.get("mesh", null)):
+			continue
+		var pts: Array = p_item.get("waypoints", [])
+		if pts.size() < 2:
+			continue
+		var phase: float = fmod(float(p_item.get("phase", 0.0)) + delta * 0.42 * flow_rate_mult, 1.0)
+		p_item["phase"] = phase
+		var seg_count := pts.size() - 1
+		var scaled := phase * float(seg_count)
+		var seg_idx := mini(int(scaled), seg_count - 1)
+		var local_t := scaled - float(seg_idx)
+		var a: Vector3 = pts[seg_idx]
+		var b: Vector3 = pts[seg_idx + 1]
+		var mesh_node: MeshInstance3D = p_item["mesh"]
+		mesh_node.position = a.lerp(b, local_t)
+		if purge_active:
+			var pm := mesh_node.material_override as StandardMaterial3D
+			if pm != null:
+				pm.albedo_color = Color(0.28, 0.72, 1.0)
+				pm.emission = Color(0.22, 0.65, 1.0)
+
+	# Animate PSA 4-bed cyclic adsorption states
+	var psa_mats: Array = _smr_refs.get("psa_bed_mats", [])
+	if not psa_mats.is_empty():
+		var cycle_idx := int(floor(_unverified_pulse_time * 0.5)) % 4
+		var state_colors := [
+			Color(0.15, 0.88, 0.55), # Adsorption
+			Color(0.95, 0.68, 0.18), # Depressurization
+			Color(0.22, 0.78, 1.0),  # Purge
+			Color(0.45, 0.62, 0.85), # Repressurization
+		]
+		for bi in range(psa_mats.size()):
+			var bmat: StandardMaterial3D = psa_mats[bi] as StandardMaterial3D
+			if bmat != null:
+				var col: Color = state_colors[(bi + cycle_idx) % 4]
+				bmat.albedo_color = col
+				bmat.emission = col
+				bmat.emission_energy_multiplier = 1.4 if ((bi + cycle_idx) % 4) == 0 else 0.7
+
+	# Animate compressor fin-fan coolers
+	var fans: Array = _smr_refs.get("comp_fan_nodes", [])
+	for fn in fans:
+		if is_instance_valid(fn):
+			fn.rotate_y(delta * 9.5)
+
+	# Animate HAZOP N2 purge flush & E_105 cooling loss alarm
+	var n2_mat: StandardMaterial3D = _smr_refs.get("n2_purge_mat", null) as StandardMaterial3D
+	if n2_mat != null:
+		if purge_active:
+			var npulse := 0.5 + 0.5 * sin(_unverified_pulse_time * 7.0)
+			n2_mat.emission_enabled = true
+			n2_mat.emission = Color(0.20, 0.72, 1.0)
+			n2_mat.emission_energy_multiplier = 1.2 + 2.2 * npulse
+		else:
+			n2_mat.emission_enabled = false
+
+	var e105_beacon: StandardMaterial3D = _smr_refs.get("e105_fault_beacon", null) as StandardMaterial3D
+	if e105_beacon != null:
+		if bool(_smr_process_state.get("e105_cooling_loss", false)):
+			var epulse := 0.5 + 0.5 * sin(_unverified_pulse_time * 8.0)
+			e105_beacon.emission_enabled = true
+			e105_beacon.emission = Color(1.0, 0.18, 0.12)
+			e105_beacon.emission_energy_multiplier = 1.5 + 2.5 * epulse
+		else:
+			e105_beacon.emission_enabled = false
 
 
 func _ready() -> void:
@@ -214,10 +306,17 @@ func reset_camera() -> void:
 	if _camera_tween != null and _camera_tween.is_valid():
 		_camera_tween.kill()
 	_camera_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_camera_tween.tween_property(self, "_target", Vector3(0.0, 1.15, 0.0), 0.75)
-	_camera_tween.tween_property(self, "_distance", maxf(6.5, float(_stage_vessels.size()) * 1.5), 0.75)
-	_camera_tween.tween_property(self, "_yaw", deg_to_rad(-22.0), 0.75)
-	_camera_tween.tween_property(self, "_pitch", deg_to_rad(-10.0), 0.75)
+	var is_chem := (not _stage_vessels.is_empty()) and bool(_stage_vessels[0].get("is_chemical_plant", false))
+	if is_chem:
+		_camera_tween.tween_property(self, "_target", Vector3(0.8, 1.8, 0.0), 0.75)
+		_camera_tween.tween_property(self, "_distance", 22.5, 0.75)
+		_camera_tween.tween_property(self, "_yaw", deg_to_rad(4.0), 0.75)
+		_camera_tween.tween_property(self, "_pitch", deg_to_rad(-24.0), 0.75)
+	else:
+		_camera_tween.tween_property(self, "_target", Vector3(0.0, 1.15, 0.0), 0.75)
+		_camera_tween.tween_property(self, "_distance", maxf(6.5, float(_stage_vessels.size()) * 1.5), 0.75)
+		_camera_tween.tween_property(self, "_yaw", deg_to_rad(-22.0), 0.75)
+		_camera_tween.tween_property(self, "_pitch", deg_to_rad(-10.0), 0.75)
 	_camera_tween.chain().tween_callback(_apply_camera)
 
 
@@ -237,47 +336,67 @@ func _build_world() -> void:
 
 	var env := WorldEnvironment.new()
 	var e := Environment.new()
-	e.background_mode = Environment.BG_COLOR
-	e.background_color = Color(0.015, 0.022, 0.035)
+	var sky := Sky.new()
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(0.05, 0.08, 0.14)
+	sky_mat.sky_horizon_color = Color(0.15, 0.22, 0.34)
+	sky_mat.ground_horizon_color = Color(0.10, 0.14, 0.20)
+	sky_mat.ground_bottom_color = Color(0.04, 0.05, 0.08)
+	sky_mat.sky_curve = 0.16
+	sky.sky_material = sky_mat
+	e.background_mode = Environment.BG_SKY
+	e.sky = sky
 	e.tonemap_mode = Environment.TONE_MAPPER_ACES
-	e.tonemap_exposure = 1.05
+	e.tonemap_exposure = 1.15
 
 	# Glow & Bloom
 	e.glow_enabled = true
-	e.glow_intensity = 0.85
-	e.glow_bloom = 0.22
+	e.glow_intensity = 0.70
+	e.glow_bloom = 0.16
 	e.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
 
 	# Screen-space ambient occlusion & reflections
 	e.ssao_enabled = true
 	e.ssao_radius = 1.2
-	e.ssao_intensity = 1.4
+	e.ssao_intensity = 1.25
 	e.ssr_enabled = true
 
-	# Ambient Lighting
-	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	e.ambient_light_color = Color(0.42, 0.50, 0.62)
-	e.ambient_light_energy = 0.80
+	# Ambient & Sky Reflection Lighting for metallic vessels and pipe rack
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	e.ambient_light_sky_contribution = 0.75
+	e.ambient_light_energy = 1.18
+	e.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.environment = e
 	_world.add_child(env)
 
 	# Studio Key Light with soft shadows
 	var key := DirectionalLight3D.new()
-	key.rotation_degrees = Vector3(-50.0, -135.0, 0.0)
-	key.light_energy = 1.40
-	key.light_color = Color(1.0, 0.98, 0.94)
+	key.rotation_degrees = Vector3(-48.0, -135.0, 0.0)
+	key.light_energy = 1.55
+	key.light_color = Color(1.0, 0.98, 0.95)
 	key.shadow_enabled = true
 	key.shadow_bias = 0.03
 	_world.add_child(key)
 
 	# Cool Studio Rim Fill Light
 	var rim := DirectionalLight3D.new()
-	rim.rotation_degrees = Vector3(-15.0, 55.0, 0.0)
-	rim.light_energy = 0.65
-	rim.light_color = Color(0.55, 0.75, 1.0)
+	rim.rotation_degrees = Vector3(-18.0, 55.0, 0.0)
+	rim.light_energy = 0.85
+	rim.light_color = Color(0.58, 0.78, 1.0)
 	rim.shadow_enabled = false
 	_world.add_child(rim)
 
+	# Warm Ground Bounce Fill Light (prevents dark undersides on skids/piping)
+	var bounce := DirectionalLight3D.new()
+	bounce.rotation_degrees = Vector3(32.0, 15.0, 0.0)
+	bounce.light_energy = 0.42
+	bounce.light_color = Color(0.75, 0.82, 0.92)
+	bounce.shadow_enabled = false
+	_world.add_child(bounce)
+
+	_bench_env_root = Node3D.new()
+	_bench_env_root.name = "BenchEnvRoot"
+	_world.add_child(_bench_env_root)
 	_build_laboratory_bench()
 
 	_bench_root = Node3D.new()
@@ -294,44 +413,109 @@ func _build_world() -> void:
 	_build_legacy_vessel()
 
 
+func _clear_bench_env() -> void:
+	if _bench_env_root == null:
+		return
+	for c in _bench_env_root.get_children():
+		c.queue_free()
+
+
 func _build_laboratory_bench() -> void:
+	_clear_bench_env()
 	var bench_mesh := BoxMesh.new()
-	bench_mesh.size = Vector3(18.0, 0.15, 4.2)
+	bench_mesh.size = Vector3(18.5, 0.16, 4.6)
 	var bench := MeshInstance3D.new()
 	bench.mesh = bench_mesh
-	bench.position = Vector3(0.0, -0.075, 0.0)
+	bench.position = Vector3(0.0, -0.08, 0.0)
 	var b_mat := StandardMaterial3D.new()
-	b_mat.albedo_color = Color(0.07, 0.08, 0.11)
-	b_mat.metallic = 0.75
-	b_mat.roughness = 0.35
+	b_mat.albedo_color = Color(0.11, 0.135, 0.175)
+	b_mat.metallic = 0.65
+	b_mat.roughness = 0.42
 	bench.material_override = b_mat
-	_world.add_child(bench)
+	_bench_env_root.add_child(bench)
 
 	var grid_plane := PlaneMesh.new()
-	grid_plane.size = Vector2(40.0, 40.0)
+	grid_plane.size = Vector2(44.0, 44.0)
 	var gm := MeshInstance3D.new()
 	gm.mesh = grid_plane
-	gm.position = Vector3(0.0, -0.16, 0.0)
+	gm.position = Vector3(0.0, -0.17, 0.0)
 	var g_mat := StandardMaterial3D.new()
-	g_mat.albedo_color = Color(0.04, 0.045, 0.06)
-	g_mat.roughness = 0.95
+	g_mat.albedo_color = Color(0.065, 0.082, 0.11)
+	g_mat.roughness = 0.88
 	gm.material_override = g_mat
-	_world.add_child(gm)
+	_bench_env_root.add_child(gm)
 
 	var mani_mesh := CylinderMesh.new()
-	mani_mesh.top_radius = 0.045
-	mani_mesh.bottom_radius = 0.045
-	mani_mesh.height = 16.0
+	mani_mesh.top_radius = 0.055
+	mani_mesh.bottom_radius = 0.055
+	mani_mesh.height = 17.5
 	var manifold := MeshInstance3D.new()
 	manifold.mesh = mani_mesh
 	manifold.rotation_degrees = Vector3(0.0, 0.0, 90.0)
-	manifold.position = Vector3(0.0, 3.4, -0.65)
+	manifold.position = Vector3(0.0, 3.65, -0.85)
 	var m_mat := StandardMaterial3D.new()
-	m_mat.albedo_color = Color(0.25, 0.30, 0.38)
+	m_mat.albedo_color = Color(0.32, 0.38, 0.48)
 	m_mat.metallic = 0.85
 	m_mat.roughness = 0.25
 	manifold.material_override = m_mat
-	_world.add_child(manifold)
+	_bench_env_root.add_child(manifold)
+
+
+func _build_industrial_plant_pad() -> void:
+	_clear_bench_env()
+
+	# 1. Surrounding Asphalt / Industrial Apron (60m x 60m)
+	var apron_m := PlaneMesh.new()
+	apron_m.size = Vector2(60.0, 60.0)
+	var apron := MeshInstance3D.new()
+	apron.mesh = apron_m
+	apron.position = Vector3(0.0, -0.18, 0.0)
+	var apron_mat := StandardMaterial3D.new()
+	apron_mat.albedo_color = Color(0.06, 0.075, 0.095)
+	apron_mat.roughness = 0.92
+	apron.material_override = apron_mat
+	_bench_env_root.add_child(apron)
+
+	# 2. Industrial Concrete Plant Pad (28m x 13m) + Raised +0.6m Mezzanine Deck under Back Row
+	var pad_mat := StandardMaterial3D.new()
+	pad_mat.albedo_color = Color(0.19, 0.21, 0.24)
+	pad_mat.roughness = 0.80
+	pad_mat.metallic = 0.08
+	_add_cad_box(_bench_env_root, Vector3(28.0, 0.18, 13.0), Vector3(0.8, -0.09, 0.0), pad_mat)
+
+	var mezz_mat := StandardMaterial3D.new()
+	mezz_mat.albedo_color = Color(0.22, 0.24, 0.28)
+	mezz_mat.roughness = 0.78
+	_add_cad_box(_bench_env_root, Vector3(24.0, 0.60, 3.8), Vector3(2.3, 0.30, -2.95), mezz_mat)
+
+	# 3. Painted Yellow Safety Walkways & Perimeter Striping
+	var yellow_mat := StandardMaterial3D.new()
+	yellow_mat.albedo_color = Color(0.78, 0.62, 0.14)
+	yellow_mat.roughness = 0.52
+	for wz in [-6.35, 6.35, 0.85, -0.95]:
+		_add_cad_box(_bench_env_root, Vector3(27.6, 0.015, 0.08), Vector3(0.8, 0.008, wz), yellow_mat)
+	_add_cad_box(_bench_env_root, Vector3(23.8, 0.015, 0.08), Vector3(2.3, 0.608, -1.08), yellow_mat)
+	for wx in [-13.05, 14.65]:
+		_add_cad_box(_bench_env_root, Vector3(0.08, 0.015, 12.7), Vector3(wx, 0.008, 0.0), yellow_mat)
+
+	# 4. Central Multi-Tier Structural Steel Overhead Pipe Rack (Spine at z = 0.0 between Front & Back Rows)
+	var steel_beam_mat := StandardMaterial3D.new()
+	steel_beam_mat.albedo_color = Color(0.32, 0.38, 0.46)
+	steel_beam_mat.metallic = 0.84
+	steel_beam_mat.roughness = 0.30
+
+	var rack_z := 0.0
+	var rack_half_w := 0.55
+	var bent_xs := [-10.0, -7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0]
+	for bx in bent_xs:
+		_add_cad_box(_bench_env_root, Vector3(0.11, 3.85, 0.11), Vector3(bx, 1.925, rack_z - rack_half_w), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(0.11, 3.85, 0.11), Vector3(bx, 1.925, rack_z + rack_half_w), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.25), Vector3(bx, 2.85, rack_z), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.25), Vector3(bx, 3.55, rack_z), steel_beam_mat)
+
+	for rz in [rack_z - rack_half_w, rack_z + rack_half_w]:
+		_add_cad_box(_bench_env_root, Vector3(21.4, 0.10, 0.10), Vector3(0.5, 2.85, rz), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(21.4, 0.10, 0.10), Vector3(0.5, 3.55, rz), steel_beam_mat)
 
 
 # ---------------------------------------------------------------- Multi-Vessel Topology
@@ -348,6 +532,8 @@ func build_anatomy_bench_async(unit_operations: Array) -> void:
 	_stage_vessels.clear()
 	_flow_chevrons.clear()
 	_transfer_slugs.clear()
+	_pipe_pulses.clear()
+	_smr_refs.clear()
 
 	if unit_operations.is_empty():
 		_build_legacy_vessel()
@@ -359,19 +545,32 @@ func build_anatomy_bench_async(unit_operations: Array) -> void:
 	bench_build_started.emit()
 
 	var count := unit_operations.size()
+	var first_arch := str(unit_operations[0].get("archetype", ""))
+	var is_chem_plant := first_arch in ["pre_reformer", "furnace_reformer", "shell_tube_hx", "packed_bed_reactor", "knockout_cooler", "co2_absorber", "psa_skid", "high_pressure_compressor"]
 	var total_span := float(count - 1) * STAGE_SPACING
 
-	# Frame 1: Stream Stage 0 (Dry Kelp Milling) & immediately focus camera
+	if is_chem_plant:
+		_build_industrial_plant_pad()
+	else:
+		_build_laboratory_bench()
+
+	# Frame 1: Stream Stage 0 & immediately focus camera
 	var op0: Dictionary = unit_operations[0]
-	var pos0 := Vector3(-total_span * 0.5, 0.0, 0.0)
+	var pos0: Vector3 = CHEM_PLOT_POSITIONS[0] if (is_chem_plant and CHEM_PLOT_POSITIONS.size() > 0) else Vector3(-total_span * 0.5, 0.0, 0.0)
 	var v_data0 := _spawn_unit_operation(op0, 0, pos0)
 	_stage_vessels.append(v_data0)
 	_add_stage_spotlight(pos0)
 
-	_target = v_data0.root.position + Vector3(0.9, 1.15, 0.0)
-	_distance = 4.8
-	_yaw = deg_to_rad(-22.0)
-	_pitch = deg_to_rad(-10.0)
+	if is_chem_plant:
+		_target = Vector3(0.8, 1.8, 0.0)
+		_distance = 22.5
+		_yaw = deg_to_rad(4.0)
+		_pitch = deg_to_rad(-24.0)
+	else:
+		_target = v_data0.root.position + Vector3(0.9, 1.15, 0.0)
+		_distance = 4.8
+		_yaw = deg_to_rad(-22.0)
+		_pitch = deg_to_rad(-10.0)
 	_apply_camera()
 	update_batch_continuity(0.0)
 
@@ -383,7 +582,7 @@ func build_anatomy_bench_async(unit_operations: Array) -> void:
 		await get_tree().process_frame
 		var op: Dictionary = unit_operations[i]
 		var pos_x := -total_span * 0.5 + float(i) * STAGE_SPACING
-		var pos := Vector3(pos_x, 0.0, 0.0)
+		var pos: Vector3 = CHEM_PLOT_POSITIONS[i] if (is_chem_plant and i < CHEM_PLOT_POSITIONS.size()) else Vector3(pos_x, 0.0, 0.0)
 		var v_data := _spawn_unit_operation(op, i, pos)
 		_stage_vessels.append(v_data)
 		_add_stage_spotlight(pos)
@@ -459,8 +658,15 @@ func _spawn_unit_operation(op: Dictionary, index: int, pos: Vector3) -> Dictiona
 	fp.material_override = steel_mat
 	root.add_child(fp)
 
+	var archetype: String = str(op.get("archetype", primitive))
+	var is_chem_plant: bool = false
+
+	# ------------------------------------------------ DYNAMIC CHEMICAL / SMR PLANT ARCHETYPES
+	if archetype in ["pre_reformer", "furnace_reformer", "shell_tube_hx", "packed_bed_reactor", "knockout_cooler", "co2_absorber", "psa_skid", "high_pressure_compressor", "separator_unit"]:
+		is_chem_plant = _build_chemical_plant_archetype(root, archetype, op, steel_mat)
+
 	# ------------------------------------------------ STAGE 0: DRY BIOMASS MILLING & SCALE
-	if "hopper" in primitive or "mill" in primitive:
+	elif "hopper" in primitive or "mill" in primitive:
 		var hopper_data := _build_dry_biomass_hopper_mill(root, op)
 		mill_blades = hopper_data.get("mill_blades")
 		pile_mesh = hopper_data.get("pile")
@@ -839,18 +1045,857 @@ func _spawn_unit_operation(op: Dictionary, index: int, pos: Vector3) -> Dictiona
 		"time_window": op.get("time_window_h", [0.0, 20.0]),
 		"is_unverified": is_unverified,
 		"is_active": false,
+		"is_chemical_plant": is_chem_plant,
 		"drivers": drivers,
 	}
 
 
+func _add_cad_box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material, rot_deg: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var m := BoxMesh.new()
+	m.size = size
+	var inst := MeshInstance3D.new()
+	inst.mesh = m
+	inst.position = pos
+	inst.rotation_degrees = rot_deg
+	inst.material_override = mat
+	parent.add_child(inst)
+	return inst
+
+
+func _add_cad_cyl(parent: Node3D, r_top: float, r_bot: float, h: float, pos: Vector3, mat: Material, rot_deg: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var m := CylinderMesh.new()
+	m.top_radius = r_top
+	m.bottom_radius = r_bot
+	m.height = h
+	var inst := MeshInstance3D.new()
+	inst.mesh = m
+	inst.position = pos
+	inst.rotation_degrees = rot_deg
+	inst.material_override = mat
+	parent.add_child(inst)
+	return inst
+
+
+func _add_plinth(root: Node3D, w: float, d: float, h: float = 0.18) -> void:
+	var concrete_mat := StandardMaterial3D.new()
+	concrete_mat.albedo_color = Color(0.26, 0.28, 0.31)
+	concrete_mat.roughness = 0.88
+	concrete_mat.metallic = 0.05
+	_add_cad_box(root, Vector3(w, h, d), Vector3(0.0, h * 0.5, 0.0), concrete_mat)
+
+
+func _add_xray_cladding(root: Node3D, size: Vector3, pos: Vector3, solid_mat: StandardMaterial3D, xray_mat: StandardMaterial3D) -> void:
+	var inst := _add_cad_box(root, size, pos, xray_mat)
+	if not _smr_refs.has("xray_panels"):
+		_smr_refs["xray_panels"] = []
+	_smr_refs["xray_panels"].append({"mesh": inst, "solid": solid_mat, "xray": xray_mat})
+
+
+func set_xray_cutaway(enabled: bool) -> void:
+	var panels: Array = _smr_refs.get("xray_panels", [])
+	for item in panels:
+		var m := item.get("mesh", null) as MeshInstance3D
+		if m != null and is_instance_valid(m):
+			m.material_override = item["xray"] if enabled else item["solid"]
+
+
+func _add_caged_ladder(root: Node3D, x: float, z: float, y_bot: float, height: float, mat: Material) -> void:
+	var y_mid := y_bot + height * 0.5
+	_add_cad_cyl(root, 0.015, 0.015, height, Vector3(x - 0.11, y_mid, z), mat)
+	_add_cad_cyl(root, 0.015, 0.015, height, Vector3(x + 0.11, y_mid, z), mat)
+	var rung_count := maxi(3, int(height / 0.32))
+	for ri in range(rung_count):
+		var ry := y_bot + 0.18 + float(ri) * (height - 0.24) / float(rung_count)
+		_add_cad_cyl(root, 0.010, 0.010, 0.22, Vector3(x, ry, z), mat, Vector3(0.0, 0.0, 90.0))
+
+
+func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictionary, steel_mat: StandardMaterial3D) -> bool:
+	var temp_c: float = float(op.get("temperature_c", 25.0))
+	var press_bar: float = float(op.get("pressure_bar", 1.0))
+	var flow_nm3: float = float(op.get("flow_nm3_h", 0.0))
+	var flow_basis: String = str(op.get("flow_basis", "Wet"))
+	var purity_pct: float = float(op.get("h2_purity_pct", 72.0))
+	var stage_idx: int = int(op.get("index", 0))
+
+	var dark_steel := StandardMaterial3D.new()
+	dark_steel.albedo_color = Color(0.20, 0.24, 0.29)
+	dark_steel.metallic = 0.82
+	dark_steel.roughness = 0.35
+
+	var vessel_steel := StandardMaterial3D.new()
+	vessel_steel.albedo_color = Color(0.32, 0.36, 0.42)
+	vessel_steel.metallic = 0.80
+	vessel_steel.roughness = 0.35
+
+	var safety_yellow := StandardMaterial3D.new()
+	safety_yellow.albedo_color = Color(0.68, 0.54, 0.14)
+	safety_yellow.metallic = 0.30
+	safety_yellow.roughness = 0.52
+
+	var ladder_steel := StandardMaterial3D.new()
+	ladder_steel.albedo_color = Color(0.42, 0.46, 0.52)
+	ladder_steel.metallic = 0.82
+	ladder_steel.roughness = 0.32
+
+	var copper_mat := StandardMaterial3D.new()
+	copper_mat.albedo_color = Color(0.84, 0.50, 0.22)
+	copper_mat.metallic = 0.88
+	copper_mat.roughness = 0.24
+
+	var xray_cladding_mat := StandardMaterial3D.new()
+	xray_cladding_mat.albedo_color = Color(0.45, 0.62, 0.78, 0.14)
+	xray_cladding_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	xray_cladding_mat.roughness = 0.18
+	xray_cladding_mat.metallic = 0.25
+
+	# Elevated Horizontal Header Signboard mounted at top front cornice of each unit
+	var tag_names := ["R-102 PRE-REF", "F-201 SMR", "E-105 WHB", "R-301A/B WGS", "E-401 / V-401", "C-501 CO2 CAP", "U-601 PSA", "K-701 COMP"]
+	var unit_cornice_ys := [3.55, 4.55, 3.55, 3.55, 2.55, 4.05, 2.95, 2.45]
+	var tag_name: String = tag_names[mini(stage_idx, tag_names.size() - 1)]
+	var tag_y: float = unit_cornice_ys[mini(stage_idx, unit_cornice_ys.size() - 1)]
+	var tag_z := 0.95
+
+	var plate_mat := StandardMaterial3D.new()
+	plate_mat.albedo_color = Color(0.05, 0.08, 0.12, 0.92)
+	plate_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	plate_mat.roughness = 0.55
+	_add_cad_box(root, Vector3(1.65, 0.42, 0.04), Vector3(0.0, tag_y, tag_z), plate_mat)
+
+	var lbl := Label3D.new()
+	lbl.text = "%s (%.0f Nm3/h %s)\n%.0f°C | %.0f bar | %.2f%% H2" % [tag_name, flow_nm3, flow_basis, temp_c, press_bar, purity_pct]
+	lbl.font_size = 20
+	lbl.pixel_size = 0.0052
+	lbl.position = Vector3(0.0, tag_y, tag_z + 0.05)
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lbl.modulate = Color(0.62, 0.96, 1.0)
+	lbl.outline_size = 5
+	root.add_child(lbl)
+
+	if not _smr_refs.has("stage_labels"):
+		_smr_refs["stage_labels"] = {}
+	_smr_refs["stage_labels"][stage_idx] = lbl
+
+	if archetype == "pre_reformer":
+		# Unit 100: Upstream ZnO Sulfur Guard Bed (R-101A) + Adiabatic Pre-Reformer (R-102)
+		_add_plinth(root, 2.8, 2.0, 0.16)
+
+		var gunmetal_mat := StandardMaterial3D.new()
+		gunmetal_mat.albedo_color = Color(0.20, 0.25, 0.31)
+		gunmetal_mat.metallic = 0.85
+		gunmetal_mat.roughness = 0.30
+
+		# Upstream ZnO Sulfur Guard Bed R-101A (left)
+		_add_cad_cyl(root, 0.30, 0.32, 0.35, Vector3(-0.78, 0.34, 0.0), dark_steel)
+		_add_cad_cyl(root, 0.34, 0.34, 1.65, Vector3(-0.78, 1.32, 0.0), vessel_steel)
+		var g_dome := SphereMesh.new()
+		g_dome.radius = 0.34
+		g_dome.height = 0.38
+		var gd := MeshInstance3D.new()
+		gd.mesh = g_dome
+		gd.position = Vector3(-0.78, 2.14, 0.0)
+		gd.material_override = vessel_steel
+		root.add_child(gd)
+
+		# Main Adiabatic Pre-Reformer R-102 (right, domed refractory-lined vessel with front cutaway)
+		var rx := 0.42
+		var rr := 0.56
+		var rh := 2.10
+		_add_cad_cyl(root, rr * 0.90, rr * 0.96, 0.42, Vector3(rx, 0.36, 0.0), dark_steel)
+		var y_mid := 0.58 + rh * 0.5
+		_add_cad_box(root, Vector3(rr * 2.0, rh, rr * 1.15), Vector3(rx, y_mid, -rr * 0.42), gunmetal_mat)
+		_add_cad_box(root, Vector3(rr * 0.52, rh, rr * 0.85), Vector3(rx - rr * 0.74, y_mid, rr * 0.42), gunmetal_mat)
+		_add_cad_box(root, Vector3(rr * 0.52, rh, rr * 0.85), Vector3(rx + rr * 0.74, y_mid, rr * 0.42), gunmetal_mat)
+		_add_cad_cyl(root, rr * 1.03, rr * 1.03, 0.14, Vector3(rx, 0.58 + rh - 0.05, 0.0), gunmetal_mat)
+		_add_cad_cyl(root, rr * 1.03, rr * 1.03, 0.14, Vector3(rx, 0.62, 0.0), gunmetal_mat)
+
+		var win_inst := _add_cad_box(root, Vector3(rr * 0.98, rh - 0.18, 0.04), Vector3(rx, y_mid, rr * 0.84), xray_cladding_mat)
+		if not _smr_refs.has("xray_panels"):
+			_smr_refs["xray_panels"] = []
+		_smr_refs["xray_panels"].append({"mesh": win_inst, "solid": gunmetal_mat, "xray": xray_cladding_mat})
+
+		var r_dome := SphereMesh.new()
+		r_dome.radius = rr
+		r_dome.height = rr * 1.1
+		var rd := MeshInstance3D.new()
+		rd.mesh = r_dome
+		rd.position = Vector3(rx, 0.58 + rh, 0.0)
+		rd.material_override = gunmetal_mat
+		root.add_child(rd)
+
+		# Internal Ni-Catalyst Bed + Axial Thermocouple Lance TI-102A/B/C
+		var ni_mat := StandardMaterial3D.new()
+		ni_mat.albedo_color = Color(0.28, 0.34, 0.30)
+		ni_mat.roughness = 0.78
+		ni_mat.emission_enabled = true
+		ni_mat.emission = Color(0.55, 0.42, 0.18)
+		ni_mat.emission_energy_multiplier = 0.38
+		_add_cad_cyl(root, rr * 0.78, rr * 0.78, rh * 0.72, Vector3(rx, y_mid, 0.02), ni_mat)
+		_add_cad_cyl(root, rr * 0.84, rr * 0.84, 0.05, Vector3(rx, 0.82, 0.02), ladder_steel)
+		# Axial Thermocouple Lance TI-102A/B/C
+		_add_cad_cyl(root, 0.022, 0.022, rh + 0.35, Vector3(rx, y_mid + 0.15, 0.26), copper_mat)
+
+		# Cutaway fill light so Ni-catalyst bed & vessel rim are clearly illuminated
+		var fill := OmniLight3D.new()
+		fill.position = Vector3(rx, y_mid, rr + 0.65)
+		fill.light_energy = 1.6
+		fill.omni_range = 2.8
+		fill.light_color = Color(0.95, 0.90, 0.82)
+		root.add_child(fill)
+
+		_add_caged_ladder(root, rx + rr + 0.14, 0.18, 0.18, rh + 0.25, ladder_steel)
+		return true
+
+	elif archetype == "furnace_reformer":
+		# Unit 100: Dominant Primary SMR Radiant Furnace (2.8m W x 4.0m H x 2.2m D) + Convection + 5.2m Stack
+		_add_plinth(root, 3.2, 2.6, 0.18)
+
+		# External I-beam buckstays & corner columns
+		for cx in [-1.36, -0.45, 0.45, 1.36]:
+			for cz in [-1.06, 1.06]:
+				_add_cad_box(root, Vector3(0.09, 3.85, 0.09), Vector3(cx, 2.10, cz), dark_steel)
+		# Terrace-wall refractory back, side walls & roof arch
+		_add_cad_box(root, Vector3(2.72, 3.70, 0.10), Vector3(0.0, 2.05, -1.04), dark_steel)
+		_add_cad_box(root, Vector3(0.10, 3.70, 2.08), Vector3(-1.34, 2.05, 0.0), dark_steel)
+		_add_cad_box(root, Vector3(0.10, 3.70, 2.08), Vector3(1.34, 2.05, 0.0), dark_steel)
+		_add_cad_box(root, Vector3(2.82, 0.16, 2.20), Vector3(0.0, 3.96, 0.0), dark_steel)
+		# Front X-Ray cutaway cladding wall
+		_add_xray_cladding(root, Vector3(2.60, 3.55, 0.04), Vector3(0.0, 2.05, 1.04), dark_steel, xray_cladding_mat)
+
+		# Multi-tier access platforms with thin dark-yellow safety handrails & thin metallic ladder
+		for py in [1.85, 3.88]:
+			_add_cad_box(root, Vector3(3.15, 0.05, 0.45), Vector3(0.0, py, 1.28), dark_steel)
+			_add_cad_cyl(root, 0.015, 0.015, 3.15, Vector3(0.0, py + 0.44, 1.49), safety_yellow, Vector3(0.0, 0.0, 90.0))
+			for px in [-1.52, -0.50, 0.50, 1.52]:
+				_add_cad_cyl(root, 0.015, 0.015, 0.44, Vector3(px, py + 0.22, 1.49), safety_yellow)
+		_add_caged_ladder(root, -1.48, 1.28, 0.18, 3.75, ladder_steel)
+
+		# Side-mounted horizontal convection pass -> 5.2m tall cylindrical flue gas stack
+		# Cutaway convection duct exposing 3 horizontal finned tube banks (Mixed Feed, Steam Superheater, BFW Economizer)
+		_add_cad_box(root, Vector3(1.15, 0.95, 1.15), Vector3(-1.88, 3.35, -0.25), xray_cladding_mat)
+		for ci in range(3):
+			var cy := 3.05 + float(ci) * 0.28
+			for cz in [-0.48, -0.16, 0.16, 0.48]:
+				_add_cad_cyl(root, 0.032, 0.032, 1.05, Vector3(-1.88, cy, cz - 0.15), copper_mat, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, 0.34, 0.42, 3.20, Vector3(-2.15, 3.60, -0.25), vessel_steel) # Reaches y = 5.2m!
+
+		# Dense Bank of 24 Slender Vertical Catalyst Tubes (3 rows x 8 tubes, radius 0.035m)
+		# Continuous from top inlet header (y=3.92) down into bottom refractory transfer manifold (y=0.42)
+		var zone_mats: Array = []
+		var zone_cols := [
+			Color(0.55, 0.44, 0.36), # 520 C top inlet
+			Color(0.82, 0.46, 0.20), # 640 C upper-mid
+			Color(0.96, 0.50, 0.14), # 760 C lower-mid
+			Color(1.00, 0.62, 0.18), # 850 C bottom radiant
+		]
+		var zone_energies := [0.35, 0.90, 1.65, 2.50]
+		for zi in range(4):
+			var zm := StandardMaterial3D.new()
+			zm.albedo_color = zone_cols[zi]
+			zm.metallic = 0.50
+			zm.emission_enabled = true
+			zm.emission = zone_cols[zi]
+			zm.emission_energy_multiplier = zone_energies[zi]
+			zone_mats.append(zm)
+		_smr_refs["reformer_tube_mats"] = zone_mats
+
+		for tz in [-0.44, 0.0, 0.44]:
+			for ti in range(8):
+				var tx := -1.05 + float(ti) * 0.30
+				for zi in range(4):
+					var zy := 3.48 - float(zi) * 0.875
+					_add_cad_cyl(root, 0.035, 0.035, 0.875, Vector3(tx, zy, tz), zone_mats[zi])
+				# Top inlet pigtail
+				_add_cad_cyl(root, 0.018, 0.018, 0.25, Vector3(tx, 4.02, tz), vessel_steel)
+
+		# Top inlet pigtail header & bottom outlet collector manifold
+		_add_cad_cyl(root, 0.08, 0.08, 2.40, Vector3(0.0, 4.14, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, 0.12, 0.12, 2.55, Vector3(0.0, 0.38, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
+
+		# 12 Radiant Floor Burners in the lanes between tube rows firing upward
+		var burner_mat := StandardMaterial3D.new()
+		burner_mat.albedo_color = Color(1.0, 0.44, 0.08)
+		burner_mat.emission_enabled = true
+		burner_mat.emission = Color(1.0, 0.40, 0.06)
+		burner_mat.emission_energy_multiplier = 2.8
+		_smr_refs["reformer_burner_mat"] = burner_mat
+		for bz in [-0.66, -0.22, 0.22, 0.66]:
+			for bx in [-0.90, 0.0, 0.90]:
+				_add_cad_cyl(root, 0.01, 0.065, 0.28, Vector3(bx, 0.36, bz), burner_mat)
+
+		# Dedicated Blue Emergency N2 Purge Header + Actuated Isolation Valve XV-101
+		var n2_mat := StandardMaterial3D.new()
+		n2_mat.albedo_color = Color(0.22, 0.62, 0.98)
+		n2_mat.metallic = 0.72
+		_smr_refs["n2_purge_mat"] = n2_mat
+		_add_cad_cyl(root, 0.045, 0.045, 3.20, Vector3(-1.52, 1.85, 0.65), n2_mat)
+		_add_cad_cyl(root, 0.038, 0.038, 0.55, Vector3(-1.25, 3.45, 0.65), n2_mat, Vector3(0.0, 0.0, 90.0))
+		var xv_mat := StandardMaterial3D.new()
+		xv_mat.albedo_color = Color(0.92, 0.30, 0.22)
+		xv_mat.metallic = 0.60
+		_smr_refs["xv101_mat"] = xv_mat
+		_add_cad_box(root, Vector3(0.16, 0.16, 0.16), Vector3(-1.52, 2.25, 0.65), xv_mat)
+		return true
+
+	elif archetype == "shell_tube_hx":
+		# Unit 200: Process Gas Waste Heat Boiler (E-105) + Elevated Steam Drum (V-102)
+		_add_plinth(root, 2.6, 1.8, 0.16)
+
+		# Twin concrete/steel saddle supports for E-105
+		for sx in [-0.65, 0.65]:
+			_add_cad_box(root, Vector3(0.20, 0.65, 0.86), Vector3(sx, 0.48, 0.0), dark_steel)
+
+		# E-105 Horizontal Cutaway Shell (radius 0.52, length 2.0m)
+		var hx_shell_inst := _add_cad_cyl(root, 0.52, 0.52, 1.95, Vector3(0.0, 1.18, 0.0), xray_cladding_mat, Vector3(0.0, 0.0, 90.0))
+		if not _smr_refs.has("xray_panels"):
+			_smr_refs["xray_panels"] = []
+		_smr_refs["xray_panels"].append({"mesh": hx_shell_inst, "solid": vessel_steel, "xray": xray_cladding_mat})
+
+		# Bolted channel head (left hot inlet) & rear shell cap
+		_add_cad_cyl(root, 0.54, 0.54, 0.30, Vector3(-1.08, 1.18, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, 0.54, 0.54, 0.16, Vector3(1.02, 1.18, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+
+		# Tube Sheet & 5 Thin Metallic Segmental Baffles
+		_add_cad_cyl(root, 0.48, 0.48, 0.04, Vector3(-0.90, 1.18, 0.0), copper_mat, Vector3(0.0, 0.0, 90.0))
+		for bx in [-0.60, -0.30, 0.0, 0.30, 0.60]:
+			_add_cad_cyl(root, 0.44, 0.44, 0.02, Vector3(bx, 1.18, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
+
+		# Dense Bundle of 18 Slender Heat-Exchanger Tubes (3x6 array, radius 0.020m)
+		var hx_hot_mat := StandardMaterial3D.new()
+		hx_hot_mat.albedo_color = Color(1.0, 0.46, 0.14)
+		hx_hot_mat.emission_enabled = true
+		hx_hot_mat.emission = Color(1.0, 0.38, 0.08)
+		hx_hot_mat.emission_energy_multiplier = 1.35
+
+		var hx_cool_mat := StandardMaterial3D.new()
+		hx_cool_mat.albedo_color = Color(0.86, 0.66, 0.28)
+		hx_cool_mat.metallic = 0.78
+		hx_cool_mat.emission_enabled = true
+		hx_cool_mat.emission = Color(0.85, 0.55, 0.15)
+		hx_cool_mat.emission_energy_multiplier = 0.40
+		_smr_refs["e105_outlet_mat"] = hx_cool_mat
+
+		for ty in [0.96, 1.18, 1.40]:
+			for tz in [-0.24, -0.08, 0.08, 0.24]:
+				_add_cad_cyl(root, 0.020, 0.020, 0.88, Vector3(-0.44, ty, tz), hx_hot_mat, Vector3(0.0, 0.0, 90.0))
+				_add_cad_cyl(root, 0.020, 0.020, 0.88, Vector3(0.44, ty, tz), hx_cool_mat, Vector3(0.0, 0.0, 90.0))
+
+		# Elevated Horizontal Steam Drum (V-102) on 4 Structural Steel Columns + 4 Vertical Riser/Downcomer Pipes
+		for sx in [-0.85, 0.85]:
+			for sz in [-0.55, 0.55]:
+				_add_cad_box(root, Vector3(0.08, 2.55, 0.08), Vector3(sx, 1.42, sz), dark_steel)
+		_add_cad_cyl(root, 0.32, 0.32, 1.85, Vector3(0.0, 2.75, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+		for rx in [-0.55, -0.18, 0.18, 0.55]:
+			_add_cad_cyl(root, 0.042, 0.042, 0.95, Vector3(rx, 2.05, 0.0), vessel_steel)
+
+		var beacon_mat := StandardMaterial3D.new()
+		beacon_mat.albedo_color = Color(0.25, 0.85, 0.45)
+		_smr_refs["e105_fault_beacon"] = beacon_mat
+		_add_cad_cyl(root, 0.055, 0.055, 0.12, Vector3(0.0, 3.16, 0.0), beacon_mat)
+		return true
+
+	elif archetype == "packed_bed_reactor":
+		# Unit 300: Two-Stage Water-Gas Shift Island (R-301A HT-Shift + R-301B LT-Shift + Inter-bed Cooler)
+		_add_plinth(root, 2.6, 1.8, 0.16)
+
+		var gunmetal_mat := StandardMaterial3D.new()
+		gunmetal_mat.albedo_color = Color(0.18, 0.22, 0.27)
+		gunmetal_mat.metallic = 0.85
+		gunmetal_mat.roughness = 0.30
+
+		# R-301A HT-Shift Reactor (left, taller) + R-301B LT-Shift Reactor (right)
+		var r_specs := [
+			{"x": -0.62, "h": 2.25, "r": 0.44, "cat_col": Color(0.36, 0.20, 0.12)},
+			{"x": 0.62,  "h": 1.75, "r": 0.40, "cat_col": Color(0.18, 0.34, 0.30)},
+		]
+		for rs in r_specs:
+			var rx: float = rs["x"]
+			var rh: float = rs["h"]
+			var rr: float = rs["r"]
+			# Cylindrical steel skirt support
+			_add_cad_cyl(root, rr * 0.90, rr * 0.96, 0.45, Vector3(rx, 0.38, 0.0), dark_steel)
+
+			# Solid dark gunmetal pressure vessel shell on back & left/right sides, leaving a narrow front cutaway slot (50% diameter)
+			var y_mid := 0.60 + rh * 0.5
+			_add_cad_box(root, Vector3(rr * 2.0, rh, rr * 1.15), Vector3(rx, y_mid, -rr * 0.42), gunmetal_mat)
+			_add_cad_box(root, Vector3(rr * 0.52, rh, rr * 0.85), Vector3(rx - rr * 0.74, y_mid, rr * 0.42), gunmetal_mat)
+			_add_cad_box(root, Vector3(rr * 0.52, rh, rr * 0.85), Vector3(rx + rr * 0.74, y_mid, rr * 0.42), gunmetal_mat)
+			# Top & bottom pressure vessel collar rings
+			_add_cad_cyl(root, rr * 1.03, rr * 1.03, 0.14, Vector3(rx, 0.60 + rh - 0.05, 0.0), gunmetal_mat)
+			_add_cad_cyl(root, rr * 1.03, rr * 1.03, 0.14, Vector3(rx, 0.64, 0.0), gunmetal_mat)
+
+			# Front cutaway window cover (toggled by X-Ray Cutaway button)
+			var win_inst := _add_cad_box(root, Vector3(rr * 0.98, rh - 0.18, 0.04), Vector3(rx, y_mid, rr * 0.84), xray_cladding_mat)
+			if not _smr_refs.has("xray_panels"):
+				_smr_refs["xray_panels"] = []
+			_smr_refs["xray_panels"].append({"mesh": win_inst, "solid": gunmetal_mat, "xray": xray_cladding_mat})
+
+			# Top hemispherical dome + inlet diffuser cone
+			var dome := SphereMesh.new()
+			dome.radius = rr
+			dome.height = rr * 1.1
+			var d_inst := MeshInstance3D.new()
+			d_inst.mesh = dome
+			d_inst.position = Vector3(rx, 0.60 + rh, 0.0)
+			d_inst.material_override = gunmetal_mat
+			root.add_child(d_inst)
+
+			# 3 Distinct Multi-Layered Packed Catalyst Beds separated by perforated support grates & quench distributor rings
+			var cat_col: Color = rs["cat_col"]
+			var cat_mat := StandardMaterial3D.new()
+			cat_mat.albedo_color = cat_col
+			cat_mat.roughness = 0.82
+			cat_mat.metallic = 0.15
+			cat_mat.emission_enabled = true
+			cat_mat.emission = cat_col
+			cat_mat.emission_energy_multiplier = 0.35
+
+			var bed_h := (rh - 0.42) / 3.0
+			for bi in range(3):
+				var by := 0.82 + float(bi) * (bed_h + 0.08) + bed_h * 0.5
+				_add_cad_cyl(root, rr * 0.78, rr * 0.78, bed_h, Vector3(rx, by, 0.02), cat_mat)
+				# Perforated support grate & quench distributor ring below each bed
+				_add_cad_cyl(root, rr * 0.84, rr * 0.84, 0.045, Vector3(rx, by - bed_h * 0.5 - 0.025, 0.02), ladder_steel)
+
+			# Top platform ring with thin dark-yellow handrail & thin metallic ladder
+			_add_cad_cyl(root, rr + 0.16, rr + 0.16, 0.035, Vector3(rx, 0.60 + rh - 0.14, 0.0), dark_steel)
+			_add_cad_cyl(root, 0.015, 0.015, rr * 2.3, Vector3(rx, 0.60 + rh + 0.24, rr + 0.14), safety_yellow, Vector3(0.0, 0.0, 90.0))
+			_add_caged_ladder(root, rx - rr - 0.14, 0.18, 0.18, rh + 0.25, ladder_steel)
+
+		# Inter-bed Cooler + Crossover Pipe between R-301A and R-301B
+		_add_cad_cyl(root, 0.16, 0.16, 0.72, Vector3(0.0, 0.95, 0.32), vessel_steel, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, 0.045, 0.045, 0.65, Vector3(-0.32, 1.45, 0.32), vessel_steel)
+		_add_cad_cyl(root, 0.045, 0.045, 0.65, Vector3(0.32, 1.45, 0.32), vessel_steel)
+
+		# Cutaway fill light so gunmetal steel rims & 3-layer catalyst beds pop
+		var wgs_fill := OmniLight3D.new()
+		wgs_fill.position = Vector3(0.0, 1.65, 1.25)
+		wgs_fill.light_energy = 1.8
+		wgs_fill.omni_range = 3.2
+		wgs_fill.light_color = Color(0.95, 0.92, 0.88)
+		root.add_child(wgs_fill)
+		return true
+
+	elif archetype == "knockout_cooler":
+		# Unit 500: Syngas Trim Cooler (E-401 Fin-Fan Bay) & Process Condensate Knock-Out Drum (V-401)
+		_add_plinth(root, 2.8, 2.0, 0.16)
+
+		# Fin-Fan Trim Cooler Bay (left) with 2 rotating fans
+		for fx in [-1.05, -0.15]:
+			for fz in [-0.55, 0.55]:
+				_add_cad_box(root, Vector3(0.06, 1.45, 0.06), Vector3(fx, 0.88, fz), dark_steel)
+		_add_cad_box(root, Vector3(1.05, 0.14, 1.25), Vector3(-0.60, 1.55, 0.0), vessel_steel)
+		var kc_fans: Array = _smr_refs.get("comp_fan_nodes", [])
+		for fz in [-0.32, 0.32]:
+			var fan_hub := Node3D.new()
+			fan_hub.position = Vector3(-0.60, 1.66, fz)
+			root.add_child(fan_hub)
+			_add_cad_box(fan_hub, Vector3(0.46, 0.02, 0.08), Vector3.ZERO, copper_mat)
+			_add_cad_box(fan_hub, Vector3(0.08, 0.02, 0.46), Vector3.ZERO, copper_mat)
+			kc_fans.append(fan_hub)
+		_smr_refs["comp_fan_nodes"] = kc_fans
+
+		# Vertical Process Condensate Knock-Out Drum V-401 (right) + bottom condensate boot + sight glass
+		_add_cad_cyl(root, 0.38, 0.38, 0.38, Vector3(0.68, 0.35, 0.0), dark_steel)
+		_add_cad_cyl(root, 0.42, 0.42, 1.45, Vector3(0.68, 1.25, 0.0), vessel_steel)
+		var v_dome := SphereMesh.new()
+		v_dome.radius = 0.42
+		v_dome.height = 0.44
+		var vd := MeshInstance3D.new()
+		vd.mesh = v_dome
+		vd.position = Vector3(0.68, 1.98, 0.0)
+		vd.material_override = vessel_steel
+		root.add_child(vd)
+		# Bottom condensate boot & blue water level sight-glass
+		_add_cad_cyl(root, 0.16, 0.16, 0.36, Vector3(0.68, 0.36, 0.38), vessel_steel)
+		var water_mat := StandardMaterial3D.new()
+		water_mat.albedo_color = Color(0.20, 0.72, 0.96)
+		water_mat.emission_enabled = true
+		water_mat.emission = Color(0.15, 0.60, 0.90)
+		water_mat.emission_energy_multiplier = 0.65
+		_add_cad_cyl(root, 0.032, 0.032, 0.55, Vector3(1.12, 0.85, 0.18), water_mat)
+		return true
+
+	elif archetype == "co2_absorber":
+		# Unit 600: Amine CO2 Capture Absorber (C-501) & Stripper Column (C-502) + Reflux Condenser & Reboiler
+		_add_plinth(root, 2.8, 2.0, 0.16)
+
+		var gunmetal_mat := StandardMaterial3D.new()
+		gunmetal_mat.albedo_color = Color(0.19, 0.23, 0.29)
+		gunmetal_mat.metallic = 0.85
+		gunmetal_mat.roughness = 0.30
+
+		# Tall Flanged Packed Absorber Column C-501 (left, 3.5m tall) with 2 structured packing cutaway slots
+		_add_cad_cyl(root, 0.44, 0.48, 0.42, Vector3(-0.55, 0.37, 0.0), dark_steel)
+		_add_cad_box(root, Vector3(0.92, 2.75, 0.52), Vector3(-0.55, 1.95, -0.20), gunmetal_mat)
+		_add_cad_box(root, Vector3(0.24, 2.75, 0.42), Vector3(-0.89, 1.95, 0.18), gunmetal_mat)
+		_add_cad_box(root, Vector3(0.24, 2.75, 0.42), Vector3(-0.21, 1.95, 0.18), gunmetal_mat)
+		var c_win := _add_cad_box(root, Vector3(0.46, 2.55, 0.04), Vector3(-0.55, 1.95, 0.38), xray_cladding_mat)
+		if not _smr_refs.has("xray_panels"):
+			_smr_refs["xray_panels"] = []
+		_smr_refs["xray_panels"].append({"mesh": c_win, "solid": gunmetal_mat, "xray": xray_cladding_mat})
+		for fy in [0.95, 1.85, 2.75, 3.30]:
+			_add_cad_cyl(root, 0.49, 0.49, 0.06, Vector3(-0.55, fy, 0.0), dark_steel)
+		var c_dome := SphereMesh.new()
+		c_dome.radius = 0.46
+		c_dome.height = 0.50
+		var cd := MeshInstance3D.new()
+		cd.mesh = c_dome
+		cd.position = Vector3(-0.55, 3.34, 0.0)
+		cd.material_override = gunmetal_mat
+		root.add_child(cd)
+
+		# 2 Structured Packing Zones inside C-501 cutaway
+		var pack_mat := StandardMaterial3D.new()
+		pack_mat.albedo_color = Color(0.28, 0.42, 0.62)
+		pack_mat.metallic = 0.65
+		pack_mat.roughness = 0.40
+		pack_mat.emission_enabled = true
+		pack_mat.emission = Color(0.18, 0.35, 0.55)
+		pack_mat.emission_energy_multiplier = 0.32
+		_add_cad_cyl(root, 0.36, 0.36, 0.90, Vector3(-0.55, 1.40, 0.02), pack_mat)
+		_add_cad_cyl(root, 0.36, 0.36, 0.90, Vector3(-0.55, 2.50, 0.02), pack_mat)
+
+		# Adjacent Amine Stripper Column C-502 (right, 2.9m tall) + Kettle Reboiler + Top Reflux Condenser
+		_add_cad_cyl(root, 0.34, 0.34, 2.45, Vector3(0.62, 1.45, 0.0), vessel_steel)
+		var s_dome := SphereMesh.new()
+		s_dome.radius = 0.34
+		s_dome.height = 0.36
+		var sd := MeshInstance3D.new()
+		sd.mesh = s_dome
+		sd.position = Vector3(0.62, 2.68, 0.0)
+		sd.material_override = vessel_steel
+		root.add_child(sd)
+		_add_cad_cyl(root, 0.22, 0.22, 0.85, Vector3(0.62, 0.45, 0.55), copper_mat, Vector3(0.0, 0.0, 90.0)) # Bottom reboiler
+		_add_cad_cyl(root, 0.16, 0.16, 0.68, Vector3(0.62, 2.95, 0.25), dark_steel, Vector3(0.0, 0.0, 90.0)) # Top reflux condenser
+
+		var co2_fill := OmniLight3D.new()
+		co2_fill.position = Vector3(-0.55, 2.0, 1.15)
+		co2_fill.light_energy = 1.6
+		co2_fill.omni_range = 3.2
+		co2_fill.light_color = Color(0.85, 0.92, 1.0)
+		root.add_child(co2_fill)
+		return true
+
+	elif archetype == "psa_skid":
+		# Unit 400: 8-Bed Pressure Swing Adsorption Matrix (2x4) + V-401 Tail Gas Surge Drum
+		_add_plinth(root, 3.4, 2.2, 0.16)
+
+		# Multi-level structural steel skid framing
+		for cx in [-1.45, 0.0, 0.85]:
+			for cz in [-0.88, 0.88]:
+				_add_cad_box(root, Vector3(0.07, 2.45, 0.07), Vector3(cx, 1.38, cz), dark_steel)
+		_add_cad_box(root, Vector3(2.40, 0.06, 1.80), Vector3(-0.30, 2.45, 0.0), dark_steel)
+
+		# 2x4 Matrix of 8 Slender Pressure Vessels with Hemispherical Domes + Subtle LED Ring & Thin Saturation Bar
+		var psa_mats: Array = []
+		for row_z in [-0.46, 0.46]:
+			for col_i in range(4):
+				var vx := -1.18 + float(col_i) * 0.58
+				_add_cad_cyl(root, 0.14, 0.14, 1.85, Vector3(vx, 1.18, row_z), vessel_steel)
+				var dome := SphereMesh.new()
+				dome.radius = 0.14
+				dome.height = 0.22
+				var d_inst := MeshInstance3D.new()
+				d_inst.mesh = dome
+				d_inst.position = Vector3(vx, 2.10, row_z)
+				d_inst.material_override = vessel_steel
+				root.add_child(d_inst)
+
+				# Subtle LED ring status indicator + thin vertical bed saturation bar
+				var led_mat := StandardMaterial3D.new()
+				led_mat.albedo_color = Color(0.15, 0.88, 0.55)
+				led_mat.emission_enabled = true
+				led_mat.emission = Color(0.15, 0.88, 0.55)
+				led_mat.emission_energy_multiplier = 1.1
+				psa_mats.append(led_mat)
+				_add_cad_cyl(root, 0.148, 0.148, 0.05, Vector3(vx, 1.92, row_z), led_mat)
+				_add_cad_box(root, Vector3(0.025, 0.95, 0.025), Vector3(vx, 1.25, row_z + (0.14 if row_z > 0 else -0.14)), led_mat)
+		_smr_refs["psa_bed_mats"] = psa_mats
+
+		# Top product manifold piping & bottom valve rack
+		_add_cad_cyl(root, 0.045, 0.045, 2.10, Vector3(-0.30, 2.35, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+		_add_cad_box(root, Vector3(2.20, 0.12, 1.20), Vector3(-0.30, 0.28, 0.0), dark_steel)
+
+		# Adjacent Horizontal PSA Tail Gas Surge Drum (V-601) on Concrete Saddles
+		for sx in [1.05, 1.55]:
+			_add_cad_box(root, Vector3(0.12, 0.45, 0.52), Vector3(sx, 0.38, 0.0), dark_steel)
+		_add_cad_cyl(root, 0.28, 0.28, 1.15, Vector3(1.30, 0.86, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+
+		var psa_fill := OmniLight3D.new()
+		psa_fill.position = Vector3(-0.30, 1.85, 1.25)
+		psa_fill.light_energy = 1.4
+		psa_fill.omni_range = 3.5
+		psa_fill.light_color = Color(0.88, 0.94, 1.0)
+		root.add_child(psa_fill)
+		return true
+
+	elif archetype == "high_pressure_compressor":
+		# Unit 500: 3-Stage Reciprocating Compressor House (K-501) + Bank of 3x 400 bar H2 Storage Bullets (V-501A/B/C)
+		_add_plinth(root, 3.6, 2.4, 0.16)
+
+		# 3-Stage Reciprocating Compressor Skid: Crankcase + 3 Horizontal Cylinders + Pulsation Dampeners + Electric Motor
+		_add_cad_box(root, Vector3(0.85, 0.55, 1.35), Vector3(-1.05, 0.48, 0.0), dark_steel)
+		_add_cad_cyl(root, 0.26, 0.26, 0.65, Vector3(-1.05, 0.52, -0.95), copper_mat, Vector3(90.0, 0.0, 0.0)) # Electric driver
+		for cz in [-0.42, 0.0, 0.42]:
+			_add_cad_cyl(root, 0.12, 0.12, 0.55, Vector3(-0.55, 0.52, cz), vessel_steel, Vector3(0.0, 0.0, 90.0))
+			# Pulsation dampener bottle above cylinder
+			_add_cad_cyl(root, 0.09, 0.09, 0.42, Vector3(-0.55, 0.86, cz), dark_steel, Vector3(0.0, 0.0, 90.0))
+
+		# Overhead Fin-Fan Interstage Air Cooler Bay with 2 Rotating Fans
+		for fx in [-1.35, -0.35]:
+			for fz in [-0.72, 0.72]:
+				_add_cad_box(root, Vector3(0.06, 1.55, 0.06), Vector3(fx, 0.92, fz), dark_steel)
+		_add_cad_box(root, Vector3(1.15, 0.14, 1.50), Vector3(-0.85, 1.65, 0.0), vessel_steel)
+		var fan_nodes: Array = _smr_refs.get("comp_fan_nodes", [])
+		for fz in [-0.36, 0.36]:
+			var fan_hub := Node3D.new()
+			fan_hub.position = Vector3(-0.85, 1.76, fz)
+			root.add_child(fan_hub)
+			_add_cad_box(fan_hub, Vector3(0.56, 0.02, 0.09), Vector3.ZERO, copper_mat)
+			_add_cad_box(fan_hub, Vector3(0.09, 0.02, 0.56), Vector3.ZERO, copper_mat)
+			fan_nodes.append(fan_hub)
+		_smr_refs["comp_fan_nodes"] = fan_nodes
+
+		# Bank of 3 Large Horizontal 400-bar H2 Storage Bullets (V-501A/B/C) on Concrete Saddles
+		var h2_tank_mat := StandardMaterial3D.new()
+		h2_tank_mat.albedo_color = Color(0.18, 0.80, 0.95)
+		h2_tank_mat.metallic = 0.78
+		h2_tank_mat.roughness = 0.24
+		for tz in [-0.62, 0.0, 0.62]:
+			_add_cad_box(root, Vector3(0.14, 0.46, 0.36), Vector3(0.32, 0.38, tz), dark_steel)
+			_add_cad_box(root, Vector3(0.14, 0.46, 0.36), Vector3(1.22, 0.38, tz), dark_steel)
+			_add_cad_cyl(root, 0.23, 0.23, 1.45, Vector3(0.77, 0.84, tz), h2_tank_mat, Vector3(0.0, 0.0, 90.0))
+		return true
+
+	return false
+
+
+func update_smr_process_state(sc_ratio: float, reformer_temp_c: float, pressure_bar: float, fault_state: Dictionary) -> void:
+	_smr_process_state["sc_ratio"] = sc_ratio
+	_smr_process_state["reformer_temp_c"] = reformer_temp_c
+	_smr_process_state["pressure_bar"] = pressure_bar
+	_smr_process_state["e105_cooling_loss"] = bool(fault_state.get("e105_cooling_loss", false))
+	_smr_process_state["coking_warning"] = bool(fault_state.get("coking_warning", false))
+	_smr_process_state["n2_purge_active"] = bool(fault_state.get("n2_purge_active", false))
+
+	var temp_norm := clampf((reformer_temp_c - 750.0) / 170.0, 0.0, 1.0)
+	var coking: bool = bool(_smr_process_state["coking_warning"])
+	var purge: bool = bool(_smr_process_state["n2_purge_active"])
+	var tube_mats: Array = _smr_refs.get("reformer_tube_mats", [])
+	for idx in range(tube_mats.size()):
+		var tm := tube_mats[idx] as StandardMaterial3D
+		if tm == null:
+			continue
+		if purge:
+			tm.emission = Color(0.20, 0.55, 0.95)
+			tm.emission_energy_multiplier = 0.45
+		elif coking:
+			tm.albedo_color = Color(0.18, 0.16, 0.15)
+			tm.emission = Color(0.65, 0.22, 0.05)
+			tm.emission_energy_multiplier = 0.5 + 0.5 * temp_norm
+		else:
+			tm.emission = Color(1.0, 0.36 + 0.12 * float(idx) * 0.4, 0.08)
+			tm.emission_energy_multiplier = (0.35 + 0.55 * float(idx)) * (0.65 + 0.85 * temp_norm)
+
+	var burner_mat := _smr_refs.get("reformer_burner_mat", null) as StandardMaterial3D
+	if burner_mat != null:
+		burner_mat.emission_energy_multiplier = 0.2 if purge else (1.8 + 2.2 * temp_norm)
+
+	var xv_mat := _smr_refs.get("xv101_mat", null) as StandardMaterial3D
+	if xv_mat != null:
+		xv_mat.albedo_color = Color(0.15, 0.95, 0.45) if purge else Color(0.92, 0.30, 0.22)
+
+	var e105_mat := _smr_refs.get("e105_outlet_mat", null) as StandardMaterial3D
+	if e105_mat != null:
+		if bool(_smr_process_state["e105_cooling_loss"]):
+			e105_mat.emission = Color(1.0, 0.22, 0.08)
+			e105_mat.emission_energy_multiplier = 2.0
+		else:
+			e105_mat.emission = Color(0.85, 0.55, 0.15)
+			e105_mat.emission_energy_multiplier = 0.40
+
+	var lbls: Dictionary = _smr_refs.get("stage_labels", {})
+	var e105_t := 580.0 if bool(_smr_process_state["e105_cooling_loss"]) else 350.0
+	var wgs_t := 340.0 if bool(_smr_process_state["e105_cooling_loss"]) else 210.0
+	var purity_val: float = float(fault_state.get("purity_pct", 99.99))
+	var h2_f: float = float(fault_state.get("h2_flow", 120000.0))
+	var f_scale: float = h2_f / 120000.0 if h2_f > 0.0 else 0.0
+	if lbls.has(0) and is_instance_valid(lbls[0]):
+		lbls[0].text = "R-102 PRE-REF (%.0f Nm3/h Wet)\n490°C | %.0f bar | S/C %.1f" % [144200.0 * f_scale, pressure_bar + 2.0, sc_ratio]
+	if lbls.has(1) and is_instance_valid(lbls[1]):
+		lbls[1].text = "F-201 SMR (%.0f Nm3/h Wet)\n%.0f°C | %.0f bar | 72.0%% Dry H2" % [210800.0 * f_scale, reformer_temp_c, pressure_bar]
+	if lbls.has(2) and is_instance_valid(lbls[2]):
+		lbls[2].text = "E-105 WHB (%.0f Nm3/h Wet)\n%.0f°C | %.0f bar | Steam" % [210800.0 * f_scale, e105_t, maxf(pressure_bar - 2.0, 1.0)]
+	if lbls.has(3) and is_instance_valid(lbls[3]):
+		lbls[3].text = "R-301A/B WGS (%.0f Nm3/h Wet)\n%.0f°C | %.0f bar | 80.1%% Dry H2" % [210800.0 * f_scale, wgs_t, maxf(pressure_bar - 3.0, 1.0)]
+	if lbls.has(4) and is_instance_valid(lbls[4]):
+		lbls[4].text = "E-401 / V-401 (%.0f Nm3/h Dry)\n40°C | %.1f bar | 80.1%% H2" % [170200.0 * f_scale, maxf(pressure_bar - 3.5, 1.0)]
+	if lbls.has(5) and is_instance_valid(lbls[5]):
+		lbls[5].text = "C-501 CO2 CAP (%.0f Nm3/h Dry)\n42°C | %.1f bar | 97.6%% H2" % [139700.0 * f_scale, maxf(pressure_bar - 3.8, 1.0)]
+	if lbls.has(6) and is_instance_valid(lbls[6]):
+		lbls[6].text = "U-601 PSA (%.0f Nm3/h Dry)\n40°C | %.0f bar | %.2f%% H2" % [h2_f, maxf(pressure_bar - 4.0, 1.0), purity_val]
+	if lbls.has(7) and is_instance_valid(lbls[7]):
+		lbls[7].text = "K-701 COMP (%.0f Nm3/h Dry)\n40°C | 400 bar | %.2f%% H2" % [h2_f, purity_val]
+
+
 # ---------------------------------------------------------------- Inter-Stage Pipes & Animated Moving Slugs
+
+func _build_rack_pipe_route(waypoints: Array, stream_color: Color, pipe_steel: Material, flange_mat: Material, ft_mat: Material) -> void:
+	for wi in range(waypoints.size() - 1):
+		var a: Vector3 = waypoints[wi]
+		var b: Vector3 = waypoints[wi + 1]
+		var seg_len := a.distance_to(b)
+		if seg_len < 0.02:
+			continue
+		var mid := (a + b) * 0.5
+		var dx := absf(b.x - a.x)
+		var dy := absf(b.y - a.y)
+		var dz := absf(b.z - a.z)
+		var rot := Vector3.ZERO
+		if dx >= dy and dx >= dz:
+			rot = Vector3(0.0, 0.0, 90.0)
+		elif dz >= dx and dz >= dy:
+			rot = Vector3(90.0, 0.0, 0.0)
+		_add_cad_cyl(_bench_root, 0.042, 0.042, seg_len, mid, pipe_steel, rot)
+		# Elbow joint sphere at intermediate corners
+		if wi > 0:
+			var elb_m := SphereMesh.new()
+			elb_m.radius = 0.052
+			elb_m.height = 0.104
+			var elb := MeshInstance3D.new()
+			elb.mesh = elb_m
+			elb.position = a
+			elb.material_override = flange_mat
+			_bench_root.add_child(elb)
+
+	# Flanged control valve station & FT collar on mid-rack segment
+	if waypoints.size() >= 4:
+		var mid_idx := waypoints.size() / 2
+		var va: Vector3 = waypoints[mid_idx - 1]
+		var vb: Vector3 = waypoints[mid_idx]
+		var vmid := (va + vb) * 0.5
+		_add_cad_box(_bench_root, Vector3(0.13, 0.11, 0.11), vmid, flange_mat)
+		_add_cad_cyl(_bench_root, 0.016, 0.016, 0.16, vmid + Vector3(0.0, 0.12, 0.0), flange_mat)
+		_add_cad_cyl(_bench_root, 0.060, 0.060, 0.07, vmid + Vector3(0.22, 0.0, 0.0), ft_mat, Vector3(0.0, 0.0, 90.0))
+
+	# 6 Sleek Streamlined Flow Pulses moving inside the semi-transparent pipe
+	for pi in range(6):
+		var pulse_m := SphereMesh.new()
+		pulse_m.radius = 0.025
+		pulse_m.height = 0.050
+		var pulse_inst := MeshInstance3D.new()
+		pulse_inst.mesh = pulse_m
+		var pm := StandardMaterial3D.new()
+		pm.albedo_color = stream_color
+		pm.emission_enabled = true
+		pm.emission = stream_color
+		pm.emission_energy_multiplier = 1.65
+		pulse_inst.material_override = pm
+		_bench_root.add_child(pulse_inst)
+		_pipe_pulses.append({
+			"mesh": pulse_inst,
+			"waypoints": waypoints,
+			"phase": float(pi) / 6.0,
+		})
+
 
 func _build_all_interstage_pipes_and_slugs() -> void:
 	if _stage_vessels.size() < 2:
 		return
 
-	# Transition definitions: [from_idx, to_idx, t_start, t_end, slug_type, color]
-	var transitions := [
+	if _stage_vessels[0].get("is_chemical_plant", false):
+		var pipe_steel := StandardMaterial3D.new()
+		pipe_steel.albedo_color = Color(0.55, 0.62, 0.70, 0.42)
+		pipe_steel.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		pipe_steel.metallic = 0.75
+		pipe_steel.roughness = 0.22
+
+		var flange_mat := StandardMaterial3D.new()
+		flange_mat.albedo_color = Color(0.28, 0.34, 0.42)
+		flange_mat.metallic = 0.88
+		flange_mat.roughness = 0.28
+
+		var ft_mat := StandardMaterial3D.new()
+		ft_mat.albedo_color = Color(0.20, 0.85, 0.95)
+		ft_mat.metallic = 0.70
+
+		# 1. Pre-Reformed Feed: Unit 100 R-102 (-9.5, 0, 2.8) -> Unit 200 F-201 (-3.5, 0, 2.8) top inlet (490 C)
+		_build_rack_pipe_route([
+			Vector3(-8.50, 2.65, 2.80),
+			Vector3(-6.40, 2.65, 2.80),
+			Vector3(-6.40, 4.14, 2.80),
+			Vector3(-4.70, 4.14, 2.80),
+		], Color(0.95, 0.72, 0.25), pipe_steel, flange_mat, ft_mat)
+
+		# 2. Hot Syngas Transfer: Unit 200 F-201 (-3.5, 0, 2.8) bottom -> Unit 300 E-105 (2.5, 0, 2.8) inlet (850 C)
+		_build_rack_pipe_route([
+			Vector3(-2.25, 0.42, 2.80),
+			Vector3(-0.30, 0.42, 2.80),
+			Vector3(-0.30, 1.18, 2.80),
+			Vector3(1.40, 1.18, 2.80),
+		], Color(1.0, 0.40, 0.12), pipe_steel, flange_mat, ft_mat)
+
+		# 3. Cooled Syngas: Unit 300 E-105 (2.5, 0, 2.8) -> Overhead Rack Tier 1 -> Unit 400 WGS (8.5, 0, 2.8)
+		_build_rack_pipe_route([
+			Vector3(3.55, 1.18, 2.80),
+			Vector3(3.55, 2.92, 2.80),
+			Vector3(3.55, 2.92, 0.20),
+			Vector3(7.85, 2.92, 0.20),
+			Vector3(7.85, 2.92, 2.80),
+			Vector3(7.85, 2.25, 2.80),
+		], Color(0.95, 0.65, 0.14), pipe_steel, flange_mat, ft_mat)
+
+		# 4. Shifted Gas Crossover: Unit 400 WGS (8.5, 0, 2.8) -> Rack Tier 1 -> Unit 500 E-401/V-401 (11.2, 0.6, -2.8)
+		_build_rack_pipe_route([
+			Vector3(9.12, 1.85, 2.80),
+			Vector3(9.12, 2.96, 2.80),
+			Vector3(9.12, 2.96, -0.20),
+			Vector3(10.60, 2.96, -0.20),
+			Vector3(10.60, 2.96, -2.80),
+			Vector3(10.60, 2.25, -2.80),
+		], Color(0.25, 0.85, 0.58), pipe_steel, flange_mat, ft_mat)
+
+		# 5. Dry Shifted Gas: Unit 500 V-401 (11.2, 0.6, -2.8) -> Rack Tier 1 -> Unit 600 C-501 (5.5, 0.6, -2.8)
+		_build_rack_pipe_route([
+			Vector3(10.50, 2.55, -2.80),
+			Vector3(10.50, 2.94, -2.80),
+			Vector3(10.50, 2.94, -0.35),
+			Vector3(4.95, 2.94, -0.35),
+			Vector3(4.95, 2.94, -2.80),
+			Vector3(4.95, 1.65, -2.80),
+		], Color(0.20, 0.82, 0.72), pipe_steel, flange_mat, ft_mat)
+
+		# 6. CO2-Lean Syngas: Unit 600 C-501 (5.5, 0.6, -2.8) -> Rack Tier 1 -> Unit 700 U-601 PSA (-0.5, 0.6, -2.8)
+		_build_rack_pipe_route([
+			Vector3(4.95, 3.95, -2.80),
+			Vector3(4.95, 3.00, -0.20),
+			Vector3(0.65, 3.00, -0.20),
+			Vector3(0.65, 3.00, -2.80),
+			Vector3(0.65, 1.75, -2.80),
+		], Color(0.18, 0.88, 0.82), pipe_steel, flange_mat, ft_mat)
+
+		# 7. PSA Tail Gas Recycle: Unit 700 V-601 (0.8, 0.6, -2.8) -> Rack Tier 2 -> Unit 200 F-201 Burners (-3.5, 0, 2.8)
+		_build_rack_pipe_route([
+			Vector3(0.80, 1.75, -2.80),
+			Vector3(0.80, 3.60, -2.80),
+			Vector3(0.80, 3.60, 0.25),
+			Vector3(-3.50, 3.60, 0.25),
+			Vector3(-3.50, 3.60, 1.75),
+			Vector3(-3.50, 0.45, 1.75),
+		], Color(0.92, 0.72, 0.22), pipe_steel, flange_mat, ft_mat)
+
+		# 8. 99.99% H2 Product Header: Unit 700 U-601 (-0.5, 0.6, -2.8) -> Rack Tier 2 -> Unit 800 K-701 (-6.5, 0.6, -2.8)
+		_build_rack_pipe_route([
+			Vector3(-0.80, 2.95, -2.80),
+			Vector3(-0.80, 3.68, -2.80),
+			Vector3(-0.80, 3.68, -0.25),
+			Vector3(-5.50, 3.68, -0.25),
+			Vector3(-5.50, 3.68, -2.80),
+			Vector3(-5.50, 1.45, -2.80),
+		], Color(0.22, 0.90, 1.0), pipe_steel, flange_mat, ft_mat)
+		return
+
+	var transitions: Array = [
 		{"from": 0, "to": 1, "t0": 1.2, "t1": 2.0, "color": Color(0.29, 0.20, 0.10), "is_chute": true},
 		{"from": 1, "to": 2, "t0": 15.0, "t1": 16.5, "color": Color(0.24, 0.16, 0.08), "is_chute": false},
 		{"from": 2, "to": 3, "t0": 31.0, "t1": 32.3, "color": Color(0.60, 0.42, 0.18), "is_chute": false},
