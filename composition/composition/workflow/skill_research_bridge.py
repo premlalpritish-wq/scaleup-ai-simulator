@@ -1017,6 +1017,18 @@ def _solve_smr_plant_trajectories(
                 st_data = dict(stage_states[1])
                 st_data["temperature_c"] = 900.0
                 st_data["pressure_bar"] = 38.0
+            elif arch == "shell_tube_hx":
+                st_data = dict(stage_states[2])
+                st_data["pressure_bar"] = 36.5
+            elif arch == "packed_bed_reactor":
+                st_data = dict(stage_states[3])
+                st_data["pressure_bar"] = 35.5
+            elif arch == "knockout_cooler":
+                st_data = dict(stage_states[4])
+                st_data["pressure_bar"] = 33.3
+            elif arch == "co2_absorber":
+                st_data = dict(stage_states[5])
+                st_data["pressure_bar"] = 33.2
             elif arch == "psa_skid":
                 st_data = dict(stage_states[6])
                 st_data["temperature_c"] = 27.0
@@ -1633,6 +1645,9 @@ def resolve_prompt_and_research(
                 "unverified_assumption_count": len(epistemic_audit.get("unverified_assumptions", {})),
             },
         }
+        from .reality_compiler import RealityCompiler
+        RealityCompiler().compile_and_verify(run_artifact, strict=True)
+
         with open(str(latest_run_path), "w", encoding="utf-8") as f:
             f.write(json.dumps(run_artifact, indent=2, ensure_ascii=False) + "\n")
         try:

@@ -1,11 +1,11 @@
 import os
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import create_engine, Column, String, Float, Text, DateTime, JSON, select, or_, text
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import declarative_base, sessionmaker
-from .schemas import RequiredParameterSpec, GroundedParameter, OperatingEnvelope
+from .schemas import RequiredParameterSpec, GroundedParameter, OperatingEnvelope, PhysicalInvariantSpec
 from .quarantine_gate import ureg
 
 Base = declarative_base()
@@ -47,6 +47,20 @@ class ScientificParameterRecord(Base):
 
 
 ParameterRecord = ScientificParameterRecord
+
+
+class MechanisticLawRecord(Base):
+    __tablename__ = "mechanistic_laws"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    law_id = Column(String, unique=True, index=True, nullable=False)
+    domain = Column(String, index=True, nullable=False)
+    governing_equation = Column(Text, nullable=False)
+    threshold_parameters_json = Column(JSON, nullable=False)
+    remediation_action = Column(String, nullable=False)
+    doi = Column(String, nullable=False)
+    verbatim_quote = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
 
 class ParameterDatabase:
@@ -239,3 +253,67 @@ class ParameterDatabase:
             )
             records = session.execute(stmt).scalars().all()
             return [self._record_to_grounded(rec) for rec in records]
+
+    def upsert_mechanistic_law(self, law: PhysicalInvariantSpec) -> bool:
+        """Insert or update a PhysicalInvariantSpec in mechanistic_laws. Returns True if newly inserted."""
+        with self.SessionLocal() as session:
+            existing = session.execute(
+                select(MechanisticLawRecord).where(MechanisticLawRecord.law_id == law.law_id)
+            ).scalar_one_or_none()
+            if existing is not None:
+                existing.domain = law.domain
+                existing.governing_equation = law.governing_equation
+                existing.threshold_parameters_json = dict(law.threshold_parameters)
+                existing.remediation_action = law.remediation_action
+                existing.doi = law.doi.strip()
+                existing.verbatim_quote = law.verbatim_quote.strip()
+                session.commit()
+                return False
+            rec = MechanisticLawRecord(
+                law_id=law.law_id,
+                domain=law.domain,
+                governing_equation=law.governing_equation,
+                threshold_parameters_json=dict(law.threshold_parameters),
+                remediation_action=law.remediation_action,
+                doi=law.doi.strip(),
+                verbatim_quote=law.verbatim_quote.strip(),
+            )
+            session.add(rec)
+            session.commit()
+            return True
+
+    def get_mechanistic_law(self, law_id: str) -> Optional[PhysicalInvariantSpec]:
+        with self.SessionLocal() as session:
+            rec = session.execute(
+                select(MechanisticLawRecord).where(MechanisticLawRecord.law_id == law_id)
+            ).scalar_one_or_none()
+            if rec is None:
+                return None
+            return PhysicalInvariantSpec(
+                law_id=rec.law_id,
+                domain=rec.domain,
+                governing_equation=rec.governing_equation,
+                threshold_parameters=dict(rec.threshold_parameters_json or {}),
+                remediation_action=rec.remediation_action,
+                doi=rec.doi,
+                verbatim_quote=rec.verbatim_quote,
+            )
+
+    def list_mechanistic_laws(self, domain: Optional[str] = None) -> List[PhysicalInvariantSpec]:
+        with self.SessionLocal() as session:
+            stmt = select(MechanisticLawRecord)
+            if domain:
+                stmt = stmt.where(MechanisticLawRecord.domain == domain)
+            records = session.execute(stmt).scalars().all()
+            return [
+                PhysicalInvariantSpec(
+                    law_id=r.law_id,
+                    domain=r.domain,
+                    governing_equation=r.governing_equation,
+                    threshold_parameters=dict(r.threshold_parameters_json or {}),
+                    remediation_action=r.remediation_action,
+                    doi=r.doi,
+                    verbatim_quote=r.verbatim_quote,
+                )
+                for r in records
+            ]

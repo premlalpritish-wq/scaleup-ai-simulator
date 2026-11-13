@@ -6,7 +6,8 @@ from typing import List, Tuple, Dict, Optional, Any
 from .schemas import (
     RawExtractedCandidate,
     RequiredParameterSpec,
-    OperatingEnvelope
+    OperatingEnvelope,
+    PhysicalInvariantSpec,
 )
 from .quarantine_gate import validate_and_normalize, ureg
 from .database import ParameterDatabase
@@ -380,6 +381,91 @@ def ingest_workspace_json_files(base_path: Optional[Path] = None) -> List[Tuple[
 
     return entries
 
+SEED_MECHANISTIC_LAWS: List[PhysicalInvariantSpec] = [
+    PhysicalInvariantSpec(
+        law_id="SECOND_LAW_PINCH",
+        domain="thermodynamics",
+        governing_equation="T_hot_in - T_cold_out >= dT_min and T_hot_out - T_cold_in >= dT_min and |Q_hot - Q_cold|/Q_hot <= 0.02",
+        threshold_parameters={"dT_min_c": 10.0, "first_law_rel_tol": 0.02},
+        remediation_action="reorder_convection_pinch",
+        doi="10.1016/0009-2509(83)80134-1",
+        verbatim_quote="Pinch design method enforces minimum approach temperature dT_min >= 10 C across all heat exchanger hot/cold stream matches.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="SINGLE_SHELL_THERMAL_SHOCK",
+        domain="thermodynamics",
+        governing_equation="delta_T_hx <= max_single_hx_dt_c",
+        threshold_parameters={"max_single_hx_dt_c": 350.0},
+        remediation_action="split_into_series_heat_exchangers",
+        doi="10.1016/B978-0-08-096659-5.00019-5",
+        verbatim_quote="Large process cooling duties exceeding 350 C temperature drop must be staged across WHB, intercooler, economizer, and trim exchangers.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="VAN_T_HOFF_EXOTHERMIC_EQUILIBRIUM",
+        domain="kinetics_equilibrium",
+        governing_equation="X_exit <= X_eq(T_out, P) and delta_T_ad <= max_adiabatic_rise_c",
+        threshold_parameters={"max_adiabatic_rise_c": 220.0, "min_intercooled_conversion_jump": 0.05},
+        remediation_action="insert_intercooled_reactor_stage",
+        doi="10.1016/j.ijhydene.2010.04.093",
+        verbatim_quote="Exothermic reversible reactions such as WGS require high-temperature conversion followed by interstage cooling to overcome equilibrium limitation.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="POLYTROPIC_COMPRESSION_DISCHARGE",
+        domain="thermodynamics",
+        governing_equation="T_out = T_in * (P_out / P_in)**((gamma - 1) / (gamma * eta_p)) <= T_max_mech",
+        threshold_parameters={"max_compressor_discharge_c": 155.0, "max_stage_ratio": 2.5, "gamma": 1.38, "eta_p": 0.80},
+        remediation_action="insert_multistage_compressor_intercoolers",
+        doi="10.1016/B978-0-12-809644-4.00003-2",
+        verbatim_quote="Reciprocating hydrogen compressors are limited to stage discharge temperatures <= 155 C via interstage cooling with stage ratio <= 2.5.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="NICKEL_SULFUR_POISONING",
+        domain="catalysis_materials",
+        governing_equation="y_H2S <= max_ni_h2s_ppm",
+        threshold_parameters={"max_ni_h2s_ppm": 0.1},
+        remediation_action="insert_upstream_hds_and_prereformer",
+        doi="10.1016/j.ijhydene.2013.08.055",
+        verbatim_quote="Nickel steam reforming catalysts suffer irreversible sulfur poisoning above 0.1 ppmv H2S and require upstream HDS ZnO guard beds.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="BOUDOUARD_CARBON_COKING",
+        domain="catalysis_materials",
+        governing_equation="S_to_C >= min_sc_ratio_ni",
+        threshold_parameters={"min_sc_ratio_ni": 2.0},
+        remediation_action="enforce_minimum_steam_to_carbon_ratio",
+        doi="10.1016/j.ijhydene.2013.08.055",
+        verbatim_quote="Industrial SMR reformers operate at S/C >= 2.0-3.0 to prevent Boudouard carbon whisker deposition on nickel catalyst tubes.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="WET_GAS_PSA_KNOCKOUT",
+        domain="hydraulics_phase",
+        governing_equation="T_psa_in <= max_psa_inlet_temp_c and has_knockout_separator == 1",
+        threshold_parameters={"max_psa_inlet_temp_c": 45.0},
+        remediation_action="insert_condensate_knockout_drum",
+        doi="10.1016/j.seppur.2018.03.058",
+        verbatim_quote="PSA adsorbent beds require cooled gas <= 45 C and upstream condensate knockout separation to prevent water condensation in molecular sieves.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="PASSIVE_PRESSURE_DROP_MONOTONICITY",
+        domain="hydraulics_phase",
+        governing_equation="P_out <= P_in for passive units; delta_P > 0 only across P-xxx/C-xxx",
+        threshold_parameters={"max_passive_pressure_rise_bar": 0.01},
+        remediation_action="insert_compressor_or_pump",
+        doi="10.1016/B978-0-08-096659-5.00005-5",
+        verbatim_quote="Passive reactors, heat exchangers, and piping cannot increase fluid static pressure without mechanical work from a pump or compressor.",
+    ),
+    PhysicalInvariantSpec(
+        law_id="AEROBIC_OXYGEN_TRANSFER_LIMIT",
+        domain="bioprocess",
+        governing_equation="OTR = kLa * (C_star - C_L) >= OUR",
+        threshold_parameters={"min_dissolved_oxygen_frac": 0.15},
+        remediation_action="increase_kla_or_aeration",
+        doi="10.1016/j.bej.2017.09.005",
+        verbatim_quote="Aerobic fermentation oxygen transfer rate OTR = kLa*(C* - C_L) must exceed oxygen uptake rate to avoid anoxic metabolic shift.",
+    ),
+]
+
+
 def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = True) -> Dict[str, Any]:
     db = ParameterDatabase(db_url=db_url)
     
@@ -421,6 +507,11 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
                 "reason": reason
             })
 
+    laws_newly_written = 0
+    for law in SEED_MECHANISTIC_LAWS:
+        if db.upsert_mechanistic_law(law):
+            laws_newly_written += 1
+
     return {
         "total_evaluated": total_count,
         "total_candidates": total_count,
@@ -428,6 +519,8 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
         "passed_quarantine": passed_count,
         "rejected_by_quarantine": rejected_count,
         "newly_written_to_db": written_count,
+        "mechanistic_laws_total": len(SEED_MECHANISTIC_LAWS),
+        "mechanistic_laws_newly_written": laws_newly_written,
         "tier_counts": tier_counts,
         "rejection_details": rejections
     }

@@ -83,6 +83,7 @@ var _prompt: TextEdit
 var _status: Label
 var _sim_status: Label
 var _confidence_badge: Label
+var _reality_compiler_badge: Label
 var _analogue_banner: Label
 var _generate: Button
 var _interpret_only: Button
@@ -1027,6 +1028,13 @@ func _create_right_drawer() -> Control:
 	close_btn.pressed.connect(_toggle_right_drawer)
 	d_header.add_child(close_btn)
 
+	_reality_compiler_badge = Label.new()
+	_reality_compiler_badge.text = "🛡 Reality Compiler: Pending verification"
+	_reality_compiler_badge.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_reality_compiler_badge.add_theme_font_size_override("font_size", 10)
+	_reality_compiler_badge.modulate = GOOD
+	body.add_child(_reality_compiler_badge)
+
 	# Growth Chart in Drawer
 	_growth = GrowthChart.new()
 	_growth.custom_minimum_size = Vector2(420, 190)
@@ -1749,6 +1757,14 @@ func load_run_dict(payload: Dictionary) -> void:
 		if _sim_status != null:
 			_sim_status.text = "Status: HALTED (Insufficient verified empirical literature)"
 			_sim_status.modulate = BAD
+		if _reality_compiler_badge != null:
+			var rc_audit: Dictionary = payload.get("reality_compiler_audit", {})
+			if not rc_audit.is_empty():
+				var rc_status := str(rc_audit.get("status", "PASSED"))
+				var rc_laws := int(rc_audit.get("laws_checked", 6))
+				var rc_viol: Array = rc_audit.get("violations", [])
+				_reality_compiler_badge.text = "🛡 Reality Compiler: %s (%d/6 Physical Laws Verified • %d Violations: Mass, 2nd-Law Pinch, Equilibrium, Catalyst, Phase, Hydraulics)" % [rc_status, rc_laws, rc_viol.size()]
+				_reality_compiler_badge.modulate = GOOD if rc_status == "PASSED" and rc_viol.is_empty() else BAD
 		if _confidence_badge != null:
 			_confidence_badge.text = "[Confidence: 0% • HALTED: InsufficientEvidenceError]"
 			_confidence_badge.modulate = BAD
@@ -1772,6 +1788,14 @@ func load_run_dict(payload: Dictionary) -> void:
 		var is_chem_sandbox: bool = str(sandbox_cfg.get("mode", "")) == "chemical_plant"
 		_set_sandbox_mode(is_chem_sandbox)
 
+		if _reality_compiler_badge != null:
+			var rc_audit: Dictionary = payload.get("reality_compiler_audit", {})
+			if not rc_audit.is_empty():
+				var rc_status := str(rc_audit.get("status", "PASSED"))
+				var rc_laws := int(rc_audit.get("laws_checked", 6))
+				var rc_viol: Array = rc_audit.get("violations", [])
+				_reality_compiler_badge.text = "🛡 Reality Compiler: %s (%d/6 Physical Laws Verified • %d Violations: Mass, 2nd-Law Pinch, Equilibrium, Catalyst, Phase, Hydraulics)" % [rc_status, rc_laws, rc_viol.size()]
+				_reality_compiler_badge.modulate = GOOD if rc_status == "PASSED" and rc_viol.is_empty() else BAD
 		if _confidence_badge != null:
 			if not prov.is_empty() and not has_analogue:
 				var t1_cnt: int = int(prov.get("tier_1_quarantine_count", 0))

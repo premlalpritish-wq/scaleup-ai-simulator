@@ -65,6 +65,22 @@ class ParameterGap(BaseModel):
     required_evidence: str
     fallback_hypothesis_value: Optional[float] = None
 
+class PhysicalInvariantSpec(BaseModel):
+    law_id: str = Field(..., description="Unique invariant identifier, e.g., 'SECOND_LAW_PINCH'")
+    domain: Literal[
+        "thermodynamics",
+        "kinetics_equilibrium",
+        "catalysis_materials",
+        "hydraulics_phase",
+        "bioprocess",
+    ]
+    governing_equation: str = Field(..., description="Machine-readable formula description")
+    threshold_parameters: Dict[str, float] = Field(default_factory=dict)
+    remediation_action: str = Field(..., description="Compiler action when violated")
+    doi: str
+    verbatim_quote: str
+
+
 class SimulationManifestPayload(BaseModel):
     prompt: str
     grounded_parameters: Dict[str, GroundedParameter]
