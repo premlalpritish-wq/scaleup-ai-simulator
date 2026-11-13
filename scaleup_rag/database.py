@@ -10,6 +10,7 @@ from .schemas import (
     GroundedParameter,
     InternalPersonaProfile,
     OperatingEnvelope,
+    PersonaEpisodicMemorySpec,
     PhysicalInvariantSpec,
     RequiredParameterSpec,
     ValidatedWorkedTraceSpec,
@@ -109,6 +110,19 @@ class AgentProfileRecord(Base):
     lens_markdown_path = Column(String, nullable=False)
     elo_trust_score = Column(Float, default=1200.0, nullable=False)
     is_proctor = Column(Integer, default=0, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
+class PersonaEpisodicMemoryRecord(Base):
+    __tablename__ = "persona_episodic_memory"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    memory_id = Column(String, nullable=False, unique=True, index=True)
+    persona_id = Column(String, nullable=False, index=True)
+    trigger_signature = Column(String, nullable=False, index=True)
+    failure_observed = Column(Text, nullable=False)
+    first_principles_diagnosis = Column(Text, nullable=False)
+    generalized_rule_derived = Column(Text, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
 
@@ -565,3 +579,55 @@ class ParameterDatabase:
             rec.elo_trust_score = round(new_score, 2)
             session.commit()
             return float(rec.elo_trust_score)
+
+    def upsert_episodic_memory(self, mem: PersonaEpisodicMemorySpec) -> bool:
+        """Insert or update a PersonaEpisodicMemorySpec. Returns True if newly inserted."""
+        with self.SessionLocal() as session:
+            existing = session.execute(
+                select(PersonaEpisodicMemoryRecord).where(
+                    PersonaEpisodicMemoryRecord.memory_id == mem.memory_id
+                )
+            ).scalar_one_or_none()
+            if existing is not None:
+                existing.persona_id = mem.persona_id
+                existing.trigger_signature = mem.trigger_signature
+                existing.failure_observed = mem.failure_observed
+                existing.first_principles_diagnosis = mem.first_principles_diagnosis
+                existing.generalized_rule_derived = mem.generalized_rule_derived
+                session.commit()
+                return False
+            rec = PersonaEpisodicMemoryRecord(
+                memory_id=mem.memory_id,
+                persona_id=mem.persona_id,
+                trigger_signature=mem.trigger_signature,
+                failure_observed=mem.failure_observed,
+                first_principles_diagnosis=mem.first_principles_diagnosis,
+                generalized_rule_derived=mem.generalized_rule_derived,
+            )
+            session.add(rec)
+            session.commit()
+            return True
+
+    def list_episodic_memories(
+        self,
+        persona_id: Optional[str] = None,
+        trigger_signature: Optional[str] = None,
+    ) -> List[PersonaEpisodicMemorySpec]:
+        with self.SessionLocal() as session:
+            stmt = select(PersonaEpisodicMemoryRecord)
+            if persona_id:
+                stmt = stmt.where(PersonaEpisodicMemoryRecord.persona_id == persona_id)
+            if trigger_signature:
+                stmt = stmt.where(PersonaEpisodicMemoryRecord.trigger_signature == trigger_signature)
+            records = session.execute(stmt).scalars().all()
+            return [
+                PersonaEpisodicMemorySpec(
+                    memory_id=r.memory_id,
+                    persona_id=r.persona_id,
+                    trigger_signature=r.trigger_signature,
+                    failure_observed=r.failure_observed,
+                    first_principles_diagnosis=r.first_principles_diagnosis,
+                    generalized_rule_derived=r.generalized_rule_derived,
+                )
+                for r in records
+            ]

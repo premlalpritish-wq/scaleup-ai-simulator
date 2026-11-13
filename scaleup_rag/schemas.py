@@ -127,3 +127,12 @@ class CritiquePayload(BaseModel):
     symptom: str
     recommended_reclassification: Optional[str] = None
     resolved: bool = False
+
+
+class PersonaEpisodicMemorySpec(BaseModel):
+    memory_id: str
+    persona_id: str
+    trigger_signature: str
+    failure_observed: str
+    first_principles_diagnosis: str
+    generalized_rule_derived: str

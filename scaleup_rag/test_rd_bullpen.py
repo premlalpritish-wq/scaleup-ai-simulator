@@ -116,3 +116,99 @@ def test_anti_gaming_elo_updates_reflect_physics_and_grounding(tmp_path):
         lazy_abstention_count=3,
     )
     assert elo_lazy < 1200.0
+
+
+def test_pioneer_toolkits_and_feynman_fermi_flux():
+    from scaleup_rag.personas.toolkits import (
+        FeynmanProctorToolkit,
+        GadenToolkit,
+        LevenspielToolkit,
+        TeslaToolkit,
+    )
+
+    lev = LevenspielToolkit().diagnose_manifest({
+        "stages": [
+            {"tag": "R-104", "archetype": "packed_bed_reactor", "temperature_c": 370.0, "sizing": {"u_superficial_m_s": 0.4}},
+        ],
+        "hen_summary": {"pinch_min_approach_c": 12.0},
+    })
+    assert lev["toolkit"] == "LevenspielToolkit"
+    assert "adiabatic_equilibrium" in lev
+    assert "catalyst_diffusion" in lev
+    assert "pinch_composite" in lev
+
+    gad = GadenToolkit().diagnose_manifest({
+        "stages": [
+            {"tag": "BIO-1", "archetype": "stirred_tank_bioreactor", "temperature_c": 37.0, "sizing": {"volume_m3": 10.0, "power_kw": 25.0}},
+        ],
+    })
+    assert gad["toolkit"] == "GadenToolkit"
+    assert "scaleup_audit" in gad
+
+    tes = TeslaToolkit().diagnose_manifest({
+        "stages": [
+            {"tag": "C-101", "archetype": "high_pressure_compressor", "temperature_c": 140.0, "sizing": {"power_kw": 500.0}},
+        ],
+    })
+    assert tes["toolkit"] == "TeslaToolkit"
+    assert "electromechanical_transients" in tes
+
+    # FeynmanProctorToolkit catches Fermi heat-flux anomaly q'' > 150 kW/m2
+    feyn = FeynmanProctorToolkit().run_asymptotic_and_flux_audit({
+        "stages": [
+            {
+                "tag": "E-999",
+                "archetype": "shell_tube_hx",
+                "temperature_c": 300.0,
+                "pressure_bar": 30.0,
+                "thermal_duty_mw": 10.0,  # 10,000 kW / 20 m2 = 500 kW/m2 > 150
+                "sizing": {"area_req_m2": 20.0},
+            }
+        ]
+    })
+    assert feyn["passed"] is False
+    assert any(a["code"] == "FERMI_HEAT_FLUX_EXCEEDED" and a["unit_tag"] == "E-999" for a in feyn["anomalies"])
+
+
+def test_bullpen_persists_and_reloads_episodic_memory(tmp_path):
+    from scaleup_rag.database import ParameterDatabase
+    from scaleup_rag.seed_knowledge import seed_database
+
+    db_url = f"sqlite:///{tmp_path / 'bullpen_mem.db'}"
+    seed_database(db_url=db_url, include_workspace_json=False)
+
+    manifest = {
+        "prompt": "Simulate SMR syngas cooling.",
+        "stages": [
+            {
+                "tag": "E-999",
+                "archetype": "shell_tube_hx",
+                "temperature_c": 350.0,
+                "pressure_bar": 35.0,
+                "thermal_duty_mw": 10.0,
+                "sizing": {"area_req_m2": 20.0},
+            }
+        ],
+        "grounded_parameters": {
+            "bogus_param": {"value": 1.0, "unit": "dimensionless"}  # missing source_doi -> triggers critique
+        },
+        "trajectories": {"t": [0.0, 1.0], "y": [1.0, 2.0]},
+    }
+
+    res1 = run_bullpen_review(manifest, primary_persona_id="octave_levenspiel", db_url=db_url)
+    learned = res1["bullpen_trace"]["episodic_memories_learned"]
+    assert len(learned) >= 1
+    assert res1["bullpen_trace"]["toolkit_diagnostics"]["toolkit"] == "LevenspielToolkit"
+    assert res1["bullpen_trace"]["feynman_proctor_audit"]["passed"] is False
+
+    # Verify DB persistence directly and reload on second wake-up
+    db = ParameterDatabase(db_url=db_url)
+    mems = db.list_episodic_memories(persona_id="octave_levenspiel")
+    assert any(m.memory_id in learned for m in mems)
+
+    res2 = run_bullpen_review(manifest, primary_persona_id="octave_levenspiel", db_url=db_url)
+    loaded = res2["bullpen_trace"]["episodic_memories_loaded"]
+    assert any(mid in loaded for mid in learned)
+    # Public export must still strip all internal persona & episodic traces
+    pub = sanitize_for_public_export(res2)
+    assert "bullpen_trace" not in pub

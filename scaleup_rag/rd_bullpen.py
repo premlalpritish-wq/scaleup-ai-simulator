@@ -1,11 +1,23 @@
 import copy
+import hashlib
 import re
 import uuid
 from typing import Any, Callable, Dict, List, Optional
 
 from .database import ParameterDatabase, ScientificParameterRecord
 from .peer_review_gate import PeerReviewCommittee
-from .schemas import CritiquePayload, DomainSkillSpec, InternalPersonaProfile
+from .personas.toolkits import (
+    FeynmanProctorToolkit,
+    GadenToolkit,
+    LevenspielToolkit,
+    TeslaToolkit,
+)
+from .schemas import (
+    CritiquePayload,
+    DomainSkillSpec,
+    InternalPersonaProfile,
+    PersonaEpisodicMemorySpec,
+)
 from .seed_knowledge import SEED_AGENT_PROFILES, SEED_DOMAIN_SKILLS
 from sqlalchemy import select
 
@@ -95,6 +107,16 @@ def _count_lazy_abstentions(db: ParameterDatabase, unverified: Dict[str, Any]) -
     return count
 
 
+def _run_primary_toolkit(persona_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    if persona_id == "octave_levenspiel":
+        return LevenspielToolkit().diagnose_manifest(payload)
+    if persona_id == "elmer_gaden":
+        return GadenToolkit().diagnose_manifest(payload)
+    if persona_id == "nikola_tesla":
+        return TeslaToolkit().diagnose_manifest(payload)
+    return {"toolkit": "none", "metrics": {}}
+
+
 def run_bullpen_review(
     manifest_payload: Dict[str, Any],
     primary_persona_id: str,
@@ -114,8 +136,17 @@ def run_bullpen_review(
     payload = copy.deepcopy(manifest_payload)
 
     # ------------------------------------------------------------------
-    # Round 1: Propose & Attack (Hard-capped at 2 rounds total)
+    # Dormant Wake-Up: load historical episodic memories for primary & proctor
     # ------------------------------------------------------------------
+    primary_memories = db.list_episodic_memories(persona_id=primary.persona_id)
+    proctor_memories = db.list_episodic_memories(persona_id=proctor.persona_id)
+    loaded_memory_ids = [m.memory_id for m in primary_memories + proctor_memories]
+
+    # ------------------------------------------------------------------
+    # Round 1: Pioneer Toolkit Derivation & Proctor Attack (Hard-capped at 2 rounds)
+    # ------------------------------------------------------------------
+    toolkit_diagnostics = _run_primary_toolkit(primary.persona_id, payload)
+
     topo = payload.setdefault("topology_manifest", {})
     if isinstance(topo, dict):
         topo.setdefault("domain_id", skill.domain_id)
@@ -169,7 +200,21 @@ def run_bullpen_review(
                 )
             )
 
-    # 1c. RealityCompiler physical invariant attack
+    # 1c. Feynman Proctor asymptotic & Fermi flux attack
+    feynman_audit = FeynmanProctorToolkit().run_asymptotic_and_flux_audit(payload)
+    for anomaly in feynman_audit.get("anomalies", []):
+        critiques.append(
+            CritiquePayload(
+                critique_id=f"crit_{uuid.uuid4().hex[:8]}",
+                author_persona_id=proctor.persona_id,
+                target_field=str(anomaly.get("unit_tag", "UNIT")),
+                severity="CRITICAL",
+                symptom=f"[{anomaly.get('code', 'FERMI_AUDIT')}] {anomaly.get('detail', '')}",
+                recommended_reclassification=None,
+            )
+        )
+
+    # 1d. RealityCompiler physical invariant attack
     try:
         RealityCompiler().verify_strict(payload)
     except PhysicsCompilationError as err:
@@ -242,6 +287,36 @@ def run_bullpen_review(
         lazy_abstention_count=lazy_abstentions,
     )
 
+    # ------------------------------------------------------------------
+    # Memory Consolidation & Sleep: persist newly learned episodic rules
+    # ------------------------------------------------------------------
+    learned_memory_ids: List[str] = []
+    for crit in critiques:
+        sig_raw = f"{primary.persona_id}:{crit.target_field}:{crit.symptom}"
+        mem_hash = hashlib.sha256(sig_raw.encode("utf-8")).hexdigest()[:10]
+        mem_id = f"mem_{mem_hash}"
+        trigger_sig = f"{skill.domain_id}:{crit.target_field}"
+        diag = (
+            f"Detected by {crit.author_persona_id} during Round 1 against {skill.domain_id} "
+            f"(toolkit={toolkit_diagnostics.get('toolkit', 'none')}, physics_passed={physics_passed})."
+        )
+        rule = (
+            f"Prevent {crit.target_field} failure: {crit.symptom}"
+            if not crit.recommended_reclassification
+            else f"Reclassify {crit.target_field} to {crit.recommended_reclassification} when ungrounded: {crit.symptom}"
+        )
+        db.upsert_episodic_memory(
+            PersonaEpisodicMemorySpec(
+                memory_id=mem_id,
+                persona_id=primary.persona_id,
+                trigger_signature=trigger_sig,
+                failure_observed=crit.symptom,
+                first_principles_diagnosis=diag,
+                generalized_rule_derived=rule,
+            )
+        )
+        learned_memory_ids.append(mem_id)
+
     return {
         "manifest_payload": payload,
         "public_engine_alias": primary.public_engine_alias,
@@ -252,6 +327,10 @@ def run_bullpen_review(
             "primary_persona_id": primary.persona_id,
             "internal_display_name": primary.internal_display_name,
             "proctor_persona_id": proctor.persona_id,
+            "toolkit_diagnostics": toolkit_diagnostics,
+            "feynman_proctor_audit": feynman_audit,
+            "episodic_memories_loaded": loaded_memory_ids,
+            "episodic_memories_learned": learned_memory_ids,
             "critiques": [c.model_dump() for c in critiques],
             "grounding_ratio": round(grounding_ratio, 4),
             "lazy_abstention_count": lazy_abstentions,

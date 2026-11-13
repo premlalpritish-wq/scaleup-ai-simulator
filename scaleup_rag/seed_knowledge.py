@@ -6,6 +6,7 @@ from typing import List, Tuple, Dict, Optional, Any
 from .schemas import (
     DomainSkillSpec,
     InternalPersonaProfile,
+    PersonaEpisodicMemorySpec,
     RawExtractedCandidate,
     RequiredParameterSpec,
     OperatingEnvelope,
@@ -634,6 +635,34 @@ SEED_AGENT_PROFILES: List[InternalPersonaProfile] = [
 ]
 
 
+SEED_EPISODIC_MEMORIES: List[PersonaEpisodicMemorySpec] = [
+    PersonaEpisodicMemorySpec(
+        memory_id="mem_levenspiel_smr_single_shell_pinch",
+        persona_id="octave_levenspiel",
+        trigger_signature="smr_syngas_cooling_single_shell",
+        failure_observed="Lumping 860 C syngas drop into a single shell-and-tube exchanger caused > 400 C thermal shock and Pinch violations.",
+        first_principles_diagnosis="Single-shell LMTD cannot span 900->40 C without violating Second-Law Pinch (>= 10 C) and TEMA thermal stress limits; UK BS EN 13480 pipe runs require staged cooling.",
+        generalized_rule_derived="Never lump an 860 C syngas drop into one shell; always stage WHB -> HT-Shift -> Intercooler -> LT-Shift -> Economizer -> Trim Condenser with counter-current BFW Pinch >= 10 C and UK BS EN 13480 spacing.",
+    ),
+    PersonaEpisodicMemorySpec(
+        memory_id="mem_gaden_saccharina_alginate_viscosity",
+        persona_id="elmer_gaden",
+        trigger_signature="saccharina_alginate_alkaline_viscosity",
+        failure_observed="Assuming Newtonian broth viscosity in Saccharina latissima alginate extraction above pH 10 over-predicted kLa and under-sized agitator power.",
+        first_principles_diagnosis="Alkaline dissolution releases high-MW guluronate/mannuronate chains that spike apparent viscosity by > 20x under low shear, collapsing kLa unless impeller tip speed and shear-thinning power law are modeled.",
+        generalized_rule_derived="For Saccharina latissima alkaline extraction (pH >= 10) or high-viscosity bioprocesses, apply shear-thinning power-law correction to Re and kLa before sizing agitator P/V.",
+    ),
+    PersonaEpisodicMemorySpec(
+        memory_id="mem_feynman_percent_dimensionless_collision",
+        persona_id="richard_feynman",
+        trigger_signature="unit_collision_percent_vs_dimensionless",
+        failure_observed="Mixed percent (e.g. 33%) and dimensionless fraction (0.33) inputs in yield/conversion equations caused 100x stoichiometry errors.",
+        first_principles_diagnosis="Dimensionless ratios passed as raw percentages without pint normalization silently amplify mass and energy balances by 10^2.",
+        generalized_rule_derived="Enforce pint quarantine normalization on every percentage/fraction parameter before ODE or stoichiometry evaluation and flag any dimensionless input > 1.0.",
+    ),
+]
+
+
 def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = True) -> Dict[str, Any]:
     db = ParameterDatabase(db_url=db_url)
     
@@ -690,6 +719,11 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
         if db.upsert_agent_profile(profile):
             profiles_newly_written += 1
 
+    memories_newly_written = 0
+    for mem in SEED_EPISODIC_MEMORIES:
+        if db.upsert_episodic_memory(mem):
+            memories_newly_written += 1
+
     return {
         "total_evaluated": total_count,
         "total_candidates": total_count,
@@ -703,6 +737,8 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
         "domain_skills_newly_written": skills_newly_written,
         "agent_profiles_total": len(SEED_AGENT_PROFILES),
         "agent_profiles_newly_written": profiles_newly_written,
+        "episodic_memories_total": len(SEED_EPISODIC_MEMORIES),
+        "episodic_memories_newly_written": memories_newly_written,
         "tier_counts": tier_counts,
         "rejection_details": rejections
     }
