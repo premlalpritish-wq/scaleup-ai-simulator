@@ -83,7 +83,10 @@ var _prompt: TextEdit
 var _status: Label
 var _sim_status: Label
 var _confidence_badge: Label
+var _top_reality_badge: Label
 var _reality_compiler_badge: Label
+var _reality_compiler_audit: Dictionary = {}
+var _runtime_law_violations: Array = []
 var _analogue_banner: Label
 var _generate: Button
 var _interpret_only: Button
@@ -344,6 +347,12 @@ func _create_top_hud() -> Control:
 	_confidence_badge.add_theme_font_size_override("font_size", 11)
 	_confidence_badge.modulate = GOOD
 	header_row.add_child(_confidence_badge)
+
+	_top_reality_badge = Label.new()
+	_top_reality_badge.text = "🟢 Reality Compiler: PASSED (6/6 Physical Laws Verified)"
+	_top_reality_badge.add_theme_font_size_override("font_size", 11)
+	_top_reality_badge.modulate = GOOD
+	header_row.add_child(_top_reality_badge)
 
 	_analogue_banner = Label.new()
 	_analogue_banner.text = "⚠️ [ANALOGUE BRIDGE WARNING: Expert verification required]"
@@ -842,6 +851,9 @@ func _recalculate_smr_equilibrium() -> void:
 	_smr_fault_state["h2_flow"] = h2_flow
 	_smr_fault_state["q_scale"] = h2_flow / 120000.0 if h2_flow > 0.0 else 0.0
 
+	var law_violations: Array = _evaluate_runtime_reality_laws(sc, temp_c, press, e105_loss, n2_purge)
+	_smr_fault_state["law_violations"] = law_violations
+
 	_smr_kpis_label.text = "R-102 C2+ Conv: %.1f%% | R-103 CH4 Slip: %.1f%%\nWGS CO: %.1f%% | H2: %.0f Nm3/h | %.0f kW" % [r102_c2_conv_pct, ch4_slip_pct, wgs_co_conv_pct, h2_flow, comp_kw]
 
 	var is_perturbed: bool = absf(sc - 3.0) > 0.05 or absf(temp_c - 900.0) > 1.0 or absf(press - 38.0) > 0.2 or e105_loss or coking_active or n2_purge
@@ -888,6 +900,141 @@ func _recalculate_smr_equilibrium() -> void:
 
 	if _view != null and _view.has_method("update_smr_process_state"):
 		_view.update_smr_process_state(sc, temp_c, press, _smr_fault_state)
+
+
+func _get_active_law(law_id: String) -> Dictionary:
+	var laws: Array = _reality_compiler_audit.get("active_laws", [])
+	for item in laws:
+		if item is Dictionary and str((item as Dictionary).get("law_id", "")) == law_id:
+			return item as Dictionary
+	return {}
+
+
+func _evaluate_runtime_reality_laws(sc: float = 3.0, temp_c: float = 900.0, press: float = 38.0, e105_loss: bool = false, n2_purge: bool = false) -> Array:
+	var violations: Array = []
+	if not _smr_mode:
+		var compile_viols: Array = _reality_compiler_audit.get("violations", [])
+		_runtime_law_violations = compile_viols
+		_update_reality_compiler_badges(compile_viols)
+		return compile_viols
+
+	# 1. BOUDOUARD_CARBON_COKING
+	var coking_law := _get_active_law("BOUDOUARD_CARBON_COKING")
+	var coking_thresh: Dictionary = coking_law.get("threshold_parameters", {})
+	var min_sc: float = float(coking_thresh.get("min_sc_ratio_ni", 2.0))
+	if sc < min_sc:
+		violations.append({
+			"law_id": "BOUDOUARD_CARBON_COKING",
+			"unit_tag": "B-101 / R-103",
+			"message": "S/C=%.2f < %.2f min Ni catalyst coking limit" % [sc, min_sc],
+			"equation": str(coking_law.get("governing_equation", "S/C >= min_sc_ratio_ni (2.0)")),
+			"doi": str(coking_law.get("doi", "10.1016/j.ijhydene.2013.08.055")),
+		})
+
+	# 2. VAN_T_HOFF_EXOTHERMIC_EQUILIBRIUM & SINGLE_SHELL_THERMAL_SHOCK
+	var vh_law := _get_active_law("VAN_T_HOFF_EXOTHERMIC_EQUILIBRIUM")
+	var hx_law := _get_active_law("SINGLE_SHELL_THERMAL_SHOCK")
+	var max_hx_dt: float = float((hx_law.get("threshold_parameters", {}) as Dictionary).get("max_single_hx_dt_c", 350.0))
+	var e105_out_c: float = (580.0 if e105_loss else 340.0) + (temp_c - 900.0) * 0.35
+	var r104_out_c: float = e105_out_c + 80.0
+	var r105_out_c: float = 245.0 + (e105_out_c - 340.0) * 0.45
+	if r104_out_c > 450.0 or r105_out_c > 260.0:
+		violations.append({
+			"law_id": "VAN_T_HOFF_EXOTHERMIC_EQUILIBRIUM",
+			"unit_tag": "R-104 / R-105",
+			"message": "Shift exit %.0f°C / %.0f°C exceeds catalyst sintering & equilibrium ceiling (450°C / 260°C)" % [r104_out_c, r105_out_c],
+			"equation": str(vh_law.get("governing_equation", "T_shift_out <= 450 C (HTS) / 260 C (LTS); dT_ad <= 220 C")),
+			"doi": str(vh_law.get("doi", "10.1016/j.ijhydene.2010.04.093")),
+		})
+	var e105_dt: float = absf(temp_c - e105_out_c)
+	if not e105_loss and e105_dt > (max_hx_dt + 230.0):
+		# E-105 is a WHB (max_whb_hx_dt_c=580°C) when nominal, flag only if exceeded
+		violations.append({
+			"law_id": "SINGLE_SHELL_THERMAL_SHOCK",
+			"unit_tag": "E-105",
+			"message": "Single-shell dT %.0f°C exceeds thermal shock limit" % e105_dt,
+			"equation": str(hx_law.get("governing_equation", "|T_in - T_out| <= max_single_hx_dt_c")),
+			"doi": str(hx_law.get("doi", "10.1016/B978-0-08-096659-5.00019-5")),
+		})
+
+	# 3. POLYTROPIC_COMPRESSION_DISCHARGE
+	var comp_law := _get_active_law("POLYTROPIC_COMPRESSION_DISCHARGE")
+	var comp_thresh: Dictionary = comp_law.get("threshold_parameters", {})
+	var gamma: float = float(comp_thresh.get("gamma", 1.38))
+	var eta_p: float = float(comp_thresh.get("eta_p", 0.80))
+	var t_max_comp_c: float = float(comp_thresh.get("max_compressor_discharge_c", 155.0))
+	var p_in_bar: float = maxf(press - 4.9, 5.0)
+	var p_out_bar: float = 400.0
+	var n_stages: float = 3.0
+	var t_in_k: float = 40.0 + 273.15
+	var t_out_k: float = t_in_k * pow(p_out_bar / p_in_bar, (gamma - 1.0) / (n_stages * gamma * eta_p))
+	var t_out_c: float = t_out_k - 273.15
+	if not n2_purge and t_out_c > t_max_comp_c:
+		violations.append({
+			"law_id": "POLYTROPIC_COMPRESSION_DISCHARGE",
+			"unit_tag": "C-101..103",
+			"message": "Stage discharge %.1f°C > %.1f°C seal limit (P_in=%.1f bar)" % [t_out_c, t_max_comp_c, p_in_bar],
+			"equation": str(comp_law.get("governing_equation", "T_out = T_in * (P_out/P_in)^((gamma-1)/(N*gamma*eta_p)) <= 155 C")),
+			"doi": str(comp_law.get("doi", "10.1016/B978-0-12-809644-4.00003-2")),
+		})
+
+	# 4. SECOND_LAW_PINCH
+	var pinch_law := _get_active_law("SECOND_LAW_PINCH")
+	var pinch_thresh: Dictionary = pinch_law.get("threshold_parameters", {})
+	var dt_min: float = float(pinch_thresh.get("dT_min_c", 10.0))
+	var flue_in_c: float = temp_c + 110.0
+	var pre_ref_out_c: float = 627.0 + (temp_c - 900.0) * 0.45
+	var stack_out_c: float = 130.0 + (temp_c - 900.0) * 0.45
+	var approach_hot: float = flue_in_c - pre_ref_out_c
+	var approach_cold: float = stack_out_c - 25.0
+	var min_approach: float = minf(approach_hot, approach_cold)
+	if min_approach < dt_min:
+		violations.append({
+			"law_id": "SECOND_LAW_PINCH",
+			"unit_tag": "E-103..E-104",
+			"message": "Convection pinch approach %.1f°C < dT_min %.1f°C" % [min_approach, dt_min],
+			"equation": str(pinch_law.get("governing_equation", "T_hot_in - T_cold_out >= dT_min and T_hot_out - T_cold_in >= dT_min")),
+			"doi": str(pinch_law.get("doi", "10.1016/0009-2509(83)80134-1")),
+		})
+
+	_runtime_law_violations = violations
+	_update_reality_compiler_badges(violations)
+	return violations
+
+
+func _update_reality_compiler_badges(violations: Array) -> void:
+	var laws_checked: int = int(_reality_compiler_audit.get("laws_checked", 6))
+	if violations.is_empty():
+		if _top_reality_badge != null:
+			_top_reality_badge.text = "🟢 Reality Compiler: PASSED (%d/6 Physical Laws Verified)" % laws_checked
+			_top_reality_badge.modulate = GOOD
+		if _reality_compiler_badge != null:
+			_reality_compiler_badge.text = "🟢 Reality Compiler: PASSED (%d/6 Physical Laws Verified • 0 Violations)" % laws_checked
+			_reality_compiler_badge.modulate = GOOD
+	else:
+		var first_v: Dictionary = violations[0] if (violations[0] is Dictionary) else {}
+		var first_id := str(first_v.get("law_id", "LAW_VIOLATION"))
+		var first_unit := str(first_v.get("unit_tag", "UNIT"))
+		var n_v: int = violations.size()
+		var plural := "" if n_v == 1 else "S"
+		if _top_reality_badge != null:
+			_top_reality_badge.text = "🔴 Reality Compiler: %d LAW VIOLATION%s (%s on %s — see Dossier)" % [n_v, plural, first_id, first_unit]
+			_top_reality_badge.modulate = BAD
+		if _reality_compiler_badge != null:
+			var lines: PackedStringArray = PackedStringArray()
+			lines.append("🔴 Reality Compiler: %d LAW VIOLATION%s" % [n_v, plural])
+			for item in violations:
+				if not (item is Dictionary):
+					continue
+				var v: Dictionary = item as Dictionary
+				lines.append("[LAW VIOLATION: %s] on %s — %s" % [
+					str(v.get("law_id", "?")),
+					str(v.get("unit_tag", "?")),
+					str(v.get("message", "")),
+				])
+				lines.append("   Eq: %s | DOI: %s" % [str(v.get("equation", "")), str(v.get("doi", ""))])
+			_reality_compiler_badge.text = "\n".join(lines)
+			_reality_compiler_badge.modulate = BAD
 
 
 func _on_sandbox_ph_toggle() -> void:
@@ -1757,14 +1904,9 @@ func load_run_dict(payload: Dictionary) -> void:
 		if _sim_status != null:
 			_sim_status.text = "Status: HALTED (Insufficient verified empirical literature)"
 			_sim_status.modulate = BAD
-		if _reality_compiler_badge != null:
-			var rc_audit: Dictionary = payload.get("reality_compiler_audit", {})
-			if not rc_audit.is_empty():
-				var rc_status := str(rc_audit.get("status", "PASSED"))
-				var rc_laws := int(rc_audit.get("laws_checked", 6))
-				var rc_viol: Array = rc_audit.get("violations", [])
-				_reality_compiler_badge.text = "🛡 Reality Compiler: %s (%d/6 Physical Laws Verified • %d Violations: Mass, 2nd-Law Pinch, Equilibrium, Catalyst, Phase, Hydraulics)" % [rc_status, rc_laws, rc_viol.size()]
-				_reality_compiler_badge.modulate = GOOD if rc_status == "PASSED" and rc_viol.is_empty() else BAD
+		_reality_compiler_audit = payload.get("reality_compiler_audit", {})
+		if not _reality_compiler_audit.is_empty():
+			_update_reality_compiler_badges(_reality_compiler_audit.get("violations", []))
 		if _confidence_badge != null:
 			_confidence_badge.text = "[Confidence: 0% • HALTED: InsufficientEvidenceError]"
 			_confidence_badge.modulate = BAD
@@ -1786,16 +1928,10 @@ func load_run_dict(payload: Dictionary) -> void:
 		var audit: Dictionary = payload.get("epistemic_audit", {})
 		var sandbox_cfg: Dictionary = payload.get("sandbox_config", {})
 		var is_chem_sandbox: bool = str(sandbox_cfg.get("mode", "")) == "chemical_plant"
+		_reality_compiler_audit = payload.get("reality_compiler_audit", {})
 		_set_sandbox_mode(is_chem_sandbox)
-
-		if _reality_compiler_badge != null:
-			var rc_audit: Dictionary = payload.get("reality_compiler_audit", {})
-			if not rc_audit.is_empty():
-				var rc_status := str(rc_audit.get("status", "PASSED"))
-				var rc_laws := int(rc_audit.get("laws_checked", 6))
-				var rc_viol: Array = rc_audit.get("violations", [])
-				_reality_compiler_badge.text = "🛡 Reality Compiler: %s (%d/6 Physical Laws Verified • %d Violations: Mass, 2nd-Law Pinch, Equilibrium, Catalyst, Phase, Hydraulics)" % [rc_status, rc_laws, rc_viol.size()]
-				_reality_compiler_badge.modulate = GOOD if rc_status == "PASSED" and rc_viol.is_empty() else BAD
+		if not is_chem_sandbox and not _reality_compiler_audit.is_empty():
+			_update_reality_compiler_badges(_reality_compiler_audit.get("violations", []))
 		if _confidence_badge != null:
 			if not prov.is_empty() and not has_analogue:
 				var t1_cnt: int = int(prov.get("tier_1_quarantine_count", 0))

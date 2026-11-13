@@ -1,7 +1,7 @@
 {
   "contract_version": "0.1.0",
   "schema_version": "1.0.0",
-  "run_id": "prompt_run_ea6a5bce",
+  "run_id": "prompt_run_b239a208",
   "status": "COMPLETED",
   "prompt": "Design and simulate an industrial Steam Methane Reforming (SMR) plant for hydrogen production with pre-reformer, primary reformer, two-stage WGS, CO2 absorption, PSA, and syngas compression.",
   "cache_hit": false,
@@ -2107,6 +2107,94 @@
     "status": "PASSED",
     "laws_checked": 6,
     "auto_remediations_applied": [],
-    "violations": []
+    "violations": [],
+    "active_laws": [
+      {
+        "law_id": "SECOND_LAW_PINCH",
+        "domain": "thermodynamics",
+        "governing_equation": "T_hot_in - T_cold_out >= dT_min and T_hot_out - T_cold_in >= dT_min and |Q_hot - Q_cold|/Q_hot <= 0.02",
+        "threshold_parameters": {
+          "dT_min_c": 10.0,
+          "first_law_rel_tol": 0.02
+        },
+        "doi": "10.1016/0009-2509(83)80134-1"
+      },
+      {
+        "law_id": "SINGLE_SHELL_THERMAL_SHOCK",
+        "domain": "thermodynamics",
+        "governing_equation": "delta_T_hx <= max_single_hx_dt_c",
+        "threshold_parameters": {
+          "max_single_hx_dt_c": 350.0
+        },
+        "doi": "10.1016/B978-0-08-096659-5.00019-5"
+      },
+      {
+        "law_id": "VAN_T_HOFF_EXOTHERMIC_EQUILIBRIUM",
+        "domain": "kinetics_equilibrium",
+        "governing_equation": "X_exit <= X_eq(T_out, P) and delta_T_ad <= max_adiabatic_rise_c",
+        "threshold_parameters": {
+          "max_adiabatic_rise_c": 220.0,
+          "min_intercooled_conversion_jump": 0.05
+        },
+        "doi": "10.1016/j.ijhydene.2010.04.093"
+      },
+      {
+        "law_id": "POLYTROPIC_COMPRESSION_DISCHARGE",
+        "domain": "thermodynamics",
+        "governing_equation": "T_out = T_in * (P_out / P_in)**((gamma - 1) / (gamma * eta_p)) <= T_max_mech",
+        "threshold_parameters": {
+          "max_compressor_discharge_c": 155.0,
+          "max_stage_ratio": 2.5,
+          "gamma": 1.38,
+          "eta_p": 0.8
+        },
+        "doi": "10.1016/B978-0-12-809644-4.00003-2"
+      },
+      {
+        "law_id": "NICKEL_SULFUR_POISONING",
+        "domain": "catalysis_materials",
+        "governing_equation": "y_H2S <= max_ni_h2s_ppm",
+        "threshold_parameters": {
+          "max_ni_h2s_ppm": 0.1
+        },
+        "doi": "10.1016/j.ijhydene.2013.08.055"
+      },
+      {
+        "law_id": "BOUDOUARD_CARBON_COKING",
+        "domain": "catalysis_materials",
+        "governing_equation": "S_to_C >= min_sc_ratio_ni",
+        "threshold_parameters": {
+          "min_sc_ratio_ni": 2.0
+        },
+        "doi": "10.1016/j.ijhydene.2013.08.055"
+      },
+      {
+        "law_id": "WET_GAS_PSA_KNOCKOUT",
+        "domain": "hydraulics_phase",
+        "governing_equation": "T_psa_in <= max_psa_inlet_temp_c and has_knockout_separator == 1",
+        "threshold_parameters": {
+          "max_psa_inlet_temp_c": 45.0
+        },
+        "doi": "10.1016/j.seppur.2018.03.058"
+      },
+      {
+        "law_id": "PASSIVE_PRESSURE_DROP_MONOTONICITY",
+        "domain": "hydraulics_phase",
+        "governing_equation": "P_out <= P_in for passive units; delta_P > 0 only across P-xxx/C-xxx",
+        "threshold_parameters": {
+          "max_passive_pressure_rise_bar": 0.01
+        },
+        "doi": "10.1016/B978-0-08-096659-5.00005-5"
+      },
+      {
+        "law_id": "AEROBIC_OXYGEN_TRANSFER_LIMIT",
+        "domain": "bioprocess",
+        "governing_equation": "OTR = kLa * (C_star - C_L) >= OUR",
+        "threshold_parameters": {
+          "min_dissolved_oxygen_frac": 0.15
+        },
+        "doi": "10.1016/j.bej.2017.09.005"
+      }
+    ]
   }
 }

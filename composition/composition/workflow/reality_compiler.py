@@ -45,6 +45,29 @@ class RealityCompiler:
         if thresholds:
             self.thresholds.update(thresholds)
 
+    def _serialize_active_laws(self) -> List[Dict[str, Any]]:
+        """Return machine-readable governing physical laws and active thresholds."""
+        try:
+            from scaleup_rag.seed_knowledge import SEED_MECHANISTIC_LAWS
+            laws = SEED_MECHANISTIC_LAWS
+        except Exception:
+            laws = []
+
+        serialized: List[Dict[str, Any]] = []
+        for law in laws:
+            merged_thresholds = dict(law.threshold_parameters or {})
+            for k in list(merged_thresholds.keys()):
+                if k in self.thresholds:
+                    merged_thresholds[k] = self.thresholds[k]
+            serialized.append({
+                "law_id": law.law_id,
+                "domain": law.domain,
+                "governing_equation": law.governing_equation,
+                "threshold_parameters": merged_thresholds,
+                "doi": law.doi,
+            })
+        return serialized
+
     @staticmethod
     def _extract_graph(payload: Dict[str, Any]) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         bp = payload.get("anatomy_blueprint", {})
@@ -362,6 +385,7 @@ class RealityCompiler:
             "laws_checked": 6,
             "auto_remediations_applied": list(payload.get("reality_compiler_audit", {}).get("auto_remediations_applied", [])),
             "violations": [],
+            "active_laws": self._serialize_active_laws(),
         }
 
     def compile_and_verify(
@@ -393,6 +417,7 @@ class RealityCompiler:
                 "laws_checked": 6,
                 "auto_remediations_applied": remediations_applied,
                 "violations": err.violations,
+                "active_laws": self._serialize_active_laws(),
             }
             payload["reality_compiler_audit"] = audit
             return audit

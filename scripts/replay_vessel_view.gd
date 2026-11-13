@@ -1826,6 +1826,11 @@ func update_smr_process_state(sc_ratio: float, reformer_temp_c: float, pressure_
 
 	var temp_norm := clampf((reformer_temp_c - 750.0) / 170.0, 0.0, 1.0)
 	var coking: bool = bool(_smr_process_state["coking_warning"])
+	var law_viols: Array = fault_state.get("law_violations", [])
+	for lv in law_viols:
+		if lv is Dictionary and str((lv as Dictionary).get("law_id", "")) == "BOUDOUARD_CARBON_COKING":
+			coking = true
+			break
 	var purge: bool = bool(_smr_process_state["n2_purge_active"])
 	var tube_mats: Array = _smr_refs.get("reformer_tube_mats", [])
 	for idx in range(tube_mats.size()):
@@ -1833,13 +1838,15 @@ func update_smr_process_state(sc_ratio: float, reformer_temp_c: float, pressure_
 		if tm == null:
 			continue
 		if purge:
+			tm.albedo_color = Color(0.55, 0.62, 0.70)
 			tm.emission = Color(0.20, 0.55, 0.95)
 			tm.emission_energy_multiplier = 0.45
 		elif coking:
-			tm.albedo_color = Color(0.18, 0.16, 0.15)
-			tm.emission = Color(0.65, 0.22, 0.05)
-			tm.emission_energy_multiplier = 0.5 + 0.5 * temp_norm
+			tm.albedo_color = Color(0.55, 0.16, 0.08)
+			tm.emission = Color(0.95, 0.24, 0.05)
+			tm.emission_energy_multiplier = 1.2 + 0.6 * temp_norm
 		else:
+			tm.albedo_color = Color(0.58, 0.60, 0.64)
 			tm.emission = Color(1.0, 0.36 + 0.12 * float(idx) * 0.4, 0.08)
 			tm.emission_energy_multiplier = (0.35 + 0.55 * float(idx)) * (0.65 + 0.85 * temp_norm)
 
