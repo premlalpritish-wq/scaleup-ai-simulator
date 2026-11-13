@@ -1125,7 +1125,7 @@ def synthesize_heat_integration_network(
         m_cp_mw_k = max(0.015, (flow_nm3 / 1000.0) * 0.00042)
 
         # Pass A: Fired Furnace Convection Bank Synthesis (T_flue_in > 700 C)
-        t_flue_in = float(u.get("flue_in_temp_c", 980.0 if arch == "furnace_reformer" else t_cur))
+        t_flue_in = float(u.get("flue_in_temp_c", 1010.0 if arch == "furnace_reformer" else t_cur))
         if arch == "furnace_reformer" or t_flue_in > 700.0 and "furnace" in (title + desc).lower():
             t_stack_target = 130.0
             # Collect cold streams from explicit streams list or infer from plant context

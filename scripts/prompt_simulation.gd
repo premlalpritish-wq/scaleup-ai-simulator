@@ -673,12 +673,12 @@ func _create_sandbox_dock() -> Control:
 	_smr_sc_val = sc_res[1]
 	_smr_sc_slider.value_changed.connect(_on_smr_param_changed)
 
-	var t_res := _make_smr_slider_row(_smr_sandbox_box, "Reformer Outlet (°C):", 750.0, 920.0, 5.0, 850.0, "%.0f °C")
+	var t_res := _make_smr_slider_row(_smr_sandbox_box, "Reformer Outlet (°C):", 750.0, 960.0, 5.0, 900.0, "%.0f °C")
 	_smr_temp_slider = t_res[0]
 	_smr_temp_val = t_res[1]
 	_smr_temp_slider.value_changed.connect(_on_smr_param_changed)
 
-	var p_res := _make_smr_slider_row(_smr_sandbox_box, "Operating Press (bar):", 15.0, 35.0, 0.5, 28.0, "%.1f bar")
+	var p_res := _make_smr_slider_row(_smr_sandbox_box, "Operating Press (bar):", 15.0, 48.0, 0.5, 38.0, "%.1f bar")
 	_smr_press_slider = p_res[0]
 	_smr_press_val = p_res[1]
 	_smr_press_slider.value_changed.connect(_on_smr_param_changed)
@@ -824,10 +824,10 @@ func _recalculate_smr_equilibrium() -> void:
 	var dh_smr_kj: float = 206.0
 	if grounded.has("smr_reaction_enthalpy") and (grounded["smr_reaction_enthalpy"] is Dictionary):
 		dh_smr_kj = float((grounded["smr_reaction_enthalpy"] as Dictionary).get("value", 206.0))
-	var t_ref_k: float = 850.0 + 273.15
+	var t_ref_k: float = 900.0 + 273.15
 	var t_k: float = temp_c + 273.15
 	var k_vant_hoff: float = exp((-dh_smr_kj * 1000.0 / 8.314) * ((1.0 / t_k) - (1.0 / t_ref_k)))
-	var le_chatelier_p: float = pow(press / 28.0, 2.0)
+	var le_chatelier_p: float = pow(press / 38.0, 2.0)
 
 	var r102_c2_conv_pct: float = clampf(99.5 - maxf(0.0, 2.5 - sc) * 4.0, 88.0, 100.0)
 	var ch4_slip_pct: float = clampf(2.1 * (1.0 / maxf(0.05, k_vant_hoff)) * (3.0 / sc) * sqrt(le_chatelier_p), 0.25, 22.0)
@@ -837,12 +837,13 @@ func _recalculate_smr_equilibrium() -> void:
 	_smr_fault_state["purity_pct"] = purity_pct
 
 	var h2_flow: float = 0.0 if n2_purge else 120000.0 * ((1.0 - ch4_slip_pct * 0.015) / (1.0 - 2.1 * 0.015)) * (wgs_co_conv_pct / 96.4) * (psa_rec_pct / 88.0)
-	var comp_kw: float = 0.0 if n2_purge else 14200.0 * (h2_flow / 120000.0) * (log(400.0 / maxf(press - 4.0, 8.0)) / log(400.0 / 24.0))
+	var comp_kw: float = 0.0 if n2_purge else 14200.0 * (h2_flow / 120000.0) * (log(400.0 / maxf(press - 4.9, 10.0)) / log(400.0 / 33.1))
 	_smr_fault_state["h2_flow"] = h2_flow
+	_smr_fault_state["q_scale"] = h2_flow / 120000.0 if h2_flow > 0.0 else 0.0
 
-	_smr_kpis_label.text = "R-102 C2+ Conv: %.1f%% | R-201 CH4 Slip: %.1f%%\nWGS CO: %.1f%% | H2: %.0f Nm3/h | %.0f kW" % [r102_c2_conv_pct, ch4_slip_pct, wgs_co_conv_pct, h2_flow, comp_kw]
+	_smr_kpis_label.text = "R-102 C2+ Conv: %.1f%% | R-103 CH4 Slip: %.1f%%\nWGS CO: %.1f%% | H2: %.0f Nm3/h | %.0f kW" % [r102_c2_conv_pct, ch4_slip_pct, wgs_co_conv_pct, h2_flow, comp_kw]
 
-	var is_perturbed: bool = absf(sc - 3.0) > 0.05 or absf(temp_c - 850.0) > 1.0 or absf(press - 28.0) > 0.2 or e105_loss or coking_active or n2_purge
+	var is_perturbed: bool = absf(sc - 3.0) > 0.05 or absf(temp_c - 900.0) > 1.0 or absf(press - 38.0) > 0.2 or e105_loss or coking_active or n2_purge
 	if _confidence_badge != null:
 		if is_perturbed:
 			_confidence_badge.text = "[Reduced-Order Equilibrium Perturbation Model • Van 't Hoff + Le Chatelier]"
@@ -1533,8 +1534,8 @@ func _build_dynamic_stepper(unit_ops: Array) -> void:
 
 		var btn := Button.new()
 		if op.has("temperature_c"):
-			var pill_names := ["U-100 Pre-Ref", "U-200 SMR", "U-300 WHB", "U-400 WGS", "U-500 Cooler/KO", "U-600 CO2 Cap", "U-700 PSA", "U-800 400bar Comp"]
-			btn.text = "[%d] %s" % [i + 1, pill_names[mini(i, pill_names.size() - 1)]]
+			var u_tag := str(op.get("tag", ""))
+			btn.text = "[%d] %s" % [i + 1, u_tag if not u_tag.is_empty() else title.substr(0, 16)]
 		else:
 			btn.text = "[%d] %s" % [i + 1, title]
 		btn.add_theme_font_size_override("font_size", 10)
@@ -1606,9 +1607,8 @@ func _build_dynamic_floating_badges(unit_ops: Array) -> void:
 
 		var label_text: String
 		if op.has("temperature_c"):
-			var short_names := ["R-102 PRE-REF", "F-201 SMR", "E-105 WHB", "R-301A/B WGS", "E-401 / V-401", "C-501 CO2 CAP", "U-601 PSA", "K-701 COMP"]
-			var sname: String = short_names[mini(i, short_names.size() - 1)]
-			label_text = "[%d] %s" % [i + 1, sname]
+			var u_tag := str(op.get("tag", ""))
+			label_text = "[%d] %s" % [i + 1, u_tag if not u_tag.is_empty() else title.substr(0, 16)]
 		else:
 			label_text = "[%s] %s [%.0fh-%.0fh] • %s" % [
 				title,
@@ -1638,8 +1638,8 @@ func _update_floating_badges_positions() -> void:
 			if not is_instance_valid(b):
 				continue
 			var world_pos: Vector3
-			if is_chem and i < ReplayVesselView.CHEM_PLOT_POSITIONS.size():
-				var base_p: Vector3 = ReplayVesselView.CHEM_PLOT_POSITIONS[i]
+			if is_chem and _view.has_method("get_stage_world_position"):
+				var base_p: Vector3 = _view.get_stage_world_position(i)
 				world_pos = base_p + Vector3(0.0, 0.14, 1.35)
 			else:
 				var pos_x := -total_span * 0.5 + float(i) * 1.95
@@ -2241,6 +2241,23 @@ func _on_bench_build_completed() -> void:
 		_is_playing = true
 		_update_play_btn()
 		_show_toast("▶ Simulation Online — Stage-Normalized 1x Pacing Active", 2.5)
+
+	var shot_path := _get_screenshot_arg()
+	if not shot_path.is_empty():
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var img := get_viewport().get_texture().get_image()
+		if img != null:
+			img.save_png(shot_path)
+		get_tree().quit()
+
+
+func _get_screenshot_arg() -> String:
+	var all_args := OS.get_cmdline_user_args() + OS.get_cmdline_args()
+	for i in range(all_args.size()):
+		if all_args[i] == "--screenshot" and i + 1 < all_args.size():
+			return all_args[i + 1]
+	return ""
 
 
 func _on_prev_stage_clicked() -> void:

@@ -457,6 +457,17 @@ func set_plant_connections(connections: Array) -> void:
 	_plant_connections = connections.duplicate(true)
 
 
+func get_stage_world_position(index: int) -> Vector3:
+	if index >= 0 and index < _stage_vessels.size():
+		var r: Node3D = _stage_vessels[index].get("root", null)
+		if r != null and is_instance_valid(r):
+			return r.position
+	var pos_arr: Array = _computed_layout.get("positions", [])
+	if index >= 0 and index < pos_arr.size():
+		return pos_arr[index]
+	return Vector3.ZERO
+
+
 func _compute_topological_plant_layout(units: Array, connections: Array) -> Dictionary:
 	var count := units.size()
 	var positions: Array = []
@@ -505,7 +516,7 @@ func _compute_topological_plant_layout(units: Array, connections: Array) -> Dict
 	if downstream_count >= 2:
 		cooling_count = clampi(cooling_count, 1, downstream_count - 1)
 
-	var north_start_x := -maxf(2.5, tunnel_reach * 0.35)
+	var north_start_x := 0.5
 	for j in range(downstream_count):
 		var idx := hub_index + 1 + j
 		if j < cooling_count:
@@ -646,8 +657,8 @@ func build_anatomy_bench_async(unit_operations: Array) -> void:
 
 	if is_chem_plant:
 		var pb: Rect2 = _computed_layout.get("pad_bounds", Rect2(-13.2, -6.5, 28.0, 13.0))
-		_target = Vector3(pb.position.x + pb.size.x * 0.5, 1.8, 0.0)
-		_distance = clampf(pb.size.x * 0.72, 18.0, 32.0)
+		_target = Vector3(pb.position.x + pb.size.x * 0.45, 1.6, 0.0)
+		_distance = clampf(pb.size.x * 0.85, 22.0, 36.0)
 		_yaw = deg_to_rad(4.0)
 		_pitch = deg_to_rad(-24.0)
 	else:
@@ -1850,27 +1861,45 @@ func update_smr_process_state(sc_ratio: float, reformer_temp_c: float, pressure_
 			e105_mat.emission_energy_multiplier = 0.40
 
 	var lbls: Dictionary = _smr_refs.get("stage_labels", {})
-	var e105_t := 580.0 if bool(_smr_process_state["e105_cooling_loss"]) else 350.0
-	var wgs_t := 340.0 if bool(_smr_process_state["e105_cooling_loss"]) else 210.0
+	var e105_loss := bool(_smr_process_state["e105_cooling_loss"])
 	var purity_val: float = float(fault_state.get("purity_pct", 99.99))
 	var h2_f: float = float(fault_state.get("h2_flow", 120000.0))
-	var f_scale: float = h2_f / 120000.0 if h2_f > 0.0 else 0.0
-	if lbls.has(0) and is_instance_valid(lbls[0]):
-		lbls[0].text = "R-102 PRE-REF (%.0f Nm3/h Wet)\n490°C | %.0f bar | S/C %.1f" % [144200.0 * f_scale, pressure_bar + 2.0, sc_ratio]
-	if lbls.has(1) and is_instance_valid(lbls[1]):
-		lbls[1].text = "F-201 SMR (%.0f Nm3/h Wet)\n%.0f°C | %.0f bar | 72.0%% Dry H2" % [210800.0 * f_scale, reformer_temp_c, pressure_bar]
-	if lbls.has(2) and is_instance_valid(lbls[2]):
-		lbls[2].text = "E-105 WHB (%.0f Nm3/h Wet)\n%.0f°C | %.0f bar | Steam" % [210800.0 * f_scale, e105_t, maxf(pressure_bar - 2.0, 1.0)]
-	if lbls.has(3) and is_instance_valid(lbls[3]):
-		lbls[3].text = "R-301A/B WGS (%.0f Nm3/h Wet)\n%.0f°C | %.0f bar | 80.1%% Dry H2" % [210800.0 * f_scale, wgs_t, maxf(pressure_bar - 3.0, 1.0)]
-	if lbls.has(4) and is_instance_valid(lbls[4]):
-		lbls[4].text = "E-401 / V-401 (%.0f Nm3/h Dry)\n40°C | %.1f bar | 80.1%% H2" % [170200.0 * f_scale, maxf(pressure_bar - 3.5, 1.0)]
-	if lbls.has(5) and is_instance_valid(lbls[5]):
-		lbls[5].text = "C-501 CO2 CAP (%.0f Nm3/h Dry)\n42°C | %.1f bar | 97.6%% H2" % [139700.0 * f_scale, maxf(pressure_bar - 3.8, 1.0)]
-	if lbls.has(6) and is_instance_valid(lbls[6]):
-		lbls[6].text = "U-601 PSA (%.0f Nm3/h Dry)\n40°C | %.0f bar | %.2f%% H2" % [h2_f, maxf(pressure_bar - 4.0, 1.0), purity_val]
-	if lbls.has(7) and is_instance_valid(lbls[7]):
-		lbls[7].text = "K-701 COMP (%.0f Nm3/h Dry)\n40°C | 400 bar | %.2f%% H2" % [h2_f, purity_val]
+	var f_scale: float = float(fault_state.get("q_scale", h2_f / 120000.0 if h2_f > 0.0 else 0.0))
+	var p_delta: float = pressure_bar - 38.0
+
+	for si in range(_stage_vessels.size()):
+		if not lbls.has(si) or not is_instance_valid(lbls[si]):
+			continue
+		var op: Dictionary = _stage_vessels[si].get("op", {})
+		var tag := str(op.get("tag", op.get("title", "U-%d" % (si + 1)))).substr(0, 22)
+		var arch := str(op.get("archetype", ""))
+		var t_base := float(op.get("temperature_c", 25.0))
+		var p_base := float(op.get("pressure_bar", 1.0))
+		var flow_base := float(op.get("flow_nm3_h", 85000.0)) * f_scale
+		var q_mw := float(op.get("thermal_duty_mw", 0.0)) * f_scale
+		var p_dyn := maxf(p_base + p_delta, 1.0)
+
+		match arch:
+			"pre_reformer":
+				lbls[si].text = "%s (%.0f Nm3/h)\n%.0f°C | %.1f bar | S/C %.1f" % [tag, flow_base, t_base, p_dyn, sc_ratio]
+			"furnace_reformer":
+				lbls[si].text = "%s (%.1f MW)\n%.0f°C | %.1f bar | 72.0%% H2" % [tag, q_mw, reformer_temp_c, pressure_bar]
+			"shell_tube_hx":
+				var t_hx := 580.0 if (e105_loss and tag == "E-105") else t_base
+				lbls[si].text = "%s (Q = %.1f MW)\n%.0f°C | %.1f bar | HX" % [tag, q_mw, t_hx, p_dyn]
+			"packed_bed_reactor":
+				var t_rx := (t_base + 120.0) if e105_loss else t_base
+				lbls[si].text = "%s (%.0f Nm3/h)\n%.0f°C | %.1f bar | WGS" % [tag, flow_base, t_rx, p_dyn]
+			"knockout_cooler":
+				lbls[si].text = "%s (%.0f Nm3/h)\n%.0f°C | %.1f bar | KO" % [tag, flow_base, t_base, p_dyn]
+			"co2_absorber":
+				lbls[si].text = "%s (%.0f Nm3/h)\n%.0f°C | %.1f bar | CO2" % [tag, flow_base, t_base, p_dyn]
+			"psa_skid":
+				lbls[si].text = "%s (%.0f Nm3/h)\n%.0f°C | %.1f bar | %.2f%% H2" % [tag, h2_f, t_base, p_dyn, purity_val]
+			"high_pressure_compressor":
+				lbls[si].text = "%s (%.1f MW)\n%.0f°C | 400 bar | %.2f%% H2" % [tag, q_mw, t_base, purity_val]
+			_:
+				lbls[si].text = "%s (%.0f Nm3/h)\n%.0f°C | %.1f bar" % [tag, flow_base, t_base, p_dyn]
 
 
 # ---------------------------------------------------------------- Inter-Stage Pipes & Animated Moving Slugs
