@@ -8,6 +8,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from .schemas import (
     DomainSkillSpec,
     GroundedParameter,
+    InternalPersonaProfile,
     OperatingEnvelope,
     PhysicalInvariantSpec,
     RequiredParameterSpec,
@@ -96,6 +97,21 @@ class ValidatedWorkedTraceRecord(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
 
+class AgentProfileRecord(Base):
+    __tablename__ = "agent_profiles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    persona_id = Column(String, nullable=False, unique=True, index=True)
+    internal_display_name = Column(String, nullable=False)
+    public_engine_alias = Column(String, nullable=False)
+    domain_scope = Column(String, nullable=False, index=True)
+    linked_domain_skill_id = Column(String, nullable=False)
+    lens_markdown_path = Column(String, nullable=False)
+    elo_trust_score = Column(Float, default=1200.0, nullable=False)
+    is_proctor = Column(Integer, default=0, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
 class ParameterDatabase:
     def __init__(self, db_url: Optional[str] = None):
         self.db_url = db_url or os.getenv("SCALEUP_DATABASE_URL", "sqlite:///scaleup_knowledge.db")
@@ -128,6 +144,16 @@ class ParameterDatabase:
             for col_name, col_type in needed.items():
                 if col_name not in existing:
                     conn.execute(text(f"ALTER TABLE scientific_parameters ADD COLUMN {col_name} {col_type}"))
+
+            ap_rows = conn.execute(text("PRAGMA table_info(agent_profiles)")).fetchall()
+            ap_existing = {r[1] for r in ap_rows}
+            ap_needed = {
+                "elo_trust_score": "FLOAT DEFAULT 1200.0",
+                "is_proctor": "INTEGER DEFAULT 0",
+            }
+            for col_name, col_type in ap_needed.items():
+                if ap_existing and col_name not in ap_existing:
+                    conn.execute(text(f"ALTER TABLE agent_profiles ADD COLUMN {col_name} {col_type}"))
 
     def _record_to_grounded(
         self,
@@ -451,3 +477,91 @@ class ParameterDatabase:
                 )
                 for r in records
             ]
+
+    def upsert_agent_profile(self, profile: InternalPersonaProfile) -> bool:
+        """Insert or update an InternalPersonaProfile in agent_profiles. Returns True if newly inserted."""
+        with self.SessionLocal() as session:
+            existing = session.execute(
+                select(AgentProfileRecord).where(AgentProfileRecord.persona_id == profile.persona_id)
+            ).scalar_one_or_none()
+            if existing is not None:
+                existing.internal_display_name = profile.internal_display_name
+                existing.public_engine_alias = profile.public_engine_alias
+                existing.domain_scope = profile.domain_scope
+                existing.linked_domain_skill_id = profile.linked_domain_skill_id
+                existing.lens_markdown_path = profile.lens_markdown_path
+                existing.is_proctor = 1 if profile.is_proctor else 0
+                session.commit()
+                return False
+            rec = AgentProfileRecord(
+                persona_id=profile.persona_id,
+                internal_display_name=profile.internal_display_name,
+                public_engine_alias=profile.public_engine_alias,
+                domain_scope=profile.domain_scope,
+                linked_domain_skill_id=profile.linked_domain_skill_id,
+                lens_markdown_path=profile.lens_markdown_path,
+                elo_trust_score=float(profile.elo_trust_score),
+                is_proctor=1 if profile.is_proctor else 0,
+            )
+            session.add(rec)
+            session.commit()
+            return True
+
+    def get_agent_profile(self, persona_id: str) -> Optional[InternalPersonaProfile]:
+        with self.SessionLocal() as session:
+            rec = session.execute(
+                select(AgentProfileRecord).where(AgentProfileRecord.persona_id == persona_id)
+            ).scalar_one_or_none()
+            if rec is None:
+                return None
+            return InternalPersonaProfile(
+                persona_id=rec.persona_id,
+                internal_display_name=rec.internal_display_name,
+                public_engine_alias=rec.public_engine_alias,
+                domain_scope=rec.domain_scope,
+                linked_domain_skill_id=rec.linked_domain_skill_id,
+                lens_markdown_path=rec.lens_markdown_path,
+                elo_trust_score=float(rec.elo_trust_score),
+                is_proctor=bool(rec.is_proctor),
+            )
+
+    def list_agent_profiles(self) -> List[InternalPersonaProfile]:
+        with self.SessionLocal() as session:
+            records = session.execute(select(AgentProfileRecord)).scalars().all()
+            return [
+                InternalPersonaProfile(
+                    persona_id=r.persona_id,
+                    internal_display_name=r.internal_display_name,
+                    public_engine_alias=r.public_engine_alias,
+                    domain_scope=r.domain_scope,
+                    linked_domain_skill_id=r.linked_domain_skill_id,
+                    lens_markdown_path=r.lens_markdown_path,
+                    elo_trust_score=float(r.elo_trust_score),
+                    is_proctor=bool(r.is_proctor),
+                )
+                for r in records
+            ]
+
+    def update_persona_elo(
+        self,
+        persona_id: str,
+        physics_passed: bool,
+        grounding_ratio: float,
+        perturbation_responsive: bool,
+        lazy_abstention_count: int = 0,
+    ) -> float:
+        """Anti-gaming Elo update: rewards compiler pass + grounding ratio + responsiveness; penalizes failures & lazy abstention."""
+        with self.SessionLocal() as session:
+            rec = session.execute(
+                select(AgentProfileRecord).where(AgentProfileRecord.persona_id == persona_id)
+            ).scalar_one_or_none()
+            if rec is None:
+                return 1200.0
+            gr = max(0.0, min(1.0, float(grounding_ratio)))
+            base_delta = 24.0 if (physics_passed and perturbation_responsive) else -32.0
+            grounding_delta = 16.0 * (gr - 0.5)
+            abstention_penalty = 10.0 * max(0, int(lazy_abstention_count))
+            new_score = max(800.0, min(2000.0, float(rec.elo_trust_score) + base_delta + grounding_delta - abstention_penalty))
+            rec.elo_trust_score = round(new_score, 2)
+            session.commit()
+            return float(rec.elo_trust_score)

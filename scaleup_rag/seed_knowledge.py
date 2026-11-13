@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Tuple, Dict, Optional, Any
 from .schemas import (
     DomainSkillSpec,
+    InternalPersonaProfile,
     RawExtractedCandidate,
     RequiredParameterSpec,
     OperatingEnvelope,
@@ -589,6 +590,50 @@ SEED_DOMAIN_SKILLS: List[DomainSkillSpec] = [
 ]
 
 
+SEED_AGENT_PROFILES: List[InternalPersonaProfile] = [
+    InternalPersonaProfile(
+        persona_id="elmer_gaden",
+        internal_display_name="Elmer Gaden",
+        public_engine_alias="ScaleUp Bioprocess Kinetics Engine",
+        domain_scope="bioprocess",
+        linked_domain_skill_id="bioprocess_kinetics",
+        lens_markdown_path="scaleup_rag/personas/elmer_gaden.md",
+        elo_trust_score=1200.0,
+        is_proctor=False,
+    ),
+    InternalPersonaProfile(
+        persona_id="octave_levenspiel",
+        internal_display_name="Octave Levenspiel",
+        public_engine_alias="ScaleUp Thermochemical Process Engine",
+        domain_scope="thermochemical",
+        linked_domain_skill_id="thermochemical_plant",
+        lens_markdown_path="scaleup_rag/personas/octave_levenspiel.md",
+        elo_trust_score=1200.0,
+        is_proctor=False,
+    ),
+    InternalPersonaProfile(
+        persona_id="nikola_tesla",
+        internal_display_name="Nikola Tesla",
+        public_engine_alias="ScaleUp Electromechanical & Coupled Physics Engine",
+        domain_scope="electromechanical",
+        linked_domain_skill_id="electromechanics",
+        lens_markdown_path="scaleup_rag/personas/nikola_tesla.md",
+        elo_trust_score=1200.0,
+        is_proctor=False,
+    ),
+    InternalPersonaProfile(
+        persona_id="richard_feynman",
+        internal_display_name="Richard Feynman",
+        public_engine_alias="ScaleUp Adversarial Verification Proctor",
+        domain_scope="adversarial_proctor",
+        linked_domain_skill_id="thermochemical_plant",
+        lens_markdown_path="scaleup_rag/personas/richard_feynman.md",
+        elo_trust_score=1200.0,
+        is_proctor=True,
+    ),
+]
+
+
 def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = True) -> Dict[str, Any]:
     db = ParameterDatabase(db_url=db_url)
     
@@ -640,6 +685,11 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
         if db.upsert_domain_skill(skill):
             skills_newly_written += 1
 
+    profiles_newly_written = 0
+    for profile in SEED_AGENT_PROFILES:
+        if db.upsert_agent_profile(profile):
+            profiles_newly_written += 1
+
     return {
         "total_evaluated": total_count,
         "total_candidates": total_count,
@@ -651,6 +701,8 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
         "mechanistic_laws_newly_written": laws_newly_written,
         "domain_skills_total": len(SEED_DOMAIN_SKILLS),
         "domain_skills_newly_written": skills_newly_written,
+        "agent_profiles_total": len(SEED_AGENT_PROFILES),
+        "agent_profiles_newly_written": profiles_newly_written,
         "tier_counts": tier_counts,
         "rejection_details": rejections
     }

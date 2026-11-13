@@ -106,3 +106,24 @@ class ValidatedWorkedTraceSpec(BaseModel):
     derivation_trace: str
     topology_manifest_json: Dict[str, Any]
     perturbation_passed: bool = True
+
+
+class InternalPersonaProfile(BaseModel):
+    persona_id: str
+    internal_display_name: str
+    public_engine_alias: str
+    domain_scope: str
+    linked_domain_skill_id: str
+    lens_markdown_path: str
+    elo_trust_score: float = 1200.0
+    is_proctor: bool = False
+
+
+class CritiquePayload(BaseModel):
+    critique_id: str
+    author_persona_id: str
+    target_field: str
+    severity: Literal["CRITICAL", "WARNING", "INFO"]
+    symptom: str
+    recommended_reclassification: Optional[str] = None
+    resolved: bool = False
