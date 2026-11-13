@@ -1,9 +1,9 @@
 {
   "contract_version": "0.1.0",
   "schema_version": "1.0.0",
-  "run_id": "prompt_run_0bdd7da3",
+  "run_id": "prompt_run_18ee66ca",
   "status": "COMPLETED",
-  "prompt": "simulate a 5-stage 120,000 Nm3/h steam methane reforming (SMR) hydrogen production plant from 95% methane natural gas feedstock and superheated steam: (1) Primary Reformer & Furnace Burner node executing endothermic steam methane reforming (CH4 + H2O <-> CO + 3H2) with temperature and pressure control loops and emergency nitrogen purge interlock, (2) Auxiliary Heat Exchanger E_105 for syngas waste heat recovery and process cooling, (3) Water-Gas Shift (WGS) Reactor converting carbon monoxide and steam to additional hydrogen and CO2 (CO + H2O <-> CO2 + H2), (4) Pressure Swing Adsorption (PSA) purification unit separating tail gas to achieve 99% H2 product purity with optional CO2 capture routing, and (5) Multi-stage Hydrogen Product Compressor pressurizing the 99% pure H2 stream to 400 bar for high-pressure storage.",
+  "prompt": "Design a 120,000 Nm3/h SMR hydrogen production plant with HDS R-101, Pre-Reformer R-102, convection heat recovery, dual-stage WGS, PSA V-101, and 400 bar H2 compression",
   "cache_hit": false,
   "confidence_score": 92.0,
   "has_analogue_bridge": false,
@@ -13,8 +13,9 @@
     {
       "stage_id": "stage_1_pre_reformer",
       "index": 0,
-      "title": "1. Feed HDS (R-101A/B) & Pre-Reformer (R-102)",
-      "description": "Feed Hydrodesulfurization (ZnO guard bed R-101A) and adiabatic Pre-Reformer (R-102) converting C2+ heavies and initial CH4 at 490 C, 30 bar.",
+      "tag": "R-101",
+      "title": "1. HDS Reactor (R-101)",
+      "description": "Hydrodesulfurization ZnO guard bed R-101 fed by E-101 at 400 C, 44.5 bar.",
       "archetype": "pre_reformer",
       "equipment_primitive": "pre_reformer",
       "time_window_h": [
@@ -23,15 +24,14 @@
       ],
       "evidence_tier": "DIRECT",
       "streams_in": [
-        "Desulfurized NG Feed (37,211 Nm3/h, 95% CH4)",
-        "Superheated Steam (106,050 Nm3/h, S/C=3.0)"
+        "Natural Gas Feed (37,211 Nm3/h, 400 C, 44.5 bar)"
       ],
       "streams_out": [
-        "Pre-Reformed Feed (144,200 Nm3/h Wet, 490 C, 30 bar, C2+ cracked)"
+        "Desulfurized NG (37,211 Nm3/h, 400 C, 44.5 bar)"
       ],
       "control_loops": [
-        "TIC-102 Pre-Reformer Temp",
-        "PIC-102 Guard Bed Press"
+        "TIC-101 HDS Temp",
+        "PIC-101 HDS Press"
       ],
       "hazop_interlocks": [],
       "required_parameters": [
@@ -42,8 +42,8 @@
         "smr_operating_pressure",
         "psa_hydrogen_recovery"
       ],
-      "temperature_c": 490.0,
-      "pressure_bar": 30.0,
+      "temperature_c": 400.0,
+      "pressure_bar": 44.5,
       "flow_nm3_h": 144200.0,
       "dry_flow_nm3_h": 48067.0,
       "flow_basis": "Wet",
@@ -51,15 +51,56 @@
       "h2_purity_pct": 22.5
     },
     {
-      "stage_id": "stage_2_furnace_reformer",
+      "stage_id": "stage_2_pre_reformer",
       "index": 1,
-      "title": "2. Primary SMR Furnace (F-201 / R-201)",
-      "description": "Terrace-wall radiant SMR furnace executing endothermic reforming (CH4 + H2O <-> CO + 3H2) at 850 C, 28 bar with convection coil bank.",
-      "archetype": "furnace_reformer",
-      "equipment_primitive": "furnace_reformer",
+      "tag": "R-102",
+      "title": "2. Adiabatic Pre-Reformer (R-102)",
+      "description": "Adiabatic Pre-Reformer R-102 fed by M-101 + E-102 converting C2+ heavies at 504 C, 38.9 bar.",
+      "archetype": "pre_reformer",
+      "equipment_primitive": "pre_reformer",
       "time_window_h": [
         2.5,
         5.0
+      ],
+      "evidence_tier": "DIRECT",
+      "streams_in": [
+        "Mixed NG + Steam via M-101/E-102 (144,200 Nm3/h, 504 C, 38.9 bar)"
+      ],
+      "streams_out": [
+        "Pre-Reformed Gas to E-103 (144,200 Nm3/h, 504 C, 38.9 bar)"
+      ],
+      "control_loops": [
+        "TIC-102 Pre-Reformer Temp",
+        "PIC-102 Pre-Reformer Press"
+      ],
+      "hazop_interlocks": [],
+      "required_parameters": [
+        "smr_reaction_enthalpy",
+        "wgs_reaction_enthalpy",
+        "smr_steam_to_carbon_ratio",
+        "smr_reformer_outlet_temperature",
+        "smr_operating_pressure",
+        "psa_hydrogen_recovery"
+      ],
+      "temperature_c": 504.0,
+      "pressure_bar": 38.9,
+      "flow_nm3_h": 144200.0,
+      "dry_flow_nm3_h": 48067.0,
+      "flow_basis": "Wet",
+      "h2_flow_nm3_h": 10815.0,
+      "h2_purity_pct": 22.5
+    },
+    {
+      "stage_id": "stage_3_furnace_reformer",
+      "index": 2,
+      "tag": "B-101/R-103",
+      "title": "3. Primary SMR Furnace (B-101 / R-103)",
+      "description": "Terrace-wall radiant SMR furnace executing endothermic reforming (CH4 + H2O <-> CO + 3H2) at 900 C, 38 bar with convection coil bank.",
+      "archetype": "furnace_reformer",
+      "equipment_primitive": "furnace_reformer",
+      "time_window_h": [
+        5.0,
+        7.5
       ],
       "evidence_tier": "DIRECT",
       "streams_in": [
@@ -83,24 +124,87 @@
         "smr_operating_pressure",
         "psa_hydrogen_recovery"
       ],
-      "temperature_c": 850.0,
-      "pressure_bar": 28.0,
+      "temperature_c": 900.0,
+      "pressure_bar": 38.0,
       "flow_nm3_h": 210800.0,
       "dry_flow_nm3_h": 138500.0,
       "flow_basis": "Wet",
       "h2_flow_nm3_h": 99720.0,
-      "h2_purity_pct": 72.0
+      "h2_purity_pct": 72.0,
+      "convection_banks": [
+        {
+          "tag": "E-103",
+          "name": "Pre-Reformer Effluent Preheat",
+          "duty_mw": 10.35,
+          "t_hot_in_c": 980.0,
+          "t_hot_out_c": 826.4,
+          "t_cold_in_c": 504.0,
+          "t_cold_out_c": 627.0,
+          "pressure_bar": 38.9,
+          "cold_stream_id": "cold_prereform_eff"
+        },
+        {
+          "tag": "E-102",
+          "name": "Mixed Feed + Steam Preheat",
+          "duty_mw": 10.84,
+          "t_hot_in_c": 826.4,
+          "t_hot_out_c": 665.4,
+          "t_cold_in_c": 360.0,
+          "t_cold_out_c": 504.0,
+          "pressure_bar": 38.9,
+          "cold_stream_id": "cold_mixed_feed"
+        },
+        {
+          "tag": "E-109",
+          "name": "LP Steam Loop Superheater",
+          "duty_mw": 13.94,
+          "t_hot_in_c": 665.4,
+          "t_hot_out_c": 458.4,
+          "t_cold_in_c": 25.0,
+          "t_cold_out_c": 400.0,
+          "pressure_bar": 4.5,
+          "cold_stream_id": "cold_steam_loop"
+        },
+        {
+          "tag": "E-101",
+          "name": "Natural Gas Feed Preheat",
+          "duty_mw": 12.62,
+          "t_hot_in_c": 458.4,
+          "t_hot_out_c": 271.0,
+          "t_cold_in_c": 25.0,
+          "t_cold_out_c": 400.0,
+          "pressure_bar": 44.5,
+          "cold_stream_id": "cold_ng_feed"
+        },
+        {
+          "tag": "E-104",
+          "name": "Combustion Air Preheat",
+          "duty_mw": 9.5,
+          "t_hot_in_c": 271.0,
+          "t_hot_out_c": 130.0,
+          "t_cold_in_c": 25.0,
+          "t_cold_out_c": 220.0,
+          "pressure_bar": 6.0,
+          "cold_stream_id": "cold_comb_air"
+        }
+      ],
+      "flue_in_temp_c": 980.0,
+      "flue_stack_temp_c": 130.0,
+      "thermal_duty_mw": 123.65,
+      "radiant_duty_mw": 66.4,
+      "convection_duty_mw": 57.25
     },
     {
-      "stage_id": "stage_3_shell_tube_hx",
-      "index": 2,
-      "title": "3. Waste Heat Boiler (E-105) & Steam Drum (V-102)",
-      "description": "Cooling reformed syngas from 850 C to 350 C while generating high-pressure superheated steam in elevated drum V-102.",
+      "stage_id": "stage_4_shell_tube_hx",
+      "index": 3,
+      "tag": "E-105",
+      "title": "4. Waste Heat Boiler (E-105)",
+      "description": "Cooling reformed syngas from 900 C to 370 C while generating high-pressure superheated steam.",
       "archetype": "shell_tube_hx",
       "equipment_primitive": "shell_tube_hx",
       "time_window_h": [
-        5.0,
-        7.5
+        7.5,
+        10.0
       ],
       "evidence_tier": "DIRECT",
       "streams_in": [
@@ -129,18 +233,101 @@
       "dry_flow_nm3_h": 138500.0,
       "flow_basis": "Wet",
       "h2_flow_nm3_h": 99720.0,
-      "h2_purity_pct": 72.0
+      "h2_purity_pct": 72.0,
+      "thermal_duty_mw": 48.69,
+      "t_hot_in_c": 900.0,
+      "t_hot_out_c": 350.0,
+      "utility_loop": "bfw_steam"
     },
     {
-      "stage_id": "stage_4_packed_bed_reactor",
-      "index": 3,
-      "title": "4. Dual-Stage WGS Island (R-301A/B + E-301)",
+      "stage_id": "stage_5_packed_bed_reactor_bed1",
+      "index": 4,
+      "tag": "R-104",
+      "title": "R-104 High-Temp Reactor Bed 1",
       "description": "High-temperature (380 C) and low-temperature (210 C) Water-Gas Shift reactors converting CO + H2O <-> CO2 + H2.",
       "archetype": "packed_bed_reactor",
       "equipment_primitive": "packed_bed_reactor",
       "time_window_h": [
-        7.5,
-        10.0
+        10.0,
+        12.5
+      ],
+      "evidence_tier": "DIRECT",
+      "streams_in": [
+        "Cooled Syngas (210,800 Nm3/h Wet, 350 C)"
+      ],
+      "streams_out": [
+        "Shifted Syngas (210,800 Nm3/h Wet / 170,200 Dry, 136,364 Nm3/h H2, 80.1% Dry H2)"
+      ],
+      "control_loops": [
+        "TIC-401A HT-Shift",
+        "TIC-401B LT-Shift"
+      ],
+      "hazop_interlocks": [],
+      "required_parameters": [
+        "smr_reaction_enthalpy",
+        "wgs_reaction_enthalpy",
+        "smr_steam_to_carbon_ratio",
+        "smr_reformer_outlet_temperature",
+        "smr_operating_pressure",
+        "psa_hydrogen_recovery"
+      ],
+      "temperature_c": 380.0,
+      "pressure_bar": 25.0,
+      "flow_nm3_h": 210800.0,
+      "dry_flow_nm3_h": 170200.0,
+      "flow_basis": "Wet",
+      "h2_flow_nm3_h": 136363.6,
+      "h2_purity_pct": 80.1
+    },
+    {
+      "stage_id": "stage_5_packed_bed_reactor_intercooler",
+      "index": 5,
+      "tag": "E-106",
+      "title": "E-106 Reactor Intercooler",
+      "description": "Inter-bed steam/BFW cooler (380 C -> 210 C, Q=15.05 MW).",
+      "archetype": "shell_tube_hx",
+      "equipment_primitive": "shell_tube_hx",
+      "temperature_c": 210.0,
+      "pressure_bar": 25.0,
+      "flow_nm3_h": 210800.0,
+      "flow_basis": "Wet",
+      "h2_purity_pct": 80.1,
+      "thermal_duty_mw": 15.05,
+      "t_hot_in_c": 380.0,
+      "t_hot_out_c": 210.0,
+      "t_cold_in_c": 145.0,
+      "t_cold_out_c": 240.0,
+      "utility_loop": "bfw_steam",
+      "control_loops": [
+        "TIC-E-106 Intercooler Outlet"
+      ],
+      "hazop_interlocks": [],
+      "streams_in": [
+        "Bed 1 Effluent (380 C)"
+      ],
+      "streams_out": [
+        "Cooled Bed 2 Feed (210 C)"
+      ],
+      "required_parameters": [
+        "smr_reaction_enthalpy",
+        "wgs_reaction_enthalpy",
+        "smr_steam_to_carbon_ratio",
+        "smr_reformer_outlet_temperature",
+        "smr_operating_pressure",
+        "psa_hydrogen_recovery"
+      ]
+    },
+    {
+      "stage_id": "stage_5_packed_bed_reactor_bed2",
+      "index": 6,
+      "tag": "R-105",
+      "title": "R-105 Low-Temp Reactor Bed 2",
+      "description": "High-temperature (380 C) and low-temperature (210 C) Water-Gas Shift reactors converting CO + H2O <-> CO2 + H2.",
+      "archetype": "packed_bed_reactor",
+      "equipment_primitive": "packed_bed_reactor",
+      "time_window_h": [
+        10.0,
+        12.5
       ],
       "evidence_tier": "DIRECT",
       "streams_in": [
@@ -171,15 +358,92 @@
       "h2_purity_pct": 80.1
     },
     {
-      "stage_id": "stage_5_knockout_cooler",
-      "index": 4,
-      "title": "5. Syngas Trim Cooler (E-401) & KO Drum (V-401)",
-      "description": "Fin-fan trim cooler E-401 cooling shifted syngas to 40 C and flashing process condensate in V-401 bottom boot.",
+      "stage_id": "stage_6_knockout_cooler_economizer",
+      "index": 7,
+      "tag": "E-107",
+      "title": "E-107 BFW Economizer",
+      "description": "Process heat recovery economizer (210 C -> 120 C, Q=6.43 MW).",
+      "archetype": "shell_tube_hx",
+      "equipment_primitive": "shell_tube_hx",
+      "temperature_c": 120.0,
+      "pressure_bar": 24.5,
+      "flow_nm3_h": 170200.0,
+      "flow_basis": "Dry",
+      "h2_purity_pct": 80.1,
+      "thermal_duty_mw": 6.43,
+      "t_hot_in_c": 210.0,
+      "t_hot_out_c": 120.0,
+      "t_cold_in_c": 35.0,
+      "t_cold_out_c": 145.0,
+      "utility_loop": "bfw_steam",
+      "control_loops": [
+        "TIC-E-107 Economizer"
+      ],
+      "hazop_interlocks": [],
+      "streams_in": [
+        "Hot Effluent (210 C)"
+      ],
+      "streams_out": [
+        "Pre-Cooled Gas (120 C)"
+      ],
+      "required_parameters": [
+        "smr_reaction_enthalpy",
+        "wgs_reaction_enthalpy",
+        "smr_steam_to_carbon_ratio",
+        "smr_reformer_outlet_temperature",
+        "smr_operating_pressure",
+        "psa_hydrogen_recovery"
+      ]
+    },
+    {
+      "stage_id": "stage_6_knockout_cooler_trim",
+      "index": 8,
+      "tag": "E-108",
+      "title": "E-108 Final Trim Cooler",
+      "description": "Cooling water trim condenser (120 C -> 40 C, Q=5.72 MW).",
+      "archetype": "shell_tube_hx",
+      "equipment_primitive": "shell_tube_hx",
+      "temperature_c": 40.0,
+      "pressure_bar": 24.5,
+      "flow_nm3_h": 170200.0,
+      "flow_basis": "Dry",
+      "h2_purity_pct": 80.1,
+      "thermal_duty_mw": 5.72,
+      "t_hot_in_c": 120.0,
+      "t_hot_out_c": 40.0,
+      "t_cold_in_c": 25.0,
+      "t_cold_out_c": 38.0,
+      "utility_loop": "cooling_water",
+      "control_loops": [
+        "TIC-E-108 Trim Outlet"
+      ],
+      "hazop_interlocks": [],
+      "streams_in": [
+        "Pre-Cooled Gas (120 C)"
+      ],
+      "streams_out": [
+        "Condensed Gas (40 C)"
+      ],
+      "required_parameters": [
+        "smr_reaction_enthalpy",
+        "wgs_reaction_enthalpy",
+        "smr_steam_to_carbon_ratio",
+        "smr_reformer_outlet_temperature",
+        "smr_operating_pressure",
+        "psa_hydrogen_recovery"
+      ]
+    },
+    {
+      "stage_id": "stage_6_knockout_cooler",
+      "index": 9,
+      "tag": "S-101",
+      "title": "6. Syngas Cooling & KO Drum (S-101)",
+      "description": "Cooling shifted syngas to 40 C and flashing process condensate in knockout separator S-101.",
       "archetype": "knockout_cooler",
       "equipment_primitive": "knockout_cooler",
       "time_window_h": [
-        10.0,
-        12.5
+        12.5,
+        15.0
       ],
       "evidence_tier": "DIRECT",
       "streams_in": [
@@ -211,50 +475,11 @@
       "h2_purity_pct": 80.1
     },
     {
-      "stage_id": "stage_6_co2_absorber",
-      "index": 5,
-      "title": "6. Amine CO2 Capture (C-501 / C-502)",
-      "description": "Packed amine absorber C-501 and stripper C-502 with reflux condenser and reboiler capturing CO2 from shifted syngas.",
-      "archetype": "co2_absorber",
-      "equipment_primitive": "co2_absorber",
-      "time_window_h": [
-        12.5,
-        15.0
-      ],
-      "evidence_tier": "DIRECT",
-      "streams_in": [
-        "Dry Shifted Syngas (170,200 Nm3/h Dry, 40 C)"
-      ],
-      "streams_out": [
-        "CO2-Lean Syngas (139,700 Nm3/h Dry, 97.6% H2)",
-        "Captured CO2 Export (30,500 Nm3/h, 95% capture)"
-      ],
-      "control_loops": [
-        "PIC-601 Absorber Press",
-        "AIC-601 CO2 Slip"
-      ],
-      "hazop_interlocks": [],
-      "required_parameters": [
-        "smr_reaction_enthalpy",
-        "wgs_reaction_enthalpy",
-        "smr_steam_to_carbon_ratio",
-        "smr_reformer_outlet_temperature",
-        "smr_operating_pressure",
-        "psa_hydrogen_recovery"
-      ],
-      "temperature_c": 42.0,
-      "pressure_bar": 24.2,
-      "flow_nm3_h": 139700.0,
-      "dry_flow_nm3_h": 139700.0,
-      "flow_basis": "Dry",
-      "h2_flow_nm3_h": 136363.6,
-      "h2_purity_pct": 97.6
-    },
-    {
       "stage_id": "stage_7_psa_skid",
-      "index": 6,
-      "title": "7. 8-Bed PSA Matrix (U-601) & V-601",
-      "description": "8-bed cyclic Pressure Swing Adsorption skid purifying H2 to 99.99% with tail gas recycle routed to F-201 burners.",
+      "index": 10,
+      "tag": "V-101",
+      "title": "4-Bed PSA Skid (V-101)",
+      "description": "4-bed cyclic Pressure Swing Adsorption skid purifying H2 to 99.99% at 27 C, 33.1 bar with tail gas recycle to B-101 burners.",
       "archetype": "psa_skid",
       "equipment_primitive": "psa_skid",
       "time_window_h": [
@@ -282,19 +507,21 @@
         "smr_operating_pressure",
         "psa_hydrogen_recovery"
       ],
-      "temperature_c": 40.0,
-      "pressure_bar": 24.0,
+      "temperature_c": 27.0,
+      "pressure_bar": 33.1,
       "flow_nm3_h": 120000.0,
       "dry_flow_nm3_h": 120000.0,
       "flow_basis": "Dry",
       "h2_flow_nm3_h": 120000.0,
-      "h2_purity_pct": 99.99
+      "h2_purity_pct": 99.99,
+      "bed_count": 4
     },
     {
       "stage_id": "stage_8_high_pressure_compressor",
-      "index": 7,
-      "title": "8. H2 Compressor (K-701) & 400 bar Bullets",
-      "description": "3-stage reciprocating H2 compressor K-701 pressurizing 99.99% pure H2 to 400 bar storage bullets V-701A/B/C.",
+      "index": 11,
+      "tag": "C-101..103",
+      "title": "H2 Compressor (C-101..103) & 400 bar Storage",
+      "description": "Multi-stage reciprocating H2 compressor pressurizing 99.99% pure H2 from 33.1 bar to 400 bar with interstage cooling.",
       "archetype": "high_pressure_compressor",
       "equipment_primitive": "high_pressure_compressor",
       "time_window_h": [
@@ -321,26 +548,88 @@
         "smr_operating_pressure",
         "psa_hydrogen_recovery"
       ],
-      "temperature_c": 40.0,
+      "temperature_c": 50.0,
       "pressure_bar": 400.0,
       "flow_nm3_h": 120000.0,
       "dry_flow_nm3_h": 120000.0,
       "flow_basis": "Dry",
       "h2_flow_nm3_h": 120000.0,
-      "h2_purity_pct": 99.99
+      "h2_purity_pct": 99.99,
+      "compressor_stages": [
+        {
+          "tag": "C-101",
+          "p_in_bar": 33.1,
+          "p_out_bar": 61.7,
+          "t_in_c": 38.0,
+          "t_out_c": 96.2,
+          "power_mw": 3.37
+        },
+        {
+          "tag": "C-102",
+          "p_in_bar": 61.7,
+          "p_out_bar": 115.1,
+          "t_in_c": 38.0,
+          "t_out_c": 96.2,
+          "power_mw": 3.37
+        },
+        {
+          "tag": "C-103",
+          "p_in_bar": 115.1,
+          "p_out_bar": 214.5,
+          "t_in_c": 38.0,
+          "t_out_c": 96.2,
+          "power_mw": 3.37
+        },
+        {
+          "tag": "C-104",
+          "p_in_bar": 214.5,
+          "p_out_bar": 400.0,
+          "t_in_c": 38.0,
+          "t_out_c": 96.2,
+          "power_mw": 3.37
+        }
+      ],
+      "intercoolers": [
+        {
+          "tag": "E-110",
+          "duty_mw": 2.93,
+          "t_hot_in_c": 96.2,
+          "t_hot_out_c": 38.0
+        },
+        {
+          "tag": "E-111",
+          "duty_mw": 2.93,
+          "t_hot_in_c": 96.2,
+          "t_hot_out_c": 38.0
+        },
+        {
+          "tag": "E-112",
+          "duty_mw": 2.93,
+          "t_hot_in_c": 96.2,
+          "t_hot_out_c": 38.0
+        },
+        {
+          "tag": "E-113",
+          "duty_mw": 2.93,
+          "t_hot_in_c": 96.2,
+          "t_hot_out_c": 38.0
+        }
+      ],
+      "thermal_duty_mw": 25.22
     }
   ],
   "anatomy_blueprint": {
     "process_domain": "chemical_plant",
-    "title": "8-Stage 120,000 Nm3/h SMR Hydrogen Production Plant",
+    "title": "12-Unit Integrated SMR Hydrogen Production Plant",
     "target_organism": "SMR Hydrogen Plant",
     "duration_hours": 32.0,
     "unit_operations": [
       {
         "stage_id": "stage_1_pre_reformer",
         "index": 0,
-        "title": "1. Feed HDS (R-101A/B) & Pre-Reformer (R-102)",
-        "description": "Feed Hydrodesulfurization (ZnO guard bed R-101A) and adiabatic Pre-Reformer (R-102) converting C2+ heavies and initial CH4 at 490 C, 30 bar.",
+        "tag": "R-101",
+        "title": "1. HDS Reactor (R-101)",
+        "description": "Hydrodesulfurization ZnO guard bed R-101 fed by E-101 at 400 C, 44.5 bar.",
         "archetype": "pre_reformer",
         "equipment_primitive": "pre_reformer",
         "time_window_h": [
@@ -349,15 +638,14 @@
         ],
         "evidence_tier": "DIRECT",
         "streams_in": [
-          "Desulfurized NG Feed (37,211 Nm3/h, 95% CH4)",
-          "Superheated Steam (106,050 Nm3/h, S/C=3.0)"
+          "Natural Gas Feed (37,211 Nm3/h, 400 C, 44.5 bar)"
         ],
         "streams_out": [
-          "Pre-Reformed Feed (144,200 Nm3/h Wet, 490 C, 30 bar, C2+ cracked)"
+          "Desulfurized NG (37,211 Nm3/h, 400 C, 44.5 bar)"
         ],
         "control_loops": [
-          "TIC-102 Pre-Reformer Temp",
-          "PIC-102 Guard Bed Press"
+          "TIC-101 HDS Temp",
+          "PIC-101 HDS Press"
         ],
         "hazop_interlocks": [],
         "required_parameters": [
@@ -368,8 +656,8 @@
           "smr_operating_pressure",
           "psa_hydrogen_recovery"
         ],
-        "temperature_c": 490.0,
-        "pressure_bar": 30.0,
+        "temperature_c": 400.0,
+        "pressure_bar": 44.5,
         "flow_nm3_h": 144200.0,
         "dry_flow_nm3_h": 48067.0,
         "flow_basis": "Wet",
@@ -377,15 +665,56 @@
         "h2_purity_pct": 22.5
       },
       {
-        "stage_id": "stage_2_furnace_reformer",
+        "stage_id": "stage_2_pre_reformer",
         "index": 1,
-        "title": "2. Primary SMR Furnace (F-201 / R-201)",
-        "description": "Terrace-wall radiant SMR furnace executing endothermic reforming (CH4 + H2O <-> CO + 3H2) at 850 C, 28 bar with convection coil bank.",
-        "archetype": "furnace_reformer",
-        "equipment_primitive": "furnace_reformer",
+        "tag": "R-102",
+        "title": "2. Adiabatic Pre-Reformer (R-102)",
+        "description": "Adiabatic Pre-Reformer R-102 fed by M-101 + E-102 converting C2+ heavies at 504 C, 38.9 bar.",
+        "archetype": "pre_reformer",
+        "equipment_primitive": "pre_reformer",
         "time_window_h": [
           2.5,
           5.0
+        ],
+        "evidence_tier": "DIRECT",
+        "streams_in": [
+          "Mixed NG + Steam via M-101/E-102 (144,200 Nm3/h, 504 C, 38.9 bar)"
+        ],
+        "streams_out": [
+          "Pre-Reformed Gas to E-103 (144,200 Nm3/h, 504 C, 38.9 bar)"
+        ],
+        "control_loops": [
+          "TIC-102 Pre-Reformer Temp",
+          "PIC-102 Pre-Reformer Press"
+        ],
+        "hazop_interlocks": [],
+        "required_parameters": [
+          "smr_reaction_enthalpy",
+          "wgs_reaction_enthalpy",
+          "smr_steam_to_carbon_ratio",
+          "smr_reformer_outlet_temperature",
+          "smr_operating_pressure",
+          "psa_hydrogen_recovery"
+        ],
+        "temperature_c": 504.0,
+        "pressure_bar": 38.9,
+        "flow_nm3_h": 144200.0,
+        "dry_flow_nm3_h": 48067.0,
+        "flow_basis": "Wet",
+        "h2_flow_nm3_h": 10815.0,
+        "h2_purity_pct": 22.5
+      },
+      {
+        "stage_id": "stage_3_furnace_reformer",
+        "index": 2,
+        "tag": "B-101/R-103",
+        "title": "3. Primary SMR Furnace (B-101 / R-103)",
+        "description": "Terrace-wall radiant SMR furnace executing endothermic reforming (CH4 + H2O <-> CO + 3H2) at 900 C, 38 bar with convection coil bank.",
+        "archetype": "furnace_reformer",
+        "equipment_primitive": "furnace_reformer",
+        "time_window_h": [
+          5.0,
+          7.5
         ],
         "evidence_tier": "DIRECT",
         "streams_in": [
@@ -409,24 +738,87 @@
           "smr_operating_pressure",
           "psa_hydrogen_recovery"
         ],
-        "temperature_c": 850.0,
-        "pressure_bar": 28.0,
+        "temperature_c": 900.0,
+        "pressure_bar": 38.0,
         "flow_nm3_h": 210800.0,
         "dry_flow_nm3_h": 138500.0,
         "flow_basis": "Wet",
         "h2_flow_nm3_h": 99720.0,
-        "h2_purity_pct": 72.0
+        "h2_purity_pct": 72.0,
+        "convection_banks": [
+          {
+            "tag": "E-103",
+            "name": "Pre-Reformer Effluent Preheat",
+            "duty_mw": 10.35,
+            "t_hot_in_c": 980.0,
+            "t_hot_out_c": 826.4,
+            "t_cold_in_c": 504.0,
+            "t_cold_out_c": 627.0,
+            "pressure_bar": 38.9,
+            "cold_stream_id": "cold_prereform_eff"
+          },
+          {
+            "tag": "E-102",
+            "name": "Mixed Feed + Steam Preheat",
+            "duty_mw": 10.84,
+            "t_hot_in_c": 826.4,
+            "t_hot_out_c": 665.4,
+            "t_cold_in_c": 360.0,
+            "t_cold_out_c": 504.0,
+            "pressure_bar": 38.9,
+            "cold_stream_id": "cold_mixed_feed"
+          },
+          {
+            "tag": "E-109",
+            "name": "LP Steam Loop Superheater",
+            "duty_mw": 13.94,
+            "t_hot_in_c": 665.4,
+            "t_hot_out_c": 458.4,
+            "t_cold_in_c": 25.0,
+            "t_cold_out_c": 400.0,
+            "pressure_bar": 4.5,
+            "cold_stream_id": "cold_steam_loop"
+          },
+          {
+            "tag": "E-101",
+            "name": "Natural Gas Feed Preheat",
+            "duty_mw": 12.62,
+            "t_hot_in_c": 458.4,
+            "t_hot_out_c": 271.0,
+            "t_cold_in_c": 25.0,
+            "t_cold_out_c": 400.0,
+            "pressure_bar": 44.5,
+            "cold_stream_id": "cold_ng_feed"
+          },
+          {
+            "tag": "E-104",
+            "name": "Combustion Air Preheat",
+            "duty_mw": 9.5,
+            "t_hot_in_c": 271.0,
+            "t_hot_out_c": 130.0,
+            "t_cold_in_c": 25.0,
+            "t_cold_out_c": 220.0,
+            "pressure_bar": 6.0,
+            "cold_stream_id": "cold_comb_air"
+          }
+        ],
+        "flue_in_temp_c": 980.0,
+        "flue_stack_temp_c": 130.0,
+        "thermal_duty_mw": 123.65,
+        "radiant_duty_mw": 66.4,
+        "convection_duty_mw": 57.25
       },
       {
-        "stage_id": "stage_3_shell_tube_hx",
-        "index": 2,
-        "title": "3. Waste Heat Boiler (E-105) & Steam Drum (V-102)",
-        "description": "Cooling reformed syngas from 850 C to 350 C while generating high-pressure superheated steam in elevated drum V-102.",
+        "stage_id": "stage_4_shell_tube_hx",
+        "index": 3,
+        "tag": "E-105",
+        "title": "4. Waste Heat Boiler (E-105)",
+        "description": "Cooling reformed syngas from 900 C to 370 C while generating high-pressure superheated steam.",
         "archetype": "shell_tube_hx",
         "equipment_primitive": "shell_tube_hx",
         "time_window_h": [
-          5.0,
-          7.5
+          7.5,
+          10.0
         ],
         "evidence_tier": "DIRECT",
         "streams_in": [
@@ -455,18 +847,101 @@
         "dry_flow_nm3_h": 138500.0,
         "flow_basis": "Wet",
         "h2_flow_nm3_h": 99720.0,
-        "h2_purity_pct": 72.0
+        "h2_purity_pct": 72.0,
+        "thermal_duty_mw": 48.69,
+        "t_hot_in_c": 900.0,
+        "t_hot_out_c": 350.0,
+        "utility_loop": "bfw_steam"
       },
       {
-        "stage_id": "stage_4_packed_bed_reactor",
-        "index": 3,
-        "title": "4. Dual-Stage WGS Island (R-301A/B + E-301)",
+        "stage_id": "stage_5_packed_bed_reactor_bed1",
+        "index": 4,
+        "tag": "R-104",
+        "title": "R-104 High-Temp Reactor Bed 1",
         "description": "High-temperature (380 C) and low-temperature (210 C) Water-Gas Shift reactors converting CO + H2O <-> CO2 + H2.",
         "archetype": "packed_bed_reactor",
         "equipment_primitive": "packed_bed_reactor",
         "time_window_h": [
-          7.5,
-          10.0
+          10.0,
+          12.5
+        ],
+        "evidence_tier": "DIRECT",
+        "streams_in": [
+          "Cooled Syngas (210,800 Nm3/h Wet, 350 C)"
+        ],
+        "streams_out": [
+          "Shifted Syngas (210,800 Nm3/h Wet / 170,200 Dry, 136,364 Nm3/h H2, 80.1% Dry H2)"
+        ],
+        "control_loops": [
+          "TIC-401A HT-Shift",
+          "TIC-401B LT-Shift"
+        ],
+        "hazop_interlocks": [],
+        "required_parameters": [
+          "smr_reaction_enthalpy",
+          "wgs_reaction_enthalpy",
+          "smr_steam_to_carbon_ratio",
+          "smr_reformer_outlet_temperature",
+          "smr_operating_pressure",
+          "psa_hydrogen_recovery"
+        ],
+        "temperature_c": 380.0,
+        "pressure_bar": 25.0,
+        "flow_nm3_h": 210800.0,
+        "dry_flow_nm3_h": 170200.0,
+        "flow_basis": "Wet",
+        "h2_flow_nm3_h": 136363.6,
+        "h2_purity_pct": 80.1
+      },
+      {
+        "stage_id": "stage_5_packed_bed_reactor_intercooler",
+        "index": 5,
+        "tag": "E-106",
+        "title": "E-106 Reactor Intercooler",
+        "description": "Inter-bed steam/BFW cooler (380 C -> 210 C, Q=15.05 MW).",
+        "archetype": "shell_tube_hx",
+        "equipment_primitive": "shell_tube_hx",
+        "temperature_c": 210.0,
+        "pressure_bar": 25.0,
+        "flow_nm3_h": 210800.0,
+        "flow_basis": "Wet",
+        "h2_purity_pct": 80.1,
+        "thermal_duty_mw": 15.05,
+        "t_hot_in_c": 380.0,
+        "t_hot_out_c": 210.0,
+        "t_cold_in_c": 145.0,
+        "t_cold_out_c": 240.0,
+        "utility_loop": "bfw_steam",
+        "control_loops": [
+          "TIC-E-106 Intercooler Outlet"
+        ],
+        "hazop_interlocks": [],
+        "streams_in": [
+          "Bed 1 Effluent (380 C)"
+        ],
+        "streams_out": [
+          "Cooled Bed 2 Feed (210 C)"
+        ],
+        "required_parameters": [
+          "smr_reaction_enthalpy",
+          "wgs_reaction_enthalpy",
+          "smr_steam_to_carbon_ratio",
+          "smr_reformer_outlet_temperature",
+          "smr_operating_pressure",
+          "psa_hydrogen_recovery"
+        ]
+      },
+      {
+        "stage_id": "stage_5_packed_bed_reactor_bed2",
+        "index": 6,
+        "tag": "R-105",
+        "title": "R-105 Low-Temp Reactor Bed 2",
+        "description": "High-temperature (380 C) and low-temperature (210 C) Water-Gas Shift reactors converting CO + H2O <-> CO2 + H2.",
+        "archetype": "packed_bed_reactor",
+        "equipment_primitive": "packed_bed_reactor",
+        "time_window_h": [
+          10.0,
+          12.5
         ],
         "evidence_tier": "DIRECT",
         "streams_in": [
@@ -497,15 +972,92 @@
         "h2_purity_pct": 80.1
       },
       {
-        "stage_id": "stage_5_knockout_cooler",
-        "index": 4,
-        "title": "5. Syngas Trim Cooler (E-401) & KO Drum (V-401)",
-        "description": "Fin-fan trim cooler E-401 cooling shifted syngas to 40 C and flashing process condensate in V-401 bottom boot.",
+        "stage_id": "stage_6_knockout_cooler_economizer",
+        "index": 7,
+        "tag": "E-107",
+        "title": "E-107 BFW Economizer",
+        "description": "Process heat recovery economizer (210 C -> 120 C, Q=6.43 MW).",
+        "archetype": "shell_tube_hx",
+        "equipment_primitive": "shell_tube_hx",
+        "temperature_c": 120.0,
+        "pressure_bar": 24.5,
+        "flow_nm3_h": 170200.0,
+        "flow_basis": "Dry",
+        "h2_purity_pct": 80.1,
+        "thermal_duty_mw": 6.43,
+        "t_hot_in_c": 210.0,
+        "t_hot_out_c": 120.0,
+        "t_cold_in_c": 35.0,
+        "t_cold_out_c": 145.0,
+        "utility_loop": "bfw_steam",
+        "control_loops": [
+          "TIC-E-107 Economizer"
+        ],
+        "hazop_interlocks": [],
+        "streams_in": [
+          "Hot Effluent (210 C)"
+        ],
+        "streams_out": [
+          "Pre-Cooled Gas (120 C)"
+        ],
+        "required_parameters": [
+          "smr_reaction_enthalpy",
+          "wgs_reaction_enthalpy",
+          "smr_steam_to_carbon_ratio",
+          "smr_reformer_outlet_temperature",
+          "smr_operating_pressure",
+          "psa_hydrogen_recovery"
+        ]
+      },
+      {
+        "stage_id": "stage_6_knockout_cooler_trim",
+        "index": 8,
+        "tag": "E-108",
+        "title": "E-108 Final Trim Cooler",
+        "description": "Cooling water trim condenser (120 C -> 40 C, Q=5.72 MW).",
+        "archetype": "shell_tube_hx",
+        "equipment_primitive": "shell_tube_hx",
+        "temperature_c": 40.0,
+        "pressure_bar": 24.5,
+        "flow_nm3_h": 170200.0,
+        "flow_basis": "Dry",
+        "h2_purity_pct": 80.1,
+        "thermal_duty_mw": 5.72,
+        "t_hot_in_c": 120.0,
+        "t_hot_out_c": 40.0,
+        "t_cold_in_c": 25.0,
+        "t_cold_out_c": 38.0,
+        "utility_loop": "cooling_water",
+        "control_loops": [
+          "TIC-E-108 Trim Outlet"
+        ],
+        "hazop_interlocks": [],
+        "streams_in": [
+          "Pre-Cooled Gas (120 C)"
+        ],
+        "streams_out": [
+          "Condensed Gas (40 C)"
+        ],
+        "required_parameters": [
+          "smr_reaction_enthalpy",
+          "wgs_reaction_enthalpy",
+          "smr_steam_to_carbon_ratio",
+          "smr_reformer_outlet_temperature",
+          "smr_operating_pressure",
+          "psa_hydrogen_recovery"
+        ]
+      },
+      {
+        "stage_id": "stage_6_knockout_cooler",
+        "index": 9,
+        "tag": "S-101",
+        "title": "6. Syngas Cooling & KO Drum (S-101)",
+        "description": "Cooling shifted syngas to 40 C and flashing process condensate in knockout separator S-101.",
         "archetype": "knockout_cooler",
         "equipment_primitive": "knockout_cooler",
         "time_window_h": [
-          10.0,
-          12.5
+          12.5,
+          15.0
         ],
         "evidence_tier": "DIRECT",
         "streams_in": [
@@ -537,50 +1089,11 @@
         "h2_purity_pct": 80.1
       },
       {
-        "stage_id": "stage_6_co2_absorber",
-        "index": 5,
-        "title": "6. Amine CO2 Capture (C-501 / C-502)",
-        "description": "Packed amine absorber C-501 and stripper C-502 with reflux condenser and reboiler capturing CO2 from shifted syngas.",
-        "archetype": "co2_absorber",
-        "equipment_primitive": "co2_absorber",
-        "time_window_h": [
-          12.5,
-          15.0
-        ],
-        "evidence_tier": "DIRECT",
-        "streams_in": [
-          "Dry Shifted Syngas (170,200 Nm3/h Dry, 40 C)"
-        ],
-        "streams_out": [
-          "CO2-Lean Syngas (139,700 Nm3/h Dry, 97.6% H2)",
-          "Captured CO2 Export (30,500 Nm3/h, 95% capture)"
-        ],
-        "control_loops": [
-          "PIC-601 Absorber Press",
-          "AIC-601 CO2 Slip"
-        ],
-        "hazop_interlocks": [],
-        "required_parameters": [
-          "smr_reaction_enthalpy",
-          "wgs_reaction_enthalpy",
-          "smr_steam_to_carbon_ratio",
-          "smr_reformer_outlet_temperature",
-          "smr_operating_pressure",
-          "psa_hydrogen_recovery"
-        ],
-        "temperature_c": 42.0,
-        "pressure_bar": 24.2,
-        "flow_nm3_h": 139700.0,
-        "dry_flow_nm3_h": 139700.0,
-        "flow_basis": "Dry",
-        "h2_flow_nm3_h": 136363.6,
-        "h2_purity_pct": 97.6
-      },
-      {
         "stage_id": "stage_7_psa_skid",
-        "index": 6,
-        "title": "7. 8-Bed PSA Matrix (U-601) & V-601",
-        "description": "8-bed cyclic Pressure Swing Adsorption skid purifying H2 to 99.99% with tail gas recycle routed to F-201 burners.",
+        "index": 10,
+        "tag": "V-101",
+        "title": "4-Bed PSA Skid (V-101)",
+        "description": "4-bed cyclic Pressure Swing Adsorption skid purifying H2 to 99.99% at 27 C, 33.1 bar with tail gas recycle to B-101 burners.",
         "archetype": "psa_skid",
         "equipment_primitive": "psa_skid",
         "time_window_h": [
@@ -608,19 +1121,21 @@
           "smr_operating_pressure",
           "psa_hydrogen_recovery"
         ],
-        "temperature_c": 40.0,
-        "pressure_bar": 24.0,
+        "temperature_c": 27.0,
+        "pressure_bar": 33.1,
         "flow_nm3_h": 120000.0,
         "dry_flow_nm3_h": 120000.0,
         "flow_basis": "Dry",
         "h2_flow_nm3_h": 120000.0,
-        "h2_purity_pct": 99.99
+        "h2_purity_pct": 99.99,
+        "bed_count": 4
       },
       {
         "stage_id": "stage_8_high_pressure_compressor",
-        "index": 7,
-        "title": "8. H2 Compressor (K-701) & 400 bar Bullets",
-        "description": "3-stage reciprocating H2 compressor K-701 pressurizing 99.99% pure H2 to 400 bar storage bullets V-701A/B/C.",
+        "index": 11,
+        "tag": "C-101..103",
+        "title": "H2 Compressor (C-101..103) & 400 bar Storage",
+        "description": "Multi-stage reciprocating H2 compressor pressurizing 99.99% pure H2 from 33.1 bar to 400 bar with interstage cooling.",
         "archetype": "high_pressure_compressor",
         "equipment_primitive": "high_pressure_compressor",
         "time_window_h": [
@@ -647,15 +1162,192 @@
           "smr_operating_pressure",
           "psa_hydrogen_recovery"
         ],
-        "temperature_c": 40.0,
+        "temperature_c": 50.0,
         "pressure_bar": 400.0,
         "flow_nm3_h": 120000.0,
         "dry_flow_nm3_h": 120000.0,
         "flow_basis": "Dry",
         "h2_flow_nm3_h": 120000.0,
-        "h2_purity_pct": 99.99
+        "h2_purity_pct": 99.99,
+        "compressor_stages": [
+          {
+            "tag": "C-101",
+            "p_in_bar": 33.1,
+            "p_out_bar": 61.7,
+            "t_in_c": 38.0,
+            "t_out_c": 96.2,
+            "power_mw": 3.37
+          },
+          {
+            "tag": "C-102",
+            "p_in_bar": 61.7,
+            "p_out_bar": 115.1,
+            "t_in_c": 38.0,
+            "t_out_c": 96.2,
+            "power_mw": 3.37
+          },
+          {
+            "tag": "C-103",
+            "p_in_bar": 115.1,
+            "p_out_bar": 214.5,
+            "t_in_c": 38.0,
+            "t_out_c": 96.2,
+            "power_mw": 3.37
+          },
+          {
+            "tag": "C-104",
+            "p_in_bar": 214.5,
+            "p_out_bar": 400.0,
+            "t_in_c": 38.0,
+            "t_out_c": 96.2,
+            "power_mw": 3.37
+          }
+        ],
+        "intercoolers": [
+          {
+            "tag": "E-110",
+            "duty_mw": 2.93,
+            "t_hot_in_c": 96.2,
+            "t_hot_out_c": 38.0
+          },
+          {
+            "tag": "E-111",
+            "duty_mw": 2.93,
+            "t_hot_in_c": 96.2,
+            "t_hot_out_c": 38.0
+          },
+          {
+            "tag": "E-112",
+            "duty_mw": 2.93,
+            "t_hot_in_c": 96.2,
+            "t_hot_out_c": 38.0
+          },
+          {
+            "tag": "E-113",
+            "duty_mw": 2.93,
+            "t_hot_in_c": 96.2,
+            "t_hot_out_c": 38.0
+          }
+        ],
+        "thermal_duty_mw": 25.22
       }
     ],
+    "connections": [
+      {
+        "from": "stage_1_pre_reformer",
+        "to": "stage_2_pre_reformer",
+        "stream_type": "process",
+        "temp_c": 400.0,
+        "label": "R-101 -> R-102"
+      },
+      {
+        "from": "stage_2_pre_reformer",
+        "to": "stage_3_furnace_reformer",
+        "stream_type": "process",
+        "temp_c": 504.0,
+        "label": "R-102 -> B-101/R-103"
+      },
+      {
+        "from": "stage_3_furnace_reformer",
+        "to": "stage_4_shell_tube_hx",
+        "stream_type": "process",
+        "temp_c": 900.0,
+        "label": "B-101/R-103 -> E-105"
+      },
+      {
+        "from": "stage_4_shell_tube_hx",
+        "to": "stage_5_packed_bed_reactor_bed1",
+        "stream_type": "process",
+        "temp_c": 350.0,
+        "label": "E-105 -> R-104"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_bed1",
+        "to": "stage_5_packed_bed_reactor_intercooler",
+        "stream_type": "process",
+        "temp_c": 380.0,
+        "label": "R-104 -> E-106"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_intercooler",
+        "to": "stage_5_packed_bed_reactor_bed2",
+        "stream_type": "process",
+        "temp_c": 210.0,
+        "label": "E-106 -> R-105"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_bed2",
+        "to": "stage_6_knockout_cooler_economizer",
+        "stream_type": "process",
+        "temp_c": 210.0,
+        "label": "R-105 -> E-107"
+      },
+      {
+        "from": "stage_6_knockout_cooler_economizer",
+        "to": "stage_6_knockout_cooler_trim",
+        "stream_type": "process",
+        "temp_c": 120.0,
+        "label": "E-107 -> E-108"
+      },
+      {
+        "from": "stage_6_knockout_cooler_trim",
+        "to": "stage_6_knockout_cooler",
+        "stream_type": "process",
+        "temp_c": 40.0,
+        "label": "E-108 -> S-101"
+      },
+      {
+        "from": "stage_6_knockout_cooler",
+        "to": "stage_7_psa_skid",
+        "stream_type": "process",
+        "temp_c": 40.0,
+        "label": "S-101 -> V-101"
+      },
+      {
+        "from": "stage_7_psa_skid",
+        "to": "stage_8_high_pressure_compressor",
+        "stream_type": "process",
+        "temp_c": 27.0,
+        "label": "V-101 -> C-101..103"
+      },
+      {
+        "from": "stage_7_psa_skid",
+        "to": "stage_3_furnace_reformer",
+        "stream_type": "recycle",
+        "temp_c": 27.0,
+        "label": "Tail Gas Recycle (V-101 -> B-101/R-103)"
+      },
+      {
+        "from": "stage_6_knockout_cooler_economizer",
+        "to": "stage_5_packed_bed_reactor_intercooler",
+        "stream_type": "bfw_steam",
+        "temp_c": 240.0,
+        "label": "BFW/Steam Loop (E-107 -> E-106)"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_intercooler",
+        "to": "stage_4_shell_tube_hx",
+        "stream_type": "bfw_steam",
+        "temp_c": 240.0,
+        "label": "BFW/Steam Loop (E-106 -> E-105)"
+      },
+      {
+        "from": "stage_4_shell_tube_hx",
+        "to": "stage_3_furnace_reformer",
+        "stream_type": "bfw_steam",
+        "temp_c": 265.0,
+        "label": "HP Steam Header (E-105 -> B-101/R-103)"
+      }
+    ],
+    "hen_summary": {
+      "total_units": 12,
+      "convection_banks_count": 5,
+      "process_heat_exchangers_count": 4,
+      "total_process_cooling_mw": 75.89,
+      "total_trim_cooling_mw": 5.72,
+      "enthalpy_balance_closed": true,
+      "connections_count": 15
+    },
     "telemetry_schema": {
       "primary_metric": "h2_flow_nm3_h",
       "primary_label": "H2 Flow (Nm3/h)",
@@ -709,14 +1401,134 @@
   "composition_graph": {
     "nodes": [
       "stage_1_pre_reformer",
-      "stage_2_furnace_reformer",
-      "stage_3_shell_tube_hx",
-      "stage_4_packed_bed_reactor",
-      "stage_5_knockout_cooler",
-      "stage_6_co2_absorber",
+      "stage_2_pre_reformer",
+      "stage_3_furnace_reformer",
+      "stage_4_shell_tube_hx",
+      "stage_5_packed_bed_reactor_bed1",
+      "stage_5_packed_bed_reactor_intercooler",
+      "stage_5_packed_bed_reactor_bed2",
+      "stage_6_knockout_cooler_economizer",
+      "stage_6_knockout_cooler_trim",
+      "stage_6_knockout_cooler",
       "stage_7_psa_skid",
       "stage_8_high_pressure_compressor"
+    ],
+    "edges": [
+      {
+        "from": "stage_1_pre_reformer",
+        "to": "stage_2_pre_reformer",
+        "stream_type": "process",
+        "temp_c": 400.0,
+        "label": "R-101 -> R-102"
+      },
+      {
+        "from": "stage_2_pre_reformer",
+        "to": "stage_3_furnace_reformer",
+        "stream_type": "process",
+        "temp_c": 504.0,
+        "label": "R-102 -> B-101/R-103"
+      },
+      {
+        "from": "stage_3_furnace_reformer",
+        "to": "stage_4_shell_tube_hx",
+        "stream_type": "process",
+        "temp_c": 900.0,
+        "label": "B-101/R-103 -> E-105"
+      },
+      {
+        "from": "stage_4_shell_tube_hx",
+        "to": "stage_5_packed_bed_reactor_bed1",
+        "stream_type": "process",
+        "temp_c": 350.0,
+        "label": "E-105 -> R-104"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_bed1",
+        "to": "stage_5_packed_bed_reactor_intercooler",
+        "stream_type": "process",
+        "temp_c": 380.0,
+        "label": "R-104 -> E-106"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_intercooler",
+        "to": "stage_5_packed_bed_reactor_bed2",
+        "stream_type": "process",
+        "temp_c": 210.0,
+        "label": "E-106 -> R-105"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_bed2",
+        "to": "stage_6_knockout_cooler_economizer",
+        "stream_type": "process",
+        "temp_c": 210.0,
+        "label": "R-105 -> E-107"
+      },
+      {
+        "from": "stage_6_knockout_cooler_economizer",
+        "to": "stage_6_knockout_cooler_trim",
+        "stream_type": "process",
+        "temp_c": 120.0,
+        "label": "E-107 -> E-108"
+      },
+      {
+        "from": "stage_6_knockout_cooler_trim",
+        "to": "stage_6_knockout_cooler",
+        "stream_type": "process",
+        "temp_c": 40.0,
+        "label": "E-108 -> S-101"
+      },
+      {
+        "from": "stage_6_knockout_cooler",
+        "to": "stage_7_psa_skid",
+        "stream_type": "process",
+        "temp_c": 40.0,
+        "label": "S-101 -> V-101"
+      },
+      {
+        "from": "stage_7_psa_skid",
+        "to": "stage_8_high_pressure_compressor",
+        "stream_type": "process",
+        "temp_c": 27.0,
+        "label": "V-101 -> C-101..103"
+      },
+      {
+        "from": "stage_7_psa_skid",
+        "to": "stage_3_furnace_reformer",
+        "stream_type": "recycle",
+        "temp_c": 27.0,
+        "label": "Tail Gas Recycle (V-101 -> B-101/R-103)"
+      },
+      {
+        "from": "stage_6_knockout_cooler_economizer",
+        "to": "stage_5_packed_bed_reactor_intercooler",
+        "stream_type": "bfw_steam",
+        "temp_c": 240.0,
+        "label": "BFW/Steam Loop (E-107 -> E-106)"
+      },
+      {
+        "from": "stage_5_packed_bed_reactor_intercooler",
+        "to": "stage_4_shell_tube_hx",
+        "stream_type": "bfw_steam",
+        "temp_c": 240.0,
+        "label": "BFW/Steam Loop (E-106 -> E-105)"
+      },
+      {
+        "from": "stage_4_shell_tube_hx",
+        "to": "stage_3_furnace_reformer",
+        "stream_type": "bfw_steam",
+        "temp_c": 265.0,
+        "label": "HP Steam Header (E-105 -> B-101/R-103)"
+      }
     ]
+  },
+  "hen_summary": {
+    "total_units": 12,
+    "convection_banks_count": 5,
+    "process_heat_exchangers_count": 4,
+    "total_process_cooling_mw": 75.89,
+    "total_trim_cooling_mw": 5.72,
+    "enthalpy_balance_closed": true,
+    "connections_count": 15
   },
   "trajectories": {
     "time_hours": [

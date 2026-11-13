@@ -636,22 +636,29 @@ def extract_dynamic_stages_from_prompt(prompt: str) -> list[dict[str, Any]]:
     """Parse numbered or sequential process stages directly from a user prompt."""
     lower_p = prompt.lower()
     if "smr" in lower_p or "steam methane reforming" in lower_p:
-        # Full 8-Unit Industrial SMR + Pre-Reformer + Condensate KO + CO2 Capture Plant
+        include_ccs = any(k in lower_p for k in ("ccs", "amine", "co2 capture", "carbon capture"))
         smr_units = [
-            ("pre_reformer", "1. Feed HDS (R-101A/B) & Pre-Reformer (R-102)", "Feed Hydrodesulfurization (ZnO guard bed R-101A) and adiabatic Pre-Reformer (R-102) converting C2+ heavies and initial CH4 at 490 C, 30 bar.", ["TIC-102 Pre-Reformer Temp", "PIC-102 Guard Bed Press"], []),
-            ("furnace_reformer", "2. Primary SMR Furnace (F-201 / R-201)", "Terrace-wall radiant SMR furnace executing endothermic reforming (CH4 + H2O <-> CO + 3H2) at 850 C, 28 bar with convection coil bank.", ["TIC-201 Furnace Outlet Temp", "PIC-201 Header Press"], ["SIS-101 Emergency N2 Purge Interlock"]),
-            ("shell_tube_hx", "3. Waste Heat Boiler (E-105) & Steam Drum (V-102)", "Cooling reformed syngas from 850 C to 350 C while generating high-pressure superheated steam in elevated drum V-102.", ["TIC-301 Boiler Outlet Temp", "LIC-102 Steam Drum Level"], []),
-            ("packed_bed_reactor", "4. Dual-Stage WGS Island (R-301A/B + E-301)", "High-temperature (380 C) and low-temperature (210 C) Water-Gas Shift reactors converting CO + H2O <-> CO2 + H2.", ["TIC-401A HT-Shift", "TIC-401B LT-Shift"], []),
-            ("knockout_cooler", "5. Syngas Trim Cooler (E-401) & KO Drum (V-401)", "Fin-fan trim cooler E-401 cooling shifted syngas to 40 C and flashing process condensate in V-401 bottom boot.", ["TIC-501 Trim Cooler", "LIC-401 Condensate Boot"], []),
-            ("co2_absorber", "6. Amine CO2 Capture (C-501 / C-502)", "Packed amine absorber C-501 and stripper C-502 with reflux condenser and reboiler capturing CO2 from shifted syngas.", ["PIC-601 Absorber Press", "AIC-601 CO2 Slip"], []),
-            ("psa_skid", "7. 8-Bed PSA Matrix (U-601) & V-601", "8-bed cyclic Pressure Swing Adsorption skid purifying H2 to 99.99% with tail gas recycle routed to F-201 burners.", ["PIC-701 PSA Press", "AIC-701 H2 Purity (99.99%)"], []),
-            ("high_pressure_compressor", "8. H2 Compressor (K-701) & 400 bar Bullets", "3-stage reciprocating H2 compressor K-701 pressurizing 99.99% pure H2 to 400 bar storage bullets V-701A/B/C.", ["PIC-801 Discharge (400 bar)", "TIC-801 Interstage Cooler"], []),
+            ("pre_reformer", "1. HDS Reactor (R-101)", "Hydrodesulfurization ZnO guard bed R-101 fed by E-101 at 400 C, 44.5 bar.", ["TIC-101 HDS Temp", "PIC-101 HDS Press"], [], "R-101"),
+            ("pre_reformer", "2. Adiabatic Pre-Reformer (R-102)", "Adiabatic Pre-Reformer R-102 fed by M-101 + E-102 converting C2+ heavies at 504 C, 38.9 bar.", ["TIC-102 Pre-Reformer Temp", "PIC-102 Pre-Reformer Press"], [], "R-102"),
+            ("furnace_reformer", "3. Primary SMR Furnace (B-101 / R-103)", "Terrace-wall radiant SMR furnace executing endothermic reforming (CH4 + H2O <-> CO + 3H2) at 900 C, 38 bar with convection coil bank.", ["TIC-201 Furnace Outlet Temp", "PIC-201 Header Press"], ["SIS-101 Emergency N2 Purge Interlock"], "B-101/R-103"),
+            ("shell_tube_hx", "4. Waste Heat Boiler (E-105)", "Cooling reformed syngas from 900 C to 370 C while generating high-pressure superheated steam.", ["TIC-301 Boiler Outlet Temp", "LIC-102 Steam Drum Level"], [], "E-105"),
+            ("packed_bed_reactor", "5. Dual-Stage WGS Island (R-104 / R-105)", "High-temperature (380 C) and low-temperature (210 C) Water-Gas Shift reactors converting CO + H2O <-> CO2 + H2.", ["TIC-401A HT-Shift", "TIC-401B LT-Shift"], [], "R-104/105"),
+            ("knockout_cooler", "6. Syngas Cooling & KO Drum (S-101)", "Cooling shifted syngas to 40 C and flashing process condensate in knockout separator S-101.", ["TIC-501 Trim Cooler", "LIC-401 Condensate Boot"], [], "S-101"),
         ]
+        if include_ccs:
+            smr_units.append(
+                ("co2_absorber", "7. Amine CO2 Capture (C-501 / C-502)", "Packed amine absorber C-501 and stripper C-502 capturing CO2 from shifted syngas.", ["PIC-601 Absorber Press", "AIC-601 CO2 Slip"], [], "C-501")
+            )
+        smr_units.extend([
+            ("psa_skid", "4-Bed PSA Skid (V-101)", "4-bed cyclic Pressure Swing Adsorption skid purifying H2 to 99.99% at 27 C, 33.1 bar with tail gas recycle to B-101 burners.", ["PIC-701 PSA Press", "AIC-701 H2 Purity (99.99%)"], [], "V-101"),
+            ("high_pressure_compressor", "H2 Compressor (C-101..103) & 400 bar Storage", "Multi-stage reciprocating H2 compressor pressurizing 99.99% pure H2 from 33.1 bar to 400 bar with interstage cooling.", ["PIC-801 Discharge (400 bar)", "TIC-801 Interstage Cooler"], [], "C-101..103"),
+        ])
         stages: list[dict[str, Any]] = []
-        for idx, (arch, title, desc, loops, interlocks) in enumerate(smr_units):
+        for idx, (arch, title, desc, loops, interlocks, unit_tag) in enumerate(smr_units):
             stages.append({
                 "stage_id": f"stage_{idx + 1}_{arch}",
                 "index": idx,
+                "tag": unit_tag,
                 "title": title,
                 "description": desc,
                 "archetype": arch,
@@ -982,8 +989,45 @@ def _solve_smr_plant_trajectories(
 
     is_smr_prompt = "smr" in prompt_text.lower() or "steam methane" in prompt_text.lower()
     if is_smr_prompt:
+        arch_to_state = {
+            "furnace_reformer": stage_states[1],
+            "shell_tube_hx": stage_states[2],
+            "packed_bed_reactor": stage_states[3],
+            "knockout_cooler": stage_states[4],
+            "co2_absorber": stage_states[5],
+            "psa_skid": stage_states[6],
+            "high_pressure_compressor": stage_states[7],
+        }
         for i, st in enumerate(stages):
-            st_data = stage_states[min(i, len(stage_states) - 1)]
+            tag = str(st.get("tag", ""))
+            arch = str(st.get("archetype", ""))
+            if tag == "R-101":
+                st_data = dict(stage_states[0])
+                st_data["temperature_c"] = 400.0
+                st_data["pressure_bar"] = 44.5
+                st_data["streams_in"] = [f"Natural Gas Feed ({ng_feed_nm3_h:,.0f} Nm3/h, 400 C, 44.5 bar)"]
+                st_data["streams_out"] = [f"Desulfurized NG ({ng_feed_nm3_h:,.0f} Nm3/h, 400 C, 44.5 bar)"]
+            elif tag == "R-102":
+                st_data = dict(stage_states[0])
+                st_data["temperature_c"] = 504.0
+                st_data["pressure_bar"] = 38.9
+                st_data["streams_in"] = [f"Mixed NG + Steam via M-101/E-102 ({144200.0 * scale:,.0f} Nm3/h, 504 C, 38.9 bar)"]
+                st_data["streams_out"] = [f"Pre-Reformed Gas to E-103 ({144200.0 * scale:,.0f} Nm3/h, 504 C, 38.9 bar)"]
+            elif arch == "furnace_reformer":
+                st_data = dict(stage_states[1])
+                st_data["temperature_c"] = 900.0
+                st_data["pressure_bar"] = 38.0
+            elif arch == "psa_skid":
+                st_data = dict(stage_states[6])
+                st_data["temperature_c"] = 27.0
+                st_data["pressure_bar"] = 33.1
+            elif arch == "high_pressure_compressor":
+                st_data = dict(stage_states[7])
+                st_data["temperature_c"] = 50.0
+                st_data["pressure_bar"] = round(final_press_bar, 1)
+            else:
+                st_data = arch_to_state.get(arch, stage_states[min(i, len(stage_states) - 1)])
+
             st["temperature_c"] = st_data["temperature_c"]
             st["pressure_bar"] = st_data["pressure_bar"]
             st["flow_nm3_h"] = st_data["total_flow_nm3_h"]
@@ -1083,34 +1127,42 @@ def synthesize_heat_integration_network(
         # Pass A: Fired Furnace Convection Bank Synthesis (T_flue_in > 700 C)
         t_flue_in = float(u.get("flue_in_temp_c", 980.0 if arch == "furnace_reformer" else t_cur))
         if arch == "furnace_reformer" or t_flue_in > 700.0 and "furnace" in (title + desc).lower():
-            t_stack_target = 135.0
-            m_cp_flue = max(0.035, m_cp_mw_k * 0.95)
+            t_stack_target = 130.0
             # Collect cold streams from explicit streams list or infer from plant context
             cold_streams = [
                 s for s in streams
                 if s.get("stream_type") == "cold" and float(s.get("t_target_c", 0.0)) > float(s.get("t_start_c", 0.0))
             ]
             if not cold_streams:
-                # Infer cold streams from upstream units & process utilities
                 has_steam = any(k in (title + desc + " ".join(str(x.get("description", "")) for x in units)).lower()
                                 for k in ("steam", "h2o", "boil", "shift", "reformer"))
                 cold_streams = [
-                    {"id": "cold_mixed_feed", "tag": "E-103", "name": "Mixed Feed Preheat", "t_start_c": 360.0, "t_target_c": 520.0, "m_cp_mw_k": m_cp_mw_k * 0.90},
-                    {"id": "cold_steam_sh", "tag": "E-102", "name": "HP Steam Superheater", "t_start_c": 265.0, "t_target_c": 450.0, "m_cp_mw_k": m_cp_mw_k * 0.72},
+                    {"id": "cold_prereform_eff", "tag": "E-103", "name": "Pre-Reformer Effluent Preheat", "t_start_c": 504.0, "t_target_c": 627.0, "pressure_bar": 38.9, "m_cp_mw_k": m_cp_mw_k * 0.95},
+                    {"id": "cold_mixed_feed", "tag": "E-102", "name": "Mixed Feed + Steam Preheat", "t_start_c": 360.0, "t_target_c": 504.0, "pressure_bar": 38.9, "m_cp_mw_k": m_cp_mw_k * 0.85},
                 ]
                 if has_steam:
-                    cold_streams.append({"id": "cold_steam_gen", "tag": "E-109", "name": "Steam Drum Boiler Coil", "t_start_c": 240.0, "t_target_c": 270.0, "m_cp_mw_k": m_cp_mw_k * 2.10})
+                    cold_streams.append({"id": "cold_steam_loop", "tag": "E-109", "name": "LP Steam Loop Superheater", "t_start_c": 25.0, "t_target_c": 400.0, "pressure_bar": 4.5, "m_cp_mw_k": m_cp_mw_k * 0.42})
                 cold_streams.extend([
-                    {"id": "cold_feed_preheat", "tag": "E-101", "name": "Raw Feed Preheat", "t_start_c": 35.0, "t_target_c": 360.0, "m_cp_mw_k": m_cp_mw_k * 0.48},
-                    {"id": "cold_comb_air", "tag": "E-104", "name": "Combustion Air Preheat", "t_start_c": 25.0, "t_target_c": 280.0, "m_cp_mw_k": m_cp_flue * 0.42},
+                    {"id": "cold_ng_feed", "tag": "E-101", "name": "Natural Gas Feed Preheat", "t_start_c": 25.0, "t_target_c": 400.0, "pressure_bar": 44.5, "m_cp_mw_k": m_cp_mw_k * 0.38},
+                    {"id": "cold_comb_air", "tag": "E-104", "name": "Combustion Air Preheat", "t_start_c": 25.0, "t_target_c": 220.0, "pressure_bar": 6.0, "m_cp_mw_k": m_cp_mw_k * 0.55},
                 ])
 
-            # Pinch hierarchy: order highest target temperature to lowest
-            cold_streams_sorted = sorted(cold_streams, key=lambda s: float(s.get("t_target_c", 0.0)), reverse=True)
+            # Second-Law Pinch hierarchy: strictly (target_temp_c DESC, inlet_temp_c DESC)
+            cold_streams_sorted = sorted(
+                cold_streams,
+                key=lambda s: (float(s.get("t_target_c", 0.0)), float(s.get("t_start_c", 0.0))),
+                reverse=True,
+            )
+            total_q_cold_mw = sum(
+                max(0.5, float(cs.get("m_cp_mw_k", m_cp_mw_k * 0.5)) * (float(cs.get("t_target_c", 200.0)) - float(cs.get("t_start_c", 25.0))))
+                for cs in cold_streams_sorted
+            )
+            m_cp_flue = max(0.020, total_q_cold_mw / max(50.0, t_flue_in - t_stack_target))
+
             t_flue_cur = t_flue_in
             conv_banks: list[dict[str, Any]] = []
             for idx_b, cs in enumerate(cold_streams_sorted):
-                if t_flue_cur <= t_stack_target + 5.0:
+                if t_flue_cur <= t_stack_target + 1.0:
                     break
                 t_c_in = float(cs.get("t_start_c", 25.0))
                 t_c_out = float(cs.get("t_target_c", 200.0))
@@ -1129,6 +1181,7 @@ def synthesize_heat_integration_network(
                     "t_hot_out_c": round(t_flue_next, 1),
                     "t_cold_in_c": round(t_c_in, 1),
                     "t_cold_out_c": round(t_c_out, 1),
+                    "pressure_bar": float(cs.get("pressure_bar", p_cur)),
                     "cold_stream_id": str(cs.get("id", f"cold_{idx_b + 1}")),
                 })
                 t_flue_cur = t_flue_next
