@@ -1005,12 +1005,14 @@ func _evaluate_runtime_reality_laws(sc: float = 3.0, temp_c: float = 900.0, pres
 
 func _update_reality_compiler_badges(violations: Array) -> void:
 	var laws_checked: int = int(_reality_compiler_audit.get("laws_checked", 6))
+	var engine_attr := str(_result.get("engine_attribution", ""))
+	var attr_suffix := (" • %s" % engine_attr) if engine_attr != "" else ""
 	if violations.is_empty():
 		if _top_reality_badge != null:
-			_top_reality_badge.text = "🟢 Reality Compiler: PASSED (%d/6 Physical Laws Verified)" % laws_checked
+			_top_reality_badge.text = "🟢 Reality Compiler: PASSED (%d/6 Physical Laws Verified)%s" % [laws_checked, attr_suffix]
 			_top_reality_badge.modulate = GOOD
 		if _reality_compiler_badge != null:
-			_reality_compiler_badge.text = "🟢 Reality Compiler: PASSED (%d/6 Physical Laws Verified • 0 Violations)" % laws_checked
+			_reality_compiler_badge.text = "🟢 Reality Compiler: PASSED (%d/6 Physical Laws Verified • 0 Violations)%s" % [laws_checked, attr_suffix]
 			_reality_compiler_badge.modulate = GOOD
 	else:
 		var first_v: Dictionary = violations[0] if (violations[0] is Dictionary) else {}

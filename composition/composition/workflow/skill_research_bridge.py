@@ -1657,6 +1657,42 @@ def compute_equipment_and_pipe_sizing(
     return units, connections, sizing_table, layout_metrics
 
 
+DOMAIN_TO_PERSONA = {
+    "thermochemical_plant": "octave_levenspiel",
+    "bioprocess_kinetics": "elmer_gaden",
+    "electromechanics": "nikola_tesla",
+}
+
+
+def _run_bullpen_and_sanitize(run_artifact: dict[str, Any], domain_id: str) -> dict[str, Any]:
+    """Execute 2-round R&D bullpen review, log internal trace, and return sanitized public artifact."""
+    from .reality_compiler import RealityCompiler
+    from scaleup_rag.rd_bullpen import run_bullpen_review, sanitize_for_public_export
+
+    persona_id = DOMAIN_TO_PERSONA.get(domain_id, "octave_levenspiel")
+    if domain_id == "thermochemical_plant":
+        RealityCompiler().compile_and_verify(run_artifact, strict=True)
+
+    internal_bundle = run_bullpen_review(run_artifact, primary_persona_id=persona_id)
+    internal_log_path = ARTIFACTS_DIR / "internal_bullpen_log.json"
+    with open(str(internal_log_path), "w", encoding="utf-8") as f:
+        f.write(
+            json.dumps(
+                {
+                    "run_id": run_artifact.get("run_id"),
+                    "domain_id": domain_id,
+                    "public_engine_alias": internal_bundle.get("public_engine_alias"),
+                    "bullpen_trace": internal_bundle.get("bullpen_trace"),
+                    "peer_review_audit": internal_bundle.get("peer_review_audit"),
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+            + "\n"
+        )
+    return sanitize_for_public_export(internal_bundle)
+
+
 def resolve_prompt_and_research(
     prompt_text: str,
     auto_research: bool = True,
@@ -1855,10 +1891,7 @@ def resolve_prompt_and_research(
             "user_design_setpoints": epistemic_audit.get("user_design_setpoints", {}),
             "unverified_assumptions": epistemic_audit.get("unverified_assumptions", {}),
         }
-        from .reality_compiler import RealityCompiler
-        from scaleup_rag.peer_review_gate import PeerReviewCommittee
-        RealityCompiler().compile_and_verify(run_artifact, strict=True)
-        PeerReviewCommittee().evaluate(run_artifact, run_perturbations=True, archive_on_pass=True, domain_id="thermochemical_plant")
+        run_artifact = _run_bullpen_and_sanitize(run_artifact, "thermochemical_plant")
 
         with open(str(latest_run_path), "w", encoding="utf-8") as f:
             f.write(json.dumps(run_artifact, indent=2, ensure_ascii=False) + "\n")
@@ -2037,6 +2070,10 @@ def resolve_prompt_and_research(
             "tier_1_quarantine_count": tier_1_count,
         },
     }
+
+    bio_domain_id = "electromechanics" if "electromech" in str(domain).lower() else "bioprocess_kinetics"
+    if str(run_artifact.get("status", "")).upper() != "HALTED":
+        run_artifact = _run_bullpen_and_sanitize(run_artifact, bio_domain_id)
 
     latest_run_path = ARTIFACTS_DIR / "latest_prompt_run.json"
     with open(str(latest_run_path), "w", encoding="utf-8") as f:
