@@ -12,16 +12,8 @@ const VESSEL_HEIGHT := 2.4
 const FILL_BASE_Y := 0.11
 const STAGE_SPACING := 1.95
 
-const CHEM_PLOT_POSITIONS: Array = [
-	Vector3(-9.5, 0.0, 2.8),   # Unit 100: R-101A/B HDS & R-102 Pre-Reformer (Front Row)
-	Vector3(-3.5, 0.0, 2.8),   # Unit 200: F-201 / R-201 Primary SMR Furnace (Front Row)
-	Vector3(2.5, 0.0, 2.8),    # Unit 300: E-105 WHB & V-102 Steam Drum (Front Row)
-	Vector3(8.5, 0.0, 2.8),    # Unit 400: R-301A/B Dual-Stage WGS (Front Row)
-	Vector3(11.2, 0.6, -2.8),  # Unit 500: E-401 Trim Cooler & V-401 Condensate KO (Mezzanine)
-	Vector3(5.5, 0.6, -2.8),   # Unit 600: C-501 / C-502 Amine CO2 Capture (Mezzanine)
-	Vector3(-0.5, 0.6, -2.8),  # Unit 700: U-601 8-Bed PSA & V-601 Tail Gas Drum (Mezzanine)
-	Vector3(-6.5, 0.6, -2.8),  # Unit 800: K-701 H2 Compressor & V-701A/B/C 400 bar Bullets (Mezzanine)
-]
+var _plant_connections: Array = []
+var _computed_layout: Dictionary = {}
 
 var _viewport: SubViewport
 var _world: Node3D
@@ -461,61 +453,148 @@ func _build_laboratory_bench() -> void:
 	_bench_env_root.add_child(manifold)
 
 
-func _build_industrial_plant_pad() -> void:
+func set_plant_connections(connections: Array) -> void:
+	_plant_connections = connections.duplicate(true)
+
+
+func _compute_topological_plant_layout(units: Array, connections: Array) -> Dictionary:
+	var count := units.size()
+	var positions: Array = []
+	positions.resize(count)
+
+	# 1. Compute degree & thermal duty per unit to detect Central Energy Hub
+	var degree_map: Dictionary = {}
+	for c in connections:
+		var u_from := str(c.get("from", ""))
+		var u_to := str(c.get("to", ""))
+		degree_map[u_from] = int(degree_map.get(u_from, 0)) + 1
+		degree_map[u_to] = int(degree_map.get(u_to, 0)) + 1
+
+	var hub_index := 0
+	var best_score := -1.0
+	for i in range(count):
+		var u: Dictionary = units[i]
+		var sid := str(u.get("stage_id", ""))
+		var q_mw := float(u.get("thermal_duty_mw", 0.0))
+		var banks: Array = u.get("convection_banks", [])
+		var deg := int(degree_map.get(sid, 0)) + banks.size()
+		var arch := str(u.get("archetype", ""))
+		var arch_bonus := 35.0 if arch == "furnace_reformer" else 0.0
+		var score := q_mw * 2.0 + float(deg) * 10.0 + arch_bonus
+		if score > best_score:
+			best_score = score
+			hub_index = i
+
+	# 2. Place Central Energy Hub at topological origin (0, 0, 0)
+	positions[hub_index] = Vector3(0.0, 0.0, 0.0)
+	var hub_banks: Array = units[hub_index].get("convection_banks", [])
+	var tunnel_reach := 2.2 + float(hub_banks.size()) * 1.15
+
+	# 3. Upstream Feed & Pre-Treatment Train -> West / Front-Left quadrant (z = +3.8)
+	var upstream_count := hub_index
+	for i in range(upstream_count):
+		var offset_from_hub := upstream_count - i
+		var x_pos := -4.8 - float(offset_from_hub - 1) * 4.5
+		positions[i] = Vector3(x_pos, 0.0, 3.8)
+
+	# 4. Downstream units split into:
+	#    - Reaction & Series Heat Exchanger Cooling Train -> North / Back row (z = -3.8)
+	#    - Separation, PSA & Multi-Stage Compression Train -> South / Front-Right quadrant (z = +3.8)
+	var downstream_count := count - 1 - hub_index
+	var cooling_count := int(ceil(float(downstream_count) * 0.6))
+	if downstream_count >= 2:
+		cooling_count = clampi(cooling_count, 1, downstream_count - 1)
+
+	var north_start_x := -maxf(2.5, tunnel_reach * 0.35)
+	for j in range(downstream_count):
+		var idx := hub_index + 1 + j
+		if j < cooling_count:
+			var x_n := north_start_x + float(j) * 4.2
+			positions[idx] = Vector3(x_n, 0.0, -3.8)
+		else:
+			var k := j - cooling_count
+			var x_s := 5.2 + float(k) * 4.8
+			positions[idx] = Vector3(x_s, 0.0, 3.8)
+
+	# 5. Compute dynamic plant pad bounding box
+	var min_x := -tunnel_reach - 2.5
+	var max_x := 4.0
+	var min_z := -6.2
+	var max_z := 6.2
+	for p in positions:
+		var v: Vector3 = p
+		min_x = minf(min_x, v.x - 3.0)
+		max_x = maxf(max_x, v.x + 3.0)
+		min_z = minf(min_z, v.z - 2.8)
+		max_z = maxf(max_z, v.z + 2.8)
+
+	var pad_bounds := Rect2(min_x, min_z, max_x - min_x, max_z - min_z)
+	return {
+		"positions": positions,
+		"hub_index": hub_index,
+		"hub_id": str(units[hub_index].get("stage_id", "")),
+		"pad_bounds": pad_bounds,
+	}
+
+
+func _build_industrial_plant_pad(pad_bounds: Rect2 = Rect2(-13.2, -6.5, 28.0, 13.0)) -> void:
 	_clear_bench_env()
 
-	# 1. Surrounding Asphalt / Industrial Apron (60m x 60m)
+	var pad_w := maxf(24.0, pad_bounds.size.x)
+	var pad_d := maxf(13.0, pad_bounds.size.y)
+	var cx := pad_bounds.position.x + pad_bounds.size.x * 0.5
+	var cz := pad_bounds.position.y + pad_bounds.size.y * 0.5
+
+	# 1. Surrounding Asphalt / Industrial Apron (80m x 80m)
 	var apron_m := PlaneMesh.new()
-	apron_m.size = Vector2(60.0, 60.0)
+	apron_m.size = Vector2(maxf(80.0, pad_w + 30.0), maxf(80.0, pad_d + 30.0))
 	var apron := MeshInstance3D.new()
 	apron.mesh = apron_m
-	apron.position = Vector3(0.0, -0.18, 0.0)
+	apron.position = Vector3(cx, -0.18, cz)
 	var apron_mat := StandardMaterial3D.new()
 	apron_mat.albedo_color = Color(0.06, 0.075, 0.095)
 	apron_mat.roughness = 0.92
 	apron.material_override = apron_mat
 	_bench_env_root.add_child(apron)
 
-	# 2. Industrial Concrete Plant Pad (28m x 13m) + Raised +0.6m Mezzanine Deck under Back Row
+	# 2. Industrial Concrete Plant Pad sized to dynamic plant bounds
 	var pad_mat := StandardMaterial3D.new()
 	pad_mat.albedo_color = Color(0.19, 0.21, 0.24)
 	pad_mat.roughness = 0.80
 	pad_mat.metallic = 0.08
-	_add_cad_box(_bench_env_root, Vector3(28.0, 0.18, 13.0), Vector3(0.8, -0.09, 0.0), pad_mat)
-
-	var mezz_mat := StandardMaterial3D.new()
-	mezz_mat.albedo_color = Color(0.22, 0.24, 0.28)
-	mezz_mat.roughness = 0.78
-	_add_cad_box(_bench_env_root, Vector3(24.0, 0.60, 3.8), Vector3(2.3, 0.30, -2.95), mezz_mat)
+	_add_cad_box(_bench_env_root, Vector3(pad_w, 0.18, pad_d), Vector3(cx, -0.09, cz), pad_mat)
 
 	# 3. Painted Yellow Safety Walkways & Perimeter Striping
 	var yellow_mat := StandardMaterial3D.new()
 	yellow_mat.albedo_color = Color(0.78, 0.62, 0.14)
 	yellow_mat.roughness = 0.52
-	for wz in [-6.35, 6.35, 0.85, -0.95]:
-		_add_cad_box(_bench_env_root, Vector3(27.6, 0.015, 0.08), Vector3(0.8, 0.008, wz), yellow_mat)
-	_add_cad_box(_bench_env_root, Vector3(23.8, 0.015, 0.08), Vector3(2.3, 0.608, -1.08), yellow_mat)
-	for wx in [-13.05, 14.65]:
-		_add_cad_box(_bench_env_root, Vector3(0.08, 0.015, 12.7), Vector3(wx, 0.008, 0.0), yellow_mat)
+	for wz in [cz - pad_d * 0.48, cz + pad_d * 0.48, 1.45, -1.45]:
+		_add_cad_box(_bench_env_root, Vector3(pad_w - 0.4, 0.015, 0.08), Vector3(cx, 0.008, wz), yellow_mat)
+	for wx in [cx - pad_w * 0.49, cx + pad_w * 0.49]:
+		_add_cad_box(_bench_env_root, Vector3(0.08, 0.015, pad_d - 0.3), Vector3(wx, 0.008, cz), yellow_mat)
 
-	# 4. Central Multi-Tier Structural Steel Overhead Pipe Rack (Spine at z = 0.0 between Front & Back Rows)
+	# 4. Central Multi-Tier Structural Steel Overhead Pipe Rack (Spine at z = 1.95 / -1.95 clear of central hub)
 	var steel_beam_mat := StandardMaterial3D.new()
 	steel_beam_mat.albedo_color = Color(0.32, 0.38, 0.46)
 	steel_beam_mat.metallic = 0.84
 	steel_beam_mat.roughness = 0.30
 
-	var rack_z := 0.0
-	var rack_half_w := 0.55
-	var bent_xs := [-10.0, -7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0]
-	for bx in bent_xs:
+	var rack_z := -1.85
+	var rack_half_w := 0.45
+	var rack_start_x := cx - pad_w * 0.40
+	var rack_end_x := cx + pad_w * 0.40
+	var rack_span := rack_end_x - rack_start_x
+	var n_bents := maxi(4, int(floor(rack_span / 3.5)) + 1)
+	for bi in range(n_bents):
+		var bx := rack_start_x + (float(bi) / float(maxi(1, n_bents - 1))) * rack_span
 		_add_cad_box(_bench_env_root, Vector3(0.11, 3.85, 0.11), Vector3(bx, 1.925, rack_z - rack_half_w), steel_beam_mat)
 		_add_cad_box(_bench_env_root, Vector3(0.11, 3.85, 0.11), Vector3(bx, 1.925, rack_z + rack_half_w), steel_beam_mat)
-		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.25), Vector3(bx, 2.85, rack_z), steel_beam_mat)
-		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.25), Vector3(bx, 3.55, rack_z), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.05), Vector3(bx, 2.85, rack_z), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.05), Vector3(bx, 3.55, rack_z), steel_beam_mat)
 
 	for rz in [rack_z - rack_half_w, rack_z + rack_half_w]:
-		_add_cad_box(_bench_env_root, Vector3(21.4, 0.10, 0.10), Vector3(0.5, 2.85, rz), steel_beam_mat)
-		_add_cad_box(_bench_env_root, Vector3(21.4, 0.10, 0.10), Vector3(0.5, 3.55, rz), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(rack_span + 0.4, 0.10, 0.10), Vector3(cx, 2.85, rz), steel_beam_mat)
+		_add_cad_box(_bench_env_root, Vector3(rack_span + 0.4, 0.10, 0.10), Vector3(cx, 3.55, rz), steel_beam_mat)
 
 
 # ---------------------------------------------------------------- Multi-Vessel Topology
@@ -549,21 +628,26 @@ func build_anatomy_bench_async(unit_operations: Array) -> void:
 	var is_chem_plant := first_arch in ["pre_reformer", "furnace_reformer", "shell_tube_hx", "packed_bed_reactor", "knockout_cooler", "co2_absorber", "psa_skid", "high_pressure_compressor"]
 	var total_span := float(count - 1) * STAGE_SPACING
 
+	var layout_positions: Array = []
 	if is_chem_plant:
-		_build_industrial_plant_pad()
+		_computed_layout = _compute_topological_plant_layout(unit_operations, _plant_connections)
+		layout_positions = _computed_layout.get("positions", [])
+		_build_industrial_plant_pad(_computed_layout.get("pad_bounds", Rect2(-13.2, -6.5, 28.0, 13.0)))
 	else:
+		_computed_layout = {}
 		_build_laboratory_bench()
 
 	# Frame 1: Stream Stage 0 & immediately focus camera
 	var op0: Dictionary = unit_operations[0]
-	var pos0: Vector3 = CHEM_PLOT_POSITIONS[0] if (is_chem_plant and CHEM_PLOT_POSITIONS.size() > 0) else Vector3(-total_span * 0.5, 0.0, 0.0)
+	var pos0: Vector3 = layout_positions[0] if (is_chem_plant and layout_positions.size() > 0) else Vector3(-total_span * 0.5, 0.0, 0.0)
 	var v_data0 := _spawn_unit_operation(op0, 0, pos0)
 	_stage_vessels.append(v_data0)
 	_add_stage_spotlight(pos0)
 
 	if is_chem_plant:
-		_target = Vector3(0.8, 1.8, 0.0)
-		_distance = 22.5
+		var pb: Rect2 = _computed_layout.get("pad_bounds", Rect2(-13.2, -6.5, 28.0, 13.0))
+		_target = Vector3(pb.position.x + pb.size.x * 0.5, 1.8, 0.0)
+		_distance = clampf(pb.size.x * 0.72, 18.0, 32.0)
 		_yaw = deg_to_rad(4.0)
 		_pitch = deg_to_rad(-24.0)
 	else:
@@ -582,7 +666,7 @@ func build_anatomy_bench_async(unit_operations: Array) -> void:
 		await get_tree().process_frame
 		var op: Dictionary = unit_operations[i]
 		var pos_x := -total_span * 0.5 + float(i) * STAGE_SPACING
-		var pos: Vector3 = CHEM_PLOT_POSITIONS[i] if (is_chem_plant and i < CHEM_PLOT_POSITIONS.size()) else Vector3(pos_x, 0.0, 0.0)
+		var pos: Vector3 = layout_positions[i] if (is_chem_plant and i < layout_positions.size()) else Vector3(pos_x, 0.0, 0.0)
 		var v_data := _spawn_unit_operation(op, i, pos)
 		_stage_vessels.append(v_data)
 		_add_stage_spotlight(pos)
@@ -1148,11 +1232,23 @@ func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictio
 	xray_cladding_mat.roughness = 0.18
 	xray_cladding_mat.metallic = 0.25
 
-	# Elevated Horizontal Header Signboard mounted at top front cornice of each unit
-	var tag_names := ["R-102 PRE-REF", "F-201 SMR", "E-105 WHB", "R-301A/B WGS", "E-401 / V-401", "C-501 CO2 CAP", "U-601 PSA", "K-701 COMP"]
-	var unit_cornice_ys := [3.55, 4.55, 3.55, 3.55, 2.55, 4.05, 2.95, 2.45]
-	var tag_name: String = tag_names[mini(stage_idx, tag_names.size() - 1)]
-	var tag_y: float = unit_cornice_ys[mini(stage_idx, unit_cornice_ys.size() - 1)]
+	# Elevated Horizontal Header Signboard mounted at top front cornice of each unit (derived dynamically from unit metadata)
+	var raw_tag := str(op.get("tag", ""))
+	if raw_tag.is_empty():
+		raw_tag = str(op.get("title", "UNIT-%d" % (stage_idx + 1)))
+	var tag_name: String = raw_tag.substr(0, 22)
+	var tag_y := 3.55
+	match archetype:
+		"furnace_reformer":
+			tag_y = 4.55
+		"co2_absorber":
+			tag_y = 4.05
+		"psa_skid":
+			tag_y = 2.95
+		"knockout_cooler", "high_pressure_compressor":
+			tag_y = 2.55
+		_:
+			tag_y = 3.55
 	var tag_z := 0.95
 
 	var plate_mat := StandardMaterial3D.new()
@@ -1269,14 +1365,47 @@ func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictio
 				_add_cad_cyl(root, 0.015, 0.015, 0.44, Vector3(px, py + 0.22, 1.49), safety_yellow)
 		_add_caged_ladder(root, -1.48, 1.28, 0.18, 3.75, ladder_steel)
 
-		# Side-mounted horizontal convection pass -> 5.2m tall cylindrical flue gas stack
-		# Cutaway convection duct exposing 3 horizontal finned tube banks (Mixed Feed, Steam Superheater, BFW Economizer)
-		_add_cad_box(root, Vector3(1.15, 0.95, 1.15), Vector3(-1.88, 3.35, -0.25), xray_cladding_mat)
-		for ci in range(3):
-			var cy := 3.05 + float(ci) * 0.28
-			for cz in [-0.48, -0.16, 0.16, 0.48]:
-				_add_cad_cyl(root, 0.032, 0.032, 1.05, Vector3(-1.88, cy, cz - 0.15), copper_mat, Vector3(0.0, 0.0, 90.0))
-		_add_cad_cyl(root, 0.34, 0.42, 3.20, Vector3(-2.15, 3.60, -0.25), vessel_steel) # Reaches y = 5.2m!
+		# Side-mounted horizontal convection pass -> procedurally extruded from convection_banks[] + tall cylindrical flue gas stack
+		var conv_banks: Array = op.get("convection_banks", [])
+		var n_banks := maxi(1, conv_banks.size())
+		var bank_pitch := 1.15
+		var tunnel_len := 1.10 + float(n_banks) * bank_pitch
+		var tunnel_center_x := -1.42 - tunnel_len * 0.5
+		_add_cad_box(root, Vector3(tunnel_len, 1.05, 1.25), Vector3(tunnel_center_x, 3.35, -0.25), xray_cladding_mat)
+		_add_cad_box(root, Vector3(tunnel_len, 0.08, 1.30), Vector3(tunnel_center_x, 2.80, -0.25), dark_steel)
+		_add_cad_box(root, Vector3(tunnel_len, 0.08, 1.30), Vector3(tunnel_center_x, 3.90, -0.25), dark_steel)
+
+		if conv_banks.is_empty():
+			for ci in range(3):
+				var cy := 3.05 + float(ci) * 0.28
+				for cz in [-0.48, -0.16, 0.16, 0.48]:
+					_add_cad_cyl(root, 0.032, 0.032, tunnel_len - 0.15, Vector3(tunnel_center_x, cy, cz - 0.15), copper_mat, Vector3(0.0, 0.0, 90.0))
+		else:
+			for bi in range(conv_banks.size()):
+				var bank: Dictionary = conv_banks[bi]
+				var bx := -1.42 - 0.55 - float(bi) * bank_pitch
+				# Finned tube coil bank (4 staggered tubes + top/bottom nozzle stubs)
+				for cz in [-0.42, -0.14, 0.14, 0.42]:
+					_add_cad_cyl(root, 0.036, 0.036, 0.88, Vector3(bx, 3.35, cz - 0.25), copper_mat, Vector3(90.0, 0.0, 0.0))
+				_add_cad_cyl(root, 0.045, 0.045, 0.28, Vector3(bx, 4.02, -0.25), vessel_steel)
+				_add_cad_cyl(root, 0.045, 0.045, 0.28, Vector3(bx, 2.68, -0.25), vessel_steel)
+				var b_lbl := Label3D.new()
+				b_lbl.text = "%s | %.1f MW\n%.0f->%.0f°C" % [
+					str(bank.get("tag", "E-conv-%d" % (bi + 1))),
+					float(bank.get("duty_mw", 0.0)),
+					float(bank.get("t_hot_in_c", 0.0)),
+					float(bank.get("t_hot_out_c", 0.0)),
+				]
+				b_lbl.font_size = 14
+				b_lbl.pixel_size = 0.0042
+				b_lbl.position = Vector3(bx, 4.35, 0.35)
+				b_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+				b_lbl.modulate = Color(1.0, 0.86, 0.45)
+				b_lbl.outline_size = 4
+				root.add_child(b_lbl)
+
+		var stack_x := -1.42 - tunnel_len - 0.25
+		_add_cad_cyl(root, 0.34, 0.42, 3.20, Vector3(stack_x, 3.60, -0.25), vessel_steel) # Flue stack at far end of tunnel
 
 		# Dense Bank of 24 Slender Vertical Catalyst Tubes (3 rows x 8 tubes, radius 0.035m)
 		# Continuous from top inlet header (y=3.92) down into bottom refractory transfer manifold (y=0.42)
@@ -1630,29 +1759,35 @@ func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictio
 		return true
 
 	elif archetype == "high_pressure_compressor":
-		# Unit 500: 3-Stage Reciprocating Compressor House (K-501) + Bank of 3x 400 bar H2 Storage Bullets (V-501A/B/C)
-		_add_plinth(root, 3.6, 2.4, 0.16)
+		# Multi-Stage Reciprocating Compressor House + Intercoolers + High-Pressure Storage Bullets
+		var comp_stages: Array = op.get("compressor_stages", [])
+		var intercoolers: Array = op.get("intercoolers", [])
+		var n_comp := maxi(1, comp_stages.size()) if not comp_stages.is_empty() else 3
+		var n_ic := maxi(1, intercoolers.size()) if not intercoolers.is_empty() else 2
+		var skid_d := maxf(2.4, 1.2 + float(n_comp) * 0.45)
+		_add_plinth(root, 3.8, skid_d, 0.16)
 
-		# 3-Stage Reciprocating Compressor Skid: Crankcase + 3 Horizontal Cylinders + Pulsation Dampeners + Electric Motor
-		_add_cad_box(root, Vector3(0.85, 0.55, 1.35), Vector3(-1.05, 0.48, 0.0), dark_steel)
-		_add_cad_cyl(root, 0.26, 0.26, 0.65, Vector3(-1.05, 0.52, -0.95), copper_mat, Vector3(90.0, 0.0, 0.0)) # Electric driver
-		for cz in [-0.42, 0.0, 0.42]:
+		# N-Stage Reciprocating Compressor Skid: Crankcase + N Horizontal Cylinders + Pulsation Dampeners + Electric Motor
+		_add_cad_box(root, Vector3(0.85, 0.55, skid_d * 0.60), Vector3(-1.05, 0.48, 0.0), dark_steel)
+		_add_cad_cyl(root, 0.26, 0.26, 0.65, Vector3(-1.05, 0.52, -skid_d * 0.42), copper_mat, Vector3(90.0, 0.0, 0.0))
+		for ci in range(n_comp):
+			var cz := -0.42 * float(n_comp - 1) * 0.5 + float(ci) * 0.42
 			_add_cad_cyl(root, 0.12, 0.12, 0.55, Vector3(-0.55, 0.52, cz), vessel_steel, Vector3(0.0, 0.0, 90.0))
-			# Pulsation dampener bottle above cylinder
 			_add_cad_cyl(root, 0.09, 0.09, 0.42, Vector3(-0.55, 0.86, cz), dark_steel, Vector3(0.0, 0.0, 90.0))
 
-		# Overhead Fin-Fan Interstage Air Cooler Bay with 2 Rotating Fans
+		# Overhead Fin-Fan Interstage Air Cooler Bay with N_ic Rotating Fans
 		for fx in [-1.35, -0.35]:
-			for fz in [-0.72, 0.72]:
+			for fz in [-skid_d * 0.34, skid_d * 0.34]:
 				_add_cad_box(root, Vector3(0.06, 1.55, 0.06), Vector3(fx, 0.92, fz), dark_steel)
-		_add_cad_box(root, Vector3(1.15, 0.14, 1.50), Vector3(-0.85, 1.65, 0.0), vessel_steel)
+		_add_cad_box(root, Vector3(1.15, 0.14, skid_d * 0.72), Vector3(-0.85, 1.65, 0.0), vessel_steel)
 		var fan_nodes: Array = _smr_refs.get("comp_fan_nodes", [])
-		for fz in [-0.36, 0.36]:
+		for fi in range(n_ic):
+			var fz := -0.50 * float(n_ic - 1) * 0.5 + float(fi) * 0.50
 			var fan_hub := Node3D.new()
 			fan_hub.position = Vector3(-0.85, 1.76, fz)
 			root.add_child(fan_hub)
-			_add_cad_box(fan_hub, Vector3(0.56, 0.02, 0.09), Vector3.ZERO, copper_mat)
-			_add_cad_box(fan_hub, Vector3(0.09, 0.02, 0.56), Vector3.ZERO, copper_mat)
+			_add_cad_box(fan_hub, Vector3(0.46, 0.02, 0.08), Vector3.ZERO, copper_mat)
+			_add_cad_box(fan_hub, Vector3(0.08, 0.02, 0.46), Vector3.ZERO, copper_mat)
 			fan_nodes.append(fan_hub)
 		_smr_refs["comp_fan_nodes"] = fan_nodes
 
@@ -1819,80 +1954,60 @@ func _build_all_interstage_pipes_and_slugs() -> void:
 		ft_mat.albedo_color = Color(0.20, 0.85, 0.95)
 		ft_mat.metallic = 0.70
 
-		# 1. Pre-Reformed Feed: Unit 100 R-102 (-9.5, 0, 2.8) -> Unit 200 F-201 (-3.5, 0, 2.8) top inlet (490 C)
-		_build_rack_pipe_route([
-			Vector3(-8.50, 2.65, 2.80),
-			Vector3(-6.40, 2.65, 2.80),
-			Vector3(-6.40, 4.14, 2.80),
-			Vector3(-4.70, 4.14, 2.80),
-		], Color(0.95, 0.72, 0.25), pipe_steel, flange_mat, ft_mat)
+		# Dynamic topology-driven pipe routing from _plant_connections (or sequential fallback)
+		var id_to_idx: Dictionary = {}
+		for si in range(_stage_vessels.size()):
+			var op_d: Dictionary = _stage_vessels[si].get("op", {})
+			id_to_idx[str(op_d.get("stage_id", ""))] = si
 
-		# 2. Hot Syngas Transfer: Unit 200 F-201 (-3.5, 0, 2.8) bottom -> Unit 300 E-105 (2.5, 0, 2.8) inlet (850 C)
-		_build_rack_pipe_route([
-			Vector3(-2.25, 0.42, 2.80),
-			Vector3(-0.30, 0.42, 2.80),
-			Vector3(-0.30, 1.18, 2.80),
-			Vector3(1.40, 1.18, 2.80),
-		], Color(1.0, 0.40, 0.12), pipe_steel, flange_mat, ft_mat)
+		var routes: Array = []
+		if not _plant_connections.is_empty():
+			routes = _plant_connections
+		else:
+			for si in range(_stage_vessels.size() - 1):
+				var op_a: Dictionary = _stage_vessels[si].get("op", {})
+				var op_b: Dictionary = _stage_vessels[si + 1].get("op", {})
+				routes.append({
+					"from": str(op_a.get("stage_id", "")),
+					"to": str(op_b.get("stage_id", "")),
+					"stream_type": "process",
+					"temp_c": float(op_a.get("temperature_c", 100.0)),
+				})
 
-		# 3. Cooled Syngas: Unit 300 E-105 (2.5, 0, 2.8) -> Overhead Rack Tier 1 -> Unit 400 WGS (8.5, 0, 2.8)
-		_build_rack_pipe_route([
-			Vector3(3.55, 1.18, 2.80),
-			Vector3(3.55, 2.92, 2.80),
-			Vector3(3.55, 2.92, 0.20),
-			Vector3(7.85, 2.92, 0.20),
-			Vector3(7.85, 2.92, 2.80),
-			Vector3(7.85, 2.25, 2.80),
-		], Color(0.95, 0.65, 0.14), pipe_steel, flange_mat, ft_mat)
+		var rack_z := -1.85
+		for ri in range(routes.size()):
+			var conn: Dictionary = routes[ri]
+			var f_id := str(conn.get("from", ""))
+			var t_id := str(conn.get("to", ""))
+			if not id_to_idx.has(f_id) or not id_to_idx.has(t_id):
+				continue
+			var ia: int = id_to_idx[f_id]
+			var ib: int = id_to_idx[t_id]
+			var p_a: Vector3 = _stage_vessels[ia].root.position
+			var p_b: Vector3 = _stage_vessels[ib].root.position
+			var stype := str(conn.get("stream_type", "process"))
+			var t_c := float(conn.get("temp_c", 150.0))
 
-		# 4. Shifted Gas Crossover: Unit 400 WGS (8.5, 0, 2.8) -> Rack Tier 1 -> Unit 500 E-401/V-401 (11.2, 0.6, -2.8)
-		_build_rack_pipe_route([
-			Vector3(9.12, 1.85, 2.80),
-			Vector3(9.12, 2.96, 2.80),
-			Vector3(9.12, 2.96, -0.20),
-			Vector3(10.60, 2.96, -0.20),
-			Vector3(10.60, 2.96, -2.80),
-			Vector3(10.60, 2.25, -2.80),
-		], Color(0.25, 0.85, 0.58), pipe_steel, flange_mat, ft_mat)
+			var rack_y := 2.92 if stype == "process" else 3.55
+			var z_lane := rack_z + (float(ri % 5) - 2.0) * 0.16
+			var p_col := Color(0.22, 0.88, 0.92)
+			if stype == "bfw_steam":
+				p_col = Color(0.28, 0.68, 1.0)
+			elif stype == "recycle":
+				p_col = Color(0.92, 0.72, 0.22)
+			elif t_c >= 600.0:
+				p_col = Color(1.0, 0.40, 0.12)
+			elif t_c >= 250.0:
+				p_col = Color(0.95, 0.68, 0.18)
 
-		# 5. Dry Shifted Gas: Unit 500 V-401 (11.2, 0.6, -2.8) -> Rack Tier 1 -> Unit 600 C-501 (5.5, 0.6, -2.8)
-		_build_rack_pipe_route([
-			Vector3(10.50, 2.55, -2.80),
-			Vector3(10.50, 2.94, -2.80),
-			Vector3(10.50, 2.94, -0.35),
-			Vector3(4.95, 2.94, -0.35),
-			Vector3(4.95, 2.94, -2.80),
-			Vector3(4.95, 1.65, -2.80),
-		], Color(0.20, 0.82, 0.72), pipe_steel, flange_mat, ft_mat)
-
-		# 6. CO2-Lean Syngas: Unit 600 C-501 (5.5, 0.6, -2.8) -> Rack Tier 1 -> Unit 700 U-601 PSA (-0.5, 0.6, -2.8)
-		_build_rack_pipe_route([
-			Vector3(4.95, 3.95, -2.80),
-			Vector3(4.95, 3.00, -0.20),
-			Vector3(0.65, 3.00, -0.20),
-			Vector3(0.65, 3.00, -2.80),
-			Vector3(0.65, 1.75, -2.80),
-		], Color(0.18, 0.88, 0.82), pipe_steel, flange_mat, ft_mat)
-
-		# 7. PSA Tail Gas Recycle: Unit 700 V-601 (0.8, 0.6, -2.8) -> Rack Tier 2 -> Unit 200 F-201 Burners (-3.5, 0, 2.8)
-		_build_rack_pipe_route([
-			Vector3(0.80, 1.75, -2.80),
-			Vector3(0.80, 3.60, -2.80),
-			Vector3(0.80, 3.60, 0.25),
-			Vector3(-3.50, 3.60, 0.25),
-			Vector3(-3.50, 3.60, 1.75),
-			Vector3(-3.50, 0.45, 1.75),
-		], Color(0.92, 0.72, 0.22), pipe_steel, flange_mat, ft_mat)
-
-		# 8. 99.99% H2 Product Header: Unit 700 U-601 (-0.5, 0.6, -2.8) -> Rack Tier 2 -> Unit 800 K-701 (-6.5, 0.6, -2.8)
-		_build_rack_pipe_route([
-			Vector3(-0.80, 2.95, -2.80),
-			Vector3(-0.80, 3.68, -2.80),
-			Vector3(-0.80, 3.68, -0.25),
-			Vector3(-5.50, 3.68, -0.25),
-			Vector3(-5.50, 3.68, -2.80),
-			Vector3(-5.50, 1.45, -2.80),
-		], Color(0.22, 0.90, 1.0), pipe_steel, flange_mat, ft_mat)
+			_build_rack_pipe_route([
+				p_a + Vector3(0.45, 1.45, 0.0),
+				Vector3(p_a.x + 0.45, rack_y, p_a.z),
+				Vector3(p_a.x + 0.45, rack_y, z_lane),
+				Vector3(p_b.x - 0.45, rack_y, z_lane),
+				Vector3(p_b.x - 0.45, rack_y, p_b.z),
+				p_b + Vector3(-0.45, 1.45, 0.0),
+			], p_col, pipe_steel, flange_mat, ft_mat)
 		return
 
 	var transitions: Array = [

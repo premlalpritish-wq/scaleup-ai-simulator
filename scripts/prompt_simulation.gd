@@ -1816,6 +1816,9 @@ func load_run_dict(payload: Dictionary) -> void:
 	if not blueprint.is_empty() or payload.has("stages"):
 		_anatomy_blueprint = blueprint
 		var unit_ops: Array = payload.get("stages", blueprint.get("unit_operations", []))
+		var conns: Array = blueprint.get("connections", payload.get("composition_graph", {}).get("edges", []))
+		if _view != null and _view.has_method("set_plant_connections"):
+			_view.set_plant_connections(conns)
 		if _view != null and _view.has_method("build_anatomy_bench"):
 			_view.build_anatomy_bench(unit_ops)
 		_build_dynamic_floating_badges(unit_ops)

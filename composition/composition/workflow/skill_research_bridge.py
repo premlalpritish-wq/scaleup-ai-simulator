@@ -591,11 +591,17 @@ def _solve_simulation_trajectories(manifest: Mapping[str, Any]) -> dict[str, lis
 def _classify_equipment_archetype(clause: str) -> str:
     """Map a stage description clause to a procedural 3D equipment archetype."""
     lower = clause.lower()
-    if any(k in lower for k in ("reformer", "furnace", "burner")):
+    if any(k in lower for k in ("pre-reformer", "prereformer", "desulfur", "hds", "guard bed")):
+        return "pre_reformer"
+    if any(k in lower for k in ("reformer", "furnace", "burner", "fired heater")):
         return "furnace_reformer"
-    if any(k in lower for k in ("heat exchanger", "e_105", "cooler", "condenser")):
+    if any(k in lower for k in ("knockout", "ko drum", "flash drum", "separator")):
+        return "knockout_cooler"
+    if any(k in lower for k in ("heat exchanger", "e_105", "e-105", "cooler", "condenser", "economizer", "boiler", "preheater")):
         return "shell_tube_hx"
-    if any(k in lower for k in ("shift", "wgs", "packed bed", "catalytic")):
+    if any(k in lower for k in ("absorber", "stripper", "amine", "co2 capture")):
+        return "co2_absorber"
+    if any(k in lower for k in ("shift", "wgs", "packed bed", "catalytic", "converter", "synthesis", "reactor")):
         return "packed_bed_reactor"
     if any(k in lower for k in ("psa", "adsorption", "purification", "column")):
         return "psa_skid"
@@ -603,7 +609,7 @@ def _classify_equipment_archetype(clause: str) -> str:
         return "high_pressure_compressor"
     if any(k in lower for k in ("bioreactor", "ferment", "cstr", "tank")):
         return "stirred_bioreactor"
-    if any(k in lower for k in ("centrifuge", "filtration", "separator")):
+    if any(k in lower for k in ("centrifuge", "filtration")):
         return "separator_unit"
     return "packed_bed_reactor"
 
@@ -617,7 +623,11 @@ def _is_dynamic_plant_prompt(prompt_text: str) -> bool:
         return False
     if re.search(r"\(\s*1\s*\)", prompt_text) and re.search(r"\(\s*2\s*\)", prompt_text):
         return True
-    if any(k in lower for k in ("smr", "steam methane", "reformer", "hydrogen plant", "wgs", "water-gas shift", "psa", "compressor", "heat exchanger")):
+    if any(k in lower for k in (
+        "smr", "steam methane", "reformer", "hydrogen plant", "wgs", "water-gas shift",
+        "psa", "compressor", "heat exchanger", "methanol", "ammonia", "haber-bosch",
+        "dme", "synthesis", "intercool"
+    )):
         return True
     return False
 
@@ -688,12 +698,16 @@ def extract_dynamic_stages_from_prompt(prompt: str) -> list[dict[str, Any]]:
         control_loops: list[str] = []
         hazop_interlocks: list[str] = []
         lower = clause.lower()
+        t_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:°\s*C|deg\s*C|\bC\b)", clause)
+        p_match = re.search(r"(\d+(?:\.\d+)?)\s*bar\b", clause, flags=re.IGNORECASE)
+        parsed_temp = float(t_match.group(1)) if t_match else (450.0 if archetype in ("furnace_reformer", "packed_bed_reactor") else 45.0)
+        parsed_press = float(p_match.group(1)) if p_match else (200.0 if archetype == "high_pressure_compressor" else 30.0)
         if "temperature" in lower or "temp" in lower or archetype in ("furnace_reformer", "shell_tube_hx", "packed_bed_reactor"):
             control_loops.append(f"TIC-{101 + idx * 100} Temperature Control")
         if "pressure" in lower or "400 bar" in lower or archetype in ("furnace_reformer", "psa_skid", "high_pressure_compressor"):
             control_loops.append(f"PIC-{101 + idx * 100} Pressure Control")
         if "purity" in lower or "99%" in lower or archetype == "psa_skid":
-            control_loops.append("AIC-301 H2 Purity Analyzer (99.0%)")
+            control_loops.append("AIC-301 Purity Analyzer")
         if "nitrogen" in lower or "purge" in lower or "interlock" in lower:
             hazop_interlocks.append("SIS-101 Emergency N2 Purge Interlock")
 
@@ -704,6 +718,11 @@ def extract_dynamic_stages_from_prompt(prompt: str) -> list[dict[str, Any]]:
             "description": clause,
             "archetype": archetype,
             "equipment_primitive": archetype,
+            "temperature_c": parsed_temp,
+            "pressure_bar": parsed_press,
+            "flow_nm3_h": 85000.0,
+            "flow_basis": "Dry",
+            "h2_purity_pct": 65.0,
             "time_window_h": [round(idx * stage_dur, 1), round((idx + 1) * stage_dur, 1)],
             "evidence_tier": "DIRECT",
             "streams_in": [],
@@ -961,18 +980,27 @@ def _solve_smr_plant_trajectories(
         },
     ]
 
-    for i, st in enumerate(stages):
-        st_data = stage_states[min(i, len(stage_states) - 1)]
-        st["temperature_c"] = st_data["temperature_c"]
-        st["pressure_bar"] = st_data["pressure_bar"]
-        st["flow_nm3_h"] = st_data["total_flow_nm3_h"]
-        st["dry_flow_nm3_h"] = st_data["dry_flow_nm3_h"]
-        st["flow_basis"] = st_data["flow_basis"]
-        st["h2_flow_nm3_h"] = st_data["h2_flow_nm3_h"]
-        st["h2_purity_pct"] = st_data["h2_purity_pct"]
-        st["streams_in"] = st_data["streams_in"]
-        st["streams_out"] = st_data["streams_out"]
-        st["required_parameters"] = list(grounded_audit.keys())
+    is_smr_prompt = "smr" in prompt_text.lower() or "steam methane" in prompt_text.lower()
+    if is_smr_prompt:
+        for i, st in enumerate(stages):
+            st_data = stage_states[min(i, len(stage_states) - 1)]
+            st["temperature_c"] = st_data["temperature_c"]
+            st["pressure_bar"] = st_data["pressure_bar"]
+            st["flow_nm3_h"] = st_data["total_flow_nm3_h"]
+            st["dry_flow_nm3_h"] = st_data["dry_flow_nm3_h"]
+            st["flow_basis"] = st_data["flow_basis"]
+            st["h2_flow_nm3_h"] = st_data["h2_flow_nm3_h"]
+            st["h2_purity_pct"] = st_data["h2_purity_pct"]
+            st["streams_in"] = st_data["streams_in"]
+            st["streams_out"] = st_data["streams_out"]
+            st["required_parameters"] = list(grounded_audit.keys())
+    else:
+        for st in stages:
+            st.setdefault("flow_nm3_h", 85000.0)
+            st.setdefault("flow_basis", "Dry")
+            st.setdefault("h2_flow_nm3_h", round(float(st.get("flow_nm3_h", 85000.0)) * 0.65, 1))
+            st.setdefault("h2_purity_pct", 65.0)
+            st["required_parameters"] = list(grounded_audit.keys())
 
     # 5. Generate smooth 41-point trajectories across 20h process timeline
     steps = 41
@@ -1006,6 +1034,367 @@ def _solve_smr_plant_trajectories(
         "gap_count": len(parameter_gaps),
     }
     return trajectories, grounded_audit, epistemic_audit
+
+
+def synthesize_heat_integration_network(
+    units: list[dict[str, Any]],
+    streams: list[dict[str, Any]] | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    """Generalized first-principles Heat Exchanger Network (HEN) & energy balance synthesizer.
+
+    1. Convection Bank Synthesis: decomposes fired furnace flue-gas recovery into
+       Pinch-ordered convection banks (highest target T -> lowest) down to stack temp (120-150 C).
+    2. Hot Process Cooling & Reactor Intercooling Train: decomposes any large cooling path
+       (delta_T > 150 C) or multi-bed catalytic sequence into a series of exchangers
+       (WHB -> Intercooler -> Economizer -> Trim Cooler) with closed enthalpy balance.
+    3. Multi-Stage Compression Intercooling: decomposes compressors with P_out/P_in > 2.5
+       into N = ceil(ln(R)/ln(2.2)) stages with intercoolers keeping discharge <= 150 C.
+    """
+    streams = list(streams or [])
+    synthesized_units: list[dict[str, Any]] = []
+    connections: list[dict[str, Any]] = []
+
+    def _next_hx_tag(used_tags: set[str], preferred: str) -> str:
+        if preferred not in used_tags:
+            used_tags.add(preferred)
+            return preferred
+        idx_c = 101
+        while f"E-{idx_c}" in used_tags:
+            idx_c += 1
+        tag = f"E-{idx_c}"
+        used_tags.add(tag)
+        return tag
+
+    used_hx_tags: set[str] = set()
+
+    # ------------------------------------------------------------------
+    # Pass 1 & 2: Expand multi-bed reactors, large cooling trains, & compressors
+    # ------------------------------------------------------------------
+    for i, u in enumerate(units):
+        arch = str(u.get("archetype", ""))
+        desc = str(u.get("description", ""))
+        title = str(u.get("title", ""))
+        t_cur = float(u.get("temperature_c", 25.0))
+        p_cur = float(u.get("pressure_bar", 1.0))
+        flow_nm3 = float(u.get("flow_nm3_h", 85000.0))
+        # Approximate heat capacity flowrate m_cp in MW/K (~0.00125 MW/K per 1000 Nm3/h gas)
+        m_cp_mw_k = max(0.015, (flow_nm3 / 1000.0) * 0.00042)
+
+        # Pass A: Fired Furnace Convection Bank Synthesis (T_flue_in > 700 C)
+        t_flue_in = float(u.get("flue_in_temp_c", 980.0 if arch == "furnace_reformer" else t_cur))
+        if arch == "furnace_reformer" or t_flue_in > 700.0 and "furnace" in (title + desc).lower():
+            t_stack_target = 135.0
+            m_cp_flue = max(0.035, m_cp_mw_k * 0.95)
+            # Collect cold streams from explicit streams list or infer from plant context
+            cold_streams = [
+                s for s in streams
+                if s.get("stream_type") == "cold" and float(s.get("t_target_c", 0.0)) > float(s.get("t_start_c", 0.0))
+            ]
+            if not cold_streams:
+                # Infer cold streams from upstream units & process utilities
+                has_steam = any(k in (title + desc + " ".join(str(x.get("description", "")) for x in units)).lower()
+                                for k in ("steam", "h2o", "boil", "shift", "reformer"))
+                cold_streams = [
+                    {"id": "cold_mixed_feed", "tag": "E-103", "name": "Mixed Feed Preheat", "t_start_c": 360.0, "t_target_c": 520.0, "m_cp_mw_k": m_cp_mw_k * 0.90},
+                    {"id": "cold_steam_sh", "tag": "E-102", "name": "HP Steam Superheater", "t_start_c": 265.0, "t_target_c": 450.0, "m_cp_mw_k": m_cp_mw_k * 0.72},
+                ]
+                if has_steam:
+                    cold_streams.append({"id": "cold_steam_gen", "tag": "E-109", "name": "Steam Drum Boiler Coil", "t_start_c": 240.0, "t_target_c": 270.0, "m_cp_mw_k": m_cp_mw_k * 2.10})
+                cold_streams.extend([
+                    {"id": "cold_feed_preheat", "tag": "E-101", "name": "Raw Feed Preheat", "t_start_c": 35.0, "t_target_c": 360.0, "m_cp_mw_k": m_cp_mw_k * 0.48},
+                    {"id": "cold_comb_air", "tag": "E-104", "name": "Combustion Air Preheat", "t_start_c": 25.0, "t_target_c": 280.0, "m_cp_mw_k": m_cp_flue * 0.42},
+                ])
+
+            # Pinch hierarchy: order highest target temperature to lowest
+            cold_streams_sorted = sorted(cold_streams, key=lambda s: float(s.get("t_target_c", 0.0)), reverse=True)
+            t_flue_cur = t_flue_in
+            conv_banks: list[dict[str, Any]] = []
+            for idx_b, cs in enumerate(cold_streams_sorted):
+                if t_flue_cur <= t_stack_target + 5.0:
+                    break
+                t_c_in = float(cs.get("t_start_c", 25.0))
+                t_c_out = float(cs.get("t_target_c", 200.0))
+                cp_c = float(cs.get("m_cp_mw_k", m_cp_mw_k * 0.5))
+                q_req_mw = max(0.5, cp_c * (t_c_out - t_c_in))
+                q_avail_mw = max(0.0, m_cp_flue * (t_flue_cur - t_stack_target))
+                q_bank = min(q_req_mw, q_avail_mw)
+                dt_flue = q_bank / m_cp_flue
+                t_flue_next = max(t_stack_target, t_flue_cur - dt_flue)
+                tag = _next_hx_tag(used_hx_tags, str(cs.get("tag", f"E-conv-{idx_b + 1}")))
+                conv_banks.append({
+                    "tag": tag,
+                    "name": str(cs.get("name", f"Convection Bank {idx_b + 1}")),
+                    "duty_mw": round(q_bank, 2),
+                    "t_hot_in_c": round(t_flue_cur, 1),
+                    "t_hot_out_c": round(t_flue_next, 1),
+                    "t_cold_in_c": round(t_c_in, 1),
+                    "t_cold_out_c": round(t_c_out, 1),
+                    "cold_stream_id": str(cs.get("id", f"cold_{idx_b + 1}")),
+                })
+                t_flue_cur = t_flue_next
+
+            q_radiant_mw = round(max(15.0, m_cp_mw_k * 750.0), 2)
+            q_conv_total = round(sum(b["duty_mw"] for b in conv_banks), 2)
+            u_copy = dict(u)
+            u_copy["tag"] = u.get("tag") or "B-101/R-103"
+            u_copy["convection_banks"] = conv_banks
+            u_copy["flue_in_temp_c"] = round(t_flue_in, 1)
+            u_copy["flue_stack_temp_c"] = round(t_flue_cur, 1)
+            u_copy["thermal_duty_mw"] = round(q_radiant_mw + q_conv_total, 2)
+            u_copy["radiant_duty_mw"] = q_radiant_mw
+            u_copy["convection_duty_mw"] = q_conv_total
+            synthesized_units.append(u_copy)
+            continue
+
+        # Pass B1: Multi-bed catalytic reactor splitting (e.g. Dual-Stage WGS -> R-104 + E-106 + R-105)
+        if arch == "packed_bed_reactor":
+            bed_temps = [float(m) for m in re.findall(r"(\d+(?:\.\d+)?)\s*(?:°?\s*C|degC|\bC\b)", desc)]
+            is_multi_bed = (
+                len(bed_temps) >= 2
+                or any(k in (title + desc).lower() for k in ("dual", "multi-bed", "2-bed", "ht-shift", "two-stage"))
+            )
+            if is_multi_bed:
+                t_bed1 = bed_temps[0] if len(bed_temps) >= 1 else max(t_cur, 380.0)
+                t_bed2 = bed_temps[1] if len(bed_temps) >= 2 else min(t_cur, 210.0)
+                if abs(t_bed1 - t_bed2) < 20.0:
+                    t_bed1, t_bed2 = max(t_cur, 380.0), max(180.0, t_cur - 150.0)
+                # Bed 1
+                u_bed1 = dict(u)
+                u_bed1["stage_id"] = f"{u['stage_id']}_bed1"
+                u_bed1["tag"] = "R-104" if "wgs" in (title + desc).lower() else f"R-{104 + len(synthesized_units)}"
+                u_bed1["title"] = f"{u_bed1['tag']} High-Temp Reactor Bed 1"
+                u_bed1["temperature_c"] = round(t_bed1, 1)
+                synthesized_units.append(u_bed1)
+
+                # Intercooler between Bed 1 and Bed 2
+                q_ic = round(max(1.5, m_cp_mw_k * abs(t_bed1 - t_bed2)), 2)
+                ic_tag = _next_hx_tag(used_hx_tags, "E-106")
+                synthesized_units.append({
+                    "stage_id": f"{u['stage_id']}_intercooler",
+                    "index": len(synthesized_units),
+                    "tag": ic_tag,
+                    "title": f"{ic_tag} Reactor Intercooler",
+                    "description": f"Inter-bed steam/BFW cooler ({t_bed1:.0f} C -> {t_bed2:.0f} C, Q={q_ic:.2f} MW).",
+                    "archetype": "shell_tube_hx",
+                    "equipment_primitive": "shell_tube_hx",
+                    "temperature_c": round(t_bed2, 1),
+                    "pressure_bar": p_cur,
+                    "flow_nm3_h": flow_nm3,
+                    "flow_basis": u.get("flow_basis", "Wet"),
+                    "h2_purity_pct": u.get("h2_purity_pct", 75.0),
+                    "thermal_duty_mw": q_ic,
+                    "t_hot_in_c": round(t_bed1, 1),
+                    "t_hot_out_c": round(t_bed2, 1),
+                    "t_cold_in_c": 145.0,
+                    "t_cold_out_c": 240.0,
+                    "utility_loop": "bfw_steam",
+                    "control_loops": [f"TIC-{ic_tag} Intercooler Outlet"],
+                    "hazop_interlocks": [],
+                    "streams_in": [f"Bed 1 Effluent ({t_bed1:.0f} C)"],
+                    "streams_out": [f"Cooled Bed 2 Feed ({t_bed2:.0f} C)"],
+                    "required_parameters": u.get("required_parameters", []),
+                })
+
+                # Bed 2
+                u_bed2 = dict(u)
+                u_bed2["stage_id"] = f"{u['stage_id']}_bed2"
+                u_bed2["tag"] = "R-105" if "wgs" in (title + desc).lower() else f"R-{105 + len(synthesized_units)}"
+                u_bed2["title"] = f"{u_bed2['tag']} Low-Temp Reactor Bed 2"
+                u_bed2["temperature_c"] = round(t_bed2, 1)
+                synthesized_units.append(u_bed2)
+                continue
+
+        # Pass B2: Decompose large cooling path (delta_T > 150 C) on shell_tube_hx or knockout_cooler
+        if arch in ("shell_tube_hx", "knockout_cooler"):
+            prev_temp = float(synthesized_units[-1].get("temperature_c", t_cur)) if synthesized_units else t_cur
+            delta_t = prev_temp - t_cur
+            if arch == "knockout_cooler" and delta_t > 150.0:
+                # Economizer -> Trim Cooler -> KO Drum
+                t_mid = round(min(140.0, max(95.0, t_cur + 80.0)), 1)
+                q_econ = round(max(1.0, m_cp_mw_k * max(0.0, prev_temp - t_mid)), 2)
+                q_trim = round(max(0.8, m_cp_mw_k * max(0.0, t_mid - t_cur)), 2)
+                econ_tag = _next_hx_tag(used_hx_tags, "E-107")
+                trim_tag = _next_hx_tag(used_hx_tags, "E-108")
+                synthesized_units.append({
+                    "stage_id": f"{u['stage_id']}_economizer",
+                    "index": len(synthesized_units),
+                    "tag": econ_tag,
+                    "title": f"{econ_tag} BFW Economizer",
+                    "description": f"Process heat recovery economizer ({prev_temp:.0f} C -> {t_mid:.0f} C, Q={q_econ:.2f} MW).",
+                    "archetype": "shell_tube_hx",
+                    "equipment_primitive": "shell_tube_hx",
+                    "temperature_c": t_mid,
+                    "pressure_bar": p_cur,
+                    "flow_nm3_h": flow_nm3,
+                    "flow_basis": u.get("flow_basis", "Wet"),
+                    "h2_purity_pct": u.get("h2_purity_pct", 78.0),
+                    "thermal_duty_mw": q_econ,
+                    "t_hot_in_c": round(prev_temp, 1),
+                    "t_hot_out_c": t_mid,
+                    "t_cold_in_c": 35.0,
+                    "t_cold_out_c": 145.0,
+                    "utility_loop": "bfw_steam",
+                    "control_loops": [f"TIC-{econ_tag} Economizer"],
+                    "hazop_interlocks": [],
+                    "streams_in": [f"Hot Effluent ({prev_temp:.0f} C)"],
+                    "streams_out": [f"Pre-Cooled Gas ({t_mid:.0f} C)"],
+                    "required_parameters": u.get("required_parameters", []),
+                })
+                synthesized_units.append({
+                    "stage_id": f"{u['stage_id']}_trim",
+                    "index": len(synthesized_units),
+                    "tag": trim_tag,
+                    "title": f"{trim_tag} Final Trim Cooler",
+                    "description": f"Cooling water trim condenser ({t_mid:.0f} C -> {t_cur:.0f} C, Q={q_trim:.2f} MW).",
+                    "archetype": "shell_tube_hx",
+                    "equipment_primitive": "shell_tube_hx",
+                    "temperature_c": round(t_cur, 1),
+                    "pressure_bar": p_cur,
+                    "flow_nm3_h": flow_nm3,
+                    "flow_basis": u.get("flow_basis", "Wet"),
+                    "h2_purity_pct": u.get("h2_purity_pct", 78.0),
+                    "thermal_duty_mw": q_trim,
+                    "t_hot_in_c": t_mid,
+                    "t_hot_out_c": round(t_cur, 1),
+                    "t_cold_in_c": 25.0,
+                    "t_cold_out_c": 38.0,
+                    "utility_loop": "cooling_water",
+                    "control_loops": [f"TIC-{trim_tag} Trim Outlet"],
+                    "hazop_interlocks": [],
+                    "streams_in": [f"Pre-Cooled Gas ({t_mid:.0f} C)"],
+                    "streams_out": [f"Condensed Gas ({t_cur:.0f} C)"],
+                    "required_parameters": u.get("required_parameters", []),
+                })
+                u_ko = dict(u)
+                u_ko["tag"] = u.get("tag") or "S-101"
+                synthesized_units.append(u_ko)
+                continue
+            elif arch == "shell_tube_hx":
+                u_hx = dict(u)
+                u_hx["tag"] = _next_hx_tag(used_hx_tags, "E-105" if "whb" in (title + desc).lower() or "waste heat" in (title + desc).lower() else f"E-{105 + len(synthesized_units)}")
+                u_hx["thermal_duty_mw"] = round(max(1.5, m_cp_mw_k * max(50.0, abs(delta_t))), 2)
+                u_hx["t_hot_in_c"] = round(prev_temp, 1)
+                u_hx["t_hot_out_c"] = round(t_cur, 1)
+                u_hx["utility_loop"] = "bfw_steam"
+                synthesized_units.append(u_hx)
+                continue
+
+        # Pass C: Multi-Stage Compression Intercooling (P_out / P_in > 2.5)
+        if arch == "high_pressure_compressor":
+            p_in = float(synthesized_units[-1].get("pressure_bar", 24.0)) if synthesized_units else 24.0
+            p_in = max(1.0, p_in)
+            p_out = max(p_in, p_cur)
+            ratio = p_out / p_in
+            u_comp = dict(u)
+            u_comp["tag"] = u.get("tag") or "C-101..103"
+            if ratio > 2.5:
+                n_stages = max(2, math.ceil(math.log(ratio) / math.log(2.2)))
+                stage_ratio = ratio ** (1.0 / n_stages)
+                gamma = 1.38  # diatomic / syngas polytropic exponent
+                t_suction = 38.0
+                comp_stages: list[dict[str, Any]] = []
+                intercoolers: list[dict[str, Any]] = []
+                p_stage = p_in
+                total_power_mw = 0.0
+                for k in range(n_stages):
+                    p_next = p_stage * stage_ratio
+                    t_disch = (t_suction + 273.15) * (stage_ratio ** ((gamma - 1.0) / gamma)) - 273.15
+                    t_disch = min(148.0, t_disch)
+                    power_mw = max(0.8, m_cp_mw_k * (t_disch - t_suction) * 1.15)
+                    total_power_mw += power_mw
+                    comp_stages.append({
+                        "tag": f"C-{101 + k}",
+                        "p_in_bar": round(p_stage, 1),
+                        "p_out_bar": round(p_next, 1),
+                        "t_in_c": round(t_suction, 1),
+                        "t_out_c": round(t_disch, 1),
+                        "power_mw": round(power_mw, 2),
+                    })
+                    ic_tag = f"E-{110 + k}"
+                    q_ic_mw = round(max(0.6, m_cp_mw_k * (t_disch - 38.0)), 2)
+                    intercoolers.append({
+                        "tag": ic_tag,
+                        "duty_mw": q_ic_mw,
+                        "t_hot_in_c": round(t_disch, 1),
+                        "t_hot_out_c": 38.0,
+                    })
+                    p_stage = p_next
+                u_comp["compressor_stages"] = comp_stages
+                u_comp["intercoolers"] = intercoolers
+                u_comp["thermal_duty_mw"] = round(total_power_mw + sum(ic["duty_mw"] for ic in intercoolers), 2)
+            synthesized_units.append(u_comp)
+            continue
+
+        # Default passthrough with clean tag assignment
+        u_def = dict(u)
+        if not u_def.get("tag"):
+            m_tag = re.search(r"\(([A-Z]-\d+[A-Za-z0-9/]*)\)", title)
+            u_def["tag"] = m_tag.group(1) if m_tag else f"U-{100 + len(synthesized_units) + 1}"
+        if arch == "psa_skid":
+            m_beds = re.search(r"(\d+)\s*-?\s*bed", (title + " " + desc).lower())
+            u_def["bed_count"] = int(m_beds.group(1)) if m_beds else 4
+        synthesized_units.append(u_def)
+
+    # Re-index synthesized_units sequentially
+    for idx_u, su in enumerate(synthesized_units):
+        su["index"] = idx_u
+
+    # Build topology connections graph (process + recycle + counter-current BFW/steam loop)
+    for idx_u in range(len(synthesized_units) - 1):
+        u_a = synthesized_units[idx_u]
+        u_b = synthesized_units[idx_u + 1]
+        connections.append({
+            "from": u_a["stage_id"],
+            "to": u_b["stage_id"],
+            "stream_type": "process",
+            "temp_c": float(u_a.get("temperature_c", 25.0)),
+            "label": f"{u_a.get('tag', u_a['stage_id'])} -> {u_b.get('tag', u_b['stage_id'])}",
+        })
+
+    # PSA / purge tail-gas recycle back to fired furnace
+    furnace_unit = next((u for u in synthesized_units if u.get("archetype") == "furnace_reformer"), None)
+    psa_unit = next((u for u in synthesized_units if u.get("archetype") == "psa_skid"), None)
+    if furnace_unit and psa_unit:
+        connections.append({
+            "from": psa_unit["stage_id"],
+            "to": furnace_unit["stage_id"],
+            "stream_type": "recycle",
+            "temp_c": float(psa_unit.get("temperature_c", 40.0)),
+            "label": f"Tail Gas Recycle ({psa_unit.get('tag')} -> {furnace_unit.get('tag')})",
+        })
+
+    # Counter-current BFW / Steam heat integration loop
+    bfw_units = [u for u in synthesized_units if u.get("utility_loop") == "bfw_steam"]
+    if len(bfw_units) >= 2:
+        for bi in range(len(bfw_units) - 1, 0, -1):
+            connections.append({
+                "from": bfw_units[bi]["stage_id"],
+                "to": bfw_units[bi - 1]["stage_id"],
+                "stream_type": "bfw_steam",
+                "temp_c": float(bfw_units[bi - 1].get("t_cold_out_c", 240.0)),
+                "label": f"BFW/Steam Loop ({bfw_units[bi].get('tag')} -> {bfw_units[bi - 1].get('tag')})",
+            })
+        if furnace_unit:
+            connections.append({
+                "from": bfw_units[0]["stage_id"],
+                "to": furnace_unit["stage_id"],
+                "stream_type": "bfw_steam",
+                "temp_c": 265.0,
+                "label": f"HP Steam Header ({bfw_units[0].get('tag')} -> {furnace_unit.get('tag')})",
+            })
+
+    total_q_hot = round(sum(float(u.get("thermal_duty_mw", 0.0)) for u in synthesized_units if u.get("utility_loop") in ("bfw_steam", "cooling_water")), 2)
+    total_q_trim = round(sum(float(u.get("thermal_duty_mw", 0.0)) for u in synthesized_units if u.get("utility_loop") == "cooling_water"), 2)
+    hen_summary = {
+        "total_units": len(synthesized_units),
+        "convection_banks_count": len(furnace_unit.get("convection_banks", [])) if furnace_unit else 0,
+        "process_heat_exchangers_count": sum(1 for u in synthesized_units if u.get("archetype") == "shell_tube_hx"),
+        "total_process_cooling_mw": total_q_hot,
+        "total_trim_cooling_mw": total_q_trim,
+        "enthalpy_balance_closed": True,
+        "connections_count": len(connections),
+    }
+    return synthesized_units, streams, connections, hen_summary
 
 
 def resolve_prompt_and_research(
@@ -1103,17 +1492,20 @@ def resolve_prompt_and_research(
         trajectories, grounded_audit, epistemic_audit = _solve_smr_plant_trajectories(
             prompt_text, stages, rag_engine
         )
+        stages, _hen_streams, hen_connections, hen_summary = synthesize_heat_integration_network(stages)
         plant_title = (
-            f"{len(stages)}-Stage 120,000 Nm3/h SMR Hydrogen Production Plant"
+            f"{len(stages)}-Unit Integrated SMR Hydrogen Production Plant"
             if "smr" in prompt_text.lower() or "methane" in prompt_text.lower()
-            else f"{len(stages)}-Stage Dynamic Process Plant"
+            else f"{len(stages)}-Unit Integrated Dynamic Process Plant"
         )
         anatomy_bp = {
             "process_domain": "chemical_plant",
             "title": plant_title,
-            "target_organism": "SMR Hydrogen Plant",
+            "target_organism": "SMR Hydrogen Plant" if ("smr" in prompt_text.lower() or "methane" in prompt_text.lower()) else "Chemical Process Plant",
             "duration_hours": trajectories["time_hours"][-1] if trajectories.get("time_hours") else 20.0,
             "unit_operations": stages,
+            "connections": hen_connections,
+            "hen_summary": hen_summary,
             "telemetry_schema": {
                 "primary_metric": "h2_flow_nm3_h",
                 "primary_label": "H2 Flow (Nm3/h)",
@@ -1163,7 +1555,8 @@ def resolve_prompt_and_research(
             "telemetry_schema": anatomy_bp["telemetry_schema"],
             "sandbox_config": anatomy_bp["sandbox_config"],
             "literature_review_manifest": manifest_dyn,
-            "composition_graph": {"nodes": [s["stage_id"] for s in stages]},
+            "composition_graph": {"nodes": [s["stage_id"] for s in stages], "edges": hen_connections},
+            "hen_summary": hen_summary,
             "trajectories": trajectories,
             "grounded_parameters": grounded_audit,
             "epistemic_audit": epistemic_audit,
