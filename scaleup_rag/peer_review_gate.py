@@ -67,11 +67,17 @@ class PeerReviewCommittee:
         total_temp = 0.0
         total_press = 0.0
         total_area = 0.0
+        total_rpm = 0.0
+        total_visc = 0.0
         for u in units:
             total_duty += float(u.get("thermal_duty_mw", 0.0))
             total_flow += float(u.get("flow_nm3_h", 0.0))
             total_temp += float(u.get("temperature_c", 0.0))
             total_press += float(u.get("pressure_bar", 0.0))
+            vd = u.get("visual_drivers", {})
+            if isinstance(vd, dict):
+                total_rpm += float(vd.get("rpm", 0.0))
+                total_visc += float(vd.get("viscosity", 0.0))
             sizing = u.get("sizing", {})
             if isinstance(sizing, dict):
                 total_area += float(sizing.get("area_req_m2", 0.0))
@@ -80,12 +86,21 @@ class PeerReviewCommittee:
                 b_s = bank.get("sizing", {})
                 if isinstance(b_s, dict):
                     total_area += float(b_s.get("area_req_m2", 0.0))
+        traj = payload.get("trajectories", {})
+        traj_sum = 0.0
+        if isinstance(traj, dict):
+            for vals in traj.values():
+                if isinstance(vals, list) and vals and isinstance(vals[0], (int, float)):
+                    traj_sum += float(vals[-1])
         return {
             "total_duty_mw": total_duty,
             "total_flow_nm3_h": total_flow,
             "total_temp_c": total_temp,
             "total_press_bar": total_press,
             "total_area_m2": total_area,
+            "total_rpm": total_rpm,
+            "total_visc": total_visc,
+            "traj_sum": traj_sum,
         }
 
     @staticmethod
@@ -101,7 +116,14 @@ class PeerReviewCommittee:
             if u.get("flow_nm3_h") is not None:
                 u["flow_nm3_h"] = float(u["flow_nm3_h"]) * flow_scale
             if u.get("temperature_c") is not None and (
-                u.get("archetype") in ("furnace_reformer", "pre_reformer", "packed_bed_reactor")
+                u.get("archetype") in (
+                    "furnace_reformer",
+                    "pre_reformer",
+                    "packed_bed_reactor",
+                    "circuit_oscillator",
+                    "solenoid_actuator",
+                    "stirred_tank_bioreactor",
+                )
                 or float(u.get("temperature_c", 0.0)) > 100.0
             ):
                 u["temperature_c"] = float(u["temperature_c"]) + temp_delta
@@ -113,6 +135,17 @@ class PeerReviewCommittee:
                 u["t_hot_in_c"] = float(u["t_hot_in_c"]) + temp_delta
             if u.get("t_hot_out_c") is not None:
                 u["t_hot_out_c"] = float(u["t_hot_out_c"]) + temp_delta * 0.5
+            vd = u.get("visual_drivers")
+            if isinstance(vd, dict):
+                if vd.get("rpm") is not None:
+                    vd["rpm"] = float(vd["rpm"]) * flow_scale
+                if vd.get("viscosity") is not None and temp_delta != 0.0:
+                    vd["viscosity"] = max(0.001, float(vd["viscosity"]) * (1.0 + abs(temp_delta) * 0.005))
+        traj = p.get("trajectories")
+        if isinstance(traj, dict) and press_scale != 1.0:
+            for k, vals in traj.items():
+                if k != "time_hours" and k != "time_s" and isinstance(vals, list) and vals and isinstance(vals[0], (int, float)):
+                    traj[k] = [float(v) * press_scale for v in vals]
         p["stages"] = units
         if isinstance(bp, dict):
             bp["unit_operations"] = units
