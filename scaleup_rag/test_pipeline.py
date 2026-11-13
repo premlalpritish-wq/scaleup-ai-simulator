@@ -372,3 +372,16 @@ def test_sqlite_range_and_envelope_roundtrip(tmp_path):
     assert loaded.envelope.temperature_c == 850.0
     assert loaded.envelope.pressure_bar == 28.0
 
+
+def test_blind_50_parameter_audit_gate():
+    from scaleup_rag.benchmark_blind_audit import run_blind_50_audit
+
+    res = run_blind_50_audit(write_artifacts=False)
+    s = res["summary"]
+    assert s["total_cases"] == 50
+    assert s["quarantine_precision"] == 1.0
+    assert s["adversarial_block_rate"] == 1.0
+    assert s["extraction_conversion_recall"] >= 0.95
+    assert s["range_bound_accuracy"] >= 0.95
+    assert s["operating_envelope_completeness"] >= 0.95
+

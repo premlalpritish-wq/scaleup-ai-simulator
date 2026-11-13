@@ -14,6 +14,7 @@ class RequiredParameterSpec(BaseModel):
     entity_name: str = Field(..., description="Snake_case identifier, e.g., 'dynamic_viscosity' or 'alginate_extraction_yield'")
     target_system: str = Field(..., description="Organism, material, or chemical species, e.g., 'Saccharina latissima'")
     expected_unit: str = Field(..., description="Pint-compatible target unit, e.g., 'Pa * s', 'dimensionless', '1 / s'")
+    aliases: List[str] = Field(default_factory=list, description="Alternative parameter names or symbols")
     envelope_constraints: OperatingEnvelope = Field(default_factory=OperatingEnvelope)
 
 class RawExtractedCandidate(BaseModel):

@@ -21,6 +21,9 @@ def validate_and_normalize(
     if len(snippet_clean) < 15:
         return None
 
+    if not candidate.raw_unit.strip():
+        return None
+
     # Rule 2: Physical dimensionality & SI/target unit normalization (including affine temperature & ranges)
     try:
         target_unit = ureg.Unit(spec.expected_unit)

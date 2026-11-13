@@ -200,7 +200,10 @@ def decompose_prompt_to_specs(prompt: str) -> List[RequiredParameterSpec]:
     return [RequiredParameterSpec(**item) for item in data["parameters"]]
 
 def _normalize_regex_unit(unit_raw: str) -> str:
-    u = unit_raw.strip().replace(" ", "").replace("^", "")
+    cleaned = unit_raw.strip().rstrip(".,;:")
+    if cleaned.endswith(")") and "(" not in cleaned:
+        cleaned = cleaned[:-1]
+    u = cleaned.replace(" ", "").replace("^", "").replace("\u00b7", "*").replace("·", "*")
     replacements = {
         "h-1": "1 / hour",
         "hr-1": "1 / hour",
@@ -209,6 +212,10 @@ def _normalize_regex_unit(unit_raw: str) -> str:
         "/h": "1 / hour",
         "1/hr": "1 / hour",
         "/hr": "1 / hour",
+        "min-1": "1 / minute",
+        "min⁻¹": "1 / minute",
+        "1/min": "1 / minute",
+        "/min": "1 / minute",
         "s-1": "1 / second",
         "s⁻¹": "1 / second",
         "1/s": "1 / second",
@@ -221,20 +228,46 @@ def _normalize_regex_unit(unit_raw: str) -> str:
         "hr": "hour",
         "g/L": "g / L",
         "g/l": "g / L",
+        "mg/L": "mg / L",
+        "mg/l": "mg / L",
+        "mg/mL": "mg / mL",
+        "mg/ml": "mg / mL",
+        "kg/m3": "kg / m**3",
+        "kg/m**3": "kg / m**3",
+        "kg/m³": "kg / m**3",
         "g/g": "dimensionless",
         "mmol/L": "mmol / L",
+        "kJ/mol": "kJ / mol",
+        "J/mol": "J / mol",
+        "J/(mol*K)": "J / (mol * K)",
+        "kJ/(mol*K)": "kJ / (mol * K)",
         "Pa*s": "Pa * s",
         "Pas": "Pa * s",
         "mPa*s": "mPa * s",
         "mPas": "mPa * s",
+        "mW/cm2": "mW / cm**2",
+        "mW/cm**2": "mW / cm**2",
+        "mW/cm²": "mW / cm**2",
+        "g/(L*h)": "g / (L * hour)",
         "MPa": "MPa",
+        "bar": "bar",
+        "°C": "degC",
+        "℃": "degC",
+        "degC": "degC",
         "%": "percent"
     }
-    return replacements.get(u, replacements.get(unit_raw.strip(), unit_raw))
+    if u in replacements:
+        return replacements[u]
+    if cleaned in replacements:
+        return replacements[cleaned]
+    return u.replace("²", "**2").replace("³", "**3")
 
 def _extract_via_regex(spec: RequiredParameterSpec, papers: List[Dict]) -> Optional[RawExtractedCandidate]:
     """Deterministic extractor fallback that parses verified sentences from EuropePMC text."""
-    stop_tokens = {"constant", "coefficient", "parameter", "value", "specific", "rate", "yield", "concentration"}
+    stop_tokens = {
+        "constant", "coefficient", "parameter", "value", "specific", "rate", "yield",
+        "concentration", "optimal", "initial", "apparent", "operating", "reaction", "maximum"
+    }
     raw_tokens = [t.lower() for t in spec.entity_name.split("_")]
     core_tokens = [t for t in raw_tokens if t not in stop_tokens]
     if not core_tokens:
@@ -262,25 +295,30 @@ def _extract_via_regex(spec: RequiredParameterSpec, papers: List[Dict]) -> Optio
         clean_text = re.sub(r"[\u2000-\u200b\u00a0]", " ", clean_text)
         clean_text = re.sub(r"\s+", " ", clean_text)
 
-        sentences = re.split(r"(?<=[.!?])\s+|\n+", clean_text)
+        sentences = re.split(r"(?<!\b[A-Z]\.)(?<!\bsp\.)(?<=[.!?])\s+|\n+", clean_text)
         for sentence in sentences:
             s_clean = sentence.strip()
             if len(s_clean) < 15:
                 continue
 
             s_lower = s_clean.lower()
-            if not any(token in s_lower for token in core_tokens):
+            alias_match = any(a.lower() in s_lower for a in spec.aliases) if spec.aliases else False
+            if not alias_match and not any(token in s_lower for token in core_tokens):
                 continue
+
+            _UNIT_PAT = r"([a-zA-Z0-9/%\*^()\u00b7·⁻¹²³-]+)"
 
             # 1. Check plus-minus pattern: e.g. "0.50 ± 0.08 1/h" or "0.50 +/- 0.08 h^-1"
             pm_matches = re.finditer(
-                r"([0-9]+(?:\.[0-9]+)?)\s*(?:\u00b1|\+/-|\ufffd)\s*([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z0-9/%\*^⁻¹²³-]+)",
+                r"(-?[0-9]+(?:\.[0-9]+)?)\s*(?:\u00b1|\+/-|\ufffd)\s*([0-9]+(?:\.[0-9]+)?)\s*" + _UNIT_PAT,
                 s_clean
             )
             for m in pm_matches:
                 val = float(m.group(1))
                 err = float(m.group(2))
                 unit_candidate = _normalize_regex_unit(m.group(3))
+                if not unit_candidate or (unit_candidate == "percent" and spec.expected_unit.strip().lower() not in ("percent", "%")):
+                    continue
                 try:
                     qty = ureg.Quantity(val, unit_candidate)
                     if qty.check(target_unit_pint.dimensionality):
@@ -300,9 +338,9 @@ def _extract_via_regex(spec: RequiredParameterSpec, papers: List[Dict]) -> Optio
                 except Exception:
                     continue
 
-            # 2. Check range pattern: e.g. "0.42–0.58 h^-1", "0.42 - 0.58 1/h", "0.42 to 0.58 h^-1"
+            # 2. Check range pattern: e.g. "0.42–0.58 h^-1", "0.42 - 0.58 1/h", "0.42 to 0.58 h^-1", "between 240 and 280 bar"
             range_matches = re.finditer(
-                r"([0-9]+(?:\.[0-9]+)?)\s*(?:-|–|—|\bto\b)\s*([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z0-9/%\*^⁻¹²³-]+)",
+                r"(?:between\s+)?(-?[0-9]+(?:\.[0-9]+)?)\s*(?:-|–|—|\bto\b|\band\b)\s*(-?[0-9]+(?:\.[0-9]+)?)\s*" + _UNIT_PAT,
                 s_clean,
                 flags=re.IGNORECASE
             )
@@ -312,6 +350,8 @@ def _extract_via_regex(spec: RequiredParameterSpec, papers: List[Dict]) -> Optio
                 v_min, v_max = min(v1, v2), max(v1, v2)
                 v_mid = round((v_min + v_max) / 2.0, 10)
                 unit_candidate = _normalize_regex_unit(m.group(3))
+                if not unit_candidate or (unit_candidate == "percent" and spec.expected_unit.strip().lower() not in ("percent", "%")):
+                    continue
                 try:
                     qty = ureg.Quantity(v_mid, unit_candidate)
                     if qty.check(target_unit_pint.dimensionality):
@@ -332,12 +372,14 @@ def _extract_via_regex(spec: RequiredParameterSpec, papers: List[Dict]) -> Optio
 
             # 3. Scalar fallback: number + unit pattern
             matches = re.finditer(
-                r"(?:of|=|\bat\b|reached\b|was\b)?\s*([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z0-9/%\*^⁻¹²³-]+)",
+                r"(?:of|=|\bat\b|reached\b|was\b)?\s*(-?[0-9]+(?:\.[0-9]+)?)\s*" + _UNIT_PAT,
                 s_clean
             )
             for m in matches:
                 val_str = m.group(1)
                 unit_candidate = _normalize_regex_unit(m.group(2))
+                if not unit_candidate or (unit_candidate == "percent" and spec.expected_unit.strip().lower() not in ("percent", "%")):
+                    continue
                 try:
                     val = float(val_str)
                     qty = ureg.Quantity(val, unit_candidate)
@@ -382,8 +424,10 @@ def live_llm_extractor(spec: RequiredParameterSpec, papers: List[Dict]) -> Optio
         "\"source_doi\": str, \"source_snippet\": \"exact verbatim sentence from the paper (>=15 chars)\", "
         "\"extraction_confidence\": float}}"
     )
+    alias_line = f"Parameter Aliases: {', '.join(spec.aliases)}\n" if spec.aliases else ""
     user_prompt = (
         f"Target Parameter: {spec.entity_name}\n"
+        f"{alias_line}"
         f"Target System/Species: {spec.target_system}\n"
         f"Expected Dimensional Unit: {spec.expected_unit}\n\n"
         f"Literature Corpus:\n{joined_corpus}"

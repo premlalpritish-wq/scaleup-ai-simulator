@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import create_engine, Column, String, Float, Text, DateTime, JSON, select, or_, text
+from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import declarative_base, sessionmaker
 from .schemas import RequiredParameterSpec, GroundedParameter, OperatingEnvelope
 from .quarantine_gate import ureg
@@ -51,7 +52,15 @@ ParameterRecord = ScientificParameterRecord
 class ParameterDatabase:
     def __init__(self, db_url: Optional[str] = None):
         self.db_url = db_url or os.getenv("SCALEUP_DATABASE_URL", "sqlite:///scaleup_knowledge.db")
-        self.engine = create_engine(self.db_url, future=True)
+        if self.db_url == "sqlite:///:memory:":
+            self.engine = create_engine(
+                self.db_url,
+                future=True,
+                connect_args={"check_same_thread": False},
+                poolclass=StaticPool,
+            )
+        else:
+            self.engine = create_engine(self.db_url, future=True)
         Base.metadata.create_all(self.engine)
         self._ensure_sqlite_columns()
         self.SessionLocal = sessionmaker(bind=self.engine, expire_on_commit=False)
