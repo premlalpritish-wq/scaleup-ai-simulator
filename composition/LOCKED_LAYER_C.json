@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "layer": "Layer C (Locked Deterministic Physics & 3D Renderer)",
+  "write_lock_policy": {
+    "subagent_write_access": "FORBIDDEN",
+    "required_output_contract": "Declarative topology_manifest JSON (derivation_trace, units, connections, grounded_parameters, user_design_setpoints, unverified_assumptions)",
+    "prohibited_actions": [
+      "Editing locked Layer C solver or Godot 3D rendering files during simulation generation or repair",
+      "Hardcoding domain-specific numeric literals outside ALLOWED_CONSTANTS / UNIT_CONVERSIONS / scaleup_rag lookups",
+      "Bypassing RealityCompiler or PeerReviewCommittee 3-point perturbation sensitivity checks"
+    ],
+    "verification_gates": [
+      "scaleup_rag/ast_magic_guard.py",
+      "scaleup_rag/peer_review_gate.py",
+      "composition/composition/workflow/reality_compiler.py"
+    ]
+  },
+  "locked_files": [
+    "scripts/replay_vessel_view.gd",
+    "scripts/prompt_simulation.gd",
+    "composition/composition/workflow/reality_compiler.py",
+    "scaleup_rag/quarantine_gate.py",
+    "scaleup_rag/peer_review_gate.py",
+    "scaleup_rag/ast_magic_guard.py"
+  ]
+}

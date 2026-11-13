@@ -2,10 +2,17 @@ import os
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, List
-from sqlalchemy import create_engine, Column, String, Float, Text, DateTime, JSON, select, or_, text
+from sqlalchemy import create_engine, Column, Integer, String, Float, Text, DateTime, JSON, select, or_, text
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import declarative_base, sessionmaker
-from .schemas import RequiredParameterSpec, GroundedParameter, OperatingEnvelope, PhysicalInvariantSpec
+from .schemas import (
+    DomainSkillSpec,
+    GroundedParameter,
+    OperatingEnvelope,
+    PhysicalInvariantSpec,
+    RequiredParameterSpec,
+    ValidatedWorkedTraceSpec,
+)
 from .quarantine_gate import ureg
 
 Base = declarative_base()
@@ -60,6 +67,32 @@ class MechanisticLawRecord(Base):
     remediation_action = Column(String, nullable=False)
     doi = Column(String, nullable=False)
     verbatim_quote = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
+class DomainSkillRecord(Base):
+    __tablename__ = "domain_skills"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    domain_id = Column(String, nullable=False, unique=True, index=True)
+    governing_laws_json = Column(JSON, nullable=False)
+    rag_scope_json = Column(JSON, nullable=False)
+    allowed_archetypes_json = Column(JSON, nullable=False)
+    few_shot_derivations_json = Column(JSON, nullable=False)
+    invariant_checks_json = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
+class ValidatedWorkedTraceRecord(Base):
+    __tablename__ = "validated_worked_traces"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    trace_id = Column(String, nullable=False, unique=True, index=True)
+    domain_id = Column(String, nullable=False, index=True)
+    prompt = Column(Text, nullable=False)
+    derivation_trace = Column(Text, nullable=False)
+    topology_manifest_json = Column(JSON, nullable=False)
+    perturbation_passed = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
 
@@ -314,6 +347,107 @@ class ParameterDatabase:
                     remediation_action=r.remediation_action,
                     doi=r.doi,
                     verbatim_quote=r.verbatim_quote,
+                )
+                for r in records
+            ]
+
+    def upsert_domain_skill(self, skill: DomainSkillSpec) -> bool:
+        """Insert or update a DomainSkillSpec in domain_skills. Returns True if newly inserted."""
+        with self.SessionLocal() as session:
+            existing = session.execute(
+                select(DomainSkillRecord).where(DomainSkillRecord.domain_id == skill.domain_id)
+            ).scalar_one_or_none()
+            if existing is not None:
+                existing.governing_laws_json = list(skill.governing_laws)
+                existing.rag_scope_json = dict(skill.rag_scope)
+                existing.allowed_archetypes_json = list(skill.allowed_archetypes)
+                existing.few_shot_derivations_json = list(skill.few_shot_derivations)
+                existing.invariant_checks_json = list(skill.invariant_checks)
+                session.commit()
+                return False
+            rec = DomainSkillRecord(
+                domain_id=skill.domain_id,
+                governing_laws_json=list(skill.governing_laws),
+                rag_scope_json=dict(skill.rag_scope),
+                allowed_archetypes_json=list(skill.allowed_archetypes),
+                few_shot_derivations_json=list(skill.few_shot_derivations),
+                invariant_checks_json=list(skill.invariant_checks),
+            )
+            session.add(rec)
+            session.commit()
+            return True
+
+    def get_domain_skill(self, domain_id: str) -> Optional[DomainSkillSpec]:
+        with self.SessionLocal() as session:
+            rec = session.execute(
+                select(DomainSkillRecord).where(DomainSkillRecord.domain_id == domain_id)
+            ).scalar_one_or_none()
+            if rec is None:
+                return None
+            return DomainSkillSpec(
+                domain_id=rec.domain_id,
+                governing_laws=list(rec.governing_laws_json or []),
+                rag_scope=dict(rec.rag_scope_json or {}),
+                allowed_archetypes=list(rec.allowed_archetypes_json or []),
+                few_shot_derivations=list(rec.few_shot_derivations_json or []),
+                invariant_checks=list(rec.invariant_checks_json or []),
+            )
+
+    def list_domain_skills(self) -> List[DomainSkillSpec]:
+        with self.SessionLocal() as session:
+            records = session.execute(select(DomainSkillRecord)).scalars().all()
+            return [
+                DomainSkillSpec(
+                    domain_id=r.domain_id,
+                    governing_laws=list(r.governing_laws_json or []),
+                    rag_scope=dict(r.rag_scope_json or {}),
+                    allowed_archetypes=list(r.allowed_archetypes_json or []),
+                    few_shot_derivations=list(r.few_shot_derivations_json or []),
+                    invariant_checks=list(r.invariant_checks_json or []),
+                )
+                for r in records
+            ]
+
+    def archive_validated_trace(self, trace: ValidatedWorkedTraceSpec) -> bool:
+        """Archive a peer-reviewed (prompt, derivation_trace, topology_manifest) tuple."""
+        with self.SessionLocal() as session:
+            existing = session.execute(
+                select(ValidatedWorkedTraceRecord).where(ValidatedWorkedTraceRecord.trace_id == trace.trace_id)
+            ).scalar_one_or_none()
+            if existing is not None:
+                existing.domain_id = trace.domain_id
+                existing.prompt = trace.prompt
+                existing.derivation_trace = trace.derivation_trace
+                existing.topology_manifest_json = dict(trace.topology_manifest_json)
+                existing.perturbation_passed = 1 if trace.perturbation_passed else 0
+                session.commit()
+                return False
+            rec = ValidatedWorkedTraceRecord(
+                trace_id=trace.trace_id,
+                domain_id=trace.domain_id,
+                prompt=trace.prompt,
+                derivation_trace=trace.derivation_trace,
+                topology_manifest_json=dict(trace.topology_manifest_json),
+                perturbation_passed=1 if trace.perturbation_passed else 0,
+            )
+            session.add(rec)
+            session.commit()
+            return True
+
+    def list_validated_traces(self, domain_id: Optional[str] = None) -> List[ValidatedWorkedTraceSpec]:
+        with self.SessionLocal() as session:
+            stmt = select(ValidatedWorkedTraceRecord)
+            if domain_id:
+                stmt = stmt.where(ValidatedWorkedTraceRecord.domain_id == domain_id)
+            records = session.execute(stmt).scalars().all()
+            return [
+                ValidatedWorkedTraceSpec(
+                    trace_id=r.trace_id,
+                    domain_id=r.domain_id,
+                    prompt=r.prompt,
+                    derivation_trace=r.derivation_trace,
+                    topology_manifest_json=dict(r.topology_manifest_json or {}),
+                    perturbation_passed=bool(r.perturbation_passed),
                 )
                 for r in records
             ]

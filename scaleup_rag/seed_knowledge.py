@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import List, Tuple, Dict, Optional, Any
 from .schemas import (
+    DomainSkillSpec,
     RawExtractedCandidate,
     RequiredParameterSpec,
     OperatingEnvelope,
@@ -475,6 +476,119 @@ SEED_MECHANISTIC_LAWS: List[PhysicalInvariantSpec] = [
 ]
 
 
+SEED_DOMAIN_SKILLS: List[DomainSkillSpec] = [
+    DomainSkillSpec(
+        domain_id="thermochemical_plant",
+        governing_laws=[
+            "SECOND_LAW_PINCH",
+            "SINGLE_SHELL_THERMAL_SHOCK",
+            "VAN_T_HOFF_EXOTHERMIC_EQUILIBRIUM",
+            "POLYTROPIC_COMPRESSION_DISCHARGE",
+            "NICKEL_SULFUR_POISONING",
+            "BOUDOUARD_CARBON_COKING",
+            "WET_GAS_PSA_KNOCKOUT",
+            "PASSIVE_PRESSURE_DROP_MONOTONICITY",
+            "UK_INDUSTRIAL_SPACING_AND_THERMAL_LENGTH",
+        ],
+        rag_scope={
+            "target_systems": ["Steam Methane Reforming", "Methanol Synthesis", "Ammonia Synthesis", "Chemical Process"],
+            "domains": ["thermodynamics", "kinetics_equilibrium", "catalysis_materials", "hydraulics_phase"],
+        },
+        allowed_archetypes=[
+            "pre_reformer",
+            "furnace_reformer",
+            "shell_tube_hx",
+            "packed_bed_reactor",
+            "knockout_cooler",
+            "co2_absorber",
+            "psa_skid",
+            "high_pressure_compressor",
+            "separator_unit",
+        ],
+        few_shot_derivations=[
+            {
+                "name": "12_unit_smr_hydrogen_plant",
+                "prompt": "Design and simulate an industrial Steam Methane Reforming (SMR) plant for hydrogen production with pre-reformer, primary reformer, two-stage WGS, CO2 absorption, PSA, and syngas compression.",
+                "derivation_trace": (
+                    "1. Desulfurize natural gas in R-101 (ZnO guard bed, 400 C, 44.5 bar) to <= 0.1 ppmv H2S (NICKEL_SULFUR_POISONING).\n"
+                    "2. Adiabatically pre-reform C2+ hydrocarbons in R-102 (504 C, 38.9 bar) with S/C=3.0 >= 2.0 (BOUDOUARD_CARBON_COKING).\n"
+                    "3. Reform CH4 in primary radiant furnace B-101/R-103 (900 C, 38.0 bar) with Pinch-ordered convection banks E-103 -> E-102 -> E-109 -> E-101 -> E-104 -> T-102.\n"
+                    "4. Stage syngas cooling & dual-bed exothermic WGS: E-105 WHB -> R-104 HT-Shift -> E-106 Intercooler -> R-105 LT-Shift -> E-107 Economizer -> E-108 Trim Condenser -> S-101 KO Drum (<= 45 C) -> V-101 4-bed PSA -> 3-stage intercooled compression C-101..103 to 400 bar."
+                ),
+                "topology_manifest": {
+                    "unit_tags": ["R-101", "R-102", "B-101/R-103", "E-105", "R-104", "E-106", "R-105", "E-107", "E-108", "S-101", "V-101", "C-101..103"],
+                    "convection_banks": ["E-103", "E-102", "E-109", "E-101", "E-104"],
+                },
+            }
+        ],
+        invariant_checks=[
+            "mass_conservation_non_negative",
+            "second_law_pinch_approach_ge_10c",
+            "single_shell_hx_dt_bounds",
+            "exothermic_shift_intercooling",
+            "polytropic_discharge_le_155c",
+            "passive_pressure_drop_monotonicity",
+            "uk_industrial_spacing_bs_en_13480",
+        ],
+    ),
+    DomainSkillSpec(
+        domain_id="bioprocess_kinetics",
+        governing_laws=["AEROBIC_OXYGEN_TRANSFER_LIMIT", "SECOND_LAW_PINCH"],
+        rag_scope={
+            "target_systems": ["Escherichia coli", "Saccharina latissima", "Corynebacterium glutamicum", "Yarrowia lipolytica"],
+            "domains": ["bioprocess", "thermodynamics"],
+        },
+        allowed_archetypes=[
+            "hopper_mill",
+            "stirred_tank_bioreactor",
+            "centrifuge_separator",
+            "membrane_filter",
+            "wet_spinning_bath",
+            "shake_flask",
+        ],
+        few_shot_derivations=[
+            {
+                "name": "saccharina_alginate_extraction",
+                "prompt": "Simulate 6-stage Saccharina latissima alginate extraction and wet-spinning.",
+                "derivation_trace": (
+                    "1. Dry milling of Laminaria/Saccharina frond biomass.\n"
+                    "2. Acid wash & alkaline Na2CO3 dissolution.\n"
+                    "3. Centrifugal clarification, cryo/ethanol precipitation, and CaCl2 wet-spinning."
+                ),
+                "topology_manifest": {"unit_tags": ["MILL-1", "ACID-2", "ALK-3", "CENT-4", "PREC-5", "SPIN-6"]},
+            },
+            {
+                "name": "ecoli_fed_batch_fermentation",
+                "prompt": "Simulate aerobic fed-batch Escherichia coli fermentation in a 10 L bioreactor.",
+                "derivation_trace": (
+                    "1. Solve Monod growth kinetics (mu_max, Ks, Y_xs, m) coupled with oxygen transfer OTR = kLa * (C* - C_L) >= OUR."
+                ),
+                "topology_manifest": {"unit_tags": ["SEED-1", "FERM-2", "HARV-3"]},
+            },
+        ],
+        invariant_checks=["mass_conservation_non_negative", "aerobic_otr_ge_our"],
+    ),
+    DomainSkillSpec(
+        domain_id="electromechanics",
+        governing_laws=["POLYTROPIC_COMPRESSION_DISCHARGE", "PASSIVE_PRESSURE_DROP_MONOTONICITY"],
+        rag_scope={
+            "target_systems": ["Electromechanical", "Reciprocating Compressor", "Doorbell Solenoid"],
+            "domains": ["thermodynamics", "hydraulics_phase"],
+        },
+        allowed_archetypes=["high_pressure_compressor", "solenoid_actuator", "circuit_oscillator"],
+        few_shot_derivations=[
+            {
+                "name": "multistage_h2_compression",
+                "prompt": "Compress purified H2 from 33.1 bar to 400 bar in intercooled reciprocating stages.",
+                "derivation_trace": "1. Compute N = ceil(ln(P_out/P_in)/ln(2.2)) stages with interstage cooling to <= 40 C keeping discharge <= 155 C.",
+                "topology_manifest": {"unit_tags": ["E-110", "C-101", "E-111", "C-102", "E-112", "C-103", "E-113"]},
+            }
+        ],
+        invariant_checks=["polytropic_discharge_le_155c", "passive_pressure_drop_monotonicity"],
+    ),
+]
+
+
 def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = True) -> Dict[str, Any]:
     db = ParameterDatabase(db_url=db_url)
     
@@ -521,6 +635,11 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
         if db.upsert_mechanistic_law(law):
             laws_newly_written += 1
 
+    skills_newly_written = 0
+    for skill in SEED_DOMAIN_SKILLS:
+        if db.upsert_domain_skill(skill):
+            skills_newly_written += 1
+
     return {
         "total_evaluated": total_count,
         "total_candidates": total_count,
@@ -530,6 +649,8 @@ def seed_database(db_url: Optional[str] = None, include_workspace_json: bool = T
         "newly_written_to_db": written_count,
         "mechanistic_laws_total": len(SEED_MECHANISTIC_LAWS),
         "mechanistic_laws_newly_written": laws_newly_written,
+        "domain_skills_total": len(SEED_DOMAIN_SKILLS),
+        "domain_skills_newly_written": skills_newly_written,
         "tier_counts": tier_counts,
         "rejection_details": rejections
     }

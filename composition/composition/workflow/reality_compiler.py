@@ -25,11 +25,23 @@ class PhysicsCompilationError(Exception):
 class RealityCompiler:
     """Deterministic 6-pass physical invariant verifier & auto-remediation coordinator."""
 
+    UNIT_CONVERSIONS: Dict[str, float] = {
+        "kelvin_offset_c": 273.15,
+        "float_eps": 1e-6,
+        "min_pressure_floor_bar": 0.5,
+        "default_suction_press_bar": 30.0,
+        "default_suction_temp_c": 38.0,
+        "default_ambient_temp_c": 25.0,
+        "compression_ratio_trigger": 1.01,
+    }
+
     DEFAULT_THRESHOLDS: Dict[str, float] = {
         "dT_min_c": 10.0,
         "first_law_rel_tol": 0.02,
         "max_single_hx_dt_c": 350.0,
         "max_whb_hx_dt_c": 600.0,
+        "ambient_quench_ceiling_c": 200.0,
+        "deep_co_in_pct_threshold": 8.0,
         "max_adiabatic_rise_c": 220.0,
         "max_compressor_discharge_c": 155.0,
         "gamma": 1.38,
@@ -147,7 +159,7 @@ class RealityCompiler:
                             "remediation_action": "reorder_convection_pinch",
                         })
 
-                    if prev_cold_target is not None and t_co > prev_cold_target + 1e-6:
+                    if prev_cold_target is not None and t_co > prev_cold_target + self.UNIT_CONVERSIONS["float_eps"]:
                         violations.append({
                             "law_id": "SECOND_LAW_TEMPERATURE_CROSS",
                             "unit_tag": b_tag,
@@ -168,7 +180,7 @@ class RealityCompiler:
                     t_in = units[idx - 1].get("temperature_c")
                 if t_in is not None and t_out is not None:
                     dt_hx = float(t_in) - float(t_out)
-                    is_lumped_to_ambient = dt_hx > max_single_dt and float(t_out) < 200.0
+                    is_lumped_to_ambient = dt_hx > max_single_dt and float(t_out) < self.thresholds["ambient_quench_ceiling_c"]
                     is_extreme_shock = dt_hx > max_whb_dt
                     if is_lumped_to_ambient or is_extreme_shock:
                         violations.append({
@@ -205,7 +217,7 @@ class RealityCompiler:
                 for p_j in pbr_indices if p_j > idx
             )
             claims_deep_single_bed = (
-                (co_in is not None and co_out is not None and float(co_in) >= 8.0 and float(co_out) <= 1.0)
+                (co_in is not None and co_out is not None and float(co_in) >= self.thresholds["deep_co_in_pct_threshold"] and float(co_out) <= 1.0)
                 or dt_ad > self.thresholds["max_adiabatic_rise_c"]
                 or ("12% co" in desc and "0.3% co" in desc)
             )
@@ -268,13 +280,18 @@ class RealityCompiler:
 
             # 2. Polytropic compressor discharge limit (<= 155 C)
             if arch == "high_pressure_compressor":
+                k_off = self.UNIT_CONVERSIONS["kelvin_offset_c"]
+                p_floor = self.UNIT_CONVERSIONS["min_pressure_floor_bar"]
+                p_def = self.UNIT_CONVERSIONS["default_suction_press_bar"]
+                t_def = self.UNIT_CONVERSIONS["default_suction_temp_c"]
+                r_trig = self.UNIT_CONVERSIONS["compression_ratio_trigger"]
                 comp_stages = u.get("compressor_stages", [])
                 if comp_stages:
                     for st in comp_stages:
-                        p_in = max(0.5, float(st.get("p_in_bar", 30.0)))
+                        p_in = max(p_floor, float(st.get("p_in_bar", p_def)))
                         p_out = max(p_in, float(st.get("p_out_bar", p_in)))
-                        t_in_c = float(st.get("t_in_c", 38.0))
-                        t_poly_c = (t_in_c + 273.15) * ((p_out / p_in) ** ((gamma - 1.0) / (gamma * eta_p))) - 273.15
+                        t_in_c = float(st.get("t_in_c", t_def))
+                        t_poly_c = (t_in_c + k_off) * ((p_out / p_in) ** ((gamma - 1.0) / (gamma * eta_p))) - k_off
                         if t_poly_c > t_max_comp:
                             violations.append({
                                 "law_id": "POLYTROPIC_COMPRESSION_DISCHARGE",
@@ -287,11 +304,11 @@ class RealityCompiler:
                                 "remediation_action": "insert_multistage_compressor_intercoolers",
                             })
                 else:
-                    p_in = float(u.get("p_in_bar", units[idx - 1].get("pressure_bar", 30.0) if idx > 0 else 30.0))
+                    p_in = float(u.get("p_in_bar", units[idx - 1].get("pressure_bar", p_def) if idx > 0 else p_def))
                     p_out = float(u.get("pressure_bar", p_in))
-                    t_in_c = float(u.get("t_in_c", 38.0))
-                    if p_out > p_in * 1.01:
-                        t_poly_c = (t_in_c + 273.15) * ((p_out / max(0.5, p_in)) ** ((gamma - 1.0) / (gamma * eta_p))) - 273.15
+                    t_in_c = float(u.get("t_in_c", t_def))
+                    if p_out > p_in * r_trig:
+                        t_poly_c = (t_in_c + k_off) * ((p_out / max(p_floor, p_in)) ** ((gamma - 1.0) / (gamma * eta_p))) - k_off
                         if t_poly_c > t_max_comp:
                             violations.append({
                                 "law_id": "POLYTROPIC_COMPRESSION_DISCHARGE",
@@ -315,7 +332,8 @@ class RealityCompiler:
                 tag = self._unit_tag(u, idx)
                 upstream = units[:idx]
                 has_ko = any(str(p.get("archetype", "")) == "knockout_cooler" for p in upstream)
-                prev_temp = float(upstream[-1].get("temperature_c", 25.0)) if upstream else 25.0
+                t_amb = self.UNIT_CONVERSIONS["default_ambient_temp_c"]
+                prev_temp = float(upstream[-1].get("temperature_c", t_amb)) if upstream else t_amb
                 if not has_ko or prev_temp > self.thresholds["max_psa_inlet_temp_c"]:
                     violations.append({
                         "law_id": "WET_GAS_PSA_KNOCKOUT",

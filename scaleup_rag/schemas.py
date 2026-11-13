@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, List, Literal
+from typing import Any, Optional, Dict, List, Literal
 
 class OperatingEnvelope(BaseModel):
     temperature_c: Optional[float] = None
@@ -88,3 +88,21 @@ class SimulationManifestPayload(BaseModel):
     cache_hit_count: int
     writeback_count: int
     gap_count: int
+
+
+class DomainSkillSpec(BaseModel):
+    domain_id: str
+    governing_laws: List[str]
+    rag_scope: Dict[str, Any]
+    allowed_archetypes: List[str]
+    few_shot_derivations: List[Dict[str, Any]]
+    invariant_checks: List[str]
+
+
+class ValidatedWorkedTraceSpec(BaseModel):
+    trace_id: str
+    domain_id: str
+    prompt: str
+    derivation_trace: str
+    topology_manifest_json: Dict[str, Any]
+    perturbation_passed: bool = True

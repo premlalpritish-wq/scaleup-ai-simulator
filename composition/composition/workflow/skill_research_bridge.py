@@ -1843,8 +1843,22 @@ def resolve_prompt_and_research(
                 "unverified_assumption_count": len(epistemic_audit.get("unverified_assumptions", {})),
             },
         }
+        run_artifact["topology_manifest"] = {
+            "domain_id": "thermochemical_plant",
+            "derivation_trace": (
+                f"Synthesized {len(stages)}-unit thermochemical flowsheet with Pinch-ordered HEN "
+                f"and UK BS EN 13480 sizing ({layout_metrics.get('cooling_train_axial_length_m', 0.0)} m axial run)."
+            ),
+            "units": [{"stage_id": s.get("stage_id"), "tag": s.get("tag"), "archetype": s.get("archetype")} for s in stages],
+            "connections": hen_connections,
+            "grounded_parameters": list(grounded_audit.keys()),
+            "user_design_setpoints": epistemic_audit.get("user_design_setpoints", {}),
+            "unverified_assumptions": epistemic_audit.get("unverified_assumptions", {}),
+        }
         from .reality_compiler import RealityCompiler
+        from scaleup_rag.peer_review_gate import PeerReviewCommittee
         RealityCompiler().compile_and_verify(run_artifact, strict=True)
+        PeerReviewCommittee().evaluate(run_artifact, run_perturbations=True, archive_on_pass=True, domain_id="thermochemical_plant")
 
         with open(str(latest_run_path), "w", encoding="utf-8") as f:
             f.write(json.dumps(run_artifact, indent=2, ensure_ascii=False) + "\n")
