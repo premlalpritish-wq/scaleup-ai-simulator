@@ -85,6 +85,7 @@ var _sim_status: Label
 var _confidence_badge: Label
 var _top_reality_badge: Label
 var _reality_compiler_badge: Label
+var _sizing_table_label: Label
 var _reality_compiler_audit: Dictionary = {}
 var _runtime_law_violations: Array = []
 var _analogue_banner: Label
@@ -1035,6 +1036,37 @@ func _update_reality_compiler_badges(violations: Array) -> void:
 				lines.append("   Eq: %s | DOI: %s" % [str(v.get("equation", "")), str(v.get("doi", ""))])
 			_reality_compiler_badge.text = "\n".join(lines)
 			_reality_compiler_badge.modulate = BAD
+	_refresh_sizing_table_label()
+
+
+func _refresh_sizing_table_label() -> void:
+	if _sizing_table_label == null:
+		return
+	var rows: Array = _reality_compiler_audit.get("mass_energy_sizing_table", [])
+	if rows.is_empty():
+		_sizing_table_label.text = ""
+		return
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("📐 MASS, ENERGY & UK BS EN 13480 SIZING TABLE:")
+	lines.append("Tag | m_dot [kg/h] | T_in->T_out [°C] | Q [MW] | U | LMTD | A [m²] | D×L [m] | DN")
+	for item in rows:
+		if not (item is Dictionary):
+			continue
+		var r: Dictionary = item as Dictionary
+		lines.append("%s | %.0f | %.0f->%.0f | %.1f | %.0f | %.1f | %.0f | %.1f×%.1f | DN%d" % [
+			str(r.get("tag", "?")),
+			float(r.get("mass_flow_kg_h", 0.0)),
+			float(r.get("t_in_c", 0.0)),
+			float(r.get("t_out_c", 0.0)),
+			float(r.get("duty_mw", 0.0)),
+			float(r.get("u_w_m2k", 0.0)),
+			float(r.get("dt_lmtd_k", 0.0)),
+			float(r.get("area_req_m2", 0.0)),
+			float(r.get("shell_d_m", 0.0)),
+			float(r.get("shell_l_m", 0.0)),
+			int(r.get("pipe_dn_mm", 0)),
+		])
+	_sizing_table_label.text = "\n".join(lines)
 
 
 func _on_sandbox_ph_toggle() -> void:
@@ -1181,6 +1213,13 @@ func _create_right_drawer() -> Control:
 	_reality_compiler_badge.add_theme_font_size_override("font_size", 10)
 	_reality_compiler_badge.modulate = GOOD
 	body.add_child(_reality_compiler_badge)
+
+	_sizing_table_label = Label.new()
+	_sizing_table_label.text = ""
+	_sizing_table_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sizing_table_label.add_theme_font_size_override("font_size", 9)
+	_sizing_table_label.modulate = Color(0.78, 0.88, 0.98)
+	body.add_child(_sizing_table_label)
 
 	# Growth Chart in Drawer
 	_growth = GrowthChart.new()

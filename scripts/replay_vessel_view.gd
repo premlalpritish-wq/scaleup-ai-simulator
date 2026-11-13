@@ -290,7 +290,7 @@ func smooth_focus_on_stage(index: int, duration: float = 0.85) -> void:
 
 
 func _zoom(direction: float) -> void:
-	_distance = clampf(_distance + direction * 0.55, 2.0, 24.0)
+	_distance = clampf(_distance + direction * 1.6, 2.5, 85.0)
 	_apply_camera()
 
 
@@ -300,10 +300,11 @@ func reset_camera() -> void:
 	_camera_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	var is_chem := (not _stage_vessels.is_empty()) and bool(_stage_vessels[0].get("is_chemical_plant", false))
 	if is_chem:
-		_camera_tween.tween_property(self, "_target", Vector3(0.8, 1.8, 0.0), 0.75)
-		_camera_tween.tween_property(self, "_distance", 22.5, 0.75)
-		_camera_tween.tween_property(self, "_yaw", deg_to_rad(4.0), 0.75)
-		_camera_tween.tween_property(self, "_pitch", deg_to_rad(-24.0), 0.75)
+		var pb: Rect2 = _computed_layout.get("pad_bounds", Rect2(-26.0, -17.5, 54.0, 35.0))
+		_camera_tween.tween_property(self, "_target", Vector3(pb.position.x + pb.size.x * 0.48, 2.2, 0.0), 0.75)
+		_camera_tween.tween_property(self, "_distance", clampf(pb.size.x * 0.78, 38.0, 64.0), 0.75)
+		_camera_tween.tween_property(self, "_yaw", deg_to_rad(14.0), 0.75)
+		_camera_tween.tween_property(self, "_pitch", deg_to_rad(-28.0), 0.75)
 	else:
 		_camera_tween.tween_property(self, "_target", Vector3(0.0, 1.15, 0.0), 0.75)
 		_camera_tween.tween_property(self, "_distance", maxf(6.5, float(_stage_vessels.size()) * 1.5), 0.75)
@@ -496,48 +497,53 @@ func _compute_topological_plant_layout(units: Array, connections: Array) -> Dict
 			best_score = score
 			hub_index = i
 
-	# 2. Place Central Energy Hub at topological origin (0, 0, 0)
-	positions[hub_index] = Vector3(0.0, 0.0, 0.0)
+	# 2. Place Central Flue Gas Heat Recovery Hub along z = 0.0
+	# Shift radiant furnace box slightly East so the ~30m horizontal convection tunnel spans dead-center across z = 0.0
+	var hub_sizing: Dictionary = units[hub_index].get("sizing", {})
+	var tunnel_len_m: float = float(hub_sizing.get("length_m", 30.0))
+	var hub_x := clampf(tunnel_len_m * 0.38, 8.0, 14.0)
+	positions[hub_index] = Vector3(hub_x, 0.0, 0.0)
 	var hub_banks: Array = units[hub_index].get("convection_banks", [])
-	var tunnel_reach := 2.2 + float(hub_banks.size()) * 1.15
+	var tunnel_reach := maxf(tunnel_len_m, 2.2 + float(hub_banks.size()) * 5.2)
 
-	# 3. Upstream Feed & Pre-Treatment Train -> West / Front-Left quadrant (z = +3.8)
+	# 3. Upstream Feed & Pre-Treatment Train -> South-West quadrant (z = +12.5m, >= 10m UK HSE clearance)
 	var upstream_count := hub_index
 	for i in range(upstream_count):
 		var offset_from_hub := upstream_count - i
-		var x_pos := -4.8 - float(offset_from_hub - 1) * 4.5
-		positions[i] = Vector3(x_pos, 0.0, 3.8)
+		var x_pos := -12.0 - float(offset_from_hub - 1) * 7.5
+		positions[i] = Vector3(x_pos, 0.0, 12.5)
 
 	# 4. Downstream units split into:
-	#    - Reaction & Series Heat Exchanger Cooling Train -> North / Back row (z = -3.8)
-	#    - Separation, PSA & Multi-Stage Compression Train -> South / Front-Right quadrant (z = +3.8)
+	#    - High-Temp Cooling & Shift Train -> North row (z = -12.5m, 12.5m clear of fired heater, ~42m axial run)
+	#    - Separation, PSA & Multi-Stage Compression -> South-East quadrant (z = +12.5m)
 	var downstream_count := count - 1 - hub_index
 	var cooling_count := int(ceil(float(downstream_count) * 0.6))
 	if downstream_count >= 2:
 		cooling_count = clampi(cooling_count, 1, downstream_count - 1)
 
-	var north_start_x := 0.5
+	var north_start_x := -20.0
+	var north_spacing := maxf(6.8, 42.0 / float(maxi(1, cooling_count - 1)))
 	for j in range(downstream_count):
 		var idx := hub_index + 1 + j
 		if j < cooling_count:
-			var x_n := north_start_x + float(j) * 4.2
-			positions[idx] = Vector3(x_n, 0.0, -3.8)
+			var x_n := north_start_x + float(j) * north_spacing
+			positions[idx] = Vector3(x_n, 0.0, -12.5)
 		else:
 			var k := j - cooling_count
-			var x_s := 5.2 + float(k) * 4.8
-			positions[idx] = Vector3(x_s, 0.0, 3.8)
+			var x_s := 7.0 + float(k) * 10.5
+			positions[idx] = Vector3(x_s, 0.0, 12.5)
 
-	# 5. Compute dynamic plant pad bounding box
-	var min_x := -tunnel_reach - 2.5
-	var max_x := 4.0
-	var min_z := -6.2
-	var max_z := 6.2
+	# 5. Compute dynamic plant pad bounding box (UK Industrial Plot Plan ~54m x 34m)
+	var min_x := hub_x - tunnel_reach - 5.0
+	var max_x := hub_x + 6.0
+	var min_z := -17.5
+	var max_z := 17.5
 	for p in positions:
 		var v: Vector3 = p
-		min_x = minf(min_x, v.x - 3.0)
-		max_x = maxf(max_x, v.x + 3.0)
-		min_z = minf(min_z, v.z - 2.8)
-		max_z = maxf(max_z, v.z + 2.8)
+		min_x = minf(min_x, v.x - 6.0)
+		max_x = maxf(max_x, v.x + 6.0)
+		min_z = minf(min_z, v.z - 5.0)
+		max_z = maxf(max_z, v.z + 5.0)
 
 	var pad_bounds := Rect2(min_x, min_z, max_x - min_x, max_z - min_z)
 	return {
@@ -590,22 +596,22 @@ func _build_industrial_plant_pad(pad_bounds: Rect2 = Rect2(-13.2, -6.5, 28.0, 13
 	steel_beam_mat.metallic = 0.84
 	steel_beam_mat.roughness = 0.30
 
-	var rack_z := -1.85
-	var rack_half_w := 0.45
-	var rack_start_x := cx - pad_w * 0.40
-	var rack_end_x := cx + pad_w * 0.40
-	var rack_span := rack_end_x - rack_start_x
-	var n_bents := maxi(4, int(floor(rack_span / 3.5)) + 1)
-	for bi in range(n_bents):
-		var bx := rack_start_x + (float(bi) / float(maxi(1, n_bents - 1))) * rack_span
-		_add_cad_box(_bench_env_root, Vector3(0.11, 3.85, 0.11), Vector3(bx, 1.925, rack_z - rack_half_w), steel_beam_mat)
-		_add_cad_box(_bench_env_root, Vector3(0.11, 3.85, 0.11), Vector3(bx, 1.925, rack_z + rack_half_w), steel_beam_mat)
-		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.05), Vector3(bx, 2.85, rack_z), steel_beam_mat)
-		_add_cad_box(_bench_env_root, Vector3(0.12, 0.10, 1.05), Vector3(bx, 3.55, rack_z), steel_beam_mat)
+	for rack_z in [-6.2, 6.2]:
+		var rack_half_w := 0.75
+		var rack_start_x := cx - pad_w * 0.42
+		var rack_end_x := cx + pad_w * 0.42
+		var rack_span := rack_end_x - rack_start_x
+		var n_bents := maxi(6, int(floor(rack_span / 5.5)) + 1)
+		for bi in range(n_bents):
+			var bx := rack_start_x + (float(bi) / float(maxi(1, n_bents - 1))) * rack_span
+			_add_cad_box(_bench_env_root, Vector3(0.18, 5.20, 0.18), Vector3(bx, 2.60, rack_z - rack_half_w), steel_beam_mat)
+			_add_cad_box(_bench_env_root, Vector3(0.18, 5.20, 0.18), Vector3(bx, 2.60, rack_z + rack_half_w), steel_beam_mat)
+			_add_cad_box(_bench_env_root, Vector3(0.20, 0.16, 1.75), Vector3(bx, 3.60, rack_z), steel_beam_mat)
+			_add_cad_box(_bench_env_root, Vector3(0.20, 0.16, 1.75), Vector3(bx, 4.65, rack_z), steel_beam_mat)
 
-	for rz in [rack_z - rack_half_w, rack_z + rack_half_w]:
-		_add_cad_box(_bench_env_root, Vector3(rack_span + 0.4, 0.10, 0.10), Vector3(cx, 2.85, rz), steel_beam_mat)
-		_add_cad_box(_bench_env_root, Vector3(rack_span + 0.4, 0.10, 0.10), Vector3(cx, 3.55, rz), steel_beam_mat)
+		for rz in [rack_z - rack_half_w, rack_z + rack_half_w]:
+			_add_cad_box(_bench_env_root, Vector3(rack_span + 0.6, 0.16, 0.16), Vector3(cx, 3.60, rz), steel_beam_mat)
+			_add_cad_box(_bench_env_root, Vector3(rack_span + 0.6, 0.16, 0.16), Vector3(cx, 4.65, rz), steel_beam_mat)
 
 
 # ---------------------------------------------------------------- Multi-Vessel Topology
@@ -656,11 +662,11 @@ func build_anatomy_bench_async(unit_operations: Array) -> void:
 	_add_stage_spotlight(pos0)
 
 	if is_chem_plant:
-		var pb: Rect2 = _computed_layout.get("pad_bounds", Rect2(-13.2, -6.5, 28.0, 13.0))
-		_target = Vector3(pb.position.x + pb.size.x * 0.45, 1.6, 0.0)
-		_distance = clampf(pb.size.x * 0.85, 22.0, 36.0)
-		_yaw = deg_to_rad(4.0)
-		_pitch = deg_to_rad(-24.0)
+		var pb: Rect2 = _computed_layout.get("pad_bounds", Rect2(-26.0, -17.5, 54.0, 35.0))
+		_target = Vector3(pb.position.x + pb.size.x * 0.48, 2.2, 0.0)
+		_distance = clampf(pb.size.x * 0.78, 38.0, 64.0)
+		_yaw = deg_to_rad(14.0)
+		_pitch = deg_to_rad(-28.0)
 	else:
 		_target = v_data0.root.position + Vector3(0.9, 1.15, 0.0)
 		_distance = 4.8
@@ -1248,34 +1254,46 @@ func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictio
 	if raw_tag.is_empty():
 		raw_tag = str(op.get("title", "UNIT-%d" % (stage_idx + 1)))
 	var tag_name: String = raw_tag.substr(0, 22)
-	var tag_y := 3.55
+	var op_sizing: Dictionary = op.get("sizing", {})
+	var tag_y := 5.2
 	match archetype:
 		"furnace_reformer":
-			tag_y = 4.55
-		"co2_absorber":
-			tag_y = 4.05
-		"psa_skid":
-			tag_y = 2.95
+			tag_y = float(op_sizing.get("radiant_height_m", 7.4)) + 1.4
+		"shell_tube_hx":
+			tag_y = float(op_sizing.get("elevation_m", 2.8)) + float(op_sizing.get("diameter_m", 2.0)) * 0.5 + (2.8 if tag_name == "E-105" else 1.4)
 		"knockout_cooler", "high_pressure_compressor":
-			tag_y = 2.55
+			tag_y = 4.4
 		_:
-			tag_y = 3.55
-	var tag_z := 0.95
+			tag_y = 5.4
+	var tag_z := 1.4
 
-	var plate_mat := StandardMaterial3D.new()
-	plate_mat.albedo_color = Color(0.05, 0.08, 0.12, 0.92)
-	plate_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	plate_mat.roughness = 0.55
-	_add_cad_box(root, Vector3(1.65, 0.42, 0.04), Vector3(0.0, tag_y, tag_z), plate_mat)
+	var pid_suffix := ""
+	if tag_name == "R-101":
+		pid_suffix = " | PRV-101 • GV-101 • DV-101"
+	elif tag_name == "R-102":
+		pid_suffix = " | T-101 Exp • M-101 • PRV-102 • GV-103"
+	elif tag_name == "V-101":
+		pid_suffix = " | 4-Bed PSA • DV-106..126"
+	elif archetype == "high_pressure_compressor":
+		pid_suffix = " | E-110 -> C-101 -> E-111 -> C-102 -> E-112 -> C-103 -> E-113"
+	elif archetype == "knockout_cooler":
+		pid_suffix = " | S-101 KO • P-101/102 • T-101 Water"
+	elif archetype == "shell_tube_hx":
+		pid_suffix = " | D=%.1fm x L=%.1fm @ Elev %.1fm (A=%.0fm²)" % [
+			float(op_sizing.get("diameter_m", 2.0)),
+			float(op_sizing.get("length_m", 7.2)),
+			float(op_sizing.get("elevation_m", 2.8)),
+			float(op_sizing.get("area_req_m2", 0.0)),
+		]
 
 	var lbl := Label3D.new()
-	lbl.text = "%s (%.0f Nm3/h %s)\n%.0f°C | %.0f bar | %.2f%% H2" % [tag_name, flow_nm3, flow_basis, temp_c, press_bar, purity_pct]
-	lbl.font_size = 20
-	lbl.pixel_size = 0.0052
-	lbl.position = Vector3(0.0, tag_y, tag_z + 0.05)
+	lbl.text = "%s%s\n%.0f Nm3/h %s | %.0f°C | %.1f bar | %.2f%% H2" % [tag_name, pid_suffix, flow_nm3, flow_basis, temp_c, press_bar, purity_pct]
+	lbl.font_size = 24
+	lbl.pixel_size = 0.0105
+	lbl.position = Vector3(0.0, tag_y, tag_z)
 	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lbl.modulate = Color(0.62, 0.96, 1.0)
-	lbl.outline_size = 5
+	lbl.outline_size = 6
 	root.add_child(lbl)
 
 	if not _smr_refs.has("stage_labels"):
@@ -1353,79 +1371,111 @@ func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictio
 		return true
 
 	elif archetype == "furnace_reformer":
-		# Unit 100: Dominant Primary SMR Radiant Furnace (2.8m W x 4.0m H x 2.2m D) + Convection + 5.2m Stack
-		_add_plinth(root, 3.2, 2.6, 0.18)
+		# Central Primary SMR Radiant Furnace (scaled from sizing) + ~30m Horizontal Flue Gas Heat Recovery Tunnel + Stack T-102
+		var f_sizing: Dictionary = op.get("sizing", {})
+		var fw: float = float(f_sizing.get("radiant_width_m", 5.2))
+		var fh: float = float(f_sizing.get("radiant_height_m", 7.4))
+		var fd: float = float(f_sizing.get("radiant_depth_m", 4.0))
+		_add_plinth(root, fw + 0.8, fd + 0.8, 0.24)
 
 		# External I-beam buckstays & corner columns
-		for cx in [-1.36, -0.45, 0.45, 1.36]:
-			for cz in [-1.06, 1.06]:
-				_add_cad_box(root, Vector3(0.09, 3.85, 0.09), Vector3(cx, 2.10, cz), dark_steel)
+		for cx in [-fw * 0.48, -fw * 0.16, fw * 0.16, fw * 0.48]:
+			for cz in [-fd * 0.48, fd * 0.48]:
+				_add_cad_box(root, Vector3(0.18, fh, 0.18), Vector3(cx, fh * 0.5 + 0.24, cz), dark_steel)
 		# Terrace-wall refractory back, side walls & roof arch
-		_add_cad_box(root, Vector3(2.72, 3.70, 0.10), Vector3(0.0, 2.05, -1.04), dark_steel)
-		_add_cad_box(root, Vector3(0.10, 3.70, 2.08), Vector3(-1.34, 2.05, 0.0), dark_steel)
-		_add_cad_box(root, Vector3(0.10, 3.70, 2.08), Vector3(1.34, 2.05, 0.0), dark_steel)
-		_add_cad_box(root, Vector3(2.82, 0.16, 2.20), Vector3(0.0, 3.96, 0.0), dark_steel)
+		_add_cad_box(root, Vector3(fw * 0.96, fh * 0.96, 0.16), Vector3(0.0, fh * 0.5 + 0.20, -fd * 0.47), dark_steel)
+		_add_cad_box(root, Vector3(0.16, fh * 0.96, fd * 0.94), Vector3(-fw * 0.48, fh * 0.5 + 0.20, 0.0), dark_steel)
+		_add_cad_box(root, Vector3(0.16, fh * 0.96, fd * 0.94), Vector3(fw * 0.48, fh * 0.5 + 0.20, 0.0), dark_steel)
+		_add_cad_box(root, Vector3(fw + 0.2, 0.24, fd + 0.2), Vector3(0.0, fh + 0.24, 0.0), dark_steel)
 		# Front X-Ray cutaway cladding wall
-		_add_xray_cladding(root, Vector3(2.60, 3.55, 0.04), Vector3(0.0, 2.05, 1.04), dark_steel, xray_cladding_mat)
+		_add_xray_cladding(root, Vector3(fw * 0.92, fh * 0.92, 0.08), Vector3(0.0, fh * 0.5 + 0.20, fd * 0.47), dark_steel, xray_cladding_mat)
 
-		# Multi-tier access platforms with thin dark-yellow safety handrails & thin metallic ladder
-		for py in [1.85, 3.88]:
-			_add_cad_box(root, Vector3(3.15, 0.05, 0.45), Vector3(0.0, py, 1.28), dark_steel)
-			_add_cad_cyl(root, 0.015, 0.015, 3.15, Vector3(0.0, py + 0.44, 1.49), safety_yellow, Vector3(0.0, 0.0, 90.0))
-			for px in [-1.52, -0.50, 0.50, 1.52]:
-				_add_cad_cyl(root, 0.015, 0.015, 0.44, Vector3(px, py + 0.22, 1.49), safety_yellow)
-		_add_caged_ladder(root, -1.48, 1.28, 0.18, 3.75, ladder_steel)
+		# Multi-tier access platforms with safety handrails & ladder
+		for py in [fh * 0.46, fh * 0.96]:
+			_add_cad_box(root, Vector3(fw + 0.6, 0.08, 0.75), Vector3(0.0, py, fd * 0.56), dark_steel)
+			_add_cad_cyl(root, 0.025, 0.025, fw + 0.6, Vector3(0.0, py + 0.75, fd * 0.64), safety_yellow, Vector3(0.0, 0.0, 90.0))
+			for px in [-fw * 0.48, 0.0, fw * 0.48]:
+				_add_cad_cyl(root, 0.025, 0.025, 0.75, Vector3(px, py + 0.37, fd * 0.64), safety_yellow)
+		_add_caged_ladder(root, -fw * 0.50, fd * 0.56, 0.24, fh, ladder_steel)
 
-		# Side-mounted horizontal convection pass -> procedurally extruded from convection_banks[] + tall cylindrical flue gas stack
+		# Central ~30m Horizontal Flue Gas Heat Exchanger Tunnel (E-103 -> E-102 -> E-109 -> E-101 -> E-104 -> T-102)
 		var conv_banks: Array = op.get("convection_banks", [])
 		var n_banks := maxi(1, conv_banks.size())
-		var bank_pitch := 1.15
-		var tunnel_len := 1.10 + float(n_banks) * bank_pitch
-		var tunnel_center_x := -1.42 - tunnel_len * 0.5
-		_add_cad_box(root, Vector3(tunnel_len, 1.05, 1.25), Vector3(tunnel_center_x, 3.35, -0.25), xray_cladding_mat)
-		_add_cad_box(root, Vector3(tunnel_len, 0.08, 1.30), Vector3(tunnel_center_x, 2.80, -0.25), dark_steel)
-		_add_cad_box(root, Vector3(tunnel_len, 0.08, 1.30), Vector3(tunnel_center_x, 3.90, -0.25), dark_steel)
+		var tunnel_len: float = maxf(24.0, float(f_sizing.get("length_m", 29.0)))
+		var bank_pitch := tunnel_len / float(n_banks)
+		var duct_d: float = clampf(float(f_sizing.get("diameter_m", 2.8)), 2.2, 3.6)
+		var tunnel_elev: float = float(f_sizing.get("elevation_m", 4.2))
+		var tunnel_center_x := -fw * 0.5 - tunnel_len * 0.5
+		_add_cad_box(root, Vector3(tunnel_len, duct_d, duct_d * 0.95), Vector3(tunnel_center_x, tunnel_elev, 0.0), xray_cladding_mat)
+		_add_cad_box(root, Vector3(tunnel_len, 0.14, duct_d), Vector3(tunnel_center_x, tunnel_elev - duct_d * 0.52, 0.0), dark_steel)
+		_add_cad_box(root, Vector3(tunnel_len, 0.14, duct_d), Vector3(tunnel_center_x, tunnel_elev + duct_d * 0.52, 0.0), dark_steel)
+		# Support piers under the 30m flue gas tunnel
+		for pi in range(n_banks + 1):
+			var px := -fw * 0.5 - float(pi) * bank_pitch
+			_add_cad_box(root, Vector3(0.35, tunnel_elev - duct_d * 0.5, duct_d * 0.8), Vector3(px, (tunnel_elev - duct_d * 0.5) * 0.5, 0.0), dark_steel)
 
+		var pid_bank_hints := {
+			"E-103": "627°C Preheat",
+			"E-102": "504°C Pre-Ref Feed",
+			"E-109": "400°C Steam Loop",
+			"E-101": "400°C HDS Feed",
+			"E-104": "Air Preheater",
+		}
 		if conv_banks.is_empty():
 			for ci in range(3):
-				var cy := 3.05 + float(ci) * 0.28
-				for cz in [-0.48, -0.16, 0.16, 0.48]:
-					_add_cad_cyl(root, 0.032, 0.032, tunnel_len - 0.15, Vector3(tunnel_center_x, cy, cz - 0.15), copper_mat, Vector3(0.0, 0.0, 90.0))
+				var cy := tunnel_elev - 0.5 + float(ci) * 0.5
+				for cz in [-0.7, 0.0, 0.7]:
+					_add_cad_cyl(root, 0.055, 0.055, tunnel_len - 0.5, Vector3(tunnel_center_x, cy, cz), copper_mat, Vector3(0.0, 0.0, 90.0))
 		else:
 			for bi in range(conv_banks.size()):
 				var bank: Dictionary = conv_banks[bi]
-				var bx := -1.42 - 0.55 - float(bi) * bank_pitch
-				# Finned tube coil bank (4 staggered tubes + top/bottom nozzle stubs)
-				for cz in [-0.42, -0.14, 0.14, 0.42]:
-					_add_cad_cyl(root, 0.036, 0.036, 0.88, Vector3(bx, 3.35, cz - 0.25), copper_mat, Vector3(90.0, 0.0, 0.0))
-				_add_cad_cyl(root, 0.045, 0.045, 0.28, Vector3(bx, 4.02, -0.25), vessel_steel)
-				_add_cad_cyl(root, 0.045, 0.045, 0.28, Vector3(bx, 2.68, -0.25), vessel_steel)
+				var b_tag := str(bank.get("tag", "E-conv-%d" % (bi + 1)))
+				var bs: Dictionary = bank.get("sizing", {})
+				var bx := -fw * 0.5 - bank_pitch * (0.5 + float(bi))
+				# Wide elevated finned tube coil bank + header nozzles
+				for cz in [-0.85, -0.28, 0.28, 0.85]:
+					_add_cad_cyl(root, 0.065, 0.065, duct_d * 0.86, Vector3(bx, tunnel_elev, cz), copper_mat, Vector3(90.0, 0.0, 0.0))
+				_add_cad_cyl(root, 0.10, 0.10, 0.55, Vector3(bx, tunnel_elev + duct_d * 0.62, 0.0), vessel_steel)
+				_add_cad_cyl(root, 0.10, 0.10, 0.55, Vector3(bx, tunnel_elev - duct_d * 0.62, 0.0), vessel_steel)
 				var b_lbl := Label3D.new()
-				b_lbl.text = "%s | %.1f MW\n%.0f->%.0f°C" % [
-					str(bank.get("tag", "E-conv-%d" % (bi + 1))),
+				var hint := str(pid_bank_hints.get(b_tag, ""))
+				b_lbl.text = "%s (%s)\n%.1f MW | A=%.0f m²\n%.0f->%.0f°C" % [
+					b_tag,
+					hint if hint != "" else str(bank.get("name", "Coil")),
 					float(bank.get("duty_mw", 0.0)),
+					float(bs.get("area_req_m2", 0.0)),
 					float(bank.get("t_hot_in_c", 0.0)),
 					float(bank.get("t_hot_out_c", 0.0)),
 				]
-				b_lbl.font_size = 14
-				b_lbl.pixel_size = 0.0042
-				b_lbl.position = Vector3(bx, 4.35, 0.35)
+				b_lbl.font_size = 20
+				b_lbl.pixel_size = 0.0085
+				b_lbl.position = Vector3(bx, tunnel_elev + duct_d * 0.85 + 0.6, 0.5)
 				b_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-				b_lbl.modulate = Color(1.0, 0.86, 0.45)
-				b_lbl.outline_size = 4
+				b_lbl.modulate = Color(1.0, 0.88, 0.45)
+				b_lbl.outline_size = 5
 				root.add_child(b_lbl)
 
-		var stack_x := -1.42 - tunnel_len - 0.25
-		_add_cad_cyl(root, 0.34, 0.42, 3.20, Vector3(stack_x, 3.60, -0.25), vessel_steel) # Flue stack at far end of tunnel
+		# Flue Stack T-102 + ID Fan C-105 / F-101 at West end of tunnel
+		var stack_x := -fw * 0.5 - tunnel_len - 1.2
+		_add_cad_cyl(root, 0.85, 1.15, 9.5, Vector3(stack_x, 4.75, 0.0), vessel_steel)
+		_add_cad_cyl(root, 0.72, 0.72, 0.95, Vector3(stack_x + 1.6, 1.1, 1.2), dark_steel, Vector3(0.0, 0.0, 90.0))
+		var stack_lbl := Label3D.new()
+		stack_lbl.text = "T-102 (Flue Stack 130°C)\nC-105 / F-101 ID Fan"
+		stack_lbl.font_size = 20
+		stack_lbl.pixel_size = 0.0085
+		stack_lbl.position = Vector3(stack_x, 10.2, 0.0)
+		stack_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		stack_lbl.modulate = Color(0.75, 0.92, 1.0)
+		stack_lbl.outline_size = 5
+		root.add_child(stack_lbl)
 
-		# Dense Bank of 24 Slender Vertical Catalyst Tubes (3 rows x 8 tubes, radius 0.035m)
-		# Continuous from top inlet header (y=3.92) down into bottom refractory transfer manifold (y=0.42)
+		# Dense Bank of 24 Vertical Catalyst Tubes (scaled to radiant box)
 		var zone_mats: Array = []
 		var zone_cols := [
-			Color(0.55, 0.44, 0.36), # 520 C top inlet
-			Color(0.82, 0.46, 0.20), # 640 C upper-mid
-			Color(0.96, 0.50, 0.14), # 760 C lower-mid
-			Color(1.00, 0.62, 0.18), # 850 C bottom radiant
+			Color(0.55, 0.44, 0.36),
+			Color(0.82, 0.46, 0.20),
+			Color(0.96, 0.50, 0.14),
+			Color(1.00, 0.62, 0.18),
 		]
 		var zone_energies := [0.35, 0.90, 1.65, 2.50]
 		for zi in range(4):
@@ -1438,68 +1488,74 @@ func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictio
 			zone_mats.append(zm)
 		_smr_refs["reformer_tube_mats"] = zone_mats
 
-		for tz in [-0.44, 0.0, 0.44]:
+		var seg_h := (fh * 0.86) / 4.0
+		for tz in [-fd * 0.22, 0.0, fd * 0.22]:
 			for ti in range(8):
-				var tx := -1.05 + float(ti) * 0.30
+				var tx := -fw * 0.38 + float(ti) * (fw * 0.76 / 7.0)
 				for zi in range(4):
-					var zy := 3.48 - float(zi) * 0.875
-					_add_cad_cyl(root, 0.035, 0.035, 0.875, Vector3(tx, zy, tz), zone_mats[zi])
-				# Top inlet pigtail
-				_add_cad_cyl(root, 0.018, 0.018, 0.25, Vector3(tx, 4.02, tz), vessel_steel)
+					var zy := fh - 0.5 - float(zi) * seg_h
+					_add_cad_cyl(root, 0.065, 0.065, seg_h, Vector3(tx, zy, tz), zone_mats[zi])
+				_add_cad_cyl(root, 0.032, 0.032, 0.55, Vector3(tx, fh + 0.45, tz), vessel_steel)
 
-		# Top inlet pigtail header & bottom outlet collector manifold
-		_add_cad_cyl(root, 0.08, 0.08, 2.40, Vector3(0.0, 4.14, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
-		_add_cad_cyl(root, 0.12, 0.12, 2.55, Vector3(0.0, 0.38, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, 0.14, 0.14, fw * 0.88, Vector3(0.0, fh + 0.72, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, 0.22, 0.22, fw * 0.92, Vector3(0.0, 0.65, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
 
-		# 12 Radiant Floor Burners in the lanes between tube rows firing upward
 		var burner_mat := StandardMaterial3D.new()
 		burner_mat.albedo_color = Color(1.0, 0.44, 0.08)
 		burner_mat.emission_enabled = true
 		burner_mat.emission = Color(1.0, 0.40, 0.06)
 		burner_mat.emission_energy_multiplier = 2.8
 		_smr_refs["reformer_burner_mat"] = burner_mat
-		for bz in [-0.66, -0.22, 0.22, 0.66]:
-			for bx in [-0.90, 0.0, 0.90]:
-				_add_cad_cyl(root, 0.01, 0.065, 0.28, Vector3(bx, 0.36, bz), burner_mat)
+		for bz in [-fd * 0.32, -fd * 0.11, fd * 0.11, fd * 0.32]:
+			for bx in [-fw * 0.32, 0.0, fw * 0.32]:
+				_add_cad_cyl(root, 0.02, 0.11, 0.55, Vector3(bx, 0.65, bz), burner_mat)
 
-		# Dedicated Blue Emergency N2 Purge Header + Actuated Isolation Valve XV-101
+		# Emergency N2 Purge Header + Actuated Isolation Valve XV-101
 		var n2_mat := StandardMaterial3D.new()
 		n2_mat.albedo_color = Color(0.22, 0.62, 0.98)
 		n2_mat.metallic = 0.72
 		_smr_refs["n2_purge_mat"] = n2_mat
-		_add_cad_cyl(root, 0.045, 0.045, 3.20, Vector3(-1.52, 1.85, 0.65), n2_mat)
-		_add_cad_cyl(root, 0.038, 0.038, 0.55, Vector3(-1.25, 3.45, 0.65), n2_mat, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, 0.08, 0.08, fh * 0.85, Vector3(-fw * 0.55, fh * 0.48, fd * 0.35), n2_mat)
+		_add_cad_cyl(root, 0.06, 0.06, 0.95, Vector3(-fw * 0.45, fh * 0.86, fd * 0.35), n2_mat, Vector3(0.0, 0.0, 90.0))
 		var xv_mat := StandardMaterial3D.new()
 		xv_mat.albedo_color = Color(0.92, 0.30, 0.22)
 		xv_mat.metallic = 0.60
 		_smr_refs["xv101_mat"] = xv_mat
-		_add_cad_box(root, Vector3(0.16, 0.16, 0.16), Vector3(-1.52, 2.25, 0.65), xv_mat)
+		_add_cad_box(root, Vector3(0.28, 0.28, 0.28), Vector3(-fw * 0.55, fh * 0.56, fd * 0.35), xv_mat)
 		return true
 
 	elif archetype == "shell_tube_hx":
-		# Unit 200: Process Gas Waste Heat Boiler (E-105) + Elevated Steam Drum (V-102)
-		_add_plinth(root, 2.6, 1.8, 0.16)
+		# Substance-driven wide, elevated horizontal shell-and-tube exchanger on tall piers
+		var hx_s: Dictionary = op.get("sizing", {})
+		var d_shell: float = clampf(float(hx_s.get("diameter_m", 2.0)), 1.6, 2.8)
+		var l_shell: float = clampf(float(hx_s.get("length_m", 7.2)), 5.8, 10.5)
+		var elev: float = clampf(float(hx_s.get("elevation_m", 2.8)), 2.4, 3.8)
+		var r_shell := d_shell * 0.5
+		var tag := str(op.get("tag", "E-105"))
+		_add_plinth(root, l_shell + 1.4, d_shell + 1.8, 0.22)
 
-		# Twin concrete/steel saddle supports for E-105
-		for sx in [-0.65, 0.65]:
-			_add_cad_box(root, Vector3(0.20, 0.65, 0.86), Vector3(sx, 0.48, 0.0), dark_steel)
+		# Tall concrete/steel saddle piers elevating the wide shell for NPSH & thermal expansion
+		var pier_h := elev - r_shell
+		for sx in [-l_shell * 0.34, l_shell * 0.34]:
+			_add_cad_box(root, Vector3(0.45, pier_h, d_shell * 0.92), Vector3(sx, pier_h * 0.5 + 0.22, 0.0), dark_steel)
 
-		# E-105 Horizontal Cutaway Shell (radius 0.52, length 2.0m)
-		var hx_shell_inst := _add_cad_cyl(root, 0.52, 0.52, 1.95, Vector3(0.0, 1.18, 0.0), xray_cladding_mat, Vector3(0.0, 0.0, 90.0))
+		# Wide Horizontal Cutaway Shell (D_shell x L_shell at y = elev)
+		var hx_shell_inst := _add_cad_cyl(root, r_shell, r_shell, l_shell, Vector3(0.0, elev, 0.0), xray_cladding_mat, Vector3(0.0, 0.0, 90.0))
 		if not _smr_refs.has("xray_panels"):
 			_smr_refs["xray_panels"] = []
 		_smr_refs["xray_panels"].append({"mesh": hx_shell_inst, "solid": vessel_steel, "xray": xray_cladding_mat})
 
-		# Bolted channel head (left hot inlet) & rear shell cap
-		_add_cad_cyl(root, 0.54, 0.54, 0.30, Vector3(-1.08, 1.18, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
-		_add_cad_cyl(root, 0.54, 0.54, 0.16, Vector3(1.02, 1.18, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+		# Bolted channel head (hot inlet) & rear shell cap
+		_add_cad_cyl(root, r_shell * 1.04, r_shell * 1.04, 0.65, Vector3(-l_shell * 0.54, elev, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
+		_add_cad_cyl(root, r_shell * 1.04, r_shell * 1.04, 0.35, Vector3(l_shell * 0.52, elev, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
 
-		# Tube Sheet & 5 Thin Metallic Segmental Baffles
-		_add_cad_cyl(root, 0.48, 0.48, 0.04, Vector3(-0.90, 1.18, 0.0), copper_mat, Vector3(0.0, 0.0, 90.0))
-		for bx in [-0.60, -0.30, 0.0, 0.30, 0.60]:
-			_add_cad_cyl(root, 0.44, 0.44, 0.02, Vector3(bx, 1.18, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
+		# Tube Sheet & Segmental Baffles
+		_add_cad_cyl(root, r_shell * 0.92, r_shell * 0.92, 0.08, Vector3(-l_shell * 0.46, elev, 0.0), copper_mat, Vector3(0.0, 0.0, 90.0))
+		for bi in range(5):
+			var bx := -l_shell * 0.32 + float(bi) * (l_shell * 0.64 / 4.0)
+			_add_cad_cyl(root, r_shell * 0.86, r_shell * 0.86, 0.04, Vector3(bx, elev, 0.0), dark_steel, Vector3(0.0, 0.0, 90.0))
 
-		# Dense Bundle of 18 Slender Heat-Exchanger Tubes (3x6 array, radius 0.020m)
+		# Tube Bundle
 		var hx_hot_mat := StandardMaterial3D.new()
 		hx_hot_mat.albedo_color = Color(1.0, 0.46, 0.14)
 		hx_hot_mat.emission_enabled = true
@@ -1512,25 +1568,27 @@ func _build_chemical_plant_archetype(root: Node3D, archetype: String, op: Dictio
 		hx_cool_mat.emission_enabled = true
 		hx_cool_mat.emission = Color(0.85, 0.55, 0.15)
 		hx_cool_mat.emission_energy_multiplier = 0.40
-		_smr_refs["e105_outlet_mat"] = hx_cool_mat
+		if tag == "E-105":
+			_smr_refs["e105_outlet_mat"] = hx_cool_mat
 
-		for ty in [0.96, 1.18, 1.40]:
-			for tz in [-0.24, -0.08, 0.08, 0.24]:
-				_add_cad_cyl(root, 0.020, 0.020, 0.88, Vector3(-0.44, ty, tz), hx_hot_mat, Vector3(0.0, 0.0, 90.0))
-				_add_cad_cyl(root, 0.020, 0.020, 0.88, Vector3(0.44, ty, tz), hx_cool_mat, Vector3(0.0, 0.0, 90.0))
+		for ty in [elev - r_shell * 0.45, elev, elev + r_shell * 0.45]:
+			for tz in [-r_shell * 0.48, -r_shell * 0.16, r_shell * 0.16, r_shell * 0.48]:
+				_add_cad_cyl(root, 0.036, 0.036, l_shell * 0.46, Vector3(-l_shell * 0.23, ty, tz), hx_hot_mat, Vector3(0.0, 0.0, 90.0))
+				_add_cad_cyl(root, 0.036, 0.036, l_shell * 0.46, Vector3(l_shell * 0.23, ty, tz), hx_cool_mat, Vector3(0.0, 0.0, 90.0))
 
-		# Elevated Horizontal Steam Drum (V-102) on 4 Structural Steel Columns + 4 Vertical Riser/Downcomer Pipes
-		for sx in [-0.85, 0.85]:
-			for sz in [-0.55, 0.55]:
-				_add_cad_box(root, Vector3(0.08, 2.55, 0.08), Vector3(sx, 1.42, sz), dark_steel)
-		_add_cad_cyl(root, 0.32, 0.32, 1.85, Vector3(0.0, 2.75, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
-		for rx in [-0.55, -0.18, 0.18, 0.55]:
-			_add_cad_cyl(root, 0.042, 0.042, 0.95, Vector3(rx, 2.05, 0.0), vessel_steel)
-
-		var beacon_mat := StandardMaterial3D.new()
-		beacon_mat.albedo_color = Color(0.25, 0.85, 0.45)
-		_smr_refs["e105_fault_beacon"] = beacon_mat
-		_add_cad_cyl(root, 0.055, 0.055, 0.12, Vector3(0.0, 3.16, 0.0), beacon_mat)
+		# Elevated Steam Drum (V-102) on E-105 Waste Heat Boiler
+		if tag == "E-105":
+			var drum_y := elev + r_shell + 1.85
+			for sx in [-l_shell * 0.30, l_shell * 0.30]:
+				for sz in [-r_shell * 0.65, r_shell * 0.65]:
+					_add_cad_box(root, Vector3(0.14, drum_y - 0.2, 0.14), Vector3(sx, drum_y * 0.5, sz), dark_steel)
+			_add_cad_cyl(root, 0.58, 0.58, l_shell * 0.78, Vector3(0.0, drum_y, 0.0), vessel_steel, Vector3(0.0, 0.0, 90.0))
+			for rx in [-l_shell * 0.24, 0.0, l_shell * 0.24]:
+				_add_cad_cyl(root, 0.08, 0.08, 1.45, Vector3(rx, elev + r_shell + 0.72, 0.0), vessel_steel)
+			var beacon_mat := StandardMaterial3D.new()
+			beacon_mat.albedo_color = Color(0.25, 0.85, 0.45)
+			_smr_refs["e105_fault_beacon"] = beacon_mat
+			_add_cad_cyl(root, 0.11, 0.11, 0.22, Vector3(0.0, drum_y + 0.68, 0.0), beacon_mat)
 		return true
 
 	elif archetype == "packed_bed_reactor":
@@ -1911,7 +1969,7 @@ func update_smr_process_state(sc_ratio: float, reformer_temp_c: float, pressure_
 
 # ---------------------------------------------------------------- Inter-Stage Pipes & Animated Moving Slugs
 
-func _build_rack_pipe_route(waypoints: Array, stream_color: Color, pipe_steel: Material, flange_mat: Material, ft_mat: Material) -> void:
+func _build_rack_pipe_route(waypoints: Array, stream_color: Color, pipe_steel: Material, flange_mat: Material, ft_mat: Material, pipe_radius: float = 0.14) -> void:
 	for wi in range(waypoints.size() - 1):
 		var a: Vector3 = waypoints[wi]
 		var b: Vector3 = waypoints[wi + 1]
@@ -1927,12 +1985,12 @@ func _build_rack_pipe_route(waypoints: Array, stream_color: Color, pipe_steel: M
 			rot = Vector3(0.0, 0.0, 90.0)
 		elif dz >= dx and dz >= dy:
 			rot = Vector3(90.0, 0.0, 0.0)
-		_add_cad_cyl(_bench_root, 0.042, 0.042, seg_len, mid, pipe_steel, rot)
+		_add_cad_cyl(_bench_root, pipe_radius, pipe_radius, seg_len, mid, pipe_steel, rot)
 		# Elbow joint sphere at intermediate corners
 		if wi > 0:
 			var elb_m := SphereMesh.new()
-			elb_m.radius = 0.052
-			elb_m.height = 0.104
+			elb_m.radius = pipe_radius * 1.25
+			elb_m.height = pipe_radius * 2.50
 			var elb := MeshInstance3D.new()
 			elb.mesh = elb_m
 			elb.position = a
@@ -1945,15 +2003,15 @@ func _build_rack_pipe_route(waypoints: Array, stream_color: Color, pipe_steel: M
 		var va: Vector3 = waypoints[mid_idx - 1]
 		var vb: Vector3 = waypoints[mid_idx]
 		var vmid := (va + vb) * 0.5
-		_add_cad_box(_bench_root, Vector3(0.13, 0.11, 0.11), vmid, flange_mat)
-		_add_cad_cyl(_bench_root, 0.016, 0.016, 0.16, vmid + Vector3(0.0, 0.12, 0.0), flange_mat)
-		_add_cad_cyl(_bench_root, 0.060, 0.060, 0.07, vmid + Vector3(0.22, 0.0, 0.0), ft_mat, Vector3(0.0, 0.0, 90.0))
+		_add_cad_box(_bench_root, Vector3(pipe_radius * 2.6, pipe_radius * 2.2, pipe_radius * 2.2), vmid, flange_mat)
+		_add_cad_cyl(_bench_root, pipe_radius * 0.35, pipe_radius * 0.35, pipe_radius * 3.0, vmid + Vector3(0.0, pipe_radius * 2.2, 0.0), flange_mat)
+		_add_cad_cyl(_bench_root, pipe_radius * 1.35, pipe_radius * 1.35, pipe_radius * 1.4, vmid + Vector3(pipe_radius * 4.0, 0.0, 0.0), ft_mat, Vector3(0.0, 0.0, 90.0))
 
 	# 6 Sleek Streamlined Flow Pulses moving inside the semi-transparent pipe
 	for pi in range(6):
 		var pulse_m := SphereMesh.new()
-		pulse_m.radius = 0.025
-		pulse_m.height = 0.050
+		pulse_m.radius = maxf(0.055, pipe_radius * 0.65)
+		pulse_m.height = maxf(0.11, pipe_radius * 1.30)
 		var pulse_inst := MeshInstance3D.new()
 		pulse_inst.mesh = pulse_m
 		var pm := StandardMaterial3D.new()
@@ -2010,7 +2068,6 @@ func _build_all_interstage_pipes_and_slugs() -> void:
 					"temp_c": float(op_a.get("temperature_c", 100.0)),
 				})
 
-		var rack_z := -1.85
 		for ri in range(routes.size()):
 			var conn: Dictionary = routes[ri]
 			var f_id := str(conn.get("from", ""))
@@ -2023,9 +2080,12 @@ func _build_all_interstage_pipes_and_slugs() -> void:
 			var p_b: Vector3 = _stage_vessels[ib].root.position
 			var stype := str(conn.get("stream_type", "process"))
 			var t_c := float(conn.get("temp_c", 150.0))
+			var pipe_od := float(conn.get("pipe_od_m", 0.35))
+			var pipe_r := clampf(pipe_od * 0.38, 0.075, 0.30)
 
-			var rack_y := 2.92 if stype == "process" else 3.55
-			var z_lane := rack_z + (float(ri % 5) - 2.0) * 0.16
+			var rack_z := -6.2 if (p_a.z < 0.0 or p_b.z < 0.0) else 6.2
+			var rack_y := 3.65 if stype == "process" else 4.70
+			var z_lane := rack_z + (float(ri % 5) - 2.0) * 0.28
 			var p_col := Color(0.22, 0.88, 0.92)
 			if stype == "bfw_steam":
 				p_col = Color(0.28, 0.68, 1.0)
@@ -2036,14 +2096,23 @@ func _build_all_interstage_pipes_and_slugs() -> void:
 			elif t_c >= 250.0:
 				p_col = Color(0.95, 0.68, 0.18)
 
-			_build_rack_pipe_route([
-				p_a + Vector3(0.45, 1.45, 0.0),
-				Vector3(p_a.x + 0.45, rack_y, p_a.z),
-				Vector3(p_a.x + 0.45, rack_y, z_lane),
-				Vector3(p_b.x - 0.45, rack_y, z_lane),
-				Vector3(p_b.x - 0.45, rack_y, p_b.z),
-				p_b + Vector3(-0.45, 1.45, 0.0),
-			], p_col, pipe_steel, flange_mat, ft_mat)
+			var wps: Array = [
+				p_a + Vector3(0.8, 2.4, 0.0),
+				Vector3(p_a.x + 0.8, rack_y, p_a.z),
+				Vector3(p_a.x + 0.8, rack_y, z_lane),
+			]
+			# Add U-bend thermal expansion loop on high-temperature process lines (>= 250 C)
+			if t_c >= 250.0 and absf(p_b.x - p_a.x) >= 5.0 and stype == "process":
+				var mid_x := (p_a.x + p_b.x) * 0.5
+				wps.append(Vector3(mid_x - 0.9, rack_y, z_lane))
+				wps.append(Vector3(mid_x - 0.9, rack_y + 1.15, z_lane))
+				wps.append(Vector3(mid_x + 0.9, rack_y + 1.15, z_lane))
+				wps.append(Vector3(mid_x + 0.9, rack_y, z_lane))
+			wps.append(Vector3(p_b.x - 0.8, rack_y, z_lane))
+			wps.append(Vector3(p_b.x - 0.8, rack_y, p_b.z))
+			wps.append(p_b + Vector3(-0.8, 2.4, 0.0))
+
+			_build_rack_pipe_route(wps, p_col, pipe_steel, flange_mat, ft_mat, pipe_r)
 		return
 
 	var transitions: Array = [

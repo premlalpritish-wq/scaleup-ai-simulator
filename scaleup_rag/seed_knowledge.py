@@ -463,6 +463,15 @@ SEED_MECHANISTIC_LAWS: List[PhysicalInvariantSpec] = [
         doi="10.1016/j.bej.2017.09.005",
         verbatim_quote="Aerobic fermentation oxygen transfer rate OTR = kLa*(C* - C_L) must exceed oxygen uptake rate to avoid anoxic metabolic shift.",
     ),
+    PhysicalInvariantSpec(
+        law_id="UK_INDUSTRIAL_SPACING_AND_THERMAL_LENGTH",
+        domain="hydraulics_phase",
+        governing_equation="clearance_fired >= 10.0 m and cooling_axial_run >= 36.0 m (BS EN 13480 / IChemE)",
+        threshold_parameters={"min_fired_heater_clearance_m": 10.0, "min_cooling_train_axial_m": 36.0},
+        remediation_action="expand_plot_spacing_and_thermal_runs",
+        doi="10.1016/B978-0-08-096659-5.00005-5",
+        verbatim_quote="Fired heaters must maintain >= 10 m clear separation from adjacent process units and high-temperature cooling trains require adequate axial run length for thermal expansion.",
+    ),
 ]
 
 

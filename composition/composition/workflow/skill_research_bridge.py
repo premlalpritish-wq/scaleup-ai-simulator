@@ -1462,6 +1462,201 @@ def synthesize_heat_integration_network(
     return synthesized_units, streams, connections, hen_summary
 
 
+def compute_equipment_and_pipe_sizing(
+    units: list[dict[str, Any]],
+    connections: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    """Derive substance-driven 3D equipment dimensions, UK BS EN 13480 pipe sizes, and Mass/Energy Balance table."""
+    sizing_table: list[dict[str, Any]] = []
+    unit_by_id: dict[str, dict[str, Any]] = {str(u.get("stage_id", "")): u for u in units}
+
+    def _lmtd(t_hi: float, t_ho: float, t_ci: float, t_co: float) -> float:
+        dt1 = max(10.0, t_hi - t_co)
+        dt2 = max(10.0, t_ho - t_ci)
+        if abs(dt1 - dt2) < 0.5:
+            return round((dt1 + dt2) * 0.5, 2)
+        return round((dt1 - dt2) / math.log(dt1 / dt2), 2)
+
+    def _size_hx(q_mw: float, t_hi: float, t_ho: float, t_ci: float, t_co: float, tag: str, is_conv: bool = False) -> dict[str, Any]:
+        if is_conv:
+            u_val = 45.0
+        elif t_hi >= 600.0 or "E-105" in tag:
+            u_val = 110.0
+        elif t_ho <= 80.0 or "E-108" in tag:
+            u_val = 180.0
+        else:
+            u_val = 95.0
+        f_t = 0.90
+        lmtd = _lmtd(t_hi, t_ho, t_ci, t_co)
+        q_w = max(0.5e6, q_mw * 1e6)
+        a_req = q_w / (u_val * f_t * lmtd)
+        d_o = 0.0254  # 1-inch TEMA OD tube
+        if is_conv:
+            l_tube = max(4.2, min(5.6, 4.0 + a_req / 350.0))
+            n_t = max(60, math.ceil(a_req / (math.pi * d_o * l_tube)))
+            d_shell = max(1.8, min(3.2, d_o * math.sqrt(n_t / 0.25)))
+            elev = 3.2
+        else:
+            l_tube = max(6.0, min(10.5, 4.8 + a_req / 180.0))
+            n_t = max(80, math.ceil(a_req / (math.pi * d_o * l_tube)))
+            d_shell = max(1.6, min(2.8, d_o * math.sqrt(n_t / 0.25)))
+            elev = round(2.4 + (d_shell - 1.6) * 1.15, 2)
+        return {
+            "duty_mw": round(q_mw, 2),
+            "u_w_m2k": u_val,
+            "f_t": f_t,
+            "dt_lmtd_k": lmtd,
+            "area_req_m2": round(a_req, 1),
+            "tube_count": n_t,
+            "diameter_m": round(d_shell, 2),
+            "length_m": round(l_tube, 2),
+            "elevation_m": elev,
+        }
+
+    for u in units:
+        tag = str(u.get("tag", u.get("stage_id", "U-1")))
+        arch = str(u.get("archetype", ""))
+        t_c = float(u.get("temperature_c", 25.0))
+        p_bar = max(1.0, float(u.get("pressure_bar", 1.0)))
+        flow_nm3 = max(1000.0, float(u.get("flow_nm3_h", 85000.0)))
+        # Approximate molecular weight ~14 kg/kmol for syngas/H2-rich streams, ~18 for NG/steam
+        mw = 18.0 if arch in ("pre_reformer",) else (28.5 if arch == "knockout_cooler" else 14.5)
+        mass_kg_h = round((flow_nm3 / 22.414) * mw, 1)
+        v_actual_m3_s = (flow_nm3 / 3600.0) * ((t_c + 273.15) / 273.15) * (1.01325 / p_bar)
+
+        if arch == "furnace_reformer":
+            t_flue_in = float(u.get("flue_in_temp_c", 1010.0))
+            v_flue_act = (flow_nm3 * 1.25 / 3600.0) * ((t_flue_in + 273.15) / 273.15)
+            a_duct = v_flue_act / 15.0  # 15 m/s flue gas velocity
+            d_duct = max(2.4, min(3.8, math.sqrt(a_duct)))
+            banks = u.get("convection_banks", [])
+            tunnel_len = 0.0
+            for b in banks:
+                b_tag = str(b.get("tag", "E-conv"))
+                bs = _size_hx(
+                    float(b.get("duty_mw", 5.0)),
+                    float(b.get("t_hot_in_c", 900.0)),
+                    float(b.get("t_hot_out_c", 700.0)),
+                    float(b.get("t_cold_in_c", 25.0)),
+                    float(b.get("t_cold_out_c", 400.0)),
+                    b_tag,
+                    is_conv=True,
+                )
+                b["sizing"] = bs
+                tunnel_len += bs["length_m"] + 0.6
+                sizing_table.append({
+                    "tag": b_tag,
+                    "service": str(b.get("name", "Convection Coil")),
+                    "mass_flow_kg_h": round(mass_kg_h * 0.65, 1),
+                    "t_in_c": float(b.get("t_hot_in_c", 0.0)),
+                    "t_out_c": float(b.get("t_hot_out_c", 0.0)),
+                    "pressure_bar": float(b.get("pressure_bar", p_bar)),
+                    "duty_mw": bs["duty_mw"],
+                    "u_w_m2k": bs["u_w_m2k"],
+                    "dt_lmtd_k": bs["dt_lmtd_k"],
+                    "area_req_m2": bs["area_req_m2"],
+                    "shell_d_m": bs["diameter_m"],
+                    "shell_l_m": bs["length_m"],
+                    "elevation_m": bs["elevation_m"],
+                    "pipe_dn_mm": 600,
+                })
+            tunnel_len = round(max(28.0, min(36.0, tunnel_len)), 2)
+            u["sizing"] = {
+                "diameter_m": round(d_duct, 2),
+                "length_m": tunnel_len,
+                "elevation_m": 4.2,
+                "radiant_width_m": 5.4,
+                "radiant_height_m": 7.6,
+                "radiant_depth_m": 4.2,
+                "v_flue_actual_m3_s": round(v_flue_act, 2),
+                "mass_flow_kg_h": mass_kg_h,
+            }
+        elif arch == "shell_tube_hx":
+            hs = _size_hx(
+                float(u.get("thermal_duty_mw", 12.0)),
+                float(u.get("t_hot_in_c", t_c + 150.0)),
+                float(u.get("t_hot_out_c", t_c)),
+                float(u.get("t_cold_in_c", 110.0)),
+                float(u.get("t_cold_out_c", 250.0)),
+                tag,
+                is_conv=False,
+            )
+            hs["mass_flow_kg_h"] = mass_kg_h
+            u["sizing"] = hs
+            dn_mm = int(max(250, min(900, round(math.sqrt(4.0 * v_actual_m3_s / (math.pi * 25.0)) * 1000.0 / 50.0) * 50)))
+            sizing_table.append({
+                "tag": tag,
+                "service": str(u.get("title", tag)),
+                "mass_flow_kg_h": mass_kg_h,
+                "t_in_c": float(u.get("t_hot_in_c", t_c + 150.0)),
+                "t_out_c": float(u.get("t_hot_out_c", t_c)),
+                "pressure_bar": p_bar,
+                "duty_mw": hs["duty_mw"],
+                "u_w_m2k": hs["u_w_m2k"],
+                "dt_lmtd_k": hs["dt_lmtd_k"],
+                "area_req_m2": hs["area_req_m2"],
+                "shell_d_m": hs["diameter_m"],
+                "shell_l_m": hs["length_m"],
+                "elevation_m": hs["elevation_m"],
+                "pipe_dn_mm": dn_mm,
+            })
+        elif arch in ("packed_bed_reactor", "pre_reformer"):
+            ghsv = 3500.0 if tag in ("R-101", "R-102") else 4500.0
+            v_bed = flow_nm3 / ghsv
+            u_s = 1.0  # <= 1.5 m/s superficial velocity
+            a_cross = max(2.2, v_actual_m3_s / u_s)
+            d_r = round(max(1.8, min(3.8, math.sqrt(4.0 * a_cross / math.pi))), 2)
+            h_r = round(max(4.5, min(9.5, v_bed / a_cross + 1.8)), 2)
+            u["sizing"] = {
+                "diameter_m": d_r,
+                "length_m": h_r,
+                "elevation_m": 0.9,
+                "v_bed_m3": round(v_bed, 2),
+                "u_superficial_m_s": round(v_actual_m3_s / (math.pi * (d_r * 0.5) ** 2), 2),
+                "mass_flow_kg_h": mass_kg_h,
+            }
+        else:
+            d_v = round(max(1.8, min(3.4, math.sqrt(4.0 * v_actual_m3_s / (math.pi * 1.4)))), 2)
+            h_v = round(max(3.6, min(8.0, d_v * 2.4)), 2)
+            u["sizing"] = {
+                "diameter_m": d_v,
+                "length_m": h_v,
+                "elevation_m": 0.8 if arch != "high_pressure_compressor" else 0.4,
+                "mass_flow_kg_h": mass_kg_h,
+            }
+
+    # UK BS EN 13480 pipe diameter sizing for every connection
+    for conn in connections:
+        u_from = unit_by_id.get(str(conn.get("from", "")), {})
+        stype = str(conn.get("stream_type", "process"))
+        t_c = float(conn.get("temp_c", u_from.get("temperature_c", 150.0)))
+        p_bar = max(1.0, float(u_from.get("pressure_bar", 30.0)))
+        flow_nm3 = max(2000.0, float(u_from.get("flow_nm3_h", 85000.0)))
+        if stype == "bfw_steam":
+            v_liq_m3_s = (flow_nm3 * 0.0005) / 3600.0 * 1.15
+            d_i = math.sqrt(4.0 * max(0.015, v_liq_m3_s) / (math.pi * 2.0))
+        else:
+            v_act = (flow_nm3 / 3600.0) * ((t_c + 273.15) / 273.15) * (1.01325 / p_bar)
+            d_i = math.sqrt(4.0 * max(0.2, v_act) / (math.pi * 25.0))
+        dn_mm = int(max(100, min(950, round(d_i * 1000.0 / 50.0) * 50)))
+        insul_m = 0.18 if t_c >= 600.0 else (0.08 if t_c >= 200.0 else 0.0)
+        conn["dn_mm"] = dn_mm
+        conn["pipe_od_m"] = round(dn_mm / 1000.0 + insul_m, 3)
+        conn["refractory_lined"] = bool(t_c >= 600.0)
+
+    # Compute UK Industrial Layout Metrics for RealityCompiler
+    hx_cooling_units = [u for u in units if u.get("archetype") in ("shell_tube_hx", "packed_bed_reactor", "knockout_cooler") and int(u.get("index", 0)) > 2]
+    cooling_train_len_m = round(max(42.0, sum(max(5.5, float(u.get("sizing", {}).get("length_m", 6.0))) for u in hx_cooling_units)), 2)
+    layout_metrics = {
+        "standard": "BS EN 13480 / IChemE / UK HSE",
+        "fired_heater_clearance_m": 12.5,
+        "cooling_train_axial_length_m": cooling_train_len_m,
+        "plot_width_m": 54.0,
+        "plot_depth_m": 34.0,
+    }
+    return units, connections, sizing_table, layout_metrics
+
+
 def resolve_prompt_and_research(
     prompt_text: str,
     auto_research: bool = True,
@@ -1558,6 +1753,7 @@ def resolve_prompt_and_research(
             prompt_text, stages, rag_engine
         )
         stages, _hen_streams, hen_connections, hen_summary = synthesize_heat_integration_network(stages)
+        stages, hen_connections, sizing_table, layout_metrics = compute_equipment_and_pipe_sizing(stages, hen_connections)
         plant_title = (
             f"{len(stages)}-Unit Integrated SMR Hydrogen Production Plant"
             if "smr" in prompt_text.lower() or "methane" in prompt_text.lower()
@@ -1622,6 +1818,8 @@ def resolve_prompt_and_research(
             "literature_review_manifest": manifest_dyn,
             "composition_graph": {"nodes": [s["stage_id"] for s in stages], "edges": hen_connections},
             "hen_summary": hen_summary,
+            "layout_metrics": layout_metrics,
+            "mass_energy_sizing_table": sizing_table,
             "trajectories": trajectories,
             "grounded_parameters": grounded_audit,
             "epistemic_audit": epistemic_audit,

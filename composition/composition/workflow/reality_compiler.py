@@ -38,6 +38,8 @@ class RealityCompiler:
         "max_ni_h2s_ppm": 0.1,
         "max_psa_inlet_temp_c": 45.0,
         "max_passive_pressure_rise_bar": 0.01,
+        "min_fired_heater_clearance_m": 10.0,
+        "min_cooling_train_axial_m": 36.0,
     }
 
     def __init__(self, thresholds: Optional[Dict[str, float]] = None):
@@ -376,6 +378,26 @@ class RealityCompiler:
         violations.extend(self.check_catalyst_and_material_invariants(units, connections, payload))
         violations.extend(self.check_phase_and_equipment_compatibility(units, connections))
         violations.extend(self.check_hydraulic_pressure_gradient(units, connections))
+        lm = payload.get("layout_metrics", {})
+        if isinstance(lm, dict) and lm:
+            clr = float(lm.get("fired_heater_clearance_m", 99.0))
+            axial = float(lm.get("cooling_train_axial_length_m", 99.0))
+            if clr < self.thresholds["min_fired_heater_clearance_m"]:
+                violations.append({
+                    "law_id": "UK_INDUSTRIAL_SPACING_AND_THERMAL_LENGTH",
+                    "unit_tag": "PLOT_PLAN",
+                    "message": f"Fired heater clearance {clr:.1f} m < {self.thresholds['min_fired_heater_clearance_m']:.1f} m UK HSE/IChemE minimum.",
+                    "equation": "clearance_fired >= 10.0 m",
+                    "remediation_action": "expand_plot_spacing_and_thermal_runs",
+                })
+            if axial < self.thresholds["min_cooling_train_axial_m"]:
+                violations.append({
+                    "law_id": "UK_INDUSTRIAL_SPACING_AND_THERMAL_LENGTH",
+                    "unit_tag": "COOLING_TRAIN",
+                    "message": f"Cooling train axial run {axial:.1f} m < {self.thresholds['min_cooling_train_axial_m']:.1f} m BS EN 13480 minimum.",
+                    "equation": "cooling_axial_run >= 36.0 m",
+                    "remediation_action": "expand_plot_spacing_and_thermal_runs",
+                })
 
         if violations:
             raise PhysicsCompilationError(violations)
@@ -386,6 +408,7 @@ class RealityCompiler:
             "auto_remediations_applied": list(payload.get("reality_compiler_audit", {}).get("auto_remediations_applied", [])),
             "violations": [],
             "active_laws": self._serialize_active_laws(),
+            "mass_energy_sizing_table": list(payload.get("mass_energy_sizing_table", [])),
         }
 
     def compile_and_verify(
